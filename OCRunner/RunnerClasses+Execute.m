@@ -154,6 +154,7 @@
     for (ORCaseStatement *statement in self.cases) {
         if (statement.value) {
             if (!hasMatch) {
+                //FIXME: MFValue值比较的问题
                 hasMatch = statement.value.executeResult == value;
                 if (!hasMatch) {
                     continue;
