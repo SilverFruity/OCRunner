@@ -11,10 +11,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class MFValue;
-
+@class MFScopeChain;
 @protocol OCExecute <NSObject>
-
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 
 // MARK: - Base

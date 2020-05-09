@@ -9,7 +9,9 @@
 #import "MFValue.h"
 #import "RunnerClasses.h"
 #import "util.h"
-
+extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
+    return type & MFStatementResultTypeReturnMask;
+}
 @interface MFValue()
 
 @property (assign, nonatomic) BOOL structPointNoCopyData;
@@ -31,7 +33,23 @@
 	return self;
 }
 
-
+- (BOOL)isReturn{
+    return MFStatementResultTypeIsReturn(self.resultType);
+}
+- (BOOL)isContinue{
+    return self.resultType == MFStatementResultTypeContinue;
+}
+- (BOOL)isBreak{
+    return self.resultType == MFStatementResultTypeBreak;
+}
+- (BOOL)isNormal{
+    return self.resultType == MFStatementResultTypeNormal;
+}
++ (instancetype)normalEnd{
+    MFValue *value = [MFValue new];
+    value.resultType = MFStatementResultTypeNormal;
+    return value;
+}
 - (BOOL)isSubtantial{
     switch (_pair.type.type) {
 		case TypeBOOL:
@@ -419,11 +437,11 @@
 //}
 
 
-//+ (instancetype)voidValueInstance{
-//	MFValue *value = [[MFValue alloc] init];
++ (instancetype)voidValueInstance{
+	MFValue *value = [[MFValue alloc] init];
 //	value.type = mf_create_type_specifier(MF_TYPE_VOID);
-//	return value;
-//}
+	return value;
+}
 //
 //
 //+ (instancetype)valueInstanceWithBOOL:(BOOL)boolValue{

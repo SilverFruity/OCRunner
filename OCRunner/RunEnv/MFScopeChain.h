@@ -8,11 +8,12 @@
 
 #import <Foundation/Foundation.h>
 @class MFValue;
-
 NS_ASSUME_NONNULL_BEGIN
 @interface MFScopeChain: NSObject
 @property (weak, nonatomic) id instance;
 @property (strong, nonatomic) MFScopeChain *next;
+@property (strong, nonatomic) MFScopeChain *top;
+@property (strong, nonatomic) NSMutableArray <MFValue *>* parameters;
 
 + (instancetype)scopeChainWithNext:(MFScopeChain *)next;
 - (nullable MFValue *)getValueWithIdentifier:(NSString *)identifier endScope:(nullable MFScopeChain *)endScope;

@@ -11,94 +11,94 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ORTypeSpecial (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORVariable  (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORTypeVarPair (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORFuncVariable (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORFuncDeclare (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORValueExpression  (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORMethodCall (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORCFuncCall (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORBlockImp (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface OCCollectionGetValue (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORAssignExpression  (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORDeclareExpression  (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORUnaryExpression  (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORBinaryExpression (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORTernaryExpression (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORStatement  (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORIfStatement  (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORWhileStatement  (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORDoWhileStatement  (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORCaseStatement  (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORSwitchStatement  (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORForStatement  (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORForInStatement  (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORReturnStatement  (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORBreakStatement  (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORContinueStatement  (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORPropertyDeclare (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORMethodDeclare (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORMethodImplementation (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORClass (Execute)
-- (nullable MFValue *)executeResult;
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 
 char *const OCTypeEncodingForPair(ORTypeVarPair * pair);

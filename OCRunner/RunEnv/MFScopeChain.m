@@ -24,6 +24,7 @@
 + (instancetype)scopeChainWithNext:(MFScopeChain *)next{
 	MFScopeChain *scope = [MFScopeChain new];
 	scope.next = next;
+    scope.top = next.top;
 	return scope;
 }
 
@@ -31,6 +32,7 @@
 	if (self = [super init]) {
 		_vars = [NSMutableDictionary dictionary];
         _lock = [[NSLock alloc] init];
+        _parameters = [NSMutableArray array];
 	}
 	return self;
 }

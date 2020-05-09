@@ -11,18 +11,27 @@
 
 NS_ASSUME_NONNULL_BEGIN
 typedef NS_ENUM(NSInteger, MFStatementResultType) {
-    //无return
-    MFStatementResultTypeNormal,
+    //no return, continue, break
+    MFStatementResultTypeNormal = 0x01,
+    MFStatementResultTypeBreak = 0x02,
+    MFStatementResultTypeContinue = 0x03,
     //return value;
-    MFStatementResultTypeReturn,
+    MFStatementResultTypeReturnValue = 0x10,
     //return;
-    MFStatementResultTypeReturnEmpty,
-    MFStatementResultTypeBreak,
-    MFStatementResultTypeContinue,
+    MFStatementResultTypeReturnEmpty = 0x10 << 1,
+    MFStatementResultTypeReturnMask = 0xF0
 };
-
+extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @interface MFValue : NSObject
+
 @property (assign, nonatomic) MFStatementResultType resultType;
+@property (assign, nonatomic) BOOL isReturn;
+@property (assign, nonatomic) BOOL isContinue;
+@property (assign, nonatomic) BOOL isBreak;
+@property (assign, nonatomic) BOOL isNormal;
+
++ (instancetype)normalEnd;
+
 @property (assign, nonatomic) unsigned char uCharValue;
 @property (assign, nonatomic) unsigned short uShortValue;
 @property (assign, nonatomic) unsigned int uIntValue;

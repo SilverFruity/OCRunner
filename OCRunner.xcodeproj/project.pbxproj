@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		04A861292466B3DD00F26998 /* MFBlock.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A861282466B3DD00F26998 /* MFBlock.h */; };
 		EE98997524658DA600ACF2C1 /* OCRunner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE98996B24658DA600ACF2C1 /* OCRunner.framework */; };
 		EE98997A24658DA600ACF2C1 /* OCRunnerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = EE98997924658DA600ACF2C1 /* OCRunnerTests.m */; };
 		EE98997C24658DA600ACF2C1 /* OCRunner.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98996E24658DA600ACF2C1 /* OCRunner.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -27,7 +28,6 @@
 		EE9899B024658F8900ACF2C1 /* MFStaticVarTable.m in Sources */ = {isa = PBXBuildFile; fileRef = EE98999A24658F8900ACF2C1 /* MFStaticVarTable.m */; };
 		EE9899B124658F8900ACF2C1 /* MFPropertyMapTable.m in Sources */ = {isa = PBXBuildFile; fileRef = EE98999B24658F8900ACF2C1 /* MFPropertyMapTable.m */; };
 		EE9899B324658F8900ACF2C1 /* MFVarDeclareChain.m in Sources */ = {isa = PBXBuildFile; fileRef = EE98999D24658F8900ACF2C1 /* MFVarDeclareChain.m */; };
-		EE9899B424658F8900ACF2C1 /* MFBlock.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98999E24658F8900ACF2C1 /* MFBlock.h */; };
 		EE9899B624658F8900ACF2C1 /* MFMethodMapTable.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899A024658F8900ACF2C1 /* MFMethodMapTable.h */; };
 		EE9899B724658F8900ACF2C1 /* MFScopeChain.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899A124658F8900ACF2C1 /* MFScopeChain.m */; };
 		EE9899B824658F8900ACF2C1 /* MFValue.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899A224658F8900ACF2C1 /* MFValue.m */; };
@@ -61,6 +61,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		04A861282466B3DD00F26998 /* MFBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFBlock.h; sourceTree = "<group>"; };
 		EE98996B24658DA600ACF2C1 /* OCRunner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OCRunner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE98996E24658DA600ACF2C1 /* OCRunner.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OCRunner.h; sourceTree = "<group>"; };
 		EE98996F24658DA600ACF2C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -84,7 +85,6 @@
 		EE98999A24658F8900ACF2C1 /* MFStaticVarTable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFStaticVarTable.m; sourceTree = "<group>"; };
 		EE98999B24658F8900ACF2C1 /* MFPropertyMapTable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFPropertyMapTable.m; sourceTree = "<group>"; };
 		EE98999D24658F8900ACF2C1 /* MFVarDeclareChain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFVarDeclareChain.m; sourceTree = "<group>"; };
-		EE98999E24658F8900ACF2C1 /* MFBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFBlock.h; sourceTree = "<group>"; };
 		EE9899A024658F8900ACF2C1 /* MFMethodMapTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFMethodMapTable.h; sourceTree = "<group>"; };
 		EE9899A124658F8900ACF2C1 /* MFScopeChain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFScopeChain.m; sourceTree = "<group>"; };
 		EE9899A224658F8900ACF2C1 /* MFValue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFValue.m; sourceTree = "<group>"; };
@@ -176,7 +176,7 @@
 			isa = PBXGroup;
 			children = (
 				EE9899BA2465915B00ACF2C1 /* MFDeclarationModifier.h */,
-				EE98999E24658F8900ACF2C1 /* MFBlock.h */,
+				04A861282466B3DD00F26998 /* MFBlock.h */,
 				EE98999224658F8900ACF2C1 /* MFBlock.m */,
 				EE9899A024658F8900ACF2C1 /* MFMethodMapTable.h */,
 				EE98999824658F8900ACF2C1 /* MFMethodMapTable.m */,
@@ -201,9 +201,9 @@
 			isa = PBXGroup;
 			children = (
 				EE9899BD2465923800ACF2C1 /* MFRSA.h */,
-				EE9899BE2465923800ACF2C1 /* util.m */,
 				EE9899BF2465923800ACF2C1 /* MFRSA.m */,
 				EE9899C02465923800ACF2C1 /* util.h */,
+				EE9899BE2465923800ACF2C1 /* util.m */,
 			);
 			path = Util;
 			sourceTree = "<group>";
@@ -252,12 +252,12 @@
 				EE9899D72465924C00ACF2C1 /* ffi_i386.h in Headers */,
 				EE9899B624658F8900ACF2C1 /* MFMethodMapTable.h in Headers */,
 				EE9899D42465924C00ACF2C1 /* ffitarget_arm64.h in Headers */,
+				04A861292466B3DD00F26998 /* MFBlock.h in Headers */,
 				EE9899DB2465924C00ACF2C1 /* ffitarget_i386.h in Headers */,
 				EE9899D52465924C00ACF2C1 /* ffitarget.h in Headers */,
 				EE9899D92465924C00ACF2C1 /* ffi_x86_64.h in Headers */,
 				EE9899BB2465915B00ACF2C1 /* MFDeclarationModifier.h in Headers */,
 				EE98998B24658DB800ACF2C1 /* RunnerClasses.h in Headers */,
-				EE9899B424658F8900ACF2C1 /* MFBlock.h in Headers */,
 				EE9899AD24658F8900ACF2C1 /* MFScopeChain.h in Headers */,
 				EE9899C62465923900ACF2C1 /* util.h in Headers */,
 				EE98997C24658DA600ACF2C1 /* OCRunner.h in Headers */,
