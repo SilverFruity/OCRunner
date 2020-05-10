@@ -8,6 +8,7 @@
 
 #import "RunnerClasses.h"
 #import "MFValue.h"
+#import <objc/runtime.h>
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ORTypeSpecial (Execute)
@@ -90,6 +91,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 @interface ORPropertyDeclare (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
+@property (nonatomic, assign)  const objc_property_attribute_t * propertyAttributes;
 @end
 @interface ORMethodDeclare (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope;

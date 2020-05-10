@@ -20,11 +20,17 @@
 @end
 
 @implementation MFScopeChain
-
++ (instancetype)topScope{
+    static MFScopeChain *instance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        instance = [MFScopeChain new];
+    });
+    return instance;
+}
 + (instancetype)scopeChainWithNext:(MFScopeChain *)next{
 	MFScopeChain *scope = [MFScopeChain new];
 	scope.next = next;
-    scope.top = next.top;
 	return scope;
 }
 
@@ -32,12 +38,17 @@
 	if (self = [super init]) {
 		_vars = [NSMutableDictionary dictionary];
         _lock = [[NSLock alloc] init];
-        _parameters = [NSMutableArray array];
 	}
 	return self;
 }
 
-
+- (id)instance{
+    MFScopeChain *scope = self;
+    while (![scope getValueWithIdentifier:@"self"]) {
+        scope = scope.next;
+    }
+    return [scope getValueWithIdentifier:@"self"];;
+}
 - (void)setValue:(MFValue *)value withIndentifier:(NSString *)identier{
     [self.lock lock];
     self.vars[identier] = value;

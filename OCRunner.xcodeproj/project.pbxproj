@@ -48,6 +48,8 @@
 		EE9899DC2465924C00ACF2C1 /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EE9899D12465924C00ACF2C1 /* libffi.a */; };
 		EE9899DD2465924C00ACF2C1 /* ffi.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899D22465924C00ACF2C1 /* ffi.h */; };
 		EE9899DE2465924C00ACF2C1 /* ffi_arm64.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899D32465924C00ACF2C1 /* ffi_arm64.h */; };
+		EEA2AC82246855F100B08407 /* MFStack.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA2AC80246855F100B08407 /* MFStack.m */; };
+		EEA2AC83246855F100B08407 /* MFStack.h in Headers */ = {isa = PBXBuildFile; fileRef = EEA2AC81246855F100B08407 /* MFStack.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -105,6 +107,8 @@
 		EE9899D12465924C00ACF2C1 /* libffi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libffi.a; sourceTree = "<group>"; };
 		EE9899D22465924C00ACF2C1 /* ffi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffi.h; sourceTree = "<group>"; };
 		EE9899D32465924C00ACF2C1 /* ffi_arm64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffi_arm64.h; sourceTree = "<group>"; };
+		EEA2AC80246855F100B08407 /* MFStack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFStack.m; sourceTree = "<group>"; };
+		EEA2AC81246855F100B08407 /* MFStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFStack.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -175,6 +179,8 @@
 		EE98998D24658F8900ACF2C1 /* RunEnv */ = {
 			isa = PBXGroup;
 			children = (
+				EEA2AC81246855F100B08407 /* MFStack.h */,
+				EEA2AC80246855F100B08407 /* MFStack.m */,
 				EE9899BA2465915B00ACF2C1 /* MFDeclarationModifier.h */,
 				04A861282466B3DD00F26998 /* MFBlock.h */,
 				EE98999224658F8900ACF2C1 /* MFBlock.m */,
@@ -261,6 +267,7 @@
 				EE9899AD24658F8900ACF2C1 /* MFScopeChain.h in Headers */,
 				EE9899C62465923900ACF2C1 /* util.h in Headers */,
 				EE98997C24658DA600ACF2C1 /* OCRunner.h in Headers */,
+				EEA2AC83246855F100B08407 /* MFStack.h in Headers */,
 				EE9899AC24658F8900ACF2C1 /* MFValue.h in Headers */,
 				EE98998C24658DB800ACF2C1 /* RunnerClasses+Execute.h in Headers */,
 				EE9899DD2465924C00ACF2C1 /* ffi.h in Headers */,
@@ -378,6 +385,7 @@
 				EE9899B824658F8900ACF2C1 /* MFValue.m in Sources */,
 				EE9899B124658F8900ACF2C1 /* MFPropertyMapTable.m in Sources */,
 				EE9899AE24658F8900ACF2C1 /* MFMethodMapTable.m in Sources */,
+				EEA2AC82246855F100B08407 /* MFStack.m in Sources */,
 				EE9899B324658F8900ACF2C1 /* MFVarDeclareChain.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
