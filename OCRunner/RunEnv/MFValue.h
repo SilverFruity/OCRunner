@@ -131,46 +131,46 @@ switch (target.typePair.type.type) {\
 #define PrefixCat(prefix, name) prefix##name
 #define SuffixCat(name, suffix) name##suffix
 
-//#define UnaryExecute(operator,suffix,target)\
-//void * unaryResultValuePointer##suffix = NULL;\
-//switch (target.typePair.type.type) {\
-//case TypeUChar:\
-//unaryResultValuePointer##suffix = operator##uCharValue##suffix; break;\
-//case TypeUShort:\
-//unaryResultValuePointer##suffix =  operator##uShortValue##suffix; break;\
-//case TypeUInt:\
-//unaryResultValuePointer##suffix =  operator##uIntValue##suffix; break;\
-//case TypeULong:\
-//unaryResultValuePointer##suffix =  operator##uLongValue##suffix; break;\
-//case TypeULongLong:\
-//unaryResultValuePointer##suffix =  operator##uLLongValue##suffix; break;\
-//case TypeBOOL:\
-//unaryResultValuePointer##suffix =  operator##boolValue##suffix; break;\
-//case TypeChar:\
-//unaryResultValuePointer##suffix =  operator##charValue##suffix; break;\
-//case TypeShort:\
-//unaryResultValuePointer##suffix =  operator##shortValue##suffix; break;\
-//case TypeInt:\
-//unaryResultValuePointer##suffix =  operator##intValue##suffix; break;\
-//case TypeLong:\
-//unaryResultValuePointer##suffix =  operator##longValue##suffix; break;\
-//case TypeLongLong:\
-//unaryResultValuePointer##suffix =  operator##lLongValue##suffix; break;\
-//case TypeFloat:\
-//unaryResultValuePointer##suffix =  operator##floatValue##suffix; break;\
-//case TypeDouble:\
-//unaryResultValuePointer##suffix =  operator##doubleValue##suffix; break;\
-//case TypeId:\
-//case TypeObject:\
-//case TypeBlock:\
-//unaryResultValuePointer##suffix =  operator##objectValue##suffix; break;\
-//case TypeSEL:\
-//unaryResultValuePointer##suffix =  operator##selValue##suffix; break;\
-//case TypeClass:\
-//unaryResultValuePointer##suffix =  operator##classValue##suffix; break;\
-//default:\
-//break;\
-//}
+#define UnaryExecute(operator,suffix,target)\
+void * unaryResultValuePointer##suffix = NULL;\
+switch (target.typePair.type.type) {\
+case TypeUChar:\
+unaryResultValuePointer##suffix = operator uCharValue##suffix; break;\
+case TypeUShort:\
+unaryResultValuePointer##suffix =  operator uShortValue##suffix; break;\
+case TypeUInt:\
+unaryResultValuePointer##suffix =  operator uIntValue##suffix; break;\
+case TypeULong:\
+unaryResultValuePointer##suffix =  operator uLongValue##suffix; break;\
+case TypeULongLong:\
+unaryResultValuePointer##suffix =  operator uLLongValue##suffix; break;\
+case TypeBOOL:\
+unaryResultValuePointer##suffix =  operator boolValue##suffix; break;\
+case TypeChar:\
+unaryResultValuePointer##suffix =  operator charValue##suffix; break;\
+case TypeShort:\
+unaryResultValuePointer##suffix =  operator shortValue##suffix; break;\
+case TypeInt:\
+unaryResultValuePointer##suffix =  operator intValue##suffix; break;\
+case TypeLong:\
+unaryResultValuePointer##suffix =  operator longValue##suffix; break;\
+case TypeLongLong:\
+unaryResultValuePointer##suffix =  operator lLongValue##suffix; break;\
+case TypeFloat:\
+unaryResultValuePointer##suffix =  operator floatValue##suffix; break;\
+case TypeDouble:\
+unaryResultValuePointer##suffix =  operator doubleValue##suffix; break;\
+case TypeId:\
+case TypeObject:\
+case TypeBlock:\
+unaryResultValuePointer##suffix =  operator objectValue##suffix; break;\
+case TypeSEL:\
+unaryResultValuePointer##suffix =  operator selValue##suffix; break;\
+case TypeClass:\
+unaryResultValuePointer##suffix =  operator classValue##suffix; break;\
+default:\
+break;\
+}
 
 
 

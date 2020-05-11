@@ -271,11 +271,11 @@ void registerClassSetter(id self1, SEL _cmd1, id newValue) { //移除set
     ValueDefineWithMFValue(0, juddgeValue);
     switch (self.operatorType) {
         case UnaryOperatorNot:{
-//            UnaryExecute(!, 0 , juddgeValue);
+            UnaryExecute(!, 0 , juddgeValue);
+            value.pointerValue = unaryResultValuePointer0;
+            break;
         }
             
-//            value.uintValue = ![self.value execute:scope].isSubtantial;
-            break;
             
             
         default:
