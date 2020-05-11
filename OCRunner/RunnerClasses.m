@@ -19,6 +19,8 @@
 @end
 @implementation ORFuncDeclare
 @end
+@implementation ORExpression
+@end
 @implementation ORValueExpression
 @end
 @implementation ORMethodCall
@@ -27,7 +29,7 @@
 @end
 @implementation ORBlockImp
 @end
-@implementation OCCollectionGetValue
+@implementation ORSubscriptExpression
 @end
 @implementation ORAssignExpression
 @end

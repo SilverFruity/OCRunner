@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MFDeclarationModifier.h"
-
+#import "RunnerClasses.h"
 NS_ASSUME_NONNULL_BEGIN
 typedef NS_ENUM(NSInteger, MFStatementResultType) {
     //no return, continue, break
@@ -21,6 +21,7 @@ typedef NS_ENUM(NSInteger, MFStatementResultType) {
     MFStatementResultTypeReturnEmpty = 0x10 << 1,
     MFStatementResultTypeReturnMask = 0xF0
 };
+@class ORTypeVarPair;
 extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @interface MFValue : NSObject
 
@@ -58,12 +59,14 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @property (assign, nonatomic, nullable) void *pointerValue;
 
 @property (assign,nonatomic)MFDeclarationModifier modifier;
-
+@property (strong,nonatomic)ORTypeVarPair *typePair;
+- (void)setValueType:(TypeKind)type;
 - (BOOL)isSubtantial;
 - (BOOL)isObject;
 - (BOOL)isMember;
 - (BOOL)isBaseValue;
-
+- (id)subscriptGetWithIndex:(MFValue *)index;
+- (void)subscriptSetWithIndex:(MFValue *)index value:(MFValue *)value;
 - (uint64_t)c2uintValue;
 - (int64_t)c2integerValue;
 - (double)c2doubleValue;

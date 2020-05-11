@@ -145,22 +145,6 @@ void registerClassSetter(id self1, SEL _cmd1, id newValue) { //移除set
     Ivar ivar = class_getInstanceVariable([self1 class], strcat("_", key.UTF8String)); //basicsViewController里面有个_dictCustomerProperty属性
     object_setIvar(self1, ivar, newValue);
 }
-@implementation ORTypeSpecial(Execute)
-- (nullable MFValue *)execute:(MFScopeChain *)scope {
-    return nil;
-}@end
-@implementation ORVariable (Execute)
-- (nullable MFValue *)execute:(MFScopeChain *)scope {
-    return nil;
-}@end
-@implementation ORTypeVarPair(Execute)
-- (nullable MFValue *)execute:(MFScopeChain *)scope {
-    return nil;
-}@end
-@implementation ORFuncVariable(Execute)
-- (nullable MFValue *)execute:(MFScopeChain *)scope {
-    return nil;
-}@end
 @implementation ORFuncDeclare(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     NSMutableArray * parameters = [[MFStack argsStack] pop];
@@ -228,9 +212,14 @@ void registerClassSetter(id self1, SEL _cmd1, id newValue) { //移除set
     return [MFValue normalEnd];
 }
 @end
-@implementation OCCollectionGetValue(Execute)
+@implementation ORSubscriptExpression(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
-    return [MFValue normalEnd];
+    MFValue *bottomValue = [self.keyExp execute:scope];
+    MFValue *arrValue = [self.caller execute:scope];
+    MFValue *resultValue = [MFValue new];
+    [resultValue setValueType:TypeObject];
+    resultValue.objectValue = [arrValue subscriptGetWithIndex:bottomValue];
+    return resultValue;
 }
 @end
 @implementation ORAssignExpression (Execute)
@@ -482,7 +471,6 @@ void registerClassSetter(id self1, SEL _cmd1, id newValue) { //移除set
         class_addProperty(class, [propertyName UTF8String], self.propertyAttributes, 3);
         class_addMethod(class, NSSelectorFromString(propertyName), (IMP)registerClassGetter, "@@:");
         class_addMethod(class, NSSelectorFromString([NSString stringWithFormat:@"set%@:",[propertyName capitalizedString]]), (IMP)registerClassSetter, "v@:@");
-        class_addIvar(class, strcat("_", propertyName.UTF8String), sizeof(int), log2(sizeof(int)), @encode(int));
     }
     return nil;
 }
