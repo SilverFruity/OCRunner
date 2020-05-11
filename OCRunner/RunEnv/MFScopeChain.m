@@ -100,7 +100,7 @@ const void *mf_propKey(NSString *propName) {
                 id associationValue = value;
                 const char *type = OCTypeEncodingForPair(propDef.var);
                 if (*type == '@') {
-                    associationValue = [value objectValue];
+//                    associationValue = [value objectValue];
                 }
                 MFPropertyModifier modifier = propDef.modifier;
                 if ((modifier & MFPropertyModifierMemMask) == MFPropertyModifierMemWeak) {
@@ -111,7 +111,7 @@ const void *mf_propKey(NSString *propName) {
             }else if((ivar = class_getInstanceVariable(object_getClass(pos.instance),identifier.UTF8String))){
                 const char *ivarEncoding = ivar_getTypeEncoding(ivar);
                 if (*ivarEncoding == '@') {
-                    object_setIvar(pos.instance, ivar, [value c2objectValue]);
+//                    object_setIvar(pos.instance, ivar, [value c2objectValue]);
                 }else{
                     void *ptr = (__bridge void *)(pos.instance) +  ivar_getOffset(ivar);
 //                    [value assignToCValuePointer:ptr typeEncoding:ivarEncoding];
@@ -189,12 +189,12 @@ const void *mf_propKey(NSString *propName) {
         for (MFValue *value in allValues) {
             if ([value isObject]) {
                 Class ocBlockClass = NSClassFromString(@"NSBlock");
-                if ([[value c2objectValue] isKindOfClass:ocBlockClass]) {
-                    struct MFSimulateBlock *blockStructPtr = (__bridge void *)value.objectValue;
-                    if (blockStructPtr->flags & BLOCK_CREATED_FROM_MFGO) {
-                        value.objectValue = nil;
-                    }
-                }
+//                if ([[value c2objectValue] isKindOfClass:ocBlockClass]) {
+//                    struct MFSimulateBlock *blockStructPtr = (__bridge void *)value.objectValue;
+//                    if (blockStructPtr->flags & BLOCK_CREATED_FROM_MFGO) {
+//                        value.objectValue = nil;
+//                    }
+//                }
 
             }
         }

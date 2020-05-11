@@ -218,7 +218,7 @@ void registerClassSetter(id self1, SEL _cmd1, id newValue) { //移除set
     MFValue *arrValue = [self.caller execute:scope];
     MFValue *resultValue = [MFValue new];
     [resultValue setValueType:TypeObject];
-    resultValue.objectValue = [arrValue subscriptGetWithIndex:bottomValue];
+    resultValue.pointerValue = (__bridge_retained void *)[arrValue subscriptGetWithIndex:bottomValue];
     return resultValue;
 }
 @end
@@ -267,9 +267,14 @@ void registerClassSetter(id self1, SEL _cmd1, id newValue) { //移除set
 @implementation ORUnaryExpression (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *value = [MFValue new];
+    MFValue *juddgeValue = [self.value execute:scope];
+    ValueDefineWithMFValue(0, juddgeValue);
     switch (self.operatorType) {
-        case UnaryOperatorNot:
-            value.uintValue = ![self.value execute:scope].isSubtantial;
+        case UnaryOperatorNot:{
+//            UnaryExecute(!, 0 , juddgeValue);
+        }
+            
+//            value.uintValue = ![self.value execute:scope].isSubtantial;
             break;
             
             
@@ -416,7 +421,9 @@ void registerClassSetter(id self1, SEL _cmd1, id newValue) { //移除set
 @implementation ORForInStatement (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
-    for (id element in [self.value execute:current].objectValue) {
+    MFValue *arrayValue = [self.value execute:current];
+    ValueDefineWithMFValue(Array, arrayValue);
+    for (id element in objectValueArray) {
         //TODO: 每执行一次，在作用域中重新设置一次
         [current setValue:[MFValue valueInstanceWithObject:element] withIndentifier:self.expression.pair.var.varname];
         MFValue *result = [self.funcImp execute:current];
@@ -462,7 +469,9 @@ void registerClassSetter(id self1, SEL _cmd1, id newValue) { //移除set
 @implementation ORPropertyDeclare(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     NSString *propertyName = self.var.var.varname;
-    Class class = [scope getValueWithIdentifier:@"Class"].classValue;
+    MFValue *classValue = [scope getValueWithIdentifier:@"Class"];
+    ValueDefineWithMFValue(Current, classValue);
+    Class class = classValueCurrent;
     objc_property_t property = class_getProperty(class, [propertyName UTF8String]);
     //FIXME: 自动生成get set方法
     if (property) {

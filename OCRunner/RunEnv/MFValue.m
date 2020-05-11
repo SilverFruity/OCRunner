@@ -20,9 +20,6 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 
 @implementation MFValue{
     ORTypeVarPair *_pair;
-    __strong id _strongObj;
-    __weak id _weakObj;
-    
 }
 
 
@@ -56,36 +53,45 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return value;
 }
 - (BOOL)isSubtantial{
+    ValueDefineWithMFValue(0, self);
+    if ((self.typePair.type.type & TypeBaseMask) && self.typePair.var.ptCount > 0) {\
+        return pointerValue0 ? YES : NO;
+    }\
     switch (_pair.type.type) {
 		case TypeBOOL:
+            return boolValue0 ? YES : NO;
         case TypeUChar:
+            return uCharValue0 ? YES : NO;
         case TypeUShort:
+            return uShortValue0 ? YES : NO;
 		case TypeUInt:
+            return uIntValue0 ? YES : NO;
         case TypeULong:
+            return uLongValue0 ? YES : NO;
         case TypeULongLong:
-			return _uintValue ? YES : NO;
+			return uLLongValue0 ? YES : NO;
 		case TypeChar:
+            return charValue0 ? YES : NO;
         case TypeShort:
+            return shortValue0 ? YES : NO;
         case TypeInt:
+            return intValue0 ? YES : NO;
         case TypeLong:
+            return longValue0 ? YES : NO;
         case TypeLongLong:
-			return _integerValue ? YES : NO;
+			return lLongValue0 ? YES : NO;
 		case TypeFloat:
+            return floatValue0 ? YES : NO;
         case TypeDouble:
-			return _doubleValue ? YES : NO;
-//		case MF_TYPE_C_STRING:
-//			return _cstringValue ? YES : NO;
+            return doubleValue0 ? YES : NO;
 		case TypeClass:
-			return _classValue ? YES : NO;
+			return classValue0 ? YES : NO;
 		case TypeSEL:
-			return _selValue ? YES : NO;
+			return selValue0 ? YES : NO;
 		case TypeObject:
 //		case MF_TYPE_STRUCT_LITERAL:
 		case TypeBlock:
-			return self.objectValue ? YES : NO;
-		case TypeStruct:
-//		case MF_TYPE_POINTER:
-			return _pointerValue ? YES : NO;
+			return objectValue0 ? YES : NO;
 		case TypeVoid:
 			return NO;
 		default:
@@ -124,16 +130,20 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 	return ![self isObject];
 }
 - (id)subscriptGetWithIndex:(MFValue *)index{
+    ValueDefineWithMFValue(Self, self);
+    ValueDefineWithMFValue(Index, index);
     if (index.typePair.type.type & TypeBaseMask) {
-        return (id)self.objectValue[index.c2integerValue];
+        HoleIntegerValue(Index, index);
+        HoleUCharValue(Index, index);
+        return (id)objectValueSelf[holeValue_int64_tIndex];
     }
     switch (index.typePair.type.type) {
         case TypeBlock:
         case TypeObject:
-            return self.objectValue[index.objectValue];
+            return objectValueSelf[objectValueIndex];
             break;
         case TypeClass:
-            return self.objectValue[index.classValue];
+            return objectValueSelf[classValueIndex];
             break;
         default:
 //            NSCAssert(0, @"line:%zd, index operator can not use type: %@",expr.bottomExpr.lineNumber, bottomValue.type.typeName);
@@ -149,39 +159,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 	if (_pair.type.type == TypeUnKnown) {
 		_pair = src->_pair;
 	}
-    switch (_pair.type.type) {
-		case TypeBOOL:
-		case TypeUInt:
-			_uintValue = [src c2uintValue];
-			break;
-		case TypeInt:
-			_integerValue = [src c2integerValue];
-			break;
-		case TypeDouble:
-			_doubleValue = [src c2doubleValue];
-			break;
-		case TypeSEL:
-			_selValue = [src selValue];
-			break;
-		case TypeBlock:
-		case TypeObject:
-			self.objectValue = [src c2objectValue];
-			break;
-		case TypeClass:
-			_classValue = [src c2objectValue];
-			break;
-//		case MF_TYPE_POINTER:
-//			_pointerValue = [src c2pointerValue];
-//			break;
-//		case MF_TYPE_C_STRING:
-//			_cstringValue = [src c2pointerValue];
-//			break;
-
-		default:
-			NSCAssert(0, @"");
-			break;
-	}
-	
+    self.pointerValue = src.pointerValue;
 }
 
 
@@ -638,87 +616,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 //}
 //
 -(void *)valuePointer{
-    unsigned char ucharValue = 0;
-    unsigned short uShortValue = 0;
-    unsigned int uIntValue = 0;
-    unsigned long uLongValue = 0;
-    unsigned long long uLLongValue = 0;
-    BOOL boolValue = 0;
+    ValueDefineWithMFValue(1, self);
     
-    char charValue = 0;
-    short shortValue = 0;
-    int intValue = 0;
-    long longValue = 0;
-    long long lLongValue = 0;
-    
-    float floatValue = 0;
-    float doubleValue = 0;
-    NSObject *objectValue = nil;
-    SEL selValue = 0;
-    Class classValue = nil;
-    void *pointerValue = nil;
-    do {
-        if ((self.typePair.type.type & TypeBaseMask) && self.typePair.var.ptCount > 0) {
-            pointerValue = *(void **)self.pointerValue;
-            break;
-        }
-        switch (self.typePair.type.type) {
-            case TypeUChar:
-                ucharValue = *(unsigned char *)self.pointerValue; break;
-            case TypeUShort:
-                uShortValue = *(unsigned short *)self.pointerValue; break;
-            case TypeUInt:
-                uIntValue = *(unsigned int *)self.pointerValue; break;
-            case TypeULong:
-                uLongValue = *(unsigned long *)self.pointerValue; break;
-            case TypeULongLong:
-                uLLongValue = *(unsigned long long *)self.pointerValue; break;
-            case TypeBOOL:
-                boolValue = *(BOOL *)self.pointerValue; break;
-            case TypeChar:
-                charValue = *(char *)self.pointerValue; break;
-            case TypeShort:
-                shortValue = *(short *)self.pointerValue; break;
-            case TypeInt:
-                intValue = *(int *)self.pointerValue; break;
-            case TypeLong:
-                longValue = *(long *)self.pointerValue; break;
-            case TypeLongLong:
-                lLongValue = *(long long *)self.pointerValue; break;
-                break;
-                
-            case TypeFloat:
-                floatValue = *(double *)self.pointerValue; break;
-            case TypeDouble:
-                doubleValue = *(double *)self.pointerValue; break;
-                break;
-                
-            case TypeId:
-            case TypeObject:
-            case TypeBlock:{
-                if (self.modifier & MFDeclarationModifierWeak) {
-                    objectValue = _weakObj;
-                }else{
-                    objectValue = _strongObj;
-                }
-                break;
-            }
-            case TypeSEL:
-                selValue = *(SEL *)self.pointerValue; break;
-                break;
-            case TypeClass:
-                classValue = *(Class *)self.pointerValue; break;;
-                break;
-                break;
-//            case TypeUnion:
-//            case TypeEnum:
-//            case TypeStruct:
-            default:
-                break;
-        }
-    } while (0);
-    
-
     return NULL;
 }
 //
