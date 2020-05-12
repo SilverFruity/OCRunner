@@ -258,41 +258,49 @@ default:\
 break;\
 }
 
+#define UnaryExecuteBaseType(resutlType,operator,suffix,target)\
+resutlType unaryResultValue##suffix;\
+switch (target.typePair.type.type) {\
+case TypeUChar:\
+unaryResultValue##suffix = operator (uCharValue##suffix); break;\
+case TypeUShort:\
+unaryResultValue##suffix = operator (uShortValue##suffix); break;\
+case TypeUInt:\
+unaryResultValue##suffix = operator (uIntValue##suffix); break;\
+case TypeULong:\
+unaryResultValue##suffix = operator (uLongValue##suffix); break;\
+case TypeULongLong:\
+unaryResultValue##suffix = operator (uLLongValue##suffix); break;\
+case TypeBOOL:\
+unaryResultValue##suffix = operator (boolValue##suffix); break;\
+case TypeChar:\
+unaryResultValue##suffix = operator (charValue##suffix); break;\
+case TypeShort:\
+unaryResultValue##suffix = operator (shortValue##suffix); break;\
+case TypeInt:\
+unaryResultValue##suffix = operator (intValue##suffix); break;\
+case TypeLong:\
+unaryResultValue##suffix = operator (longValue##suffix); break;\
+case TypeLongLong:\
+unaryResultValue##suffix = operator (lLongValue##suffix); break;\
+case TypeFloat:\
+unaryResultValue##suffix = operator (floatValue##suffix); break;\
+case TypeDouble:\
+unaryResultValue##suffix = operator (doubleValue##suffix); break;\
+default:\
+break;\
+}
+
 
 #define UnaryExecute(resutlType,operator,suffix,target)\
 resutlType unaryResultValue##suffix;\
 do{\
     if (target.isPointer) {\
-        pointerValue##suffix = operator (pointerValue##suffix);\
+        unaryResultValue##suffix = operator (pointerValue##suffix);\
         break;\
     }\
+    UnaryExecuteBaseType(resutlType,operator,suffix,target)\
     switch (target.typePair.type.type) {\
-    case TypeUChar:\
-    unaryResultValue##suffix = operator (uCharValue##suffix); break;\
-    case TypeUShort:\
-    unaryResultValue##suffix = operator (uShortValue##suffix); break;\
-    case TypeUInt:\
-    unaryResultValue##suffix = operator (uIntValue##suffix); break;\
-    case TypeULong:\
-    unaryResultValue##suffix = operator (uLongValue##suffix); break;\
-    case TypeULongLong:\
-    unaryResultValue##suffix = operator (uLLongValue##suffix); break;\
-    case TypeBOOL:\
-    unaryResultValue##suffix = operator (boolValue##suffix); break;\
-    case TypeChar:\
-    unaryResultValue##suffix = operator (charValue##suffix); break;\
-    case TypeShort:\
-    unaryResultValue##suffix = operator (shortValue##suffix); break;\
-    case TypeInt:\
-    unaryResultValue##suffix = operator (intValue##suffix); break;\
-    case TypeLong:\
-    unaryResultValue##suffix = operator (longValue##suffix); break;\
-    case TypeLongLong:\
-    unaryResultValue##suffix = operator (lLongValue##suffix); break;\
-    case TypeFloat:\
-    unaryResultValue##suffix = operator (floatValue##suffix); break;\
-    case TypeDouble:\
-    unaryResultValue##suffix = operator (doubleValue##suffix); break;\
     case TypeId:\
     case TypeObject:\
     case TypeBlock:\
@@ -426,6 +434,14 @@ do{\
     target.floatValue = floatValue##resultSuffix; break;\
     case TypeDouble:\
     target.doubleValue = doubleValue##resultSuffix; break;\
+    case TypeId:\
+    case TypeObject:\
+    case TypeBlock:\
+    target.objectValue = objectValue##resultSuffix; break;\
+    case TypeSEL:\
+    target.selValue = selValue##resultSuffix; break;\
+    case TypeClass:\
+    target.classValue = classValue##resultSuffix; break;\
     default:\
     break;\
     }\
@@ -486,7 +502,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 - (BOOL)isMember;
 - (BOOL)isBaseValue;
 - (BOOL)isPointer;
-- (id)subscriptGetWithIndex:(MFValue *)index;
+- (MFValue *)subscriptGetWithIndex:(MFValue *)index;
+- (void)subscriptSetValue:(MFValue *)value index:(MFValue *)index;
 - (void)subscriptSetWithIndex:(MFValue *)index value:(MFValue *)value;
 
 + (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding;

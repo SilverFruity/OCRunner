@@ -83,7 +83,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 	return ![self isObject];
 }
 - (BOOL)isPointer{
-    if ((self.typePair.type.type & TypeBaseMask) && self.typePair.var.ptCount > 0) {
+    TypeKind type = self.typePair.type.type;
+    if (((type & TypeBaseMask) || (type == TypeVoid)) && self.typePair.var.ptCount > 0) {
         return YES;
     }
     if (self.typePair.var.ptCount > 1) {\
@@ -91,20 +92,20 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     }
     return NO;
 }
-- (id)subscriptGetWithIndex:(MFValue *)index{
+- (MFValue *)subscriptGetWithIndex:(MFValue *)index{
     ValueDefineWithMFValue(Self, self);
     ValueDefineWithMFValue(Index, index);
     if (index.typePair.type.type & TypeBaseMask) {
         HoleIntegerValue(Index, index);
-        return (id)objectValueSelf[holeValue_int64_tIndex];
+        return [MFValue valueInstanceWithObject:objectValueSelf[holeValue_int64_tIndex]];
     }
     switch (index.typePair.type.type) {
         case TypeBlock:
         case TypeObject:
-            return objectValueSelf[objectValueIndex];
+            return [MFValue valueInstanceWithObject:objectValueSelf[objectValueIndex]];
             break;
         case TypeClass:
-            return objectValueSelf[classValueIndex];
+            return [MFValue valueInstanceWithObject:objectValueSelf[classValueIndex]];
             break;
         default:
 //            NSCAssert(0, @"line:%zd, index operator can not use type: %@",expr.bottomExpr.lineNumber, bottomValue.type.typeName);
@@ -112,8 +113,25 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     }
     return nil;
 }
-- (void)subscriptSetWithIndex:(MFValue *)index value:(MFValue *)value{
-    
+- (void)subscriptSetValue:(MFValue *)value index:(MFValue *)index{
+    ValueDefineWithMFValue(Self, self);
+        ValueDefineWithMFValue(Index, index);
+        if (index.typePair.type.type & TypeBaseMask) {
+            HoleIntegerValue(Index, index);
+            self.objectValue[holeValue_int64_tIndex] = value.objectValue;
+        }
+        switch (index.typePair.type.type) {
+            case TypeBlock:
+            case TypeObject:
+                self.objectValue[index.objectValue] = value.objectValue;
+                break;
+            case TypeClass:
+                self.objectValue[(id<NSCopying>)index.classValue] = value.objectValue;
+                break;
+            default:
+    //            NSCAssert(0, @"line:%zd, index operator can not use type: %@",expr.bottomExpr.lineNumber, bottomValue.type.typeName);
+                break;
+        }
 }
 
 - (void)assignFrom:(MFValue *)src{
@@ -122,65 +140,16 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 	}
     self.pointerValue = src.pointerValue;
 }
-
-
-//- (uint64_t)c2uintValue{
-//	switch (_type.typeKind) {
-//		case MF_TYPE_BOOL:
-//			return _uintValue;
-//		case MF_TYPE_INT:
-//			return _integerValue;
-//		case MF_TYPE_U_INT:
-//			return _uintValue;
-//		case MF_TYPE_DOUBLE:
-//			return _doubleValue;
-//		default:
-//			return 0;
-//	}
-//}
-//
-//
-//- (int64_t)c2integerValue{
-//	switch (_type.typeKind) {
-//		case MF_TYPE_BOOL:
-//			return _uintValue;
-//		case MF_TYPE_INT:
-//			return _integerValue;
-//		case MF_TYPE_U_INT:
-//			return _uintValue;
-//		case MF_TYPE_DOUBLE:
-//			return _doubleValue;
-//		default:
-//			return 0;
-//	}
-//}
-//
-//
-//- (double)c2doubleValue{
-//	switch (_type.typeKind) {
-//		case MF_TYPE_BOOL:
-//			return _uintValue;
-//		case MF_TYPE_INT:
-//			return _integerValue;
-//		case MF_TYPE_U_INT:
-//			return _uintValue;
-//		case MF_TYPE_DOUBLE:
-//			return _doubleValue;
-//		default:
-//			return 0.0;
-//	}
-//}
-//
-//
 //- (id)c2objectValue{
-//	switch (_type.typeKind) {
-//		case MF_TYPE_CLASS:
+//    if (self.isPointer) {
+//        return (__bridge id)_pointerValue;
+//    }
+//    switch (self.typePair.type.type) {
+//		case TypeClass:
 //			return _classValue;
-//		case MF_TYPE_OBJECT:
-//		case MF_TYPE_BLOCK:
+//		case TypeObject:
+//		case TypeBlock:
 //			return self.objectValue;
-//		case MF_TYPE_POINTER:
-//			return (__bridge id)_pointerValue;
 //		default:
 //			return nil;
 //	}
@@ -189,23 +158,21 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 //
 //
 //- (void *)c2pointerValue{
-//	switch (_type.typeKind) {
-//		case MF_TYPE_C_STRING:
-//			return (void *)_cstringValue;
-//		case MF_TYPE_POINTER:
-//        case MF_TYPE_C_FUNCTION:
-//			return _pointerValue;
-//		case MF_TYPE_CLASS:
-//			return (__bridge void*)_classValue;
-//		case MF_TYPE_OBJECT:
-//		case MF_TYPE_BLOCK:
-//			return (__bridge void*)self.objectValue;
-//		default:
-//			return NULL;
-//	}
+//    if (self.isPointer) {
+//        return _pointerValue;
+//    }
+//    switch (self.typePair.type.type) {
+//        case TypeClass:
+//            return (__bridge void*)_classValue;
+//        case TypeObject:
+//        case TypeBlock:
+//            return (__bridge void*)self.objectValue;
+//        default:
+//            return NULL;
+//    }
 //}
-
-
+//
+//
 //- (void)assignToCValuePointer:(void *)cvaluePointer typeEncoding:(const char *)typeEncoding{
 //	typeEncoding = removeTypeEncodingPrefix((char *)typeEncoding);
 //#define mf_ASSIGN_2_C_VALUE_POINTER_CASE(_encode, _type, _sel)\
@@ -214,21 +181,20 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 //*ptr = (_type)[self _sel];\
 //break;\
 //}
-//
 //	switch (*typeEncoding) {
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('c', char, c2integerValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('i', int, c2integerValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('s', short, c2integerValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('l', long, c2integerValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('q', long long, c2integerValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('C', unsigned char, c2uintValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('I', unsigned int, c2uintValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('S', unsigned short, c2uintValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('L', unsigned long, c2uintValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('Q', unsigned long long, c2uintValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('f', float, c2doubleValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('d', double, c2doubleValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('B', BOOL, c2uintValue)
+//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('c', char, charValue)
+//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('i', int, intValue)
+//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('s', short, shortValue)
+//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('l', long, longValue)
+//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('q', long long, longLongValue)
+//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('C', unsigned char, uCharValue)
+//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('I', unsigned int, uIntValue)
+//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('S', unsigned short, uShortValue)
+//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('L', unsigned long, uLongValue)
+//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('Q', unsigned long long, uLongLongValue)
+//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('f', float, floatValue)
+//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('d', double, doubleValue)
+//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('B', BOOL, boolValue)
 //			mf_ASSIGN_2_C_VALUE_POINTER_CASE('*', char *, c2pointerValue)
 //			mf_ASSIGN_2_C_VALUE_POINTER_CASE('^', void *, c2pointerValue)
 //			mf_ASSIGN_2_C_VALUE_POINTER_CASE(':', SEL, selValue)
@@ -242,17 +208,6 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 //			*ptr = [self c2objectValue];
 //			break;
 //		}
-//		case '{':{
-//			if (_type.typeKind == MF_TYPE_STRUCT) {
-//				size_t structSize = mf_size_with_encoding(typeEncoding);
-//				memcpy(cvaluePointer, self.pointerValue, structSize);
-//			}else if (_type.typeKind == MF_TYPE_STRUCT_LITERAL){
-//				NSString *structName = mf_struct_name_with_encoding(typeEncoding);
-//				MFStructDeclareTable *table = [MFStructDeclareTable shareInstance];
-//				mf_struct_data_with_dic(cvaluePointer, self.objectValue, [table getStructDeclareWithName:structName]);
-//			}
-//			break;
-//		}
 //		case 'v':{
 //			break;
 //		}
@@ -261,39 +216,49 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 //			break;
 //	}
 //}
-
-
+//
+//
 //- (instancetype)initWithCValuePointer:(void *)cValuePointer typeEncoding:(const char *)typeEncoding bridgeTransfer:(BOOL)bridgeTransfer  {
 //	typeEncoding = removeTypeEncodingPrefix((char *)typeEncoding);
 //	MFValue *retValue = [[MFValue alloc] init];
 //
 //#define MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE(_code,_kind, _type,_sel)\
 //case _code:{\
-//retValue.type = mf_create_type_specifier(_kind);\
+//[retValue setValueType:_kind];\
 //retValue._sel = *(_type *)cValuePointer;\
 //break;\
 //}
-//
+//    
 //	switch (*typeEncoding) {
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('c',MF_TYPE_INT, char, integerValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('i',MF_TYPE_INT, int,integerValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('s',MF_TYPE_INT, short,integerValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('l',MF_TYPE_INT, long,integerValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('q',MF_TYPE_INT, long long,integerValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('C',MF_TYPE_U_INT, unsigned char, uintValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('I',MF_TYPE_U_INT,  unsigned int, uintValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('S',MF_TYPE_U_INT, unsigned short, uintValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('L',MF_TYPE_U_INT,  unsigned long, uintValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('Q',MF_TYPE_U_INT, unsigned long long,uintValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('B',MF_TYPE_BOOL, BOOL, uintValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('f',MF_TYPE_DOUBLE, float, doubleValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('d',MF_TYPE_DOUBLE, double,doubleValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE(':',MF_TYPE_SEL, SEL, selValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('^',MF_TYPE_POINTER,void *, pointerValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('*',MF_TYPE_C_STRING, char *,cstringValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('#',MF_TYPE_CLASS, Class,classValue)
+//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('c',TypeChar, char, charValue)
+//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('i',TypeInt, int,intValue)
+//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('s',TypeShort, short,shortValue)
+//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('l',TypeLong, long,longValue)
+//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('q',TypeLongLong, long long,longLongValue)
+//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('C',TypeUChar, unsigned char, uCharValue)
+//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('I',TypeUInt,  unsigned int, uIntValue)
+//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('S',TypeUShort, unsigned short, uShortValue)
+//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('L',TypeULong,  unsigned long, uLongValue)
+//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('Q',TypeULongLong, unsigned long long,uLongLongValue)
+//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('B',TypeBOOL, BOOL, boolValue)
+//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('f',TypeFloat, float, floatValue)
+//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('d',TypeDouble, double,doubleValue)
+//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE(':',TypeSEL, SEL, selValue)
+//            case '^':{
+//                [retValue setValueType:TypeVoid];
+//                retValue.typePair.var.ptCount = 1;
+//                retValue.pointerValue = *(void* *)cValuePointer;
+//                break;
+//            }
+//            case '*':{
+//                [retValue setValueType:TypeChar];
+//                retValue.typePair.var.ptCount = 1;
+//                retValue.pointerValue = *(void* *)cValuePointer;
+//                break;
+//            }
+//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('#',TypeClass, Class,classValue)
 //		case '@':{
-//			retValue.type = mf_create_type_specifier(MF_TYPE_OBJECT);
+//            [retValue setValueType:TypeObject];
 //			if (bridgeTransfer) {
 //                id objectValue = (__bridge_transfer id)(*(void **)cValuePointer);
 //                retValue.objectValue = objectValue;
@@ -304,15 +269,6 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 //
 //			break;
 //		}
-//		case '{':{
-//			NSString *structName = mf_struct_name_with_encoding(typeEncoding);
-//			retValue.type= mf_create_struct_type_specifier(structName);
-//			size_t size = mf_size_with_encoding(typeEncoding);
-//			retValue.pointerValue = malloc(size);
-//			memcpy(retValue.pointerValue, cValuePointer, size);
-//			break;
-//		}
-//
 //		default:
 //			NSCAssert(0, @"not suppoert %s", typeEncoding);
 //			break;
@@ -320,75 +276,72 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 //
 //	return retValue;
 //}
-
-
+//
+//
 //+ (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding{
 //	typeEncoding = removeTypeEncodingPrefix((char *)typeEncoding);
 //	MFValue *value = [[MFValue alloc] init];
 //	switch (*typeEncoding) {
 //		case 'c':
-//			value.type = mf_create_type_specifier(MF_TYPE_INT);
+//            [value setValueType:TypeChar];
 //			break;
 //		case 'i':
-//			value.type = mf_create_type_specifier(MF_TYPE_INT);
+//			[value setValueType:TypeInt];
 //			break;
 //		case 's':
-//			value.type = mf_create_type_specifier(MF_TYPE_INT);
+//            [value setValueType:TypeShort];
 //			break;
 //		case 'l':
-//			value.type = mf_create_type_specifier(MF_TYPE_INT);
+//            [value setValueType:TypeLong];
 //			break;
 //		case 'q':
-//			value.type = mf_create_type_specifier(MF_TYPE_INT);
+//			[value setValueType:TypeLongLong];
 //			break;
 //		case 'C':
-//			value.type = mf_create_type_specifier(MF_TYPE_U_INT);
+//			[value setValueType:TypeUChar];
 //			break;
 //		case 'I':
-//			value.type = mf_create_type_specifier(MF_TYPE_U_INT);
+//			[value setValueType:TypeUInt];
 //			break;
 //		case 'S':
-//			value.type = mf_create_type_specifier(MF_TYPE_U_INT);
+//			[value setValueType:TypeUShort];
 //			break;
 //		case 'L':
-//			value.type = mf_create_type_specifier(MF_TYPE_U_INT);
+//			[value setValueType:TypeULong];
 //			break;
 //		case 'Q':
-//			value.type = mf_create_type_specifier(MF_TYPE_U_INT);
+//            [value setValueType:TypeULongLong];
 //			break;
 //		case 'B':
-//			value.type = mf_create_type_specifier(MF_TYPE_BOOL);
+//            [value setValueType:TypeBOOL];
 //			break;
 //		case 'f':
-//			value.type = mf_create_type_specifier(MF_TYPE_DOUBLE);
+//            [value setValueType:TypeFloat];
 //			break;
 //		case 'd':
-//			value.type = mf_create_type_specifier(MF_TYPE_DOUBLE);
+//            [value setValueType:TypeDouble];
 //			break;
 //		case ':':
-//			value.type = mf_create_type_specifier(MF_TYPE_SEL);
+//            [value setValueType:TypeSEL];
 //			break;
-//		case '^':
-//			value.type = mf_create_type_specifier(MF_TYPE_POINTER);
-//			break;
-//		case '*':
-//			value.type = mf_create_type_specifier(MF_TYPE_C_STRING);
-//			break;
+//        case '^':{
+//            [value setValueType:TypeVoid];
+//            value.typePair.var.ptCount += 1;
+//            break;
+//        }
+//        case '*':{
+//            [value setValueType:TypeChar];
+//            value.typePair.var.ptCount = 1;
+//            break;
+//        }
 //		case '#':
-//			value.type = mf_create_type_specifier(MF_TYPE_CLASS);
+//			[value setValueType:TypeClass];
 //			break;
 //		case '@':
-//			value.type = mf_create_type_specifier(MF_TYPE_OBJECT);
+//			[value setValueType:TypeObject];
 //			break;
-//        case '{':{
-//			value.type = mf_create_struct_type_specifier(mf_struct_name_with_encoding(typeEncoding));
-//            value.type.structName =  mf_struct_name_with_encoding(typeEncoding);
-//            size_t size = mf_size_with_encoding(typeEncoding);
-//            value.pointerValue = malloc(size);
-//			break;
-//        }
 //		case 'v':
-//			value.type = mf_create_type_specifier(MF_TYPE_VOID);
+//			[value setValueType:TypeVoid];
 //			break;
 //		default:
 //			NSCAssert(0, @"");
@@ -509,8 +462,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 
 + (instancetype)valueInstanceWithPointer:(void *)pointerValue{
 	MFValue *value = [[MFValue alloc] init];
-    [value setValueType:TypeObject];
-    value.typePair.var.ptCount = 2;
+    [value setValueType:TypeChar];
+    value.typePair.var.ptCount = 1;
 	value.pointerValue = pointerValue;
 	return value;
 }

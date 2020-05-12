@@ -78,32 +78,39 @@ enum{
 
 // MARK: - Expression
 typedef enum {
-    OCValueVariable,
-    OCValueClassType,
-    OCValueSelf,
-    OCValueSuper,
-    OCValueBlock,
-    OCValueSelector,
-    OCValueProtocol,
-    OCValueDictionary, // value -> [[exp,exp]..]
-    OCValueArray, // value -> [exp..]
-    OCValueNSNumber,
-    OCValueString,
-    OCValueCString,
-    OCValueInt,
-    OCValueDouble,
-    OCValueConvert,
-    OCValueNil,
-    OCValueNULL,
-    OCValueBOOL,
-    OCValuePointValue,
-    OCValueVarPoint,
+    OCValueVariable, // value: NSString
+    OCValueClassName, // value: NSString
+    OCValueSelf, // value: nil
+    OCValueSuper, // value: nil
+    OCValueSelector, // value: sel NSString
+    OCValueProtocol, // value: String
+    OCValueDictionary, // value: Exp Array
+    OCValueArray, // value: Exp Array
+    OCValueNSNumber, // value: Exp
+    OCValueString, // value: NSString
+    OCValueCString, // value: NSString
+    OCValueInt, // value: NSString
+    OCValueDouble, // value: NSString
+    OCValueNil, //  value: nil
+    OCValueNULL, //  value: nil
+    OCValueBOOL, //  value: @"YES" @"NO"
+    
+    //Class
     OCValueMethodCall,
     OCValueFuncCall,
+    OCValueBlock,
     OCValueCollectionGetValue // array[0] , dict[@"key"]
 }OC_VALUE_TYPE;
 
-@interface ORExpression: NSObject
+@interface ORCodeCheck : NSObject
+@property (nonatomic, assign)NSInteger lineNum;
+@property (nonatomic, assign)NSInteger columnStart;
+@property (nonatomic, assign)NSInteger length;
+@property (nonatomic, copy)NSString *filename;
+@end
+
+@interface ORExpression: ORCodeCheck
+
 @end
 
 @interface ORValueExpression: ORExpression
@@ -112,24 +119,24 @@ typedef enum {
 @end
 
 @interface ORMethodCall: ORExpression
-@property (nonatomic, strong)ORExpression * caller;
+@property (nonatomic, strong)ORValueExpression * caller;
 @property (nonatomic, assign)BOOL isDot;
 @property (nonatomic, strong)NSMutableArray *names;
 @property (nonatomic, strong)NSMutableArray <ORExpression *> *values;
 @end
 
 @interface ORCFuncCall: ORExpression
-@property (nonatomic, strong)ORExpression *caller;
+@property (nonatomic, strong)ORValueExpression *caller;
 @property (nonatomic, strong)NSMutableArray <ORExpression *>*expressions;
 @end
 
-@interface ORBlockImp: NSObject
+@interface ORBlockImp: ORCodeCheck
 @property(nonatomic,strong) ORFuncDeclare *declare;
 @property(nonatomic,strong) NSMutableArray<id >* statements;
 @end
 
 @interface ORSubscriptExpression: ORExpression
-@property (nonatomic, strong)ORExpression * caller;
+@property (nonatomic, strong)ORValueExpression * caller;
 @property (nonatomic, strong)ORExpression * keyExp;
 @end
 
@@ -147,13 +154,13 @@ typedef enum {
     AssignOperatorAssignShiftRight,
 }AssignOperatorType;
 
-@interface ORAssignExpression:NSObject
-@property (nonatomic,strong)ORExpression * value;
+@interface ORAssignExpression: ORCodeCheck
+@property (nonatomic,strong)ORValueExpression * value;
 @property (nonatomic,assign)AssignOperatorType assignType;
 @property (nonatomic,strong)ORExpression * expression;
 @end
 
-@interface ORDeclareExpression:NSObject
+@interface ORDeclareExpression: ORCodeCheck
 @property (nonatomic,strong)ORTypeVarPair *pair;
 @property (nonatomic,strong, nullable)ORExpression * expression;
 @end
@@ -170,7 +177,7 @@ typedef enum {
     UnaryOperatorAdressPoint,
     UnaryOperatorAdressValue
 }UnaryOperatorType;
-@interface ORUnaryExpression:NSObject
+@interface ORUnaryExpression: ORCodeCheck
 @property (nonatomic,strong)ORExpression * value;
 @property (nonatomic,assign)UnaryOperatorType operatorType;
 @end
@@ -268,13 +275,13 @@ typedef NS_ENUM(NSUInteger, MFPropertyModifier) {
     MFPropertyModifierNonatomic =  0x10,
     MFPropertyModifierAtomicMask = 0xF0,
 };
-@interface ORPropertyDeclare: NSObject
+@interface ORPropertyDeclare: ORCodeCheck
 @property(nonatomic,strong) NSMutableArray *keywords;
 @property(nonatomic,strong) ORTypeVarPair * var;
 @property(nonatomic,assign) MFPropertyModifier modifier;
 @end
 
-@interface ORMethodDeclare: NSObject
+@interface ORMethodDeclare: ORCodeCheck
 @property(nonatomic,assign) BOOL isClassMethod;
 @property(nonatomic,strong) ORTypeVarPair * returnType;
 @property(nonatomic,strong) NSMutableArray *methodNames;

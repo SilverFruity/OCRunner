@@ -156,6 +156,85 @@ void registerClassSetter(id self1, SEL _cmd1, id newValue) { //移除set
 @end
 @implementation ORValueExpression (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
+    switch (self.type) {
+        case OCValueVariable:{
+            return [scope getValueWithIdentifier:self.value];
+        }
+        case OCValueClassName:{
+            return [MFValue valueInstanceWithClass:NSClassFromString(self.value)];
+        }
+        case OCValueSelf:{
+            return [scope getValueWithIdentifier:@"self"];
+        }
+        case OCValueSuper:{
+            return [scope getValueWithIdentifier:@"super"];
+        }
+        case OCValueSelector:{
+            return [MFValue valueInstanceWithSEL:NSSelectorFromString(self.value)];
+        }
+//        case OCValueProtocol:{
+//            return [MFValue valueInstanceWithObject:NSProtocolFromString(self.value)];
+//        }
+        case OCValueDictionary:{
+            NSMutableArray *exps = self.value;
+            NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+            for (NSMutableArray <ORExpression *>*kv in exps) {
+                ORExpression *keyExp = kv.firstObject;
+                ORExpression *valueExp = kv.firstObject;
+                id key = [keyExp execute:scope].objectValue;
+                id value = [valueExp execute:scope].objectValue;
+                NSAssert(key == nil, @"the key of NSDictionary can't be nil");
+                NSAssert(value == nil, @"the vale of NSDictionary can't be nil");
+                dict[key] = value;
+            }
+            return [MFValue valueInstanceWithObject:[dict copy]];
+        }
+        case OCValueArray:{
+            NSMutableArray *exps = self.value;
+            NSMutableArray *array = [NSMutableArray array];
+            for (ORExpression *exp in exps) {
+                id value = [exp execute:scope].objectValue;
+                NSAssert(value == nil, @"the vale of NSArray can't be nil");
+                [array addObject:value];
+            }
+            return [MFValue valueInstanceWithObject:[array copy]];
+        }
+        case OCValueNSNumber:{
+            MFValue *value = [self.value execute:scope];
+            ValueDefineWithMFValue(0, value);
+            UnaryExecuteBaseType(NSNumber *, @, 0, value);
+            return [MFValue valueInstanceWithObject:unaryResultValue0];
+        }
+        case OCValueString:{
+            return [MFValue valueInstanceWithObject:self.value];
+        }
+        case OCValueCString:{
+            NSString *value = self.value;
+            char * cstring = malloc(value.length * sizeof(char));
+            memcpy(cstring, value.UTF8String, value.length * sizeof(char));
+            return [MFValue valueInstanceWithPointer:cstring];
+        }
+        case OCValueInt:{
+            NSString *value = self.value;
+            return [MFValue valueInstanceWithLongLong:value.longLongValue];
+        }
+        case OCValueDouble:{
+            NSString *value = self.value;
+            return [MFValue valueInstanceWithLongLong:value.doubleValue];
+        }
+        case OCValueNil:{
+            return [MFValue valueInstanceWithObject:nil];
+        }
+        case OCValueNULL:{
+            return [MFValue valueInstanceWithPointer:NULL];
+        }
+        case OCValueBOOL:{
+            return [MFValue valueInstanceWithBOOL:[self.value isEqual:@"YES"] ? YES: NO];
+            break;
+        }
+        default:
+            break;
+    }
     return nil;
 }
 @end
@@ -168,6 +247,9 @@ void registerClassSetter(id self1, SEL _cmd1, id newValue) { //移除set
     [[MFStack argsStack] push:argValues];
     id instance = scope.selfInstance;
     NSString *selector = [self.names componentsJoinedByString:@":"];
+    if (self.values.count >= 1) {
+        selector = [selector stringByAppendingString:@":"];
+    }
     SEL sel = NSSelectorFromString(selector);
     NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
     NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
@@ -193,6 +275,8 @@ void registerClassSetter(id self1, SEL _cmd1, id newValue) { //移除set
     }
     if ([self.caller isKindOfClass:[ORMethodCall class]] && [(ORMethodCall *)self.caller isDot]){
         // make.left.equalTo(xxxx);
+        MFValue *value = [(ORMethodCall *)self.caller execute:scope];
+        // FIXME: 调用block
     }
     // C 函数调用
     return nil;
@@ -216,72 +300,114 @@ void registerClassSetter(id self1, SEL _cmd1, id newValue) { //移除set
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *bottomValue = [self.keyExp execute:scope];
     MFValue *arrValue = [self.caller execute:scope];
-    MFValue *resultValue = [MFValue new];
-    [resultValue setValueType:TypeObject];
-    resultValue.pointerValue = (__bridge_retained void *)[arrValue subscriptGetWithIndex:bottomValue];
-    return resultValue;
+    return [arrValue subscriptGetWithIndex:bottomValue];
 }
 @end
 @implementation ORAssignExpression (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
-    MFValue *rightValue = [self.expression execute:scope];
-    MFValue *leftValue = [self.value execute:scope];
-    ValueDefineWithMFValue(left, leftValue);
-    ValueDefineWithMFValue(right, rightValue);
-    ValueDefineWithSuffix(Result);
-    TypeKind type = rightValue.typePair.type.type;
+    ORExpression *resultExp;
+#define SetResultExpWithBinaryOperator(type)\
+    ORBinaryExpression *exp = [ORBinaryExpression new];\
+    exp.left = self.value;\
+    exp.right = self.expression;\
+    exp.operatorType = type;\
+    resultExp = exp;
     switch (self.assignType) {
         case AssignOperatorAssign:
+            resultExp = self.expression;
             break;
         case AssignOperatorAssignAnd:{
-            BinaryExecuteInt(left, &, right, type, Result);
+            SetResultExpWithBinaryOperator(BinaryOperatorAnd);
             break;
         }
         case AssignOperatorAssignOr:{
-            BinaryExecuteInt(left, |, right, type, Result);
+            SetResultExpWithBinaryOperator(BinaryOperatorOr);
             break;
         }
         case AssignOperatorAssignXor:{
-            BinaryExecuteInt(left, ^, right, type, Result);
+            SetResultExpWithBinaryOperator(BinaryOperatorXor);
             break;
         }
         case AssignOperatorAssignAdd:{
-            BinaryExecuteInt(left, +, right, type, Result);
-            BinaryExecuteFloat(left, +, right, type, Result);
+            SetResultExpWithBinaryOperator(BinaryOperatorAdd);
             break;
         }
         case AssignOperatorAssignSub:{
-            BinaryExecuteInt(left, -, right, type, Result);
-            BinaryExecuteFloat(left, -, right, type, Result);
+            SetResultExpWithBinaryOperator(BinaryOperatorSub);
             break;
         }
         case AssignOperatorAssignDiv:{
-            BinaryExecuteInt(left, /, right, type, Result);
-            BinaryExecuteFloat(left, /, right, type, Result);
+            SetResultExpWithBinaryOperator(BinaryOperatorDiv);
             break;
         }
         case AssignOperatorAssignMuti:{
-            BinaryExecuteInt(left, *, right, type, Result);
-            BinaryExecuteFloat(left, *, right, type, Result);
+            SetResultExpWithBinaryOperator(BinaryOperatorMulti);
             break;
         }
         case AssignOperatorAssignMod:{
-            BinaryExecuteInt(left, %, right, type, Result);
+            SetResultExpWithBinaryOperator(BinaryOperatorMod);
             break;
         }
         case AssignOperatorAssignShiftLeft:{
-            BinaryExecuteInt(left, <<, right, type, Result);
+            SetResultExpWithBinaryOperator(BinaryOperatorShiftLeft);
             break;
         }
         case AssignOperatorAssignShiftRight:{
-            BinaryExecuteInt(left, >>, right, type, Result);
+            SetResultExpWithBinaryOperator(BinaryOperatorShiftRight);
             break;
         }
         default:
             break;
     }
+    
+    switch (self.value.type) {
+        case OCValueSelf:{
+            MFValue *resultValue = [resultExp execute:scope];
+            [scope assignWithIdentifer:@"self" value:resultValue];
+            break;
+        }
+        case OCValueVariable:{
+            MFValue *resultValue = [resultExp execute:scope];
+            [scope assignWithIdentifer:(NSString *)self.value.value value:resultValue];
+            break;
+        }
+        case OCValueMethodCall:{
+            ORMethodCall *methodCall = (ORMethodCall *)self.value;
+            if (!methodCall.isDot) {
+                NSCAssert(0, @"must dot grammar");
+            }
+            //调用对象setter方法
+            NSString *setterName = methodCall.names.firstObject;
+            NSString *first = [[setterName substringToIndex:1] uppercaseString];
+            NSString *other = setterName.length > 1 ? [setterName substringFromIndex:1] : nil;
+            setterName = [NSString stringWithFormat:@"set%@%@",first,other];
+            if (methodCall.caller.type == OCValueSuper) {
+                Class currentClass = objc_getClass(((NSString *)methodCall.caller.value).UTF8String);
+                Class superClass = class_getSuperclass(currentClass);
+                //FIXME: set super property
+//                invoke_sueper_values([memberObjValue c2objectValue], superClass, NSSelectorFromString(memberName), @[operValue]);
+            }else{
+                ORMethodCall *setCaller = [ORMethodCall new];
+                setCaller.caller = self.value;
+                setCaller.names = [@[setterName] mutableCopy];
+                setCaller.values = [@[resultExp] mutableCopy];
+                [setCaller execute:scope];
+            }
+            break;
+        }
+        case OCValueCollectionGetValue:{
+            MFValue *resultValue = [resultExp execute:scope];
+            ORSubscriptExpression *subExp = (ORSubscriptExpression *)self.value;
+            MFValue *caller = [subExp.caller execute:scope];
+            MFValue *indexValue = [subExp.keyExp execute:scope];
+            [caller subscriptSetValue:resultValue index:indexValue];
+        }
+        default:
+            break;
+    }
     return [MFValue normalEnd];
-}@end
+}
+@end
 @implementation ORDeclareExpression (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     if (self.expression) {

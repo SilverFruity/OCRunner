@@ -9,6 +9,8 @@
 #import "RunnerClasses.h"
 
 // Document: https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
+@implementation ORCodeCheck
+@end
 @implementation ORTypeSpecial
 @end
 @implementation ORVariable
