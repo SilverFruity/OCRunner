@@ -20,6 +20,9 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 
 @implementation MFValue{
     ORTypeVarPair *_pair;
+    __strong id _strongObj;
+    __weak id _weakObj;
+    
 }
 
 
@@ -54,63 +57,13 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 - (BOOL)isSubtantial{
     ValueDefineWithMFValue(0, self);
-    if ((self.typePair.type.type & TypeBaseMask) && self.typePair.var.ptCount > 0) {\
-        return pointerValue0 ? YES : NO;
-    }\
-    switch (_pair.type.type) {
-		case TypeBOOL:
-            return boolValue0 ? YES : NO;
-        case TypeUChar:
-            return uCharValue0 ? YES : NO;
-        case TypeUShort:
-            return uShortValue0 ? YES : NO;
-		case TypeUInt:
-            return uIntValue0 ? YES : NO;
-        case TypeULong:
-            return uLongValue0 ? YES : NO;
-        case TypeULongLong:
-			return uLLongValue0 ? YES : NO;
-		case TypeChar:
-            return charValue0 ? YES : NO;
-        case TypeShort:
-            return shortValue0 ? YES : NO;
-        case TypeInt:
-            return intValue0 ? YES : NO;
-        case TypeLong:
-            return longValue0 ? YES : NO;
-        case TypeLongLong:
-			return lLongValue0 ? YES : NO;
-		case TypeFloat:
-            return floatValue0 ? YES : NO;
-        case TypeDouble:
-            return doubleValue0 ? YES : NO;
-		case TypeClass:
-			return classValue0 ? YES : NO;
-		case TypeSEL:
-			return selValue0 ? YES : NO;
-		case TypeObject:
-//		case MF_TYPE_STRUCT_LITERAL:
-		case TypeBlock:
-			return objectValue0 ? YES : NO;
-		case TypeVoid:
-			return NO;
-		default:
-			break;
-	}
-	return NO;
+    UnaryExecute(BOOL, !, 0, self);
+    return !unaryResultValue0;
 }
 
 
 - (BOOL)isMember{
-    switch (_pair.type.type) {
-		case TypeBOOL:
-		case TypeInt:
-		case TypeULongLong:
-		case TypeDouble:
-			return YES;
-		default:
-			return NO;
-	}
+    return _pair.type.type & TypeBaseMask;
 }
 
 
@@ -129,12 +82,20 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 - (BOOL)isBaseValue{
 	return ![self isObject];
 }
+- (BOOL)isPointer{
+    if ((self.typePair.type.type & TypeBaseMask) && self.typePair.var.ptCount > 0) {
+        return YES;
+    }
+    if (self.typePair.var.ptCount > 1) {\
+        return YES;
+    }
+    return NO;
+}
 - (id)subscriptGetWithIndex:(MFValue *)index{
     ValueDefineWithMFValue(Self, self);
     ValueDefineWithMFValue(Index, index);
     if (index.typePair.type.type & TypeBaseMask) {
         HoleIntegerValue(Index, index);
-        HoleUCharValue(Index, index);
         return (id)objectValueSelf[holeValue_int64_tIndex];
     }
     switch (index.typePair.type.type) {
@@ -442,104 +403,117 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 //	value.type = mf_create_type_specifier(MF_TYPE_VOID);
 	return value;
 }
-//
-//
-//+ (instancetype)valueInstanceWithBOOL:(BOOL)boolValue{
-//	MFValue *value = [[MFValue alloc] init];
-//	value.type = mf_create_type_specifier(MF_TYPE_BOOL);
-//	value.uintValue = boolValue;
-//	return value;
-//}
-//
-//
-//+ (instancetype)valueInstanceWithUint:(uint64_t)uintValue{
-//	MFValue *value = [[MFValue alloc] init];
-//	value.type = mf_create_type_specifier(MF_TYPE_U_INT);
-//	value.uintValue = uintValue;
-//	return value;
-//}
-//
-//
-//+ (instancetype)valueInstanceWithInt:(int64_t)intValue{
-//	MFValue *value = [[MFValue alloc] init];
-//	value.type = mf_create_type_specifier(MF_TYPE_INT);
-//	value.integerValue = intValue;
-//	return value;
-//}
-//
-//
-//+ (instancetype)valueInstanceWithDouble:(double)doubleValue{
-//	MFValue *value = [[MFValue alloc] init];
-//	value.type = mf_create_type_specifier(MF_TYPE_DOUBLE);
-//	value.doubleValue = doubleValue;
-//	return value;
-//}
-//
-//
-//+ (instancetype)valueInstanceWithObject:(id)objValue{
-//	MFValue *value = [[MFValue alloc] init];
-//	value.type = mf_create_type_specifier(MF_TYPE_OBJECT);
-//	value.objectValue = objValue;
-//	return value;
-//}
-//
-//
-//+ (instancetype)valueInstanceWithBlock:(id)blockValue{
-//	MFValue *value = [[MFValue alloc] init];
-//	value.type = mf_create_type_specifier(MF_TYPE_BLOCK);
-//	value.objectValue = blockValue;
-//	return value;
-//}
-//
-//
-//+ (instancetype)valueInstanceWithClass:(Class)clazzValue{
-//	MFValue *value = [[MFValue alloc] init];
-//	value.type = mf_create_type_specifier(MF_TYPE_CLASS);
-//	value.classValue = clazzValue;
-//	return value;
-//}
-//
-//
-//+ (instancetype)valueInstanceWithSEL:(SEL)selValue{
-//	MFValue *value = [[MFValue alloc] init];
-//	value.type = mf_create_type_specifier(MF_TYPE_SEL);
-//	value.selValue = selValue;
-//	return value;
-//}
-//
-//
-//+ (instancetype)valueInstanceWithCstring:(const char *)cstringValue{
-//	MFValue *value = [[MFValue alloc] init];
-//	value.type = mf_create_type_specifier(MF_TYPE_C_STRING);
-//	value.cstringValue = cstringValue;
-//	return value;
-//}
-//
-//
-//+ (instancetype)valueInstanceWithPointer:(void *)pointerValue{
-//	MFValue *value = [[MFValue alloc] init];
-//	value.type = mf_create_type_specifier(MF_TYPE_POINTER);
-//	value.pointerValue = pointerValue;
-//	return value;
-//}
-//
-//
-//+ (instancetype)valueInstanceWithStruct:(void *)structValue typeEncoding:(const char *)typeEncoding copyData:(BOOL)copyData{
-//	MFValue *value = [[MFValue alloc] init];
-//	value.type = mf_create_type_specifier(MF_TYPE_STRUCT);
-//	value.type.structName = mf_struct_name_with_encoding(typeEncoding);
-//	size_t size = mf_size_with_encoding(typeEncoding);
-//    if (copyData) {
-//        value.pointerValue = malloc(size);
-//        memcpy(value.pointerValue, structValue, size);
-//    }else{
-//        value.pointerValue = structValue;
-//        value.structPointNoCopyData = YES;
-//    }
-//	return value;
-//}
-//
-//
+
++ (instancetype)valueInstanceWithBOOL:(BOOL)boolValue{
+    MFValue *value = [[MFValue alloc] init];
+    [value setValueType:TypeBOOL];
+    value.boolValue = boolValue;
+    return value;
+}
++ (instancetype)valueInstanceWithUChar:(unsigned char)uCharValue{
+    MFValue *value = [[MFValue alloc] init];
+    [value setValueType:TypeUChar];
+    value.uCharValue = uCharValue;
+    return value;
+}
++ (instancetype)valueInstanceWithUShort:(unsigned short)uShortValue{
+    MFValue *value = [[MFValue alloc] init];
+    [value setValueType:TypeUShort];
+    value.uShortValue = uShortValue;
+    return value;
+}
++ (instancetype)valueInstanceWithUInt:(unsigned int)uIntValue{
+    MFValue *value = [[MFValue alloc] init];
+    [value setValueType:TypeUInt];
+    value.uIntValue = uIntValue;
+    return value;
+}
++ (instancetype)valueInstanceWithULong:(unsigned long)uLongValue{
+    MFValue *value = [[MFValue alloc] init];
+    [value setValueType:TypeUChar];
+    value.uLongValue = uLongValue;
+    return value;
+}
++ (instancetype)valueInstanceWithULongLong:(unsigned long long)uLongLongValue{
+    MFValue *value = [[MFValue alloc] init];
+    [value setValueType:TypeULongLong];
+    value.uLongLongValue = uLongLongValue;
+    return value;
+}
++ (instancetype)valueInstanceWithChar:(char)charValue{
+    MFValue *value = [[MFValue alloc] init];
+    [value setValueType:TypeChar];
+    value.charValue = charValue;
+    return value;
+}
++ (instancetype)valueInstanceWithShort:(short)shortValue{
+    MFValue *value = [[MFValue alloc] init];
+    [value setValueType:TypeShort];
+    value.shortValue = shortValue;
+    return value;
+}
++ (instancetype)valueInstanceWithInt:(int)intValue{
+    MFValue *value = [[MFValue alloc] init];
+   [value setValueType:TypeInt];
+   value.intValue = intValue;
+   return value;
+}
++ (instancetype)valueInstanceWithLong:(long)longValue{
+    MFValue *value = [[MFValue alloc] init];
+   [value setValueType:TypeLong];
+   value.longValue = longValue;
+   return value;
+}
++ (instancetype)valueInstanceWithLongLong:(long long)longLongValue{
+    MFValue *value = [[MFValue alloc] init];
+    [value setValueType:TypeLongLong];
+    value.longLongValue = longLongValue;
+    return value;
+}
++ (instancetype)valueInstanceWithFloat:(float)floatValue{
+    MFValue *value = [[MFValue alloc] init];
+    [value setValueType:TypeFloat];
+    value.floatValue = floatValue;
+    return value;
+}
++ (instancetype)valueInstanceWithDouble:(double)doubleValue{
+	MFValue *value = [[MFValue alloc] init];
+    [value setValueType:TypeDouble];
+	value.doubleValue = doubleValue;
+	return value;
+}
++ (instancetype)valueInstanceWithObject:(id)objValue{
+	MFValue *value = [[MFValue alloc] init];
+    [value setValueType:TypeObject];
+	value.objectValue = objValue;
+	return value;
+}
++ (instancetype)valueInstanceWithBlock:(id)blockValue{
+	MFValue *value = [[MFValue alloc] init];
+    [value setValueType:TypeBlock];
+	value.objectValue = blockValue;
+	return value;
+}
++ (instancetype)valueInstanceWithClass:(Class)clazzValue{
+	MFValue *value = [[MFValue alloc] init];
+    [value setValueType:TypeClass];
+	value.classValue = clazzValue;
+	return value;
+}
++ (instancetype)valueInstanceWithSEL:(SEL)selValue{
+	MFValue *value = [[MFValue alloc] init];
+    [value setValueType:TypeSEL];
+	value.selValue = selValue;
+	return value;
+}
+
++ (instancetype)valueInstanceWithPointer:(void *)pointerValue{
+	MFValue *value = [[MFValue alloc] init];
+    [value setValueType:TypeObject];
+    value.typePair.var.ptCount = 2;
+	value.pointerValue = pointerValue;
+	return value;
+}
 //- (instancetype)nsStringValue{
 //	MFValue *value = [[MFValue alloc] init];
 //	value.type = mf_create_type_specifier(MF_TYPE_OBJECT);
@@ -588,44 +562,112 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 //	return value;
 //}
 //
-//
-//- (MFTypeSpecifier *)type{
-//    return _type;
-//}
-//
-//
-//- (void)setType:(MFTypeSpecifier *)type{
-//    _type = type;
-//}
-//
-//-(void)setObjectValue:(id)objectValue{
-//    if (self.modifier & MFDeclarationModifierWeak) {
-//        _weakObj = objectValue;
-//    }else{
-//        _strongObj = objectValue;
-//    }
-//}
-//
-//
-//- (id)objectValue{
-//    if (self.modifier & MFDeclarationModifierWeak) {
-//        return _weakObj;
-//    }else{
-//        return _strongObj;
-//    }
-//}
-//
--(void *)valuePointer{
-    ValueDefineWithMFValue(1, self);
-    
-    return NULL;
+-(void)setObjectValue:(id)objectValue{
+    if (self.modifier & MFDeclarationModifierWeak) {
+        _weakObj = objectValue;
+    }else{
+        _strongObj = objectValue;
+    }
 }
-//
-//- (void)dealloc{
-//    if (_type.typeKind == MF_TYPE_STRUCT && !_structPointNoCopyData) {
-//        free(_pointerValue);
-//    }
-//}
+- (id)objectValue{
+    if (self.modifier & MFDeclarationModifierWeak) {
+        return _weakObj;
+    }else{
+        return _strongObj;
+    }
+}
+-(void *)valuePointer{
+    void *retPtr = NULL;
+    if (self.isPointer) {
+        retPtr = &_pointerValue;
+        return retPtr;
+    }
+    switch (self.typePair.type.type) {
+        case TypeUChar:{
+            retPtr = &_uCharValue;
+            break;
+        }
+        case TypeUInt:{
+            retPtr = &_uIntValue;
+            break;
+        }
+        case TypeUShort:{
+            retPtr = &_uShortValue;
+            break;
+        }
+        case TypeULong:{
+            retPtr = &_uLongValue;
+            break;
+        }
+        case TypeULongLong:{
+            retPtr = &_uLongLongValue;
+            break;
+        }
+        case TypeBOOL:{
+            retPtr = &_boolValue;
+            break;
+        }
+        case TypeChar:{
+            retPtr = &_charValue;
+            break;
+        }
+        case TypeShort:{
+            retPtr = &_shortValue;
+            break;
+        }
+        case TypeInt:{
+            retPtr = &_intValue;
+            break;
+        }
+        case TypeLong:{
+            retPtr = &_longValue;
+            break;
+        }
+        case TypeLongLong:{
+            retPtr = &_longLongValue;
+            break;
+        }
+        case TypeFloat:{
+            retPtr = &_floatValue;
+            break;
+        }
+        case TypeDouble:{
+            retPtr = &_doubleValue;
+            break;
+        }
+        case TypeSEL:{
+            retPtr = &_selValue;
+            break;
+        }
+        case TypeClass:{
+            retPtr = &_classValue;
+            break;
+        }
+        case TypeObject:
+        case TypeBlock:
+        case TypeId:{
+            if (self.modifier & MFDeclarationModifierWeak) {
+                retPtr = &_weakObj;
+            }else{
+                retPtr = &_strongObj;
+            }
+            break;
+        }
+        case TypeVoid:
+            retPtr = &_pointerValue; break;
+//        case TypeUnKnown:
+//        case TypeEnum:
+//        case TypeUnion:
+//        case TypeStruct:
+        default:
+            break;
+    }
+    
+    return retPtr;
+}
+- (void)dealloc{
+    
+}
 
 @end
 

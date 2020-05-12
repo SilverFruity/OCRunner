@@ -225,30 +225,58 @@ void registerClassSetter(id self1, SEL _cmd1, id newValue) { //移除set
 @implementation ORAssignExpression (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *rightValue = [self.expression execute:scope];
+    MFValue *leftValue = [self.value execute:scope];
+    ValueDefineWithMFValue(left, leftValue);
+    ValueDefineWithMFValue(right, rightValue);
+    ValueDefineWithSuffix(Result);
+    TypeKind type = rightValue.typePair.type.type;
     switch (self.assignType) {
         case AssignOperatorAssign:
             break;
-        case AssignOperatorAssignAnd:
+        case AssignOperatorAssignAnd:{
+            BinaryExecuteInt(left, &, right, type, Result);
             break;
-        case AssignOperatorAssignOr:
+        }
+        case AssignOperatorAssignOr:{
+            BinaryExecuteInt(left, |, right, type, Result);
             break;
-        case AssignOperatorAssignXor:
+        }
+        case AssignOperatorAssignXor:{
+            BinaryExecuteInt(left, ^, right, type, Result);
             break;
-        case AssignOperatorAssignAdd:
+        }
+        case AssignOperatorAssignAdd:{
+            BinaryExecuteInt(left, +, right, type, Result);
+            BinaryExecuteFloat(left, +, right, type, Result);
             break;
-        case AssignOperatorAssignSub:
+        }
+        case AssignOperatorAssignSub:{
+            BinaryExecuteInt(left, -, right, type, Result);
+            BinaryExecuteFloat(left, -, right, type, Result);
             break;
-        case AssignOperatorAssignDiv:
+        }
+        case AssignOperatorAssignDiv:{
+            BinaryExecuteInt(left, /, right, type, Result);
+            BinaryExecuteFloat(left, /, right, type, Result);
             break;
-        case AssignOperatorAssignMuti:
+        }
+        case AssignOperatorAssignMuti:{
+            BinaryExecuteInt(left, *, right, type, Result);
+            BinaryExecuteFloat(left, *, right, type, Result);
             break;
-        case AssignOperatorAssignMod:
+        }
+        case AssignOperatorAssignMod:{
+            BinaryExecuteInt(left, %, right, type, Result);
             break;
-        case AssignOperatorAssignShiftLeft:
+        }
+        case AssignOperatorAssignShiftLeft:{
+            BinaryExecuteInt(left, <<, right, type, Result);
             break;
-        case AssignOperatorAssignShiftRight:
+        }
+        case AssignOperatorAssignShiftRight:{
+            BinaryExecuteInt(left, >>, right, type, Result);
             break;
-            
+        }
         default:
             break;
     }
@@ -266,31 +294,181 @@ void registerClassSetter(id self1, SEL _cmd1, id newValue) { //移除set
 }@end
 @implementation ORUnaryExpression (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
-    MFValue *value = [MFValue new];
-    MFValue *juddgeValue = [self.value execute:scope];
-    ValueDefineWithMFValue(0, juddgeValue);
+    MFValue *currentValue = [self.value execute:scope];
+    ValueDefineWithMFValue(0, currentValue);
+    ValueDefineWithSuffix(Result);
+    MFValue *resultValue = [MFValue new];
+    resultValue.typePair = currentValue.typePair;
+    //FIXME: 取值问题
     switch (self.operatorType) {
-        case UnaryOperatorNot:{
-            UnaryExecute(!, 0 , juddgeValue);
-            value.pointerValue = unaryResultValuePointer0;
+        case UnaryOperatorIncrementSuffix:{
+            SuffixUnaryExecuteInt(++, 0 , currentValue, Result);
+            SuffixUnaryExecuteFloat(++, 0, currentValue, Result);
             break;
         }
-            
-            
-            
+        case UnaryOperatorDecrementSuffix:{
+            SuffixUnaryExecuteInt(--, 0 , currentValue, Result);
+            SuffixUnaryExecuteFloat(--, 0, currentValue, Result);
+            break;
+        }
+        case UnaryOperatorIncrementPrefix:{
+            PrefixUnaryExecuteInt(++, 0 , currentValue, Result);
+            PrefixUnaryExecuteFloat(++, 0, currentValue, Result);
+            break;
+        }
+        case UnaryOperatorDecrementPrefix:{
+            PrefixUnaryExecuteInt(--, 0 , currentValue, Result);
+            PrefixUnaryExecuteFloat(--, 0, currentValue, Result);
+            break;
+        }
+        case UnaryOperatorNot:{
+            return [MFValue valueInstanceWithBOOL:!currentValue.isSubtantial];
+        }
+        case UnaryOperatorSizeOf:{
+            UnaryExecute(size_t, sizeof, 0 , currentValue);
+            return [MFValue valueInstanceWithLongLong:unaryResultValue0];
+        }
+        case UnaryOperatorBiteNot:{
+            PrefixUnaryExecuteInt(~, 0, currentValue, Result);
+            break;
+        }
+        case UnaryOperatorNegative:{
+            PrefixUnaryExecuteInt(-, 0 , currentValue, Result);
+            PrefixUnaryExecuteFloat(-, 0, currentValue, Result);;
+            break;
+        }
+        case UnaryOperatorAdressPoint:{
+            resultValue.pointerValue = [currentValue valuePointer];
+            resultValue.typePair.var.ptCount += 1;
+            return resultValue;
+        }
+        case UnaryOperatorAdressValue:{
+            if (currentValue.typePair.var.ptCount > 1) {
+                resultValue.pointerValue = *(void **)currentValue.pointerValue;
+            }else{
+                GetPointerValue(0, currentValue);
+                MFValueSetValue(resultValue, 0);
+            }
+            resultValue.typePair.var.ptCount -= 1;
+            return resultValue;
+        }
         default:
             break;
     }
-    return value;
+    MFValueSetValue(resultValue, Result);
+    return resultValue;
 }@end
 @implementation ORBinaryExpression(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
-    return nil;
+    MFValue *rightValue = [self.right execute:scope];
+    MFValue *leftValue = [self.left execute:scope];
+    ValueDefineWithMFValue(left, leftValue);
+    ValueDefineWithMFValue(right, rightValue);
+    ValueDefineWithSuffix(Result);
+    TypeKind type = rightValue.typePair.type.type;
+    MFValue *resultValue = [MFValue new];
+    [resultValue setValueType:type];
+    switch (self.operatorType) {
+        case BinaryOperatorAdd:{
+            BinaryExecuteInt(left, +, right, type, Result);
+            BinaryExecuteFloat(left, +, right, type, Result);
+            break;
+        }
+        case BinaryOperatorSub:{
+            BinaryExecuteInt(left, -, right, type, Result);
+            BinaryExecuteFloat(left, -, right, type, Result);
+            break;
+        }
+        case BinaryOperatorDiv:{
+            BinaryExecuteInt(left, /, right, type, Result);
+            BinaryExecuteFloat(left, /, right, type, Result);
+            break;
+        }
+        case BinaryOperatorMulti:{
+            BinaryExecuteInt(left, *, right, type, Result);
+            BinaryExecuteFloat(left, *, right, type, Result);
+            break;
+        }
+        case BinaryOperatorMod:{
+            BinaryExecuteInt(left, %, right, type, Result);
+            break;
+        }
+        case BinaryOperatorShiftLeft:{
+            BinaryExecuteInt(left, <<, right, type, Result);
+            break;
+        }
+        case BinaryOperatorShiftRight:{
+            BinaryExecuteInt(left, >>, right, type, Result);
+            break;
+        }
+        case BinaryOperatorAnd:{
+            BinaryExecuteInt(left, &, right, type, Result);
+            break;
+        }
+        case BinaryOperatorOr:{
+            BinaryExecuteInt(left, |, right, type, Result);
+            break;
+        }
+        case BinaryOperatorXor:{
+            BinaryExecuteInt(left, ^, right, type, Result);
+            break;
+        }
+        case BinaryOperatorLT:{
+            LogicBinaryOperatorExecute(left, <, right, leftValue);
+            return [MFValue valueInstanceWithBOOL:logicResultValue];
+        }
+        case BinaryOperatorGT:{
+            LogicBinaryOperatorExecute(left, >, right, leftValue);
+            return [MFValue valueInstanceWithBOOL:logicResultValue];
+        }
+        case BinaryOperatorLE:{
+            LogicBinaryOperatorExecute(left, <=, right, leftValue);
+            return [MFValue valueInstanceWithBOOL:logicResultValue];
+        }
+        case BinaryOperatorGE:{
+            LogicBinaryOperatorExecute(left, >=, right, leftValue);
+            return [MFValue valueInstanceWithBOOL:logicResultValue];
+        }
+        case BinaryOperatorNotEqual:{
+            LogicBinaryOperatorExecute(left, !=, right, leftValue);
+            return [MFValue valueInstanceWithBOOL:logicResultValue];
+        }
+        case BinaryOperatorEqual:{
+            LogicBinaryOperatorExecute(left, ==, right, leftValue);
+            return [MFValue valueInstanceWithBOOL:logicResultValue];
+        }
+        case BinaryOperatorLOGIC_AND:{
+            LogicBinaryOperatorExecute(left, &&, right, leftValue);
+            return [MFValue valueInstanceWithBOOL:logicResultValue];
+        }
+        case BinaryOperatorLOGIC_OR:{
+            LogicBinaryOperatorExecute(left, ||, right, leftValue);
+            return [MFValue valueInstanceWithBOOL:logicResultValue];
+        }
+        default:
+            break;
+    }
+    MFValueSetValue(resultValue, Result);
+    return resultValue;
 }@end
 @implementation ORTernaryExpression(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
-    return nil;
-}@end
+    MFValue *condition = [self.expression execute:scope];
+    if (self.values.count == 1) { // condition ?: value
+        if (condition.isSubtantial) {
+            return condition;
+        }else{
+            return [self.values.lastObject execute:scope];
+        }
+    }else{ // condition ? value1 : value2
+        if (condition.isSubtantial) {
+            return [self.values.firstObject execute:scope];
+        }else{
+            return [self.values.lastObject execute:scope];
+        }
+    }
+}
+@end
 @implementation ORStatement (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     return [MFValue normalEnd];;

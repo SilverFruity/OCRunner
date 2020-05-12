@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 // MARK: - Base
 typedef enum{
+    TypeVoid = 0x00,
     TypeUChar = 0x01,
     TypeUInt,
     TypeUShort,
@@ -26,7 +27,6 @@ typedef enum{
     TypeFloat,
     TypeDouble,
     TypeBaseMask = 0x0F,
-    TypeVoid,
     TypeUnion = 0x10,
     TypeStruct = 0x20,
     TypeSEL = 0x30,
