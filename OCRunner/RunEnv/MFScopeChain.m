@@ -15,13 +15,11 @@
 #import "util.h"
 #import "RunnerClasses+Execute.h"
 @interface MFScopeChain()
-@property (strong, nonatomic) NSMutableDictionary<NSString *,MFValue *> *vars;
 @property (strong,nonatomic)NSLock *lock;
 @end
-
+static MFScopeChain *instance = nil;
 @implementation MFScopeChain
 + (instancetype)topScope{
-    static MFScopeChain *instance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         instance = [MFScopeChain new];
@@ -31,6 +29,7 @@
 + (instancetype)scopeChainWithNext:(MFScopeChain *)next{
 	MFScopeChain *scope = [MFScopeChain new];
 	scope.next = next;
+    scope.vars = [NSMutableDictionary dictionaryWithDictionary:next.vars];
 	return scope;
 }
 
@@ -44,7 +43,7 @@
 
 - (id)instance{
     MFScopeChain *scope = self;
-    while (![scope getValueWithIdentifier:@"self"]) {
+    while (scope && ![scope getValueWithIdentifier:@"self"]) {
         scope = scope.next;
     }
     return [scope getValueWithIdentifier:@"self"];;
@@ -100,7 +99,7 @@ const void *mf_propKey(NSString *propName) {
                 id associationValue = value;
                 const char *type = OCTypeEncodingForPair(propDef.var);
                 if (*type == '@') {
-//                    associationValue = [value objectValue];
+                    associationValue = [value objectValue];
                 }
                 MFPropertyModifier modifier = propDef.modifier;
                 if ((modifier & MFPropertyModifierMemMask) == MFPropertyModifierMemWeak) {
@@ -111,10 +110,10 @@ const void *mf_propKey(NSString *propName) {
             }else if((ivar = class_getInstanceVariable(object_getClass(pos.instance),identifier.UTF8String))){
                 const char *ivarEncoding = ivar_getTypeEncoding(ivar);
                 if (*ivarEncoding == '@') {
-//                    object_setIvar(pos.instance, ivar, [value c2objectValue]);
+                    object_setIvar(pos.instance, ivar, [value c2objectValue]);
                 }else{
                     void *ptr = (__bridge void *)(pos.instance) +  ivar_getOffset(ivar);
-//                    [value assignToCValuePointer:ptr typeEncoding:ivarEncoding];
+                    [value assignToCValuePointer:ptr typeEncoding:ivarEncoding];
                 }
                 return;
                 
@@ -131,7 +130,9 @@ const void *mf_propKey(NSString *propName) {
 }
 
 - (MFValue *)getValueWithIdentifier:(NSString *)identifier endScope:(MFScopeChain *)endScope{
-    for (MFScopeChain *pos = self; pos != endScope; pos = pos.next) {
+    MFScopeChain *pos = self;
+    // FIX: while self == endScope, will ignore self
+    do {
         if (pos.instance) {
             NSString *propName = [self propNameByIvarName:identifier];
             MFPropertyMapTable *table = [MFPropertyMapTable shareInstance];
@@ -152,6 +153,7 @@ const void *mf_propKey(NSString *propName) {
                         value = [MFValue valueInstanceWithObject:propValue];
                     }
                 }
+                pos = pos.next;
                 return value;
                 
             }else if((ivar = class_getInstanceVariable(object_getClass(pos.instance),identifier.UTF8String))){
@@ -164,17 +166,19 @@ const void *mf_propKey(NSString *propName) {
                     void *ptr = (__bridge void *)(pos.instance) +  ivar_getOffset(ivar);
                     value = [[MFValue alloc] initWithCValuePointer:ptr typeEncoding:ivarEncoding bridgeTransfer:NO];
                 }
+                pos = pos.next;
                 return value;
                 
             }
         }else{
             MFValue *value = [pos getValueWithIdentifier:identifier];
             if (value) {
+                pos = pos.next;
                 return value;
             }
-            
         }
-    }
+        pos = pos.next;
+    } while ((pos != endScope) && (self != endScope));
     return nil;
 }
 
@@ -200,6 +204,9 @@ const void *mf_propKey(NSString *propName) {
 //        [self.lock unlock];
 //    });
 }
-
+- (void)clear{
+    _vars = [NSMutableDictionary dictionary];
+    _lock = [[NSLock alloc] init];
+}
 @end
 

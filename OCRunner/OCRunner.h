@@ -15,5 +15,8 @@ FOUNDATION_EXPORT double OCRunnerVersionNumber;
 FOUNDATION_EXPORT const unsigned char OCRunnerVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <OCRunner/PublicHeader.h>
-
+#import <OCRunner/MFBlock.h>
+#import <OCRunner/MFValue.h>
+#import <OCRunner/MFScopeChain.h>
+#import <OCRunner/RunnerClasses+Execute.h>
 

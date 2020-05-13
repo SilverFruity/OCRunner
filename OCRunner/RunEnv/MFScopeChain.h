@@ -11,6 +11,7 @@
 @class MFValue;
 NS_ASSUME_NONNULL_BEGIN
 @interface MFScopeChain: NSObject
+@property (strong, nonatomic) NSMutableDictionary<NSString *,MFValue *> *vars;
 + (instancetype)topScope;
 @property (weak, nonatomic) id selfInstance;
 @property (strong, nonatomic) MFScopeChain *next;
@@ -22,6 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setValue:(MFValue *)value withIndentifier:(NSString *)identier;
 - (void)assignWithIdentifer:(NSString *)identifier value:(MFValue *)value;
 - (void)setMangoBlockVarNil;
+- (void)clear;
 @end
 NS_ASSUME_NONNULL_END
 

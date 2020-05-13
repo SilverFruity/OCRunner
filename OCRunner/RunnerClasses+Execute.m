@@ -13,6 +13,8 @@
 #import "MFPropertyMapTable.h"
 #import "MFVarDeclareChain.h"
 #import "MFBlock.h"
+#import "MFValue.h"
+
 static void *add_function(const char *funcReturnType, NSMutableArray <NSString *>*argTypes, void (*executeFunc)(ffi_cif*,void*,void**,void*), NSDictionary *userInfo){
     void *imp = NULL;
     ffi_cif *cif = malloc(sizeof(ffi_cif));//不可以free
@@ -147,7 +149,7 @@ void registerClassSetter(id self1, SEL _cmd1, id newValue) { //移除set
     Ivar ivar = class_getInstanceVariable([self1 class], strcat("_", key.UTF8String)); //basicsViewController里面有个_dictCustomerProperty属性
     object_setIvar(self1, ivar, newValue);
 }
-extern void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *fromScope, MFScopeChain *destScope);
+void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *fromScope, MFScopeChain *destScope);
 void copy_undef_vars(NSArray *exprOrStatements, MFVarDeclareChain *chain, MFScopeChain *fromScope, MFScopeChain *destScope){
     for (id exprOrStatement in exprOrStatements) {
         copy_undef_var(exprOrStatement, chain, fromScope, destScope);
@@ -161,7 +163,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     Class exprOrStatementClass = [exprOrStatement class];
     if (exprOrStatementClass == [ORValueExpression class]) {
         ORValueExpression *expr = (ORValueExpression *)exprOrStatement;
-        switch (expr.type) {
+        switch (expr.value_type) {
             case OCValueDictionary:{
                 for (NSArray *kv in expr.value) {
                     ORExpression *keyExp = kv.firstObject;
@@ -306,7 +308,12 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         
     }
 }
+@implementation ORCodeCheck(Execute)
+- (nullable MFValue *)execute:(MFScopeChain *)scope {
+    return nil;
+}
 
+@end
 @implementation ORFuncDeclare(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     NSMutableArray * parameters = [[MFStack argsStack] pop];
@@ -318,7 +325,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @end
 @implementation ORValueExpression (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
-    switch (self.type) {
+    switch (self.value_type) {
         case OCValueVariable:{
             return [scope getValueWithIdentifier:self.value];
         }
@@ -466,10 +473,40 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }
         return retValue;
     }
-    // 全局函数调用
-    if (self.caller.type == OCValueVariable) {
-        ORBlockImp *imp = [scope getValueWithIdentifier:self.caller.value].objectValue;
-        [imp execute:scope];
+    if (self.caller.value_type == OCValueVariable) {
+        MFValue *blockValue = [scope getValueWithIdentifier:self.caller.value];
+        if (blockValue.typePair.type.type == TypeBlock) {
+            const char *blockTypeEncoding = [MFBlock typeEncodingForBlock:blockValue.c2objectValue];
+            NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:blockTypeEncoding];
+            NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
+            [invocation setTarget:blockValue.objectValue];
+            NSUInteger numberOfArguments = [sig numberOfArguments];
+            if (numberOfArguments - 1 != self.expressions.count) {
+            //            mf_throw_error(expr.lineNumber, MFRuntimeErrorParameterListCountNoMatch, @"expect count: %zd, pass in cout:%zd",numberOfArguments - 1,expr.args.count);
+                return nil;
+            }
+            //占位..
+            for (NSUInteger i = 1; i < numberOfArguments; i++) {
+                void *ptr = malloc(sizeof(char *));
+                [invocation setArgument:ptr atIndex:i];
+                free(ptr);
+            }
+            [invocation invoke];
+            const char *retType = [sig methodReturnType];
+            retType = removeTypeEncodingPrefix((char *)retType);
+            MFValue *retValue;
+            if (*retType != 'v') {
+                void *retValuePtr = alloca(mf_size_with_encoding(retType));
+                [invocation getReturnValue:retValuePtr];
+                retValue = [[MFValue alloc] initWithCValuePointer:retValuePtr typeEncoding:retType bridgeTransfer:NO];
+            }else{
+                retValue = [MFValue voidValueInstance];
+            }
+            return retValue;
+        }else{
+            ORBlockImp *imp = [scope getValueWithIdentifier:self.caller.value].objectValue;
+            [imp execute:scope];
+        }
     }
     return nil;
 }
@@ -578,7 +615,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             break;
     }
     
-    switch (self.value.type) {
+    switch (self.value.value_type) {
         case OCValueSelf:{
             MFValue *resultValue = [resultExp execute:scope];
             [scope assignWithIdentifer:@"self" value:resultValue];
@@ -599,7 +636,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             NSString *first = [[setterName substringToIndex:1] uppercaseString];
             NSString *other = setterName.length > 1 ? [setterName substringFromIndex:1] : nil;
             setterName = [NSString stringWithFormat:@"set%@%@",first,other];
-            if (methodCall.caller.type == OCValueSuper) {
+            if (methodCall.caller.value_type == OCValueSuper) {
                 Class currentClass = objc_getClass(((NSString *)methodCall.caller.value).UTF8String);
                 Class superClass = class_getSuperclass(currentClass);
                 //FIXME: set super property
@@ -630,7 +667,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     if (self.expression) {
         MFValue *value = [self.expression execute:scope];
+        if (!(value.typePair.type.type == TypeBlock)) {
+            value.typePair = self.pair;
+        }
         [scope setValue:value withIndentifier:self.pair.var.varname];
+        return value;
     }else{
         [scope setValue:[MFValue defaultValueWithTypeEncoding:OCTypeEncodingForPair(self.pair)] withIndentifier:self.pair.var.varname];
     }
@@ -793,7 +834,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }
     MFValueSetValue(resultValue, Result);
     return resultValue;
-}@end
+}
+@end
 @implementation ORTernaryExpression(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *condition = [self.expression execute:scope];
@@ -974,7 +1016,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         return value;
     }
     return nil;
-}@end
+}
+@end
 @implementation ORBreakStatement (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *value = [MFValue voidValueInstance];
@@ -1135,11 +1178,12 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }
     return nil;
 }
-
 @end
 
+// Document: https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
 char *const OCTypeEncodingForPair(ORTypeVarPair * pair){
     char encoding[20];
+    memset(encoding, 0, 20);
 #define append(str) strcat(encoding,str)
     NSInteger pointCount = pair.var.ptCount;
     TypeKind type = pair.type.type;
@@ -1160,7 +1204,7 @@ char *const OCTypeEncodingForPair(ORTypeVarPair * pair){
     }
     
 #define CaseTypeEncoding(type,code)\
-case ##type:\
+case type:\
 append(code); break;
 
     switch (type) {
@@ -1190,7 +1234,6 @@ append(code); break;
         CaseTypeEncoding(TypeClass, "#")
         CaseTypeEncoding(TypeSEL, ":")
         CaseTypeEncoding(TypeBlock, "@?")
-        CaseTypeEncoding(TypeFunction, "?")
         default:
             break;
     }

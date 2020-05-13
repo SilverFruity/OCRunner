@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "MFDeclarationModifier.h"
 #import "RunnerClasses.h"
+// FIXME: 转码问题，int->char 等等， 设置一个基础类型，同时设置所有类型。导致 testBlockCopyValue 测试不能通过。
 #define ValueDefineWithSuffix(suffix)\
 unsigned char uCharValue##suffix = 0;\
 unsigned short uShortValue##suffix = 0;\
@@ -451,9 +452,9 @@ do{\
 NS_ASSUME_NONNULL_BEGIN
 typedef NS_ENUM(NSInteger, MFStatementResultType) {
     //no return, continue, break
-    MFStatementResultTypeNormal = 0x01,
-    MFStatementResultTypeBreak = 0x02,
-    MFStatementResultTypeContinue = 0x03,
+    MFStatementResultTypeNormal = 0x00,
+    MFStatementResultTypeBreak = 0x01,
+    MFStatementResultTypeContinue = 0x02,
     //return value;
     MFStatementResultTypeReturnValue = 0x10,
     //return;

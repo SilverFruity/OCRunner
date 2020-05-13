@@ -77,7 +77,55 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 			return NO;
 	}
 }
-
+#define MFConvertValue(value)\
+_charValue = (char) value;\
+_shortValue = (short) value;\
+_intValue = (int) value;\
+_longValue = (long) value;\
+_longLongValue = (long long) value;\
+_uCharValue = (unsigned char) value;\
+_uShortValue = (unsigned short) value;\
+_uIntValue = (unsigned int) value;\
+_uLongValue = (unsigned long) value;\
+_uLongLongValue = (unsigned long long) value;\
+_floatValue = (float) value;\
+_doubleValue = (double) value;
+- (void)setUCharValue:(unsigned char)uCharValue{
+    MFConvertValue(uCharValue)
+}
+- (void)setUShortValue:(unsigned short)uShortValue{
+    MFConvertValue(uShortValue)
+}
+- (void)setUIntValue:(unsigned int)uIntValue{
+    MFConvertValue(uIntValue)
+}
+- (void)setULongValue:(unsigned long)uLongValue{
+    MFConvertValue(uLongValue)
+}
+- (void)setULongLongValue:(unsigned long long)uLongLongValue{
+    MFConvertValue(uLongLongValue)
+}
+- (void)setCharValue:(char)charValue{
+    MFConvertValue(charValue)
+}
+- (void)setShortValue:(short)shortValue{
+    MFConvertValue(shortValue)
+}
+- (void)setIntValue:(int)intValue{
+    MFConvertValue(intValue)
+}
+- (void)setLongValue:(long)longValue{
+    MFConvertValue(longValue)
+}
+- (void)setLongLongValue:(long long)longLongValue{
+    MFConvertValue(longLongValue)
+}
+- (void)setFloatValue:(float)floatValue{
+    MFConvertValue(floatValue)
+}
+- (void)setDoubleValue:(double)doubleValue{
+    MFConvertValue(doubleValue)
+}
 
 - (BOOL)isBaseValue{
 	return ![self isObject];

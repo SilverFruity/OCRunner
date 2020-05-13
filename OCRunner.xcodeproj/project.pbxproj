@@ -7,22 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		047EF859246BF68D0071F9D3 /* CRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047EF858246BF68D0071F9D3 /* CRunnerTests.swift */; };
-		04A861292466B3DD00F26998 /* MFBlock.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A861282466B3DD00F26998 /* MFBlock.h */; };
+		047EF859246BF68D0071F9D3 /* OCRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */; };
+		04A861292466B3DD00F26998 /* MFBlock.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A861282466B3DD00F26998 /* MFBlock.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EE38F997246C3C2A00E7C37B /* RunnerClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98998724658DB700ACF2C1 /* RunnerClasses.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE98997524658DA600ACF2C1 /* OCRunner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE98996B24658DA600ACF2C1 /* OCRunner.framework */; };
 		EE98997C24658DA600ACF2C1 /* OCRunner.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98996E24658DA600ACF2C1 /* OCRunner.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		EE98998924658DB800ACF2C1 /* RunnerClasses.m in Sources */ = {isa = PBXBuildFile; fileRef = EE98998524658DB700ACF2C1 /* RunnerClasses.m */; };
 		EE98998A24658DB800ACF2C1 /* RunnerClasses+Execute.m in Sources */ = {isa = PBXBuildFile; fileRef = EE98998624658DB700ACF2C1 /* RunnerClasses+Execute.m */; };
-		EE98998B24658DB800ACF2C1 /* RunnerClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98998724658DB700ACF2C1 /* RunnerClasses.h */; };
-		EE98998C24658DB800ACF2C1 /* RunnerClasses+Execute.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98998824658DB800ACF2C1 /* RunnerClasses+Execute.h */; };
+		EE98998C24658DB800ACF2C1 /* RunnerClasses+Execute.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98998824658DB800ACF2C1 /* RunnerClasses+Execute.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE9899A424658F8900ACF2C1 /* MFPropertyMapTable.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98998E24658F8900ACF2C1 /* MFPropertyMapTable.h */; };
 		EE9899A524658F8900ACF2C1 /* MFStaticVarTable.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98998F24658F8900ACF2C1 /* MFStaticVarTable.h */; };
 		EE9899A624658F8900ACF2C1 /* MFWeakPropertyBox.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98999024658F8900ACF2C1 /* MFWeakPropertyBox.h */; };
 		EE9899A724658F8900ACF2C1 /* runenv.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98999124658F8900ACF2C1 /* runenv.h */; };
 		EE9899A824658F8900ACF2C1 /* MFBlock.m in Sources */ = {isa = PBXBuildFile; fileRef = EE98999224658F8900ACF2C1 /* MFBlock.m */; };
 		EE9899A924658F8900ACF2C1 /* MFVarDeclareChain.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98999324658F8900ACF2C1 /* MFVarDeclareChain.h */; };
-		EE9899AC24658F8900ACF2C1 /* MFValue.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98999624658F8900ACF2C1 /* MFValue.h */; };
-		EE9899AD24658F8900ACF2C1 /* MFScopeChain.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98999724658F8900ACF2C1 /* MFScopeChain.h */; };
+		EE9899AC24658F8900ACF2C1 /* MFValue.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98999624658F8900ACF2C1 /* MFValue.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EE9899AD24658F8900ACF2C1 /* MFScopeChain.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98999724658F8900ACF2C1 /* MFScopeChain.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE9899AE24658F8900ACF2C1 /* MFMethodMapTable.m in Sources */ = {isa = PBXBuildFile; fileRef = EE98999824658F8900ACF2C1 /* MFMethodMapTable.m */; };
 		EE9899AF24658F8900ACF2C1 /* MFWeakPropertyBox.m in Sources */ = {isa = PBXBuildFile; fileRef = EE98999924658F8900ACF2C1 /* MFWeakPropertyBox.m */; };
 		EE9899B024658F8900ACF2C1 /* MFStaticVarTable.m in Sources */ = {isa = PBXBuildFile; fileRef = EE98999A24658F8900ACF2C1 /* MFStaticVarTable.m */; };
@@ -31,7 +30,7 @@
 		EE9899B624658F8900ACF2C1 /* MFMethodMapTable.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899A024658F8900ACF2C1 /* MFMethodMapTable.h */; };
 		EE9899B724658F8900ACF2C1 /* MFScopeChain.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899A124658F8900ACF2C1 /* MFScopeChain.m */; };
 		EE9899B824658F8900ACF2C1 /* MFValue.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899A224658F8900ACF2C1 /* MFValue.m */; };
-		EE9899BB2465915B00ACF2C1 /* MFDeclarationModifier.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899BA2465915B00ACF2C1 /* MFDeclarationModifier.h */; };
+		EE9899BB2465915B00ACF2C1 /* MFDeclarationModifier.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899BA2465915B00ACF2C1 /* MFDeclarationModifier.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE9899C32465923900ACF2C1 /* MFRSA.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899BD2465923800ACF2C1 /* MFRSA.h */; };
 		EE9899C42465923900ACF2C1 /* util.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899BE2465923800ACF2C1 /* util.m */; };
 		EE9899C52465923900ACF2C1 /* MFRSA.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899BF2465923800ACF2C1 /* MFRSA.m */; };
@@ -49,30 +48,37 @@
 		EE9899DD2465924C00ACF2C1 /* ffi.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899D22465924C00ACF2C1 /* ffi.h */; };
 		EE9899DE2465924C00ACF2C1 /* ffi_arm64.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899D32465924C00ACF2C1 /* ffi_arm64.h */; };
 		EEA2AC82246855F100B08407 /* MFStack.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA2AC80246855F100B08407 /* MFStack.m */; };
-		EEA2AC83246855F100B08407 /* MFStack.h in Headers */ = {isa = PBXBuildFile; fileRef = EEA2AC81246855F100B08407 /* MFStack.h */; };
+		EEA2AC83246855F100B08407 /* MFStack.h in Headers */ = {isa = PBXBuildFile; fileRef = EEA2AC81246855F100B08407 /* MFStack.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		047EF873246BF7CA0071F9D3 /* PBXContainerItemProxy */ = {
+		EE38F9D4246C5F0300E7C37B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 047EF86D246BF7CA0071F9D3 /* oc2mango.xcodeproj */;
+			containerPortal = EE38F9CE246C5F0300E7C37B /* oc2mango.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = EE6E6CCF225E488000616C7E;
 			remoteInfo = oc2mango;
 		};
-		047EF875246BF7CA0071F9D3 /* PBXContainerItemProxy */ = {
+		EE38F9D6246C5F0300E7C37B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 047EF86D246BF7CA0071F9D3 /* oc2mango.xcodeproj */;
+			containerPortal = EE38F9CE246C5F0300E7C37B /* oc2mango.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = EED67A6E2270AE0E0015AC02;
 			remoteInfo = oc2mangoLib;
 		};
-		047EF877246BF7CA0071F9D3 /* PBXContainerItemProxy */ = {
+		EE38F9D8246C5F0300E7C37B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 047EF86D246BF7CA0071F9D3 /* oc2mango.xcodeproj */;
+			containerPortal = EE38F9CE246C5F0300E7C37B /* oc2mango.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = EED67A762270AE0F0015AC02;
 			remoteInfo = oc2mangoLibTests;
+		};
+		EE38F9DE246C5F5500E7C37B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EE38F9CE246C5F0300E7C37B /* oc2mango.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = EED67A6D2270AE0E0015AC02;
+			remoteInfo = oc2mangoLib;
 		};
 		EE98997624658DA600ACF2C1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -85,15 +91,14 @@
 
 /* Begin PBXFileReference section */
 		047EF857246BF68D0071F9D3 /* OCRunnerTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OCRunnerTests-Bridging-Header.h"; sourceTree = "<group>"; };
-		047EF858246BF68D0071F9D3 /* CRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CRunnerTests.swift; sourceTree = "<group>"; };
-		047EF86D246BF7CA0071F9D3 /* oc2mango.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = oc2mango.xcodeproj; path = ../../oc2mongo/oc2mango.xcodeproj; sourceTree = "<group>"; };
+		047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRunnerTests.swift; sourceTree = "<group>"; };
 		04A861282466B3DD00F26998 /* MFBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFBlock.h; sourceTree = "<group>"; };
+		EE38F9CE246C5F0300E7C37B /* oc2mango.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = oc2mango.xcodeproj; path = ../../oc2mongo/oc2mango.xcodeproj; sourceTree = "<group>"; };
 		EE98996B24658DA600ACF2C1 /* OCRunner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OCRunner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE98996E24658DA600ACF2C1 /* OCRunner.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OCRunner.h; sourceTree = "<group>"; };
 		EE98996F24658DA600ACF2C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EE98997424658DA600ACF2C1 /* OCRunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OCRunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE98997B24658DA600ACF2C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		EE98998524658DB700ACF2C1 /* RunnerClasses.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RunnerClasses.m; sourceTree = "<group>"; };
 		EE98998624658DB700ACF2C1 /* RunnerClasses+Execute.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RunnerClasses+Execute.m"; sourceTree = "<group>"; };
 		EE98998724658DB700ACF2C1 /* RunnerClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RunnerClasses.h; sourceTree = "<group>"; };
 		EE98998824658DB800ACF2C1 /* RunnerClasses+Execute.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RunnerClasses+Execute.h"; sourceTree = "<group>"; };
@@ -155,12 +160,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		047EF86E246BF7CA0071F9D3 /* Products */ = {
+		EE38F9B7246C5E9500E7C37B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				047EF874246BF7CA0071F9D3 /* oc2mango */,
-				047EF876246BF7CA0071F9D3 /* oc2mangoLib.framework */,
-				047EF878246BF7CA0071F9D3 /* oc2mangoLibTests.xctest */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		EE38F9CF246C5F0300E7C37B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EE38F9D5246C5F0300E7C37B /* oc2mango */,
+				EE38F9D7246C5F0300E7C37B /* oc2mangoLib.framework */,
+				EE38F9D9246C5F0300E7C37B /* oc2mangoLibTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -171,6 +183,7 @@
 				EE98996D24658DA600ACF2C1 /* OCRunner */,
 				EE98997824658DA600ACF2C1 /* OCRunnerTests */,
 				EE98996C24658DA600ACF2C1 /* Products */,
+				EE38F9B7246C5E9500E7C37B /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -186,8 +199,8 @@
 		EE98996D24658DA600ACF2C1 /* OCRunner */ = {
 			isa = PBXGroup;
 			children = (
+				EE38F9CE246C5F0300E7C37B /* oc2mango.xcodeproj */,
 				EE98998724658DB700ACF2C1 /* RunnerClasses.h */,
-				EE98998524658DB700ACF2C1 /* RunnerClasses.m */,
 				EE98998824658DB800ACF2C1 /* RunnerClasses+Execute.h */,
 				EE98998624658DB700ACF2C1 /* RunnerClasses+Execute.m */,
 				EE98998D24658F8900ACF2C1 /* RunEnv */,
@@ -203,9 +216,8 @@
 		EE98997824658DA600ACF2C1 /* OCRunnerTests */ = {
 			isa = PBXGroup;
 			children = (
-				047EF86D246BF7CA0071F9D3 /* oc2mango.xcodeproj */,
 				047EF857246BF68D0071F9D3 /* OCRunnerTests-Bridging-Header.h */,
-				047EF858246BF68D0071F9D3 /* CRunnerTests.swift */,
+				047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */,
 				EE98997B24658DA600ACF2C1 /* Info.plist */,
 			);
 			path = OCRunnerTests;
@@ -214,12 +226,8 @@
 		EE98998D24658F8900ACF2C1 /* RunEnv */ = {
 			isa = PBXGroup;
 			children = (
-				EE98999624658F8900ACF2C1 /* MFValue.h */,
-				EE9899A224658F8900ACF2C1 /* MFValue.m */,
 				04A861282466B3DD00F26998 /* MFBlock.h */,
 				EE98999224658F8900ACF2C1 /* MFBlock.m */,
-				EEA2AC81246855F100B08407 /* MFStack.h */,
-				EEA2AC80246855F100B08407 /* MFStack.m */,
 				EE9899BA2465915B00ACF2C1 /* MFDeclarationModifier.h */,
 				EE9899A024658F8900ACF2C1 /* MFMethodMapTable.h */,
 				EE98999824658F8900ACF2C1 /* MFMethodMapTable.m */,
@@ -227,8 +235,12 @@
 				EE98999B24658F8900ACF2C1 /* MFPropertyMapTable.m */,
 				EE98999724658F8900ACF2C1 /* MFScopeChain.h */,
 				EE9899A124658F8900ACF2C1 /* MFScopeChain.m */,
+				EEA2AC81246855F100B08407 /* MFStack.h */,
+				EEA2AC80246855F100B08407 /* MFStack.m */,
 				EE98998F24658F8900ACF2C1 /* MFStaticVarTable.h */,
 				EE98999A24658F8900ACF2C1 /* MFStaticVarTable.m */,
+				EE98999624658F8900ACF2C1 /* MFValue.h */,
+				EE9899A224658F8900ACF2C1 /* MFValue.m */,
 				EE98999324658F8900ACF2C1 /* MFVarDeclareChain.h */,
 				EE98999D24658F8900ACF2C1 /* MFVarDeclareChain.m */,
 				EE98999024658F8900ACF2C1 /* MFWeakPropertyBox.h */,
@@ -293,12 +305,12 @@
 				EE9899D72465924C00ACF2C1 /* ffi_i386.h in Headers */,
 				EE9899B624658F8900ACF2C1 /* MFMethodMapTable.h in Headers */,
 				EE9899D42465924C00ACF2C1 /* ffitarget_arm64.h in Headers */,
+				EE38F997246C3C2A00E7C37B /* RunnerClasses.h in Headers */,
 				04A861292466B3DD00F26998 /* MFBlock.h in Headers */,
 				EE9899DB2465924C00ACF2C1 /* ffitarget_i386.h in Headers */,
 				EE9899D52465924C00ACF2C1 /* ffitarget.h in Headers */,
 				EE9899D92465924C00ACF2C1 /* ffi_x86_64.h in Headers */,
 				EE9899BB2465915B00ACF2C1 /* MFDeclarationModifier.h in Headers */,
-				EE98998B24658DB800ACF2C1 /* RunnerClasses.h in Headers */,
 				EE9899AD24658F8900ACF2C1 /* MFScopeChain.h in Headers */,
 				EE9899C62465923900ACF2C1 /* util.h in Headers */,
 				EE98997C24658DA600ACF2C1 /* OCRunner.h in Headers */,
@@ -326,6 +338,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				EE38F9DF246C5F5500E7C37B /* PBXTargetDependency */,
 			);
 			name = OCRunner;
 			productName = OCRunner;
@@ -382,8 +395,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 047EF86E246BF7CA0071F9D3 /* Products */;
-					ProjectRef = 047EF86D246BF7CA0071F9D3 /* oc2mango.xcodeproj */;
+					ProductGroup = EE38F9CF246C5F0300E7C37B /* Products */;
+					ProjectRef = EE38F9CE246C5F0300E7C37B /* oc2mango.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -395,25 +408,25 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		047EF874246BF7CA0071F9D3 /* oc2mango */ = {
+		EE38F9D5246C5F0300E7C37B /* oc2mango */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
 			path = oc2mango;
-			remoteRef = 047EF873246BF7CA0071F9D3 /* PBXContainerItemProxy */;
+			remoteRef = EE38F9D4246C5F0300E7C37B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		047EF876246BF7CA0071F9D3 /* oc2mangoLib.framework */ = {
+		EE38F9D7246C5F0300E7C37B /* oc2mangoLib.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = oc2mangoLib.framework;
-			remoteRef = 047EF875246BF7CA0071F9D3 /* PBXContainerItemProxy */;
+			remoteRef = EE38F9D6246C5F0300E7C37B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		047EF878246BF7CA0071F9D3 /* oc2mangoLibTests.xctest */ = {
+		EE38F9D9246C5F0300E7C37B /* oc2mangoLibTests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = oc2mangoLibTests.xctest;
-			remoteRef = 047EF877246BF7CA0071F9D3 /* PBXContainerItemProxy */;
+			remoteRef = EE38F9D8246C5F0300E7C37B /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -441,7 +454,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				EE9899C52465923900ACF2C1 /* MFRSA.m in Sources */,
-				EE98998924658DB800ACF2C1 /* RunnerClasses.m in Sources */,
 				EE9899B024658F8900ACF2C1 /* MFStaticVarTable.m in Sources */,
 				EE9899B724658F8900ACF2C1 /* MFScopeChain.m in Sources */,
 				EE98998A24658DB800ACF2C1 /* RunnerClasses+Execute.m in Sources */,
@@ -460,13 +472,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				047EF859246BF68D0071F9D3 /* CRunnerTests.swift in Sources */,
+				047EF859246BF68D0071F9D3 /* OCRunnerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		EE38F9DF246C5F5500E7C37B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = oc2mangoLib;
+			targetProxy = EE38F9DE246C5F5500E7C37B /* PBXContainerItemProxy */;
+		};
 		EE98997724658DA600ACF2C1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = EE98996A24658DA600ACF2C1 /* OCRunner */;

@@ -7,13 +7,23 @@
 //
 
 #import "RunnerClasses.h"
-
-// Document: https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
 @implementation ORCodeCheck
 @end
 @implementation ORTypeSpecial
++ (instancetype)specialWithType:(TypeKind)type name:(NSString *)name{
+    ORTypeSpecial *s = [ORTypeSpecial new];
+    s.type = type;
+    s.name = name;
+    return s;
+}
 @end
 @implementation ORVariable
++ (instancetype)copyFromVar:(ORVariable *)var{
+    ORVariable *new = [[self class] new];
+    new.ptCount = var.ptCount;
+    new.varname = var.varname;
+    return new;
+}
 @end
 @implementation ORTypeVarPair
 @end
@@ -36,6 +46,22 @@
 @implementation ORCFuncCall
 @end
 @implementation ORBlockImp
+- (instancetype)init
+{
+    self = [super init];
+    self.statements = [NSMutableArray array];
+    return self;
+}
+- (void)addStatements:(id)statements{
+    if ([statements isKindOfClass:[NSArray class]]) {
+        [self.statements addObjectsFromArray:statements];
+    }else{
+        [self.statements addObject:statements];
+    }
+}
+- (void)copyFromImp:(ORBlockImp *)imp{
+    self.statements = imp.statements;
+}
 @end
 @implementation ORSubscriptExpression
 @end
@@ -48,6 +74,12 @@
 @implementation ORBinaryExpression
 @end
 @implementation ORTernaryExpression
+- (instancetype)init
+{
+    self = [super init];
+    self.values = [NSMutableArray array];
+    return self;
+}
 @end
 @implementation ORStatement
 @end
@@ -60,6 +92,12 @@
 @implementation ORCaseStatement
 @end
 @implementation ORSwitchStatement
+- (instancetype)init
+{
+    self = [super init];
+    self.cases = [NSMutableArray array];
+    return self;
+}
 @end
 @implementation ORForStatement
 @end

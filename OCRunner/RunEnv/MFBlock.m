@@ -10,8 +10,7 @@
 #import "ffi.h"
 #import "util.h"
 #import "RunnerClasses+Execute.h"
-
-
+#import "MFValue.h"
 
 void copy_helper(struct MFSimulateBlock *dst, struct MFSimulateBlock *src)
 {
@@ -27,10 +26,9 @@ void dispose_helper(struct MFSimulateBlock *src)
 
 static void blockInter(ffi_cif *cif, void *ret, void **args, void *userdata){
 	MFBlock *mangoBlock = (__bridge MFBlock *)userdata;
-	MFScopeChain *scope = [MFScopeChain scopeChainWithNext:mangoBlock.outScope];
 	ORBlockImp *func = mangoBlock.func;
 	NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:mangoBlock.typeEncoding];
-    __autoreleasing MFValue *retValue = [func execute:scope];
+    __autoreleasing MFValue *retValue = [func execute:mangoBlock.outScope];
     [retValue assignToCValuePointer:ret typeEncoding:[sig methodReturnType]];
 }
 
