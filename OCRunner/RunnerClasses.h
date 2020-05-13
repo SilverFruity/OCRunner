@@ -74,6 +74,8 @@ enum{
 @interface ORFuncDeclare: NSObject
 @property(nonatomic,strong) ORTypeVarPair *returnType;
 @property(nonatomic,strong) ORFuncVariable *var;
+@property(nonatomic,assign) BOOL isBlockDeclare;
+- (void)becomeNormalFuncDeclare;
 @end
 
 // MARK: - Expression

@@ -532,5 +532,10 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 
 - (instancetype)nsStringValue;
 - (void *)valuePointer;
+
+- (id)c2objectValue;
+- (void *)c2pointerValue;
+- (void)assignToCValuePointer:(void *)cvaluePointer typeEncoding:(const char *)typeEncoding;
+- (instancetype)initWithCValuePointer:(void *)cValuePointer typeEncoding:(const char *)typeEncoding bridgeTransfer:(BOOL)bridgeTransfer;
 @end
 NS_ASSUME_NONNULL_END

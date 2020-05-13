@@ -9,7 +9,7 @@
 #import "MFBlock.h"
 #import "ffi.h"
 #import "util.h"
-
+#import "RunnerClasses+Execute.h"
 
 
 
@@ -33,15 +33,12 @@ static void blockInter(ffi_cif *cif, void *ret, void **args, void *userdata){
 	ORBlockImp *func = mangoBlock.func;
 	NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:mangoBlock.typeEncoding];
 	NSUInteger numberOfArguments = [sig numberOfArguments];
-	NSMutableArray *argValues = [NSMutableArray array];
 	for (NSUInteger i = 1; i < numberOfArguments ; i++) {
 		void *arg = args[i];
-//		MFValue *argValue = [[MFValue alloc] initWithCValuePointer:arg typeEncoding:[sig getArgumentTypeAtIndex:i] bridgeTransfer:NO];
-//		[argValues addObject:argValue];
-		
+        free(arg);
 	}
-//	__autoreleasing MFValue *retValue = mf_call_mf_function(inter, scope, func, argValues);
-//	[retValue assignToCValuePointer:ret typeEncoding:[sig methodReturnType]];
+    __autoreleasing MFValue *retValue = [func execute:scope];
+    [retValue assignToCValuePointer:ret typeEncoding:[sig methodReturnType]];
 }
 
 @implementation MFBlock{

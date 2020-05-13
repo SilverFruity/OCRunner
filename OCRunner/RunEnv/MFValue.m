@@ -140,144 +140,142 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 	}
     self.pointerValue = src.pointerValue;
 }
-//- (id)c2objectValue{
-//    if (self.isPointer) {
-//        return (__bridge id)_pointerValue;
-//    }
-//    switch (self.typePair.type.type) {
-//		case TypeClass:
-//			return _classValue;
-//		case TypeObject:
-//		case TypeBlock:
-//			return self.objectValue;
-//		default:
-//			return nil;
-//	}
-//
-//}
-//
-//
-//- (void *)c2pointerValue{
-//    if (self.isPointer) {
-//        return _pointerValue;
-//    }
-//    switch (self.typePair.type.type) {
-//        case TypeClass:
-//            return (__bridge void*)_classValue;
-//        case TypeObject:
-//        case TypeBlock:
-//            return (__bridge void*)self.objectValue;
-//        default:
-//            return NULL;
-//    }
-//}
-//
-//
-//- (void)assignToCValuePointer:(void *)cvaluePointer typeEncoding:(const char *)typeEncoding{
-//	typeEncoding = removeTypeEncodingPrefix((char *)typeEncoding);
-//#define mf_ASSIGN_2_C_VALUE_POINTER_CASE(_encode, _type, _sel)\
-//case _encode:{\
-//_type *ptr = (_type *)cvaluePointer;\
-//*ptr = (_type)[self _sel];\
-//break;\
-//}
-//	switch (*typeEncoding) {
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('c', char, charValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('i', int, intValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('s', short, shortValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('l', long, longValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('q', long long, longLongValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('C', unsigned char, uCharValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('I', unsigned int, uIntValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('S', unsigned short, uShortValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('L', unsigned long, uLongValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('Q', unsigned long long, uLongLongValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('f', float, floatValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('d', double, doubleValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('B', BOOL, boolValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('*', char *, c2pointerValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE('^', void *, c2pointerValue)
-//			mf_ASSIGN_2_C_VALUE_POINTER_CASE(':', SEL, selValue)
-//		case '@':{
-//			void  **ptr =cvaluePointer;
-//			*ptr = (__bridge void *)[self c2objectValue];
-//			break;
-//		}
-//		case '#':{
-//			Class *ptr = (Class  *)cvaluePointer;
-//			*ptr = [self c2objectValue];
-//			break;
-//		}
-//		case 'v':{
-//			break;
-//		}
-//		default:
-//			NSCAssert(0, @"");
-//			break;
-//	}
-//}
-//
-//
-//- (instancetype)initWithCValuePointer:(void *)cValuePointer typeEncoding:(const char *)typeEncoding bridgeTransfer:(BOOL)bridgeTransfer  {
-//	typeEncoding = removeTypeEncodingPrefix((char *)typeEncoding);
-//	MFValue *retValue = [[MFValue alloc] init];
-//
-//#define MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE(_code,_kind, _type,_sel)\
-//case _code:{\
-//[retValue setValueType:_kind];\
-//retValue._sel = *(_type *)cValuePointer;\
-//break;\
-//}
-//    
-//	switch (*typeEncoding) {
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('c',TypeChar, char, charValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('i',TypeInt, int,intValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('s',TypeShort, short,shortValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('l',TypeLong, long,longValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('q',TypeLongLong, long long,longLongValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('C',TypeUChar, unsigned char, uCharValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('I',TypeUInt,  unsigned int, uIntValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('S',TypeUShort, unsigned short, uShortValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('L',TypeULong,  unsigned long, uLongValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('Q',TypeULongLong, unsigned long long,uLongLongValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('B',TypeBOOL, BOOL, boolValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('f',TypeFloat, float, floatValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('d',TypeDouble, double,doubleValue)
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE(':',TypeSEL, SEL, selValue)
-//            case '^':{
-//                [retValue setValueType:TypeVoid];
-//                retValue.typePair.var.ptCount = 1;
-//                retValue.pointerValue = *(void* *)cValuePointer;
-//                break;
-//            }
-//            case '*':{
-//                [retValue setValueType:TypeChar];
-//                retValue.typePair.var.ptCount = 1;
-//                retValue.pointerValue = *(void* *)cValuePointer;
-//                break;
-//            }
-//			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('#',TypeClass, Class,classValue)
-//		case '@':{
-//            [retValue setValueType:TypeObject];
-//			if (bridgeTransfer) {
-//                id objectValue = (__bridge_transfer id)(*(void **)cValuePointer);
-//                retValue.objectValue = objectValue;
-//			}else{
-//                id objectValue = (__bridge id)(*(void **)cValuePointer);
-//                retValue.objectValue = objectValue;
-//			}
-//
-//			break;
-//		}
-//		default:
-//			NSCAssert(0, @"not suppoert %s", typeEncoding);
-//			break;
-//	}
-//
-//	return retValue;
-//}
-//
-//
+- (id)c2objectValue{
+    if (self.isPointer) {
+        return (__bridge id)_pointerValue;
+    }
+    switch (self.typePair.type.type) {
+		case TypeClass:
+			return _classValue;
+		case TypeObject:
+		case TypeBlock:
+			return self.objectValue;
+		default:
+			return nil;
+	}
+
+}
+
+
+- (void *)c2pointerValue{
+    if (self.isPointer) {
+        return _pointerValue;
+    }
+    switch (self.typePair.type.type) {
+        case TypeClass:
+            return (__bridge void*)_classValue;
+        case TypeObject:
+        case TypeBlock:
+            return (__bridge void*)self.objectValue;
+        default:
+            return NULL;
+    }
+}
+
+//FIXME: 编码问题以及引用相关问题，指针数转换..
+- (void)assignToCValuePointer:(void *)cvaluePointer typeEncoding:(const char *)typeEncoding{
+	typeEncoding = removeTypeEncodingPrefix((char *)typeEncoding);
+#define mf_ASSIGN_2_C_VALUE_POINTER_CASE(_encode, _type, _sel)\
+case _encode:{\
+_type *ptr = (_type *)cvaluePointer;\
+*ptr = (_type)[self _sel];\
+break;\
+}
+	switch (*typeEncoding) {
+			mf_ASSIGN_2_C_VALUE_POINTER_CASE('c', char, charValue)
+			mf_ASSIGN_2_C_VALUE_POINTER_CASE('i', int, intValue)
+			mf_ASSIGN_2_C_VALUE_POINTER_CASE('s', short, shortValue)
+			mf_ASSIGN_2_C_VALUE_POINTER_CASE('l', long, longValue)
+			mf_ASSIGN_2_C_VALUE_POINTER_CASE('q', long long, longLongValue)
+			mf_ASSIGN_2_C_VALUE_POINTER_CASE('C', unsigned char, uCharValue)
+			mf_ASSIGN_2_C_VALUE_POINTER_CASE('I', unsigned int, uIntValue)
+			mf_ASSIGN_2_C_VALUE_POINTER_CASE('S', unsigned short, uShortValue)
+			mf_ASSIGN_2_C_VALUE_POINTER_CASE('L', unsigned long, uLongValue)
+			mf_ASSIGN_2_C_VALUE_POINTER_CASE('Q', unsigned long long, uLongLongValue)
+			mf_ASSIGN_2_C_VALUE_POINTER_CASE('f', float, floatValue)
+			mf_ASSIGN_2_C_VALUE_POINTER_CASE('d', double, doubleValue)
+			mf_ASSIGN_2_C_VALUE_POINTER_CASE('B', BOOL, boolValue)
+			mf_ASSIGN_2_C_VALUE_POINTER_CASE('*', char *, c2pointerValue)
+			mf_ASSIGN_2_C_VALUE_POINTER_CASE('^', void *, c2pointerValue)
+			mf_ASSIGN_2_C_VALUE_POINTER_CASE(':', SEL, selValue)
+		case '@':{
+			void  **ptr =cvaluePointer;
+			*ptr = (__bridge void *)[self c2objectValue];
+			break;
+		}
+		case '#':{
+			Class *ptr = (Class  *)cvaluePointer;
+			*ptr = [self c2objectValue];
+			break;
+		}
+		case 'v':{
+			break;
+		}
+		default:
+			NSCAssert(0, @"");
+			break;
+	}
+}
+
+//FIXME: 编码问题以及引用相关问题，指针数转换..
+- (instancetype)initWithCValuePointer:(void *)cValuePointer typeEncoding:(const char *)typeEncoding bridgeTransfer:(BOOL)bridgeTransfer  {
+	typeEncoding = removeTypeEncodingPrefix((char *)typeEncoding);
+	MFValue *retValue = [[MFValue alloc] init];
+
+#define MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE(_code,_kind, _type,_sel)\
+case _code:{\
+[retValue setValueType:_kind];\
+retValue._sel = *(_type *)cValuePointer;\
+break;\
+}
+    
+	switch (*typeEncoding) {
+			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('c',TypeChar, char, charValue)
+			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('i',TypeInt, int,intValue)
+			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('s',TypeShort, short,shortValue)
+			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('l',TypeLong, long,longValue)
+			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('q',TypeLongLong, long long,longLongValue)
+			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('C',TypeUChar, unsigned char, uCharValue)
+			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('I',TypeUInt,  unsigned int, uIntValue)
+			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('S',TypeUShort, unsigned short, uShortValue)
+			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('L',TypeULong,  unsigned long, uLongValue)
+			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('Q',TypeULongLong, unsigned long long,uLongLongValue)
+			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('B',TypeBOOL, BOOL, boolValue)
+			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('f',TypeFloat, float, floatValue)
+			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('d',TypeDouble, double,doubleValue)
+			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE(':',TypeSEL, SEL, selValue)
+            case '^':{
+                [retValue setValueType:TypeVoid];
+                retValue.typePair.var.ptCount = 1;
+                retValue.pointerValue = *(void* *)cValuePointer;
+                break;
+            }
+            case '*':{
+                [retValue setValueType:TypeChar];
+                retValue.typePair.var.ptCount = 1;
+                retValue.pointerValue = *(void* *)cValuePointer;
+                break;
+            }
+			MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE('#',TypeClass, Class,classValue)
+		case '@':{
+            [retValue setValueType:TypeObject];
+			if (bridgeTransfer) {
+                id objectValue = (__bridge_transfer id)(*(void **)cValuePointer);
+                retValue.objectValue = objectValue;
+			}else{
+                id objectValue = (__bridge id)(*(void **)cValuePointer);
+                retValue.objectValue = objectValue;
+			}
+
+			break;
+		}
+		default:
+			NSCAssert(0, @"not suppoert %s", typeEncoding);
+			break;
+	}
+	return retValue;
+}
+
 //+ (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding{
 //	typeEncoding = removeTypeEncodingPrefix((char *)typeEncoding);
 //	MFValue *value = [[MFValue alloc] init];

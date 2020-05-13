@@ -12,7 +12,7 @@
 - (instancetype)initWithClass:(Class)clazz method:(ORMethodImplementation *)method; {
 	if (self = [super init]) {
 		_clazz = clazz;
-		_method = method;
+		_methodImp = method;
 	}
 	return self;
 }
@@ -41,8 +41,8 @@
 }
 
 - (void)addMethodMapTableItem:(MFMethodMapTableItem *)methodMapTableItem{
-    NSString *methodName = [methodMapTableItem.method.declare.methodNames componentsJoinedByString:@":"];
-    NSString *index = [NSString stringWithFormat:@"%d_%@_%@,",methodMapTableItem.method.declare.isClassMethod,NSStringFromClass(methodMapTableItem.clazz),methodName];
+    NSString *methodName = [methodMapTableItem.methodImp.declare.methodNames componentsJoinedByString:@":"];
+    NSString *index = [NSString stringWithFormat:@"%d_%@_%@,",methodMapTableItem.methodImp.declare.isClassMethod,NSStringFromClass(methodMapTableItem.clazz),methodName];
     [_lock lock];
 	_dic[index] = methodMapTableItem;
     [_lock unlock];
