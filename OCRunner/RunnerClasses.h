@@ -120,24 +120,24 @@ typedef enum {
 @property (nonatomic,strong)id value;
 @end
 
-@interface ORMethodCall: ORExpression
+@interface ORMethodCall: ORValueExpression
 @property (nonatomic, strong)ORValueExpression * caller;
 @property (nonatomic, assign)BOOL isDot;
 @property (nonatomic, strong)NSMutableArray *names;
 @property (nonatomic, strong)NSMutableArray <ORExpression *> *values;
 @end
 
-@interface ORCFuncCall: ORExpression
+@interface ORCFuncCall: ORValueExpression
 @property (nonatomic, strong)ORValueExpression *caller;
 @property (nonatomic, strong)NSMutableArray <ORExpression *>*expressions;
 @end
 
-@interface ORBlockImp: ORCodeCheck
+@interface ORBlockImp: ORValueExpression
 @property(nonatomic,strong) ORFuncDeclare *declare;
 @property(nonatomic,strong) NSMutableArray<id >* statements;
 @end
 
-@interface ORSubscriptExpression: ORExpression
+@interface ORSubscriptExpression: ORValueExpression
 @property (nonatomic, strong)ORValueExpression * caller;
 @property (nonatomic, strong)ORExpression * keyExp;
 @end

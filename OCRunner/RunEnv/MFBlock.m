@@ -25,18 +25,11 @@ void dispose_helper(struct MFSimulateBlock *src)
 	CFRelease(src->wrapper);
 }
 
-
-
 static void blockInter(ffi_cif *cif, void *ret, void **args, void *userdata){
 	MFBlock *mangoBlock = (__bridge MFBlock *)userdata;
 	MFScopeChain *scope = [MFScopeChain scopeChainWithNext:mangoBlock.outScope];
 	ORBlockImp *func = mangoBlock.func;
 	NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:mangoBlock.typeEncoding];
-	NSUInteger numberOfArguments = [sig numberOfArguments];
-	for (NSUInteger i = 1; i < numberOfArguments ; i++) {
-		void *arg = args[i];
-        free(arg);
-	}
     __autoreleasing MFValue *retValue = [func execute:scope];
     [retValue assignToCValuePointer:ret typeEncoding:[sig methodReturnType]];
 }

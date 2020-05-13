@@ -162,7 +162,7 @@ const void *mf_propKey(NSString *propName) {
                     value = [MFValue valueInstanceWithObject:ivarValue];
                 }else{
                     void *ptr = (__bridge void *)(pos.instance) +  ivar_getOffset(ivar);
-//                    value = [[MFValue alloc] initWithCValuePointer:ptr typeEncoding:ivarEncoding bridgeTransfer:NO];
+                    value = [[MFValue alloc] initWithCValuePointer:ptr typeEncoding:ivarEncoding bridgeTransfer:NO];
                 }
                 return value;
                 
@@ -183,24 +183,22 @@ const void *mf_propKey(NSString *propName) {
 }
 
 - (void)setMangoBlockVarNil{
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        [self.lock lock];
-        NSArray *allValues = [self.vars allValues];
-        for (MFValue *value in allValues) {
-            if ([value isObject]) {
-                Class ocBlockClass = NSClassFromString(@"NSBlock");
+//    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+//        [self.lock lock];
+//        NSArray *allValues = [self.vars allValues];
+//        for (MFValue *value in allValues) {
+//            if ([value isObject]) {
+//                Class ocBlockClass = NSClassFromString(@"NSBlock");
 //                if ([[value c2objectValue] isKindOfClass:ocBlockClass]) {
 //                    struct MFSimulateBlock *blockStructPtr = (__bridge void *)value.objectValue;
 //                    if (blockStructPtr->flags & BLOCK_CREATED_FROM_MFGO) {
 //                        value.objectValue = nil;
 //                    }
 //                }
-
-            }
-        }
-        [self.lock unlock];
-    });
-    
+//            }
+//        }
+//        [self.lock unlock];
+//    });
 }
 
 @end

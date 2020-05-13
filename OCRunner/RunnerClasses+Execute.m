@@ -153,6 +153,7 @@ void copy_undef_vars(NSArray *exprOrStatements, MFVarDeclareChain *chain, MFScop
         copy_undef_var(exprOrStatement, chain, fromScope, destScope);
     }
 }
+/// Block执行时的外部变量捕获
 void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *fromScope, MFScopeChain *destScope){
     if (!exprOrStatement) {
         return;
@@ -418,9 +419,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     invocation.selector = sel;
     NSUInteger argCount = [sig numberOfArguments];
     for (NSUInteger i = 2; i < argCount; i++) {
-        const char *typeEncoding = [sig getArgumentTypeAtIndex:i];
-        void *ptr = malloc(mf_size_with_encoding(typeEncoding));
-        [argValues[i-2] assignToCValuePointer:ptr typeEncoding:typeEncoding];
+        void *ptr = malloc(sizeof(char *));
         [invocation setArgument:ptr atIndex:i];
         free(ptr);
     }
@@ -448,10 +447,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 //            mf_throw_error(expr.lineNumber, MFRuntimeErrorParameterListCountNoMatch, @"expect count: %zd, pass in cout:%zd",numberOfArguments - 1,expr.args.count);
             return nil;
         }
+        //占位..
         for (NSUInteger i = 1; i < numberOfArguments; i++) {
-            //占位..
-            void *ptr = alloca(sizeof(char *));
+            void *ptr = malloc(sizeof(char *));
             [invocation setArgument:ptr atIndex:i];
+            free(ptr);
         }
         [invocation invoke];
         const char *retType = [sig methodReturnType];
@@ -466,7 +466,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }
         return retValue;
     }
-    // C 函数调用
+    // 全局函数调用
     if (self.caller.type == OCValueVariable) {
         ORBlockImp *imp = [scope getValueWithIdentifier:self.caller.value].objectValue;
         [imp execute:scope];
@@ -998,8 +998,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     objc_property_t property = class_getProperty(class, [propertyName UTF8String]);
     //FIXME: 自动生成get set方法
     if (property) {
-        
+        //FIXME: replace get set
     }else{
+        //FIXME: add property
         class_addProperty(class, [propertyName UTF8String], self.propertyAttributes, 3);
         class_addMethod(class, NSSelectorFromString(propertyName), (IMP)registerClassGetter, "@@:");
         class_addMethod(class, NSSelectorFromString([NSString stringWithFormat:@"set%@:",[propertyName capitalizedString]]), (IMP)registerClassSetter, "v@:@");
