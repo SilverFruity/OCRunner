@@ -56,7 +56,6 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return value;
 }
 - (BOOL)isSubtantial{
-    ValueDefineWithMFValue(0, self);
     UnaryExecute(BOOL, unaryResultValue0, !, self);
     return !unaryResultValue0;
 }

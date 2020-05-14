@@ -679,8 +679,6 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @implementation ORUnaryExpression (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *currentValue = [self.value execute:scope];
-    ValueDefineWithMFValue(0, currentValue);
-    ValueDefineWithSuffix(Result);
     MFValue *resultValue = [MFValue new];
     resultValue.typePair = currentValue.typePair;
     switch (self.operatorType) {
@@ -730,8 +728,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             if (currentValue.typePair.var.ptCount > 1) {
                 resultValue.pointerValue = *(void **)currentValue.pointerValue;
             }else{
-                GetPointerValue(0, currentValue);
-                MFValueSetValue(resultValue, 0);
+                MFValueGetValueInPointer(resultValue, currentValue);
             }
             resultValue.typePair.var.ptCount -= 1;
             return resultValue;
@@ -920,7 +917,6 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @implementation ORSwitchStatement (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *value = [self.value execute:scope];
-    ValueDefineWithMFValue(Switch, value);
     BOOL hasMatch = NO;
     for (ORCaseStatement *statement in self.cases) {
         if (statement.value) {
@@ -980,8 +976,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
     MFValue *arrayValue = [self.value execute:current];
-    ValueDefineWithMFValue(Array, arrayValue);
-    for (id element in objectValueArray) {
+    for (id element in arrayValue.objectValue) {
         //TODO: 每执行一次，在作用域中重新设置一次
         [current setValue:[MFValue valueInstanceWithObject:element] withIndentifier:self.expression.pair.var.varname];
         MFValue *result = [self.funcImp execute:current];
@@ -1029,8 +1024,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     NSString *propertyName = self.var.var.varname;
     MFValue *classValue = [scope getValueWithIdentifier:@"Class"];
-    ValueDefineWithMFValue(Current, classValue);
-    Class class = classValueCurrent;
+    Class class = classValue.classValue;
     objc_property_t property = class_getProperty(class, [propertyName UTF8String]);
     //FIXME: 自动生成get set方法
     if (property) {

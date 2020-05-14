@@ -9,179 +9,55 @@
 #import <Foundation/Foundation.h>
 #import "MFDeclarationModifier.h"
 #import "RunnerClasses.h"
-// FIXME: 转码问题，int->char 等等， 设置一个基础类型，同时设置所有类型。导致 testBlockCopyValue 测试不能通过。
-#define ValueDefineWithSuffix(suffix)\
-unsigned char uCharValue##suffix = 0;\
-unsigned short uShortValue##suffix = 0;\
-unsigned int uIntValue##suffix = 0;\
-unsigned long uLongValue##suffix = 0;\
-unsigned long long uLLongValue##suffix = 0;\
-BOOL boolValue##suffix = 0;\
-char charValue##suffix = 0;\
-short shortValue##suffix = 0;\
-int intValue##suffix = 0;\
-long longValue##suffix = 0;\
-long long lLongValue##suffix = 0;\
-float floatValue##suffix = 0;\
-float doubleValue##suffix = 0;\
-id objectValue##suffix = nil;\
-SEL selValue##suffix = 0;\
-Class classValue##suffix = nil;\
-void *pointerValue##suffix = nil;\
-
-#define GetPointerValue(suffix, target)\
-ValueDefineWithSuffix(suffix)\
+#define MFValueGetValueInPointer(resultValue, fromValue)\
 do {\
-    if (currentValue.typePair.var.ptCount > 1) {\
-        pointerValue##suffix = *(void **)target.pointerValue;\
+    if (fromValue.typePair.var.ptCount > 1) {\
+        resultValue.pointerValue = *(void **)fromValue.pointerValue;\
         break;\
     }\
-    switch (target.typePair.type.type) {\
+    switch (fromValue.typePair.type.type) {\
         case TypeUChar:\
-            uCharValue##suffix = *(unsigned char *)target.pointerValue; break;\
+            resultValue.uCharValue = *(unsigned char *)fromValue.pointerValue; break;\
         case TypeUShort:\
-            uShortValue##suffix = *(unsigned short *)target.pointerValue; break;\
+            resultValue.uShortValue = *(unsigned short *)fromValue.pointerValue; break;\
         case TypeUInt:\
-            uIntValue##suffix = *(unsigned int *)target.pointerValue; break;\
+            resultValue.uIntValue = *(unsigned int *)fromValue.pointerValue; break;\
         case TypeULong:\
-            uLongValue##suffix = *(unsigned long *)target.pointerValue; break;\
+            resultValue.uLongValue = *(unsigned long *)fromValue.pointerValue; break;\
         case TypeULongLong:\
-            uLLongValue##suffix = *(unsigned long long *)target.pointerValue; break;\
+            resultValue.uLongLongValue = *(unsigned long long *)fromValue.pointerValue; break;\
         case TypeBOOL:\
-            boolValue##suffix = *(BOOL *)target.pointerValue; break;\
+            resultValue.boolValue = *(BOOL *)fromValue.pointerValue; break;\
         case TypeChar:\
-            charValue##suffix = *(char *)target.pointerValue; break;\
+            resultValue.charValue = *(char *)fromValue.pointerValue; break;\
         case TypeShort:\
-            shortValue##suffix = *(short *)target.pointerValue; break;\
+            resultValue.shortValue = *(short *)fromValue.pointerValue; break;\
         case TypeInt:\
-            intValue##suffix = *(int *)target.pointerValue; break;\
+            resultValue.intValue = *(int *)fromValue.pointerValue; break;\
         case TypeLong:\
-            longValue##suffix = *(long *)target.pointerValue; break;\
+            resultValue.longValue = *(long *)fromValue.pointerValue; break;\
         case TypeLongLong:\
-            lLongValue##suffix = *(long long *)target.pointerValue; break;\
+            resultValue.longLongValue = *(long long *)fromValue.pointerValue; break;\
         case TypeFloat:\
-            floatValue##suffix = *(double *)target.pointerValue; break;\
+            resultValue.floatValue = *(double *)fromValue.pointerValue; break;\
         case TypeDouble:\
-            doubleValue##suffix = *(double *)target.pointerValue; break;\
+            resultValue.doubleValue = *(double *)fromValue.pointerValue; break;\
         case TypeId:\
         case TypeObject:\
         case TypeBlock:{\
-            objectValue##suffix = *(__strong id *)target.pointerValue;\
+            resultValue.objectValue = *(__strong id *)fromValue.pointerValue;\
             break;\
         }\
         case TypeSEL:\
-            selValue##suffix = *(SEL *)target.pointerValue; break;\
+            resultValue.selValue = *(SEL *)fromValue.pointerValue; break;\
             break;\
         case TypeClass:\
-            classValue##suffix = *(Class *)target.pointerValue; break;\
+            resultValue.classValue = *(Class *)fromValue.pointerValue; break;\
             break;\
         default:\
             break;\
     }\
 } while (0);
-
-#define ValueDefineWithMFValue(suffix,target)\
-ValueDefineWithSuffix(suffix)\
-do {\
-    if (target.isPointer) {\
-        pointerValue##suffix = target.pointerValue;\
-        break;\
-    }\
-    switch (target.typePair.type.type) {\
-        case TypeUChar:\
-            uCharValue##suffix = target.uCharValue; break;\
-        case TypeUShort:\
-            uShortValue##suffix = target.uShortValue; break;\
-        case TypeUInt:\
-            uIntValue##suffix = target.uIntValue; break;\
-        case TypeULong:\
-            uLongValue##suffix = target.uLongValue; break;\
-        case TypeULongLong:\
-            uLLongValue##suffix = target.uLongLongValue; break;\
-        case TypeBOOL:\
-            boolValue##suffix = target.boolValue; break;\
-        case TypeChar:\
-            charValue##suffix = target.charValue; break;\
-        case TypeShort:\
-            shortValue##suffix = target.shortValue; break;\
-        case TypeInt:\
-            intValue##suffix = target.intValue; break;\
-        case TypeLong:\
-            longValue##suffix = target.longValue; break;\
-        case TypeLongLong:\
-            lLongValue##suffix = target.longLongValue; break;\
-        case TypeFloat:\
-            floatValue##suffix = target.floatValue; break;\
-        case TypeDouble:\
-            doubleValue##suffix = target.doubleValue; break;\
-        case TypeId:\
-        case TypeObject:\
-        case TypeBlock:{\
-            objectValue##suffix = target.objectValue;\
-            break;\
-        }\
-        case TypeSEL:\
-            selValue##suffix = target.selValue; break;\
-            break;\
-        case TypeClass:\
-            classValue##suffix = target.classValue; break;\
-            break;\
-        default:\
-            break;\
-    }\
-} while (0);
-
-
-
-#define HoleValue(valueType, suffix, target)\
-valueType holeValue_##valueType##suffix  = 0;\
-switch (target.typePair.type.type) {\
-    case TypeUChar:\
-        holeValue_##valueType##suffix = uCharValue##suffix; break;\
-    case TypeUShort:\
-        holeValue_##valueType##suffix  = uShortValue##suffix; break;\
-    case TypeUInt:\
-        holeValue_##valueType##suffix  = uIntValue##suffix; break;\
-    case TypeULong:\
-        holeValue_##valueType##suffix  = uLongValue##suffix; break;\
-    case TypeULongLong:\
-        holeValue_##valueType##suffix  = uLLongValue##suffix; break;\
-    case TypeBOOL:\
-        holeValue_##valueType##suffix  = boolValue##suffix; break;\
-    case TypeChar:\
-        holeValue_##valueType##suffix  = charValue##suffix; break;\
-    case TypeShort:\
-        holeValue_##valueType##suffix  = shortValue##suffix; break;\
-    case TypeInt:\
-        holeValue_##valueType##suffix  = intValue##suffix; break;\
-    case TypeLong:\
-        holeValue_##valueType##suffix  = longValue##suffix; break;\
-    case TypeLongLong:\
-        holeValue_##valueType##suffix  = lLongValue##suffix; break;\
-    case TypeFloat:\
-        holeValue_##valueType##suffix  = floatValue##suffix; break;\
-    case TypeDouble:\
-        holeValue_##valueType##suffix  = doubleValue##suffix; break;\
-    default:\
-        break;\
-}
-
-#define HoleUCharValue(suffix, target) HoleValue(uint8_t, suffix, target)
-#define HoleUShortValue(suffix, target) HoleValue(uint16_t, suffix, target)
-#define HoleUIntValue(suffix, target) HoleValue(uint32_t, suffix, target)
-#define HoleULongValue(suffix, target) HoleValue(uint64_t, suffix, target)
-
-#define HoleCharValue(suffix, target) HoleValue(int8_t, suffix, target)
-#define HoleShortValue(suffix, target) HoleValue(int16_t, suffix, target)
-#define HoleIntValue(suffix, target) HoleValue(int32_t, suffix, target)
-#define HoleLongValue(suffix, target) HoleValue(int64_t, suffix, target)
-
-#define HoleIntegerValue(suffix, target) HoleLongValue(suffix, target)
-#define HoleUIntegerValue(suffix, target) HoleULongValue(suffix, target)
-
-#define HoleFloatValue(suffix, target) HoleValue(float, suffix, target)
-#define HoleDoubleValue(suffix, target) HoleValue(double, suffix, target)
-
 
 #define PrefixUnaryExecuteInt(operator,value,resultValue)\
 switch (value.typePair.type.type) {\
