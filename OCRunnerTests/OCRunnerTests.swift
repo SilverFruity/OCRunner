@@ -419,4 +419,35 @@ class CRunnerTests: XCTestCase {
         print(scope.getValueWithIdentifier("a")!.intValue)
         XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 6)
     }
+    func testClassMethodReplace(){
+        let source =
+        """
+        @interface ORTestReplaceClass : NSObject
+        - (int)test;
+        - (int)arg1:(NSNumber *)arg1;
+        - (int)arg1:(NSNumber *)arg1 arg2:(NSNumber *)arg2;
+        @end
+        @implementation ORTestReplaceClass
+        - (int)test{
+            return 1;
+        }
+        - (int)arg1:(NSNumber *)arg1{
+            return [arg1 intValue];
+        }
+        - (int)arg1:(NSNumber *)arg1 arg2:(NSNumber *)arg2{
+            return [arg1 intValue] + [arg2 intValue];
+        }
+        @end
+        """
+        ocparser.parseSource(source)
+        let classes = ocparser.ast.classCache.allValues as! [ORClass];
+        for classValue in classes {
+            classValue.execute(scope);
+        }
+        let test = ORTestReplaceClass.init()
+        assert(test.test() == 1)
+        assert(test.arg1(NSNumber.init(value: 2), arg2: NSNumber.init(value: 3)) == 5)
+        assert(test.arg1(NSNumber.init(value: 10)) == 10)
+        
+    }
 }

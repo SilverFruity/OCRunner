@@ -14,7 +14,7 @@
 #import "MFVarDeclareChain.h"
 #import "MFBlock.h"
 #import "MFValue.h"
-static MFValue * invoke_blockValue(MFValue *blockValue, NSArray *args){
+static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
     const char *blockTypeEncoding = [MFBlock typeEncodingForBlock:blockValue.c2objectValue];
     NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:blockTypeEncoding];
     NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
@@ -24,11 +24,14 @@ static MFValue * invoke_blockValue(MFValue *blockValue, NSArray *args){
         //            mf_throw_error(expr.lineNumber, MFRuntimeErrorParameterListCountNoMatch, @"expect count: %zd, pass in cout:%zd",numberOfArguments - 1,expr.args.count);
         return nil;
     }
-    //占位..
+    //根据MFValue的type传入值的原因: 模拟在OC中的调用
     for (NSUInteger i = 1; i < numberOfArguments; i++) {
-        void *ptr = malloc(sizeof(char *));
+        const char *typeEncoding = [sig getArgumentTypeAtIndex:i];
+        void *ptr = alloca(mf_size_with_encoding(typeEncoding));
+        __autoreleasing MFValue *argValue = args[i -1];
+        [argValue assignToCValuePointer:ptr typeEncoding:typeEncoding];
         [invocation setArgument:ptr atIndex:i];
-        free(ptr);
+        
     }
     [invocation invoke];
     const char *retType = [sig methodReturnType];
@@ -69,15 +72,33 @@ static void methodIMP(ffi_cif *cif, void *ret, void **args, void *userdata){
     SEL sel = *(void **)args[1];
     BOOL classMethod = object_isClass(assignSlf);
     MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:class classMethod:classMethod sel:sel];
-    __autoreleasing MFValue *retValue = [map.methodImp execute:scope];
     NSMethodSignature *methodSignature = [NSMethodSignature signatureWithObjCTypes:typeEncoding.UTF8String];
+    NSMutableArray<MFValue *> *argValues = [NSMutableArray array];
+    NSUInteger numberOfArguments = [methodSignature numberOfArguments];
+    // 在OC中，传入值都为原数值并非MFValue，需要转换
+    for (NSUInteger i = 2; i < numberOfArguments; i++) {
+        MFValue *argValue;
+        const char *type = [methodSignature getArgumentTypeAtIndex:i];
+        if (strcmp(type, "@?") == 0) {
+            id block =  (__bridge id)(*(void **)args[i]);
+            block = [block copy];
+            argValue = [MFValue valueInstanceWithObject:block];
+        }else{
+            void *arg = args[i];
+            argValue = [[MFValue alloc] initWithCValuePointer:arg typeEncoding:[methodSignature getArgumentTypeAtIndex:i] bridgeTransfer:NO];
+        }
+        
+        [argValues addObject:argValue];
+    }
+    [[MFStack argsStack] push:argValues];
+    __autoreleasing MFValue *retValue = [map.methodImp execute:scope];
     [retValue assignToCValuePointer:ret typeEncoding:[methodSignature methodReturnType]];
 }
 
 
 static void replace_method(Class clazz, ORMethodImplementation *methodImp, MFScopeChain *scope){
     ORMethodDeclare *declare = methodImp.declare;
-    NSString *methodName = [declare.methodNames componentsJoinedByString:@":"];
+    NSString *methodName = declare.selectorName;
     SEL sel = NSSelectorFromString(methodName);
     
     MFMethodMapTableItem *item = [[MFMethodMapTableItem alloc] initWithClass:clazz method:methodImp];
@@ -91,12 +112,10 @@ static void replace_method(Class clazz, ORMethodImplementation *methodImp, MFSco
     }else{
         ocMethod = class_getInstanceMethod(clazz, sel);
     }
-    
     if (ocMethod) {
         typeEncoding = method_getTypeEncoding(ocMethod);
     }else{
         typeEncoding = OCTypeEncodingForPair(methodImp.declare.returnType);
-        
         for (ORTypeVarPair *pair in methodImp.declare.parameterTypes) {
             const char *paramTypeEncoding = OCTypeEncodingForPair(pair);
             typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
@@ -125,7 +144,7 @@ static void replace_method(Class clazz, ORMethodImplementation *methodImp, MFSco
 }
 static void add_method(Class clazz, ORMethodImplementation *methodImp, MFScopeChain *scope){
     ORMethodDeclare *declare = methodImp.declare;
-    NSString *methodName = [declare.methodNames componentsJoinedByString:@":"];
+    NSString *methodName = declare.selectorName;
     SEL sel = NSSelectorFromString(methodName);
     
     MFMethodMapTableItem *item = [[MFMethodMapTableItem alloc] initWithClass:clazz method:methodImp];
@@ -443,21 +462,19 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     for (ORValueExpression *exp in self.values){
         [argValues addObject:[exp execute:scope]];
     }
-    [[MFStack argsStack] push:argValues];
-    NSString *selector = [self.names componentsJoinedByString:@":"];
-    if (self.values.count >= 1) {
-        selector = [selector stringByAppendingString:@":"];
-    }
+    NSString *selector = self.methodName;
     SEL sel = NSSelectorFromString(selector);
     NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
     NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
     invocation.target = instance;
     invocation.selector = sel;
     NSUInteger argCount = [sig numberOfArguments];
+    //根据MFValue的type传入值的原因: 模拟在OC中的调用
     for (NSUInteger i = 2; i < argCount; i++) {
-        void *ptr = malloc(sizeof(char *));
+        const char *typeEncoding = [sig getArgumentTypeAtIndex:i];
+        void *ptr = alloca(mf_size_with_encoding(typeEncoding));
+        [argValues[i-2] assignToCValuePointer:ptr typeEncoding:typeEncoding];
         [invocation setArgument:ptr atIndex:i];
-        free(ptr);
     }
     // func replaceIMP execute
     [invocation invoke];
@@ -487,13 +504,12 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     for (ORValueExpression *exp in self.expressions){
         [args addObject:[exp execute:scope]];
     }
-    [[MFStack argsStack] push:args];
     if ([self.caller isKindOfClass:[ORMethodCall class]] && [(ORMethodCall *)self.caller isDot]){
         // TODO: 调用block
         // make.left.equalTo(xxxx);
         MFValue *value = [(ORMethodCall *)self.caller execute:scope];
         if (value.typePair.type.type == TypeBlock) {
-            return invoke_blockValue(value, args);
+            return invoke_MFBlockValue(value, args);
         }else{
             NSCAssert(0, @"must be a block value");
         }
@@ -501,8 +517,10 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     if (self.caller.value_type == OCValueVariable) {
         MFValue *blockValue = [scope getValueWithIdentifier:self.caller.value];
         if (blockValue.typePair.type.type == TypeBlock) {
-            return invoke_blockValue(blockValue, args);
+            return invoke_MFBlockValue(blockValue, args);
         }else{
+            // global function calll
+            [[MFStack argsStack] push:args];
             ORBlockImp *imp = [scope getValueWithIdentifier:self.caller.value].objectValue;
             return [imp execute:scope];
         }

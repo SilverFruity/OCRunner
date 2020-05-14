@@ -13,6 +13,7 @@
 		042AC259246D453700070814 /* MFBlock.h in Headers */ = {isa = PBXBuildFile; fileRef = 042AC257246D453700070814 /* MFBlock.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		047EF859246BF68D0071F9D3 /* OCRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */; };
 		EE38F997246C3C2A00E7C37B /* RunnerClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98998724658DB700ACF2C1 /* RunnerClasses.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EE79FF6B246D917100ABE06F /* ORTestReplaceClass.m in Sources */ = {isa = PBXBuildFile; fileRef = EE79FF6A246D917100ABE06F /* ORTestReplaceClass.m */; };
 		EE98997524658DA600ACF2C1 /* OCRunner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE98996B24658DA600ACF2C1 /* OCRunner.framework */; };
 		EE98997C24658DA600ACF2C1 /* OCRunner.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98996E24658DA600ACF2C1 /* OCRunner.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE98998A24658DB800ACF2C1 /* RunnerClasses+Execute.m in Sources */ = {isa = PBXBuildFile; fileRef = EE98998624658DB700ACF2C1 /* RunnerClasses+Execute.m */; };
@@ -99,6 +100,8 @@
 		047EF857246BF68D0071F9D3 /* OCRunnerTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OCRunnerTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRunnerTests.swift; sourceTree = "<group>"; };
 		EE38F9CE246C5F0300E7C37B /* oc2mango.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = oc2mango.xcodeproj; path = ../../oc2mongo/oc2mango.xcodeproj; sourceTree = "<group>"; };
+		EE79FF69246D917100ABE06F /* ORTestReplaceClass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORTestReplaceClass.h; sourceTree = "<group>"; };
+		EE79FF6A246D917100ABE06F /* ORTestReplaceClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORTestReplaceClass.m; sourceTree = "<group>"; };
 		EE98996B24658DA600ACF2C1 /* OCRunner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OCRunner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE98996E24658DA600ACF2C1 /* OCRunner.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OCRunner.h; sourceTree = "<group>"; };
 		EE98996F24658DA600ACF2C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -181,6 +184,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		EE79FF66246D915C00ABE06F /* TestClass */ = {
+			isa = PBXGroup;
+			children = (
+				EE79FF69246D917100ABE06F /* ORTestReplaceClass.h */,
+				EE79FF6A246D917100ABE06F /* ORTestReplaceClass.m */,
+			);
+			path = TestClass;
+			sourceTree = "<group>";
+		};
 		EE98996124658DA600ACF2C1 = {
 			isa = PBXGroup;
 			children = (
@@ -220,6 +232,7 @@
 		EE98997824658DA600ACF2C1 /* OCRunnerTests */ = {
 			isa = PBXGroup;
 			children = (
+				EE79FF66246D915C00ABE06F /* TestClass */,
 				047EF857246BF68D0071F9D3 /* OCRunnerTests-Bridging-Header.h */,
 				047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */,
 				EE98997B24658DA600ACF2C1 /* Info.plist */,
@@ -480,6 +493,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EE79FF6B246D917100ABE06F /* ORTestReplaceClass.m in Sources */,
 				047EF859246BF68D0071F9D3 /* OCRunnerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

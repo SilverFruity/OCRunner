@@ -41,7 +41,7 @@
 }
 
 - (void)addMethodMapTableItem:(MFMethodMapTableItem *)methodMapTableItem{
-    NSString *methodName = [methodMapTableItem.methodImp.declare.methodNames componentsJoinedByString:@":"];
+    NSString *methodName = [methodMapTableItem.methodImp.declare selectorName];
     NSString *index = [NSString stringWithFormat:@"%d_%@_%@,",methodMapTableItem.methodImp.declare.isClassMethod,NSStringFromClass(methodMapTableItem.clazz),methodName];
     [_lock lock];
 	_dic[index] = methodMapTableItem;

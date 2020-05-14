@@ -28,6 +28,16 @@ static void blockInter(ffi_cif *cif, void *ret, void **args, void *userdata){
 	MFBlock *mangoBlock = (__bridge MFBlock *)userdata;
 	ORBlockImp *func = mangoBlock.func;
 	NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:mangoBlock.typeEncoding];
+    NSUInteger numberOfArguments = [sig numberOfArguments];
+    NSMutableArray *argValues = [NSMutableArray array];
+    // 在OC中，传入值都为原数值并非MFValue，需要转换
+    for (NSUInteger i = 1; i < numberOfArguments ; i++) {
+        void *arg = args[i];
+        MFValue *argValue = [[MFValue alloc] initWithCValuePointer:arg typeEncoding:[sig getArgumentTypeAtIndex:i] bridgeTransfer:NO];
+        [argValues addObject:argValue];
+        
+    }
+    [[MFStack argsStack] push:argValues];
     __autoreleasing MFValue *retValue = [func execute:mangoBlock.outScope];
     [retValue assignToCValuePointer:ret typeEncoding:[sig methodReturnType]];
 }
