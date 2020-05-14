@@ -37,6 +37,9 @@
 	[_arr removeLastObject];
 	return value;
 }
+- (BOOL)isEmpty{
+    return [_arr count] == 0;
+}
 - (NSUInteger)size{
 	return _arr.count;
 }

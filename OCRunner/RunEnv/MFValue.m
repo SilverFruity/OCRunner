@@ -185,7 +185,7 @@ _boolValue = (BOOL) value;
 	if (_pair.type.type == TypeUnKnown) {
 		_pair = src->_pair;
 	}
-    self.pointerValue = src.pointerValue;
+    MFValueSetValue(self, src);
 }
 - (id)c2objectValue{
     if (self.isPointer) {

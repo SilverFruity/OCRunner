@@ -275,47 +275,47 @@ do{\
     }\
 }while(0)
 
-#define MFValueSetValue(target,resultSuffix)\
+#define MFValueSetValue(target,from)\
 do{\
     if (target.isPointer) {\
-        target.pointerValue = pointerValue##resultSuffix;\
+        target.pointerValue = from.pointerValue;\
         break;\
     }\
     switch (target.typePair.type.type) {\
     case TypeUChar:\
-    target.uCharValue = uCharValue##resultSuffix; break;\
+    target.uCharValue = from.uCharValue; break;\
     case TypeUShort:\
-    target.uShortValue = uShortValue##resultSuffix; break;\
+    target.uShortValue = from.uShortValue; break;\
     case TypeUInt:\
-    target.uIntValue = uIntValue##resultSuffix; break;\
+    target.uIntValue = from.uIntValue; break;\
     case TypeULong:\
-    target.uLongValue = uLongValue##resultSuffix; break;\
+    target.uLongValue = from.uLongValue; break;\
     case TypeULongLong:\
-    target.uLongLongValue = uLLongValue##resultSuffix; break;\
+    target.uLongLongValue = from.uLongLongValue; break;\
     case TypeBOOL:\
-    target.boolValue = boolValue##resultSuffix; break;\
+    target.boolValue = from.boolValue; break;\
     case TypeChar:\
-    target.charValue = charValue##resultSuffix; break;\
+    target.charValue = from.charValue; break;\
     case TypeShort:\
-    target.shortValue = shortValue##resultSuffix; break;\
+    target.shortValue = from.shortValue; break;\
     case TypeInt:\
-    target.intValue = intValue##resultSuffix; break;\
+    target.intValue = from.intValue; break;\
     case TypeLong:\
-    target.longValue = longValue##resultSuffix; break;\
+    target.longValue = from.longValue; break;\
     case TypeLongLong:\
-    target.longLongValue = lLongValue##resultSuffix; break;\
+    target.longLongValue = from.longLongValue; break;\
     case TypeFloat:\
-    target.floatValue = floatValue##resultSuffix; break;\
+    target.floatValue = from.floatValue; break;\
     case TypeDouble:\
-    target.doubleValue = doubleValue##resultSuffix; break;\
+    target.doubleValue = from.doubleValue; break;\
     case TypeId:\
     case TypeObject:\
     case TypeBlock:\
-    target.objectValue = objectValue##resultSuffix; break;\
+    target.objectValue = from.objectValue; break;\
     case TypeSEL:\
-    target.selValue = selValue##resultSuffix; break;\
+    target.selValue = from.selValue; break;\
     case TypeClass:\
-    target.classValue = classValue##resultSuffix; break;\
+    target.classValue = from.classValue; break;\
     default:\
     break;\
     }\
@@ -376,6 +376,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 - (BOOL)isMember;
 - (BOOL)isBaseValue;
 - (BOOL)isPointer;
+- (void)assignFrom:(MFValue *)src;
 - (MFValue *)subscriptGetWithIndex:(MFValue *)index;
 - (void)subscriptSetValue:(MFValue *)value index:(MFValue *)index;
 - (void)subscriptSetWithIndex:(MFValue *)index value:(MFValue *)value;

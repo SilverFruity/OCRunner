@@ -187,4 +187,104 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 3)
         XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 2)
     }
+    func testIfStatement(){
+        let source =
+        """
+        int func(int a){
+            if (a <= 1){
+              return 0;
+            }else if (a < 10){
+              return 1;
+            }else if (a < 20){
+              return 2;
+            }else{
+              return 3;
+            }
+        }
+        int a = func(1);
+        int b = func(3);
+        int c = func(15);
+        int d = func(30);
+        """
+        ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 0)
+        XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 1)
+        XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 2)
+        XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 3)
+    }
+    
+    func testWhileStatement(){
+        let source =
+        """
+        int func(int x){
+            int a = 1;
+            while(a < x){
+                if (x < 3){
+                    break;
+                }
+                if (a == 12){
+                    return 18;
+                }
+                if (a == 10){
+                    a = 12;
+                    continue;
+                }
+                a++;
+            }
+            return a;
+        }
+        int a = func(2);
+        int b = func(3);
+        int c = func(15);
+        int d = func(30);
+        """
+        ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 1)
+        XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 3)
+        XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 18)
+        XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 18)
+    }
+    func testDoWhileStatement(){
+        let source =
+        """
+        int func(int x){
+            int a = 1;
+            do{
+                a++;
+                if (x < 3){
+                    break;
+                }
+                if (a == 12){
+                    return 18;
+                }
+                if (a == 10){
+                    a = 11;
+                    continue;
+                }
+            }while(a < x)
+            return a;
+        }
+        int a = func(2);
+        int b = func(3);
+        int c = func(15);
+        int d = func(30);
+        """
+        ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 2)
+        XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 3)
+        XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 18)
+        XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 18)
+    }
 }

@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)argsStack;
 - (void)push:(NSMutableArray <MFValue *> *)value;
 - (NSMutableArray <MFValue *> *)pop;
+- (BOOL)isEmpty;
 - (NSUInteger)size;
 
 @end

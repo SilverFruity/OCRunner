@@ -14,7 +14,35 @@
 #import "MFVarDeclareChain.h"
 #import "MFBlock.h"
 #import "MFValue.h"
-
+static MFValue * invoke_blockValue(MFValue *blockValue, NSArray *args){
+    const char *blockTypeEncoding = [MFBlock typeEncodingForBlock:blockValue.c2objectValue];
+    NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:blockTypeEncoding];
+    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
+    [invocation setTarget:blockValue.objectValue];
+    NSUInteger numberOfArguments = [sig numberOfArguments];
+    if (numberOfArguments - 1 != args.count) {
+        //            mf_throw_error(expr.lineNumber, MFRuntimeErrorParameterListCountNoMatch, @"expect count: %zd, pass in cout:%zd",numberOfArguments - 1,expr.args.count);
+        return nil;
+    }
+    //占位..
+    for (NSUInteger i = 1; i < numberOfArguments; i++) {
+        void *ptr = malloc(sizeof(char *));
+        [invocation setArgument:ptr atIndex:i];
+        free(ptr);
+    }
+    [invocation invoke];
+    const char *retType = [sig methodReturnType];
+    retType = removeTypeEncodingPrefix((char *)retType);
+    MFValue *retValue;
+    if (*retType != 'v') {
+        void *retValuePtr = alloca(mf_size_with_encoding(retType));
+        [invocation getReturnValue:retValuePtr];
+        retValue = [[MFValue alloc] initWithCValuePointer:retValuePtr typeEncoding:retType bridgeTransfer:NO];
+    }else{
+        retValue = [MFValue voidValueInstance];
+    }
+    return retValue;
+}
 static void *add_function(const char *funcReturnType, NSMutableArray <NSString *>*argTypes, void (*executeFunc)(ffi_cif*,void*,void**,void*), NSDictionary *userInfo){
     void *imp = NULL;
     ffi_cif *cif = malloc(sizeof(ffi_cif));//不可以free
@@ -445,67 +473,19 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         // TODO: 调用block
         // make.left.equalTo(xxxx);
         MFValue *value = [(ORMethodCall *)self.caller execute:scope];
-        const char *blockTypeEncoding = [MFBlock typeEncodingForBlock:value.c2objectValue];
-        NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:blockTypeEncoding];
-        NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
-        [invocation setTarget:value.objectValue];
-        NSUInteger numberOfArguments = [sig numberOfArguments];
-        if (numberOfArguments - 1 != self.expressions.count) {
-//            mf_throw_error(expr.lineNumber, MFRuntimeErrorParameterListCountNoMatch, @"expect count: %zd, pass in cout:%zd",numberOfArguments - 1,expr.args.count);
-            return nil;
-        }
-        //占位..
-        for (NSUInteger i = 1; i < numberOfArguments; i++) {
-            void *ptr = malloc(sizeof(char *));
-            [invocation setArgument:ptr atIndex:i];
-            free(ptr);
-        }
-        [invocation invoke];
-        const char *retType = [sig methodReturnType];
-        retType = removeTypeEncodingPrefix((char *)retType);
-        MFValue *retValue;
-        if (*retType != 'v') {
-            void *retValuePtr = alloca(mf_size_with_encoding(retType));
-            [invocation getReturnValue:retValuePtr];
-            retValue = [[MFValue alloc] initWithCValuePointer:retValuePtr typeEncoding:retType bridgeTransfer:NO];
+        if (value.typePair.type.type == TypeBlock) {
+            return invoke_blockValue(value, args);
         }else{
-            retValue = [MFValue voidValueInstance];
+            NSCAssert(0, @"must be a block value");
         }
-        return retValue;
     }
     if (self.caller.value_type == OCValueVariable) {
         MFValue *blockValue = [scope getValueWithIdentifier:self.caller.value];
         if (blockValue.typePair.type.type == TypeBlock) {
-            const char *blockTypeEncoding = [MFBlock typeEncodingForBlock:blockValue.c2objectValue];
-            NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:blockTypeEncoding];
-            NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
-            [invocation setTarget:blockValue.objectValue];
-            NSUInteger numberOfArguments = [sig numberOfArguments];
-            if (numberOfArguments - 1 != self.expressions.count) {
-            //            mf_throw_error(expr.lineNumber, MFRuntimeErrorParameterListCountNoMatch, @"expect count: %zd, pass in cout:%zd",numberOfArguments - 1,expr.args.count);
-                return nil;
-            }
-            //占位..
-            for (NSUInteger i = 1; i < numberOfArguments; i++) {
-                void *ptr = malloc(sizeof(char *));
-                [invocation setArgument:ptr atIndex:i];
-                free(ptr);
-            }
-            [invocation invoke];
-            const char *retType = [sig methodReturnType];
-            retType = removeTypeEncodingPrefix((char *)retType);
-            MFValue *retValue;
-            if (*retType != 'v') {
-                void *retValuePtr = alloca(mf_size_with_encoding(retType));
-                [invocation getReturnValue:retValuePtr];
-                retValue = [[MFValue alloc] initWithCValuePointer:retValuePtr typeEncoding:retType bridgeTransfer:NO];
-            }else{
-                retValue = [MFValue voidValueInstance];
-            }
-            return retValue;
+            return invoke_blockValue(blockValue, args);
         }else{
             ORBlockImp *imp = [scope getValueWithIdentifier:self.caller.value].objectValue;
-            [imp execute:scope];
+            return [imp execute:scope];
         }
     }
     return nil;
@@ -513,6 +493,14 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @end
 @implementation ORBlockImp(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
+    // C函数声明执行, 向全局作用域注册函数
+    if (scope == [MFScopeChain topScope] && self.declare && self.declare.var.ptCount == 0) {
+        NSString *funcName = self.declare.var.varname;
+        if ([scope getValueWithIdentifier:funcName] == nil) {
+            [scope setValue:[MFValue valueInstanceWithObject:self] withIndentifier:funcName];
+            return nil;
+        }
+    }
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
     if (self.declare) {
         if(self.declare.isBlockDeclare){
@@ -856,10 +844,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     ORIfStatement *ifStatement = self;
     while (ifStatement) {
         [statements insertObject:ifStatement atIndex:0];
-        ifStatement = self.last;
+        ifStatement = ifStatement.last;
     }
     for (ORIfStatement *statement in statements) {
-        if ([statement.condition execute:scope].isSubtantial) {
+        MFValue *conditionValue = [statement.condition execute:scope];
+        if (conditionValue.isSubtantial) {
             return [statement.funcImp execute:scope];
         }
     }
@@ -883,7 +872,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }else if (resultValue.isReturn){
             return resultValue;
         }else if (resultValue.isNormal){
-            return [MFValue normalEnd];
+            
         }
     }
     return [MFValue normalEnd];
@@ -901,9 +890,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }else if (resultValue.isReturn){
             return resultValue;
         }else if (resultValue.isNormal){
-            return [MFValue normalEnd];
+            
         }
-        
         if (![self.condition execute:scope].isSubtantial) {
             break;
         }

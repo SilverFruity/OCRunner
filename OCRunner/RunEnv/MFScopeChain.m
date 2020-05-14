@@ -121,7 +121,7 @@ const void *mf_propKey(NSString *propName) {
 		}else{
 			MFValue *srcValue = [pos getValueWithIdentifier:identifier];
 			if (srcValue) {
-//				[srcValue assignFrom:value];
+				[srcValue assignFrom:value];
 				return;
 			}
 		}
