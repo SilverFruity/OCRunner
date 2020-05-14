@@ -370,8 +370,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }
         case OCValueNSNumber:{
             MFValue *value = [self.value execute:scope];
-            UnaryExecuteBaseType(NSNumber *, unaryResultValue0, @, value);
-            return [MFValue valueInstanceWithObject:unaryResultValue0];
+            NSNumber *result = nil;
+            UnaryExecuteBaseType(result, @, value);
+            return [MFValue valueInstanceWithObject:result];
         }
         case OCValueString:{
             return [MFValue valueInstanceWithObject:self.value];
@@ -706,9 +707,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             return [MFValue valueInstanceWithBOOL:!currentValue.isSubtantial];
         }
         case UnaryOperatorSizeOf:{
-//            UnaryExecute(size_t, sizeof, 0, currentValue);
-            UnaryExecute(size_t, unaryResultValue0, sizeof, currentValue);
-            return [MFValue valueInstanceWithLongLong:unaryResultValue0];
+            size_t result = 0;
+            UnaryExecute(result, sizeof, currentValue);
+            return [MFValue valueInstanceWithLongLong:result];
         }
         case UnaryOperatorBiteNot:{
             PrefixUnaryExecuteInt(~, currentValue , resultValue);

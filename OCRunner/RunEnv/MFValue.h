@@ -135,8 +135,7 @@ default:\
 break;\
 }
 
-#define UnaryExecuteBaseType(resutlType,resultName,operator,value)\
-resutlType resultName;\
+#define UnaryExecuteBaseType(resultName,operator,value)\
 switch (value.typePair.type.type) {\
 case TypeUChar:\
 resultName = operator (value.uCharValue); break;\
@@ -169,14 +168,13 @@ break;\
 }
 
 
-#define UnaryExecute(resutlType,resultName,operator,value)\
-resutlType resultName;\
+#define UnaryExecute(resultName,operator,value)\
 do{\
     if (value.isPointer) {\
         resultName = operator (value.pointerValue);\
         break;\
     }\
-    UnaryExecuteBaseType(resutlType,resultName,operator,value)\
+    UnaryExecuteBaseType(resultName,operator,value)\
     switch (value.typePair.type.type) {\
     case TypeId:\
     case TypeObject:\

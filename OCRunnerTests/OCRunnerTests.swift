@@ -86,4 +86,105 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scopeValue!.typePair.type.type == TypeInt)
         XCTAssert(scopeValue!.intValue == 3)
     }
+    func testUnaryExpresssion() {
+        let source =
+        """
+        int a = 2;
+        int c = a++;
+        int d = a--;
+        a = 2;
+        int e = ++a;
+        int f = --a;
+        BOOL g = !a;
+        int h = sizeof(a);
+        int i = ~a;
+        int j = -a;
+        int *k = &a;
+        int l = *k;
+        """
+        ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 2)
+        XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 3)
+        XCTAssert(scope.getValueWithIdentifier("e")!.intValue == 3)
+        XCTAssert(scope.getValueWithIdentifier("f")!.intValue == 2)
+        XCTAssert(scope.getValueWithIdentifier("g")!.boolValue == false)
+        XCTAssert(scope.getValueWithIdentifier("h")!.intValue == 4)
+        XCTAssert(scope.getValueWithIdentifier("i")!.intValue == -3)
+        XCTAssert(scope.getValueWithIdentifier("j")!.intValue == -2)
+//        let k = scope.getValueWithIdentifier("k")!
+//        let pointer = k.pointerValue!
+//        let intPointer = pointer.assumingMemoryBound(to: Int.self)
+//        print(intPointer.pointee)
+        XCTAssert(scope.getValueWithIdentifier("l")!.intValue == 2)
+    }
+    func testBinaryExpresssion() {
+        let source =
+        """
+        int a = 2;
+        int b = 1;
+        int c = a + b;
+        int d = a - b;
+        int e = a * b;
+        int f = a / b;
+        int g = a % b;
+        int h = a << b;
+        int i = a >> b;
+        int j = a & 1;
+        int k = a ^ b;
+        int l = a | b;
+        Bool m = a < b;
+        Bool n = a > b;
+        Bool o = a <= b;
+        Bool p = a >= b;
+        Bool q = a && b;
+        Bool r = a || b;
+        Bool s = a != b;
+        Bool t = a == b;
+        """
+        ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 3)
+        XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 1)
+        XCTAssert(scope.getValueWithIdentifier("e")!.intValue == 2)
+        XCTAssert(scope.getValueWithIdentifier("f")!.intValue == 2)
+        XCTAssert(scope.getValueWithIdentifier("g")!.intValue == 0)
+        XCTAssert(scope.getValueWithIdentifier("h")!.intValue == 4)
+        XCTAssert(scope.getValueWithIdentifier("i")!.intValue == 1)
+        XCTAssert(scope.getValueWithIdentifier("j")!.intValue == 0)
+        XCTAssert(scope.getValueWithIdentifier("k")!.intValue == 3)
+        XCTAssert(scope.getValueWithIdentifier("l")!.intValue == 3)
+        XCTAssert(scope.getValueWithIdentifier("m")!.boolValue == false)
+        XCTAssert(scope.getValueWithIdentifier("n")!.boolValue == true)
+        XCTAssert(scope.getValueWithIdentifier("o")!.boolValue == false)
+        XCTAssert(scope.getValueWithIdentifier("p")!.boolValue == true)
+        XCTAssert(scope.getValueWithIdentifier("q")!.boolValue == true)
+        XCTAssert(scope.getValueWithIdentifier("r")!.boolValue == true)
+        XCTAssert(scope.getValueWithIdentifier("s")!.boolValue == true)
+        XCTAssert(scope.getValueWithIdentifier("t")!.boolValue == false)
+    }
+    
+    func testTernaryExpression() {
+        let source =
+        """
+        int a = 2;
+        int b = a? 1 : 3;
+        int c = a == 1 ? 1 : 3;
+        int d = a?:3;
+        """
+        ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 1)
+        XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 3)
+        XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 2)
+    }
 }
