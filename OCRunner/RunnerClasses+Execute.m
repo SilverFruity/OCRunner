@@ -462,7 +462,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     for (ORValueExpression *exp in self.values){
         [argValues addObject:[exp execute:scope]];
     }
-    NSString *selector = self.methodName;
+    NSString *selector = self.selectorName;
     SEL sel = NSSelectorFromString(selector);
     NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
     NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
