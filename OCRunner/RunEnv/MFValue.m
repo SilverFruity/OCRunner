@@ -57,7 +57,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 - (BOOL)isSubtantial{
     ValueDefineWithMFValue(0, self);
-    UnaryExecute(BOOL, !, 0, self);
+    UnaryExecute(BOOL, unaryResultValue0, !, self);
     return !unaryResultValue0;
 }
 
@@ -89,7 +89,9 @@ _uIntValue = (unsigned int) value;\
 _uLongValue = (unsigned long) value;\
 _uLongLongValue = (unsigned long long) value;\
 _floatValue = (float) value;\
-_doubleValue = (double) value;
+_doubleValue = (double) value;\
+_boolValue = (BOOL) value;
+
 - (void)setUCharValue:(unsigned char)uCharValue{
     MFConvertValue(uCharValue)
 }
@@ -126,6 +128,9 @@ _doubleValue = (double) value;
 - (void)setDoubleValue:(double)doubleValue{
     MFConvertValue(doubleValue)
 }
+- (void)setBoolValue:(BOOL)boolValue{
+    MFConvertValue(boolValue);
+}
 
 - (BOOL)isBaseValue{
 	return ![self isObject];
@@ -141,19 +146,16 @@ _doubleValue = (double) value;
     return NO;
 }
 - (MFValue *)subscriptGetWithIndex:(MFValue *)index{
-    ValueDefineWithMFValue(Self, self);
-    ValueDefineWithMFValue(Index, index);
     if (index.typePair.type.type & TypeBaseMask) {
-        HoleIntegerValue(Index, index);
-        return [MFValue valueInstanceWithObject:objectValueSelf[holeValue_int64_tIndex]];
+        return [MFValue valueInstanceWithObject:self.objectValue[index.longLongValue]];
     }
     switch (index.typePair.type.type) {
         case TypeBlock:
         case TypeObject:
-            return [MFValue valueInstanceWithObject:objectValueSelf[objectValueIndex]];
+            return [MFValue valueInstanceWithObject:self.objectValue[index.objectValue]];
             break;
         case TypeClass:
-            return [MFValue valueInstanceWithObject:objectValueSelf[classValueIndex]];
+            return [MFValue valueInstanceWithObject:self.objectValue[index.classValue]];
             break;
         default:
 //            NSCAssert(0, @"line:%zd, index operator can not use type: %@",expr.bottomExpr.lineNumber, bottomValue.type.typeName);
@@ -162,11 +164,8 @@ _doubleValue = (double) value;
     return nil;
 }
 - (void)subscriptSetValue:(MFValue *)value index:(MFValue *)index{
-    ValueDefineWithMFValue(Self, self);
-        ValueDefineWithMFValue(Index, index);
         if (index.typePair.type.type & TypeBaseMask) {
-            HoleIntegerValue(Index, index);
-            self.objectValue[holeValue_int64_tIndex] = value.objectValue;
+            self.objectValue[index.longLongValue] = value.objectValue;
         }
         switch (index.typePair.type.type) {
             case TypeBlock:

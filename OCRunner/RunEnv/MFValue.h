@@ -183,224 +183,223 @@ switch (target.typePair.type.type) {\
 #define HoleDoubleValue(suffix, target) HoleValue(double, suffix, target)
 
 
-#define PrefixUnaryExecuteInt(operator,suffix,target,resultSuffix)\
-switch (target.typePair.type.type) {\
+#define PrefixUnaryExecuteInt(operator,value,resultValue)\
+switch (value.typePair.type.type) {\
 case TypeUChar:\
-uCharValue##resultSuffix = (operator uCharValue##suffix); break;\
+resultValue.uCharValue = (operator value.uCharValue); break;\
 case TypeUShort:\
-uShortValue##resultSuffix = (operator uShortValue##suffix); break;\
+resultValue.uShortValue = (operator value.uShortValue); break;\
 case TypeUInt:\
-uIntValue##resultSuffix = (operator uIntValue##suffix); break;\
+resultValue.uIntValue = (operator value.uIntValue); break;\
 case TypeULong:\
-uLongValue##resultSuffix = (operator uLongValue##suffix); break;\
+resultValue.uLongValue = (operator value.uLongValue); break;\
 case TypeULongLong:\
-uLLongValue##resultSuffix = (operator uLLongValue##suffix); break;\
+resultValue.uLongLongValue = (operator value.uLongLongValue); break;\
 case TypeBOOL:\
-boolValue##resultSuffix = (operator boolValue##suffix); break;\
+resultValue.boolValue = (operator value.boolValue); break;\
 case TypeChar:\
-charValue##resultSuffix = (operator charValue##suffix); break;\
+resultValue.charValue = (operator value.charValue); break;\
 case TypeShort:\
-shortValue##resultSuffix = (operator shortValue##suffix); break;\
+resultValue.shortValue = (operator value.shortValue); break;\
 case TypeInt:\
-intValue##resultSuffix = (operator intValue##suffix); break;\
+resultValue.intValue = (operator value.intValue); break;\
 case TypeLong:\
-longValue##resultSuffix = (operator longValue##suffix); break;\
+resultValue.longValue = (operator value.longValue); break;\
 case TypeLongLong:\
-lLongValue##resultSuffix = (operator lLongValue##suffix); break;\
+resultValue.longLongValue = (operator value.longLongValue); break;\
 default:\
 break;\
 }
 
-#define PrefixUnaryExecuteFloat(operator,suffix,target,resultSuffix)\
-switch (target.typePair.type.type) {\
+#define PrefixUnaryExecuteFloat(operator,value,resultValue)\
+switch (value.typePair.type.type) {\
 case TypeFloat:\
-floatValue##resultSuffix = (operator floatValue##suffix); break;\
+resultValue.floatValue = (operator value.floatValue); break;\
 case TypeDouble:\
-doubleValue##resultSuffix = (operator doubleValue##suffix); break;\
+resultValue.doubleValue = (operator value.doubleValue); break;\
 default:\
 break;\
 }
 
-#define SuffixUnaryExecuteInt(operator,suffix,target,resultSuffix)\
-switch (target.typePair.type.type) {\
+#define SuffixUnaryExecuteInt(operator,value,resultValue)\
+switch (value.typePair.type.type) {\
 case TypeUChar:\
-uCharValue##resultSuffix = (uCharValue##suffix operator); break;\
+resultValue.uCharValue = (value.uCharValue operator); break;\
 case TypeUShort:\
-uShortValue##resultSuffix = (uShortValue##suffix operator); break;\
+resultValue.uShortValue = (value.uShortValue operator); break;\
 case TypeUInt:\
-uIntValue##resultSuffix = (uIntValue##suffix operator); break;\
+resultValue.uIntValue = (value.uIntValue operator); break;\
 case TypeULong:\
-uLongValue##resultSuffix = (uLongValue##suffix operator); break;\
+resultValue.uLongValue = (value.uLongValue operator); break;\
 case TypeULongLong:\
-uLLongValue##resultSuffix = (uLLongValue##suffix operator); break;\
+resultValue.uLongLongValue = (value.uLongLongValue operator); break;\
 case TypeBOOL:\
-boolValue##resultSuffix = (boolValue##suffix operator); break;\
+resultValue.boolValue = (value.boolValue operator); break;\
 case TypeChar:\
-charValue##resultSuffix = (charValue##suffix operator); break;\
+resultValue.charValue = (value.charValue operator); break;\
 case TypeShort:\
-shortValue##resultSuffix = (shortValue##suffix operator); break;\
+resultValue.shortValue = (value.shortValue operator); break;\
 case TypeInt:\
-intValue##resultSuffix = (intValue##suffix operator); break;\
+resultValue.intValue = (value.intValue operator); break;\
 case TypeLong:\
-longValue##resultSuffix = (longValue##suffix operator); break;\
+resultValue.longValue = (value.longValue operator); break;\
 case TypeLongLong:\
-lLongValue##resultSuffix = (lLongValue##suffix operator); break;\
+resultValue.longLongValue = (value.longLongValue operator); break;\
 default:\
 break;\
 }
 
-#define SuffixUnaryExecuteFloat(operator,suffix,target,resultSuffix)\
-switch (target.typePair.type.type) {\
+#define SuffixUnaryExecuteFloat(operator,value,resultValue)\
+switch (value.typePair.type.type) {\
 case TypeFloat:\
-floatValue##resultSuffix = (floatValue##suffix operator); break;\
+resultValue.floatValue = (value.floatValue operator); break;\
 case TypeDouble:\
-doubleValue##resultSuffix = (doubleValue##suffix operator); break;\
+resultValue.doubleValue = (value.doubleValue operator); break;\
 default:\
 break;\
 }
 
-#define UnaryExecuteBaseType(resutlType,operator,suffix,target)\
-resutlType unaryResultValue##suffix;\
-switch (target.typePair.type.type) {\
+#define UnaryExecuteBaseType(resutlType,resultName,operator,value)\
+resutlType resultName;\
+switch (value.typePair.type.type) {\
 case TypeUChar:\
-unaryResultValue##suffix = operator (uCharValue##suffix); break;\
+resultName = operator (value.uCharValue); break;\
 case TypeUShort:\
-unaryResultValue##suffix = operator (uShortValue##suffix); break;\
+resultName = operator (value.uShortValue); break;\
 case TypeUInt:\
-unaryResultValue##suffix = operator (uIntValue##suffix); break;\
+resultName = operator (value.uIntValue); break;\
 case TypeULong:\
-unaryResultValue##suffix = operator (uLongValue##suffix); break;\
+resultName = operator (value.uLongValue); break;\
 case TypeULongLong:\
-unaryResultValue##suffix = operator (uLLongValue##suffix); break;\
+resultName = operator (value.uLongLongValue); break;\
 case TypeBOOL:\
-unaryResultValue##suffix = operator (boolValue##suffix); break;\
+resultName = operator (value.boolValue); break;\
 case TypeChar:\
-unaryResultValue##suffix = operator (charValue##suffix); break;\
+resultName = operator (value.charValue); break;\
 case TypeShort:\
-unaryResultValue##suffix = operator (shortValue##suffix); break;\
+resultName = operator (value.shortValue); break;\
 case TypeInt:\
-unaryResultValue##suffix = operator (intValue##suffix); break;\
+resultName = operator (value.intValue); break;\
 case TypeLong:\
-unaryResultValue##suffix = operator (longValue##suffix); break;\
+resultName = operator (value.longValue); break;\
 case TypeLongLong:\
-unaryResultValue##suffix = operator (lLongValue##suffix); break;\
+resultName = operator (value.longLongValue); break;\
 case TypeFloat:\
-unaryResultValue##suffix = operator (floatValue##suffix); break;\
+resultName = operator (value.floatValue); break;\
 case TypeDouble:\
-unaryResultValue##suffix = operator (doubleValue##suffix); break;\
+resultName = operator (value.doubleValue); break;\
 default:\
 break;\
 }
 
 
-#define UnaryExecute(resutlType,operator,suffix,target)\
-resutlType unaryResultValue##suffix;\
+#define UnaryExecute(resutlType,resultName,operator,value)\
+resutlType resultName;\
 do{\
-    if (target.isPointer) {\
-        unaryResultValue##suffix = operator (pointerValue##suffix);\
+    if (value.isPointer) {\
+        resultName = operator (value.pointerValue);\
         break;\
     }\
-    UnaryExecuteBaseType(resutlType,operator,suffix,target)\
-    switch (target.typePair.type.type) {\
+    UnaryExecuteBaseType(resutlType,resultName,operator,value)\
+    switch (value.typePair.type.type) {\
     case TypeId:\
     case TypeObject:\
     case TypeBlock:\
-    unaryResultValue##suffix = operator (objectValue##suffix); break;\
+    resultName = operator (value.objectValue); break;\
     case TypeSEL:\
-    unaryResultValue##suffix = operator (selValue##suffix); break;\
+    resultName = operator (value.selValue); break;\
     case TypeClass:\
-    unaryResultValue##suffix = operator (classValue##suffix); break;\
+    resultName = operator (value.classValue); break;\
     default:\
     break;\
     }\
 }while(0)
 
 
-#define BinaryExecuteInt(left,operator,right,type,resultSuffix)\
-switch (type) {\
+#define BinaryExecuteInt(leftValue,operator,rightValue,resultValue)\
+switch (leftValue.typePair.type.type) {\
 case TypeUChar:\
-uCharValue##resultSuffix = (uCharValue##left operator uCharValue##right); break;\
+resultValue.uCharValue = (leftValue.uCharValue operator rightValue.uCharValue); break;\
 case TypeUShort:\
-uShortValue##resultSuffix = (uShortValue##left operator uShortValue##right); break;\
+resultValue.uShortValue = (leftValue.uShortValue operator rightValue.uShortValue); break;\
 case TypeUInt:\
-uIntValue##resultSuffix = (uIntValue##left operator uIntValue##right); break;\
+resultValue.uIntValue = (leftValue.uIntValue operator rightValue.uIntValue); break;\
 case TypeULong:\
-uLongValue##resultSuffix = (uLongValue##left operator uLongValue##right); break;\
+resultValue.uLongValue = (leftValue.uLongValue operator rightValue.uLongValue); break;\
 case TypeULongLong:\
-uLLongValue##resultSuffix = (uLLongValue##left operator uLLongValue##right); break;\
+resultValue.uLongLongValue = (leftValue.uLongLongValue operator rightValue.uLongLongValue); break;\
 case TypeBOOL:\
-boolValue##resultSuffix = (boolValue##left operator boolValue##right); break;\
+resultValue.boolValue = (leftValue.boolValue operator rightValue.boolValue); break;\
 case TypeChar:\
-charValue##resultSuffix = (charValue##left operator charValue##right); break;\
+resultValue.charValue = (leftValue.charValue operator rightValue.charValue); break;\
 case TypeShort:\
-shortValue##resultSuffix = (shortValue##left operator shortValue##right); break;\
+resultValue.shortValue = (leftValue.shortValue operator rightValue.shortValue); break;\
 case TypeInt:\
-intValue##resultSuffix = (intValue##left operator intValue##right); break;\
+resultValue.intValue = (leftValue.intValue operator rightValue.intValue); break;\
 case TypeLong:\
-longValue##resultSuffix = (longValue##left operator longValue##right); break;\
+resultValue.longValue = (leftValue.longValue operator rightValue.longValue); break;\
 case TypeLongLong:\
-lLongValue##resultSuffix = (lLongValue##left operator lLongValue##right); break;\
+resultValue.longLongValue = (leftValue.longLongValue operator rightValue.longLongValue); break;\
 default:\
 break;\
 }
 
-#define BinaryExecuteFloat(left,operator,right,type, resultSuffix)\
-switch (type) {\
+#define BinaryExecuteFloat(leftValue,operator,rightValue,resultValue)\
+switch (leftValue.typePair.type.type) {\
 case TypeFloat:\
-floatValue##resultSuffix = (floatValue##left operator floatValue##right); break;\
+resultValue.floatValue = (leftValue.floatValue operator rightValue.floatValue); break;\
 case TypeDouble:\
-doubleValue##resultSuffix = (doubleValue##left operator doubleValue##right); break;\
+resultValue.doubleValue = (leftValue.doubleValue operator rightValue.doubleValue); break;\
 default:\
 break;\
 }
 
-#define LogicBinaryOperatorExecute(left,operator,right,target)\
+#define LogicBinaryOperatorExecute(leftValue,operator,rightValue)\
 BOOL logicResultValue = NO;\
 do{\
-    if (target.isPointer) {\
-        logicResultValue= (pointerValue##left operator pointerValue##right);\
+    if (leftValue.isPointer) {\
+        logicResultValue= (leftValue.pointerValue operator rightValue.pointerValue);\
         break;\
     }\
-    switch (target.typePair.type.type) {\
+    switch (leftValue.typePair.type.type) {\
     case TypeUChar:\
-    logicResultValue = (uCharValue##left operator uCharValue##right); break;\
+    logicResultValue = (leftValue.uCharValue operator rightValue.uCharValue); break;\
     case TypeUShort:\
-    logicResultValue = (uShortValue##left operator uShortValue##right); break;\
+    logicResultValue = (leftValue.uShortValue operator rightValue.uShortValue); break;\
     case TypeUInt:\
-    logicResultValue = (uIntValue##left operator uIntValue##right); break;\
+    logicResultValue = (leftValue.uIntValue operator rightValue.uIntValue); break;\
     case TypeULong:\
-    logicResultValue = (uLongValue##left operator uLongValue##right); break;\
+    logicResultValue = (leftValue.uLongValue operator rightValue.uLongValue); break;\
     case TypeULongLong:\
-    logicResultValue = (uLLongValue##left operator uLLongValue##right); break;\
+    logicResultValue = (leftValue.uLongLongValue operator rightValue.uLongLongValue); break;\
     case TypeBOOL:\
-    logicResultValue = (boolValue##left operator boolValue##right); break;\
+    logicResultValue = (leftValue.boolValue operator rightValue.boolValue); break;\
     case TypeChar:\
-    logicResultValue = (charValue##left operator charValue##right); break;\
+    logicResultValue = (leftValue.charValue operator rightValue.charValue); break;\
     case TypeShort:\
-    logicResultValue = (shortValue##left operator shortValue##right); break;\
+    logicResultValue = (leftValue.shortValue operator rightValue.shortValue); break;\
     case TypeInt:\
-    logicResultValue = (intValue##left operator intValue##right); break;\
+    logicResultValue = (leftValue.intValue operator rightValue.intValue); break;\
     case TypeLong:\
-    logicResultValue = (longValue##left operator longValue##right); break;\
+    logicResultValue = (leftValue.longValue operator rightValue.longValue); break;\
     case TypeLongLong:\
-    logicResultValue = (lLongValue##left operator lLongValue##right); break;\
+    logicResultValue = (leftValue.longLongValue operator rightValue.longLongValue); break;\
     case TypeFloat:\
-    logicResultValue = (floatValue##left operator floatValue##right); break;\
+    logicResultValue = (leftValue.floatValue operator rightValue.floatValue); break;\
     case TypeDouble:\
-    logicResultValue = (doubleValue##left operator doubleValue##right); break;\
+    logicResultValue = (leftValue.doubleValue operator rightValue.doubleValue); break;\
     case TypeId:\
     case TypeObject:\
     case TypeBlock:\
-    logicResultValue = (objectValue##left operator objectValue##right); break;\
+    logicResultValue = (leftValue.objectValue operator rightValue.objectValue); break;\
     case TypeSEL:\
-    logicResultValue =  (selValue##left operator selValue##right); break;\
+    logicResultValue =  (leftValue.selValue operator rightValue.selValue); break;\
     case TypeClass:\
-    logicResultValue =  (classValue##left operator classValue##right); break;\
+    logicResultValue =  (leftValue.classValue operator rightValue.classValue); break;\
     default:\
     break;\
     }\
 }while(0)
-
 
 #define MFValueSetValue(target,resultSuffix)\
 do{\

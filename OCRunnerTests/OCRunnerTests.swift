@@ -70,10 +70,10 @@ class CRunnerTests: XCTestCase {
         let source =
         """
         int x = 2;
-        short (^a)(void) = ^short{
-            return 1 + x;
+        short (^a)(int) = ^short(int y){
+            return y + x;
         };
-        int b = a();
+        int b = a(1);
         """
         ocparser.parseSource(source)
         let exps = ocparser.ast.globalStatements as! [ORExpression]
@@ -81,9 +81,9 @@ class CRunnerTests: XCTestCase {
             exp.execute(scope);
         }
         let scopeValue = scope.getValueWithIdentifier("b")
+        XCTAssert(scope.vars.count == 3)
         XCTAssert(scopeValue!.typePair.type.type == TypeInt)
         XCTAssert(scopeValue!.typePair.type.type == TypeInt)
-
         XCTAssert(scopeValue!.intValue == 3)
     }
 }

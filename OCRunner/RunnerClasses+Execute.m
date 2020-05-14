@@ -370,8 +370,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }
         case OCValueNSNumber:{
             MFValue *value = [self.value execute:scope];
-            ValueDefineWithMFValue(0, value);
-            UnaryExecuteBaseType(NSNumber *, @, 0, value);
+            UnaryExecuteBaseType(NSNumber *, unaryResultValue0, @, value);
             return [MFValue valueInstanceWithObject:unaryResultValue0];
         }
         case OCValueString:{
@@ -686,39 +685,40 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     resultValue.typePair = currentValue.typePair;
     switch (self.operatorType) {
         case UnaryOperatorIncrementSuffix:{
-            SuffixUnaryExecuteInt(++, 0 , currentValue, Result);
-            SuffixUnaryExecuteFloat(++, 0, currentValue, Result);
+            SuffixUnaryExecuteInt(++, currentValue , resultValue);
+            SuffixUnaryExecuteFloat(++, currentValue , resultValue);
             break;
         }
         case UnaryOperatorDecrementSuffix:{
-            SuffixUnaryExecuteInt(--, 0 , currentValue, Result);
-            SuffixUnaryExecuteFloat(--, 0, currentValue, Result);
+            SuffixUnaryExecuteInt(--, currentValue , resultValue);
+            SuffixUnaryExecuteFloat(--, currentValue , resultValue);
             break;
         }
         case UnaryOperatorIncrementPrefix:{
-            PrefixUnaryExecuteInt(++, 0 , currentValue, Result);
-            PrefixUnaryExecuteFloat(++, 0, currentValue, Result);
+            PrefixUnaryExecuteInt(++, currentValue , resultValue);
+            PrefixUnaryExecuteFloat(++, currentValue , resultValue);
             break;
         }
         case UnaryOperatorDecrementPrefix:{
-            PrefixUnaryExecuteInt(--, 0 , currentValue, Result);
-            PrefixUnaryExecuteFloat(--, 0, currentValue, Result);
+            PrefixUnaryExecuteInt(--, currentValue , resultValue);
+            PrefixUnaryExecuteFloat(--, currentValue , resultValue);
             break;
         }
         case UnaryOperatorNot:{
             return [MFValue valueInstanceWithBOOL:!currentValue.isSubtantial];
         }
         case UnaryOperatorSizeOf:{
-            UnaryExecute(size_t, sizeof, 0 , currentValue);
+//            UnaryExecute(size_t, sizeof, 0, currentValue);
+            UnaryExecute(size_t, unaryResultValue0, sizeof, currentValue);
             return [MFValue valueInstanceWithLongLong:unaryResultValue0];
         }
         case UnaryOperatorBiteNot:{
-            PrefixUnaryExecuteInt(~, 0, currentValue, Result);
+            PrefixUnaryExecuteInt(~, currentValue , resultValue);
             break;
         }
         case UnaryOperatorNegative:{
-            PrefixUnaryExecuteInt(-, 0 , currentValue, Result);
-            PrefixUnaryExecuteFloat(-, 0, currentValue, Result);;
+            PrefixUnaryExecuteInt(-, currentValue , resultValue);
+            PrefixUnaryExecuteFloat(-, currentValue , resultValue);;
             break;
         }
         case UnaryOperatorAdressPoint:{
@@ -739,100 +739,94 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         default:
             break;
     }
-    MFValueSetValue(resultValue, Result);
     return resultValue;
 }@end
 @implementation ORBinaryExpression(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *rightValue = [self.right execute:scope];
     MFValue *leftValue = [self.left execute:scope];
-    ValueDefineWithMFValue(left, leftValue);
-    ValueDefineWithMFValue(right, rightValue);
-    ValueDefineWithSuffix(Result);
-    TypeKind type = rightValue.typePair.type.type;
     MFValue *resultValue = [MFValue new];
-    [resultValue setValueType:type];
+    [resultValue setValueType:leftValue.typePair.type.type];
     switch (self.operatorType) {
         case BinaryOperatorAdd:{
-            BinaryExecuteInt(left, +, right, type, Result);
-            BinaryExecuteFloat(left, +, right, type, Result);
+            BinaryExecuteInt(leftValue, +, rightValue, resultValue);
+            BinaryExecuteFloat(leftValue, +, rightValue, resultValue);
             break;
         }
         case BinaryOperatorSub:{
-            BinaryExecuteInt(left, -, right, type, Result);
-            BinaryExecuteFloat(left, -, right, type, Result);
+            BinaryExecuteInt(leftValue, -, rightValue, resultValue);
+            BinaryExecuteFloat(leftValue, -, rightValue, resultValue);
             break;
         }
         case BinaryOperatorDiv:{
-            BinaryExecuteInt(left, /, right, type, Result);
-            BinaryExecuteFloat(left, /, right, type, Result);
+            BinaryExecuteInt(leftValue, /, rightValue, resultValue);
+            BinaryExecuteFloat(leftValue, /, rightValue, resultValue);
             break;
         }
         case BinaryOperatorMulti:{
-            BinaryExecuteInt(left, *, right, type, Result);
-            BinaryExecuteFloat(left, *, right, type, Result);
+            BinaryExecuteInt(leftValue, *, rightValue, resultValue);
+            BinaryExecuteFloat(leftValue, *, rightValue, resultValue);
             break;
         }
         case BinaryOperatorMod:{
-            BinaryExecuteInt(left, %, right, type, Result);
+            BinaryExecuteInt(leftValue, %, rightValue, resultValue);
             break;
         }
         case BinaryOperatorShiftLeft:{
-            BinaryExecuteInt(left, <<, right, type, Result);
+            BinaryExecuteInt(leftValue, <<, rightValue, resultValue);
             break;
         }
         case BinaryOperatorShiftRight:{
-            BinaryExecuteInt(left, >>, right, type, Result);
+            BinaryExecuteInt(leftValue, >>, rightValue, resultValue);
             break;
         }
         case BinaryOperatorAnd:{
-            BinaryExecuteInt(left, &, right, type, Result);
+            BinaryExecuteInt(leftValue, &, rightValue, resultValue);
             break;
         }
         case BinaryOperatorOr:{
-            BinaryExecuteInt(left, |, right, type, Result);
+            BinaryExecuteInt(leftValue, |, rightValue, resultValue);
             break;
         }
         case BinaryOperatorXor:{
-            BinaryExecuteInt(left, ^, right, type, Result);
+            BinaryExecuteInt(leftValue, ^, rightValue, resultValue);
             break;
         }
         case BinaryOperatorLT:{
-            LogicBinaryOperatorExecute(left, <, right, leftValue);
+            LogicBinaryOperatorExecute(leftValue, <, rightValue);
             return [MFValue valueInstanceWithBOOL:logicResultValue];
         }
         case BinaryOperatorGT:{
-            LogicBinaryOperatorExecute(left, >, right, leftValue);
+            LogicBinaryOperatorExecute(leftValue, >, rightValue);
             return [MFValue valueInstanceWithBOOL:logicResultValue];
         }
         case BinaryOperatorLE:{
-            LogicBinaryOperatorExecute(left, <=, right, leftValue);
+            LogicBinaryOperatorExecute(leftValue, <=, rightValue);
             return [MFValue valueInstanceWithBOOL:logicResultValue];
         }
         case BinaryOperatorGE:{
-            LogicBinaryOperatorExecute(left, >=, right, leftValue);
+            LogicBinaryOperatorExecute(leftValue, >=, rightValue);
             return [MFValue valueInstanceWithBOOL:logicResultValue];
         }
         case BinaryOperatorNotEqual:{
-            LogicBinaryOperatorExecute(left, !=, right, leftValue);
+            LogicBinaryOperatorExecute(leftValue, !=, rightValue);
             return [MFValue valueInstanceWithBOOL:logicResultValue];
         }
         case BinaryOperatorEqual:{
-            LogicBinaryOperatorExecute(left, ==, right, leftValue);
+            LogicBinaryOperatorExecute(leftValue, ==, rightValue);
             return [MFValue valueInstanceWithBOOL:logicResultValue];
         }
         case BinaryOperatorLOGIC_AND:{
-            LogicBinaryOperatorExecute(left, &&, right, leftValue);
+            LogicBinaryOperatorExecute(leftValue, &&, rightValue);
             return [MFValue valueInstanceWithBOOL:logicResultValue];
         }
         case BinaryOperatorLOGIC_OR:{
-            LogicBinaryOperatorExecute(left, ||, right, leftValue);
+            LogicBinaryOperatorExecute(leftValue, ||, rightValue);
             return [MFValue valueInstanceWithBOOL:logicResultValue];
         }
         default:
             break;
     }
-    MFValueSetValue(resultValue, Result);
     return resultValue;
 }
 @end
@@ -932,8 +926,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         if (statement.value) {
             if (!hasMatch) {
                 MFValue *caseValue = [statement.value execute:scope];
-                ValueDefineWithMFValue(Case, caseValue);
-                LogicBinaryOperatorExecute(Switch, ==, Case,value);
+                LogicBinaryOperatorExecute(value, ==, caseValue);
                 hasMatch = logicResultValue;
                 if (!hasMatch) {
                     continue;
