@@ -306,7 +306,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }else if (exprOrStatementClass == ORForStatement.class){
         ORForStatement *forStatement = (ORForStatement *)exprOrStatement;
         MFVarDeclareChain *forChain = [MFVarDeclareChain varDeclareChainWithNext:chain];
-        copy_undef_vars(forStatement.declareExpressions, forChain, fromScope, destScope);
+        copy_undef_vars(forStatement.varExpressions, forChain, fromScope, destScope);
         copy_undef_var(forStatement.condition, forChain, fromScope, destScope);
         copy_undef_vars(forStatement.expressions, forChain, fromScope, destScope);
         copy_undef_var(forStatement.funcImp, forChain, fromScope, destScope);
@@ -355,10 +355,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     switch (self.value_type) {
         case OCValueVariable:{
-            return [scope getValueWithIdentifier:self.value];
-        }
-        case OCValueClassName:{
-            return [MFValue valueInstanceWithClass:NSClassFromString(self.value)];
+            MFValue *value = [scope getValueWithIdentifier:self.value];
+            if (!value) {
+                value = [MFValue valueInstanceWithClass:NSClassFromString(self.value)];
+            }
+            return value;
         }
         case OCValueSelf:{
             return [scope getValueWithIdentifier:@"self"];
@@ -391,7 +392,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             NSMutableArray *array = [NSMutableArray array];
             for (ORExpression *exp in exps) {
                 id value = [exp execute:scope].objectValue;
-                NSAssert(value == nil, @"the vale of NSArray can't be nil");
+                NSAssert(value != nil, @"the vale of NSArray can't be nil");
                 [array addObject:value];
             }
             return [MFValue valueInstanceWithObject:[array copy]];
@@ -437,12 +438,12 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @end
 @implementation ORMethodCall(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
+    id instance = [self.caller execute:scope].objectValue;
     NSMutableArray *argValues = [NSMutableArray array];
     for (ORValueExpression *exp in self.values){
         [argValues addObject:[exp execute:scope]];
     }
     [[MFStack argsStack] push:argValues];
-    id instance = scope.selfInstance;
     NSString *selector = [self.names componentsJoinedByString:@":"];
     if (self.values.count >= 1) {
         selector = [selector stringByAppendingString:@":"];
@@ -460,7 +461,25 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }
     // func replaceIMP execute
     [invocation invoke];
-    return nil;
+    char *returnType = (char *)[sig methodReturnType];
+    returnType = removeTypeEncodingPrefix(returnType);
+    MFValue *retValue;
+    if (*returnType != 'v') {
+        void *retValuePointer = malloc([sig methodReturnLength]);
+        [invocation getReturnValue:retValuePointer];
+        NSString *selectorName = NSStringFromSelector(sel);
+        if ([selectorName isEqualToString:@"alloc"] || [selectorName isEqualToString:@"new"] ||
+            [selectorName isEqualToString:@"copy"] || [selectorName isEqualToString:@"mutableCopy"]) {
+            retValue = [[MFValue alloc] initWithCValuePointer:retValuePointer typeEncoding:returnType bridgeTransfer:YES];
+        }else{
+            retValue = [[MFValue alloc] initWithCValuePointer:retValuePointer typeEncoding:returnType bridgeTransfer:NO];
+        }
+        
+        free(retValuePointer);
+    }else{
+        retValue = [MFValue voidValueInstance];
+    }
+    return retValue;
 }@end
 @implementation ORCFuncCall(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
@@ -920,11 +939,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             MFValue *result = [statement.funcImp execute:scope];
             if (result.isBreak) {
                 result.resultType = MFStatementResultTypeNormal;
-                return value;
+                return result;
             }else if (result.isNormal){
                 continue;
             }else{
-                return value;
+                return result;
             }
         }else{
             MFValue *result = [statement.funcImp execute:scope];
@@ -939,8 +958,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @implementation ORForStatement (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
-    for (ORDeclareExpression *declare in self.declareExpressions) {
-        [declare execute:current];
+    for (ORExpression *exp in self.varExpressions) {
+        [exp execute:current];
     }
     while (1) {
         if (![self.condition execute:current].isSubtantial) {
@@ -955,7 +974,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }else if (result.isContinue){
             continue;
         }
-        for (ORValueExpression *exp in self.expressions) {
+        for (ORExpression *exp in self.expressions) {
             [exp execute:(MFScopeChain *)current];
         }
     }
@@ -974,7 +993,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             return result;
         }else if(result.isContinue){
             continue;
-        }else{
+        }else if (result.isReturn){
             return result;
         }
     }

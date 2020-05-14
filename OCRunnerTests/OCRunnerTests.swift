@@ -287,4 +287,136 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 18)
         XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 18)
     }
+    func testSwitchStatement(){
+        let source =
+        """
+        int func(int x){
+            int a = 0;
+            switch (x){
+                case 0:
+                    a = x + 3;
+                    break;
+                case 1:
+                    return 111;
+                case 2:
+                    break;
+                default:
+                    a = 222;
+                    break;
+            }
+            return a;
+        }
+        int a = func(0);
+        int b = func(1);
+        int c = func(2);
+        int d = func(3);
+        """
+        ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 3)
+        XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 111)
+        XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 0)
+        XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 222)
+    }
+    
+    func testForStatement(){
+        let source =
+        """
+        int func(int x){
+            int a = 1;
+            for (a; a < x; a++){
+                if (x == 2){
+                    a = 10;
+                    break;
+                }
+                if (a == 2){
+                    a = 100;
+                    continute;
+                }
+                if (a == 3){
+                  return a;
+                }
+            }
+            return a;
+        }
+        int a = func(0);
+        int b = func(2);
+        int c = func(3);
+        int d = func(4);
+        """
+        ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 1)
+        XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 10)
+        print(scope.getValueWithIdentifier("c")!.intValue)
+        XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 101)
+        XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 101)
+    }
+    func testForStatementWithDeclare(){
+        let source =
+        """
+        int func(int x){
+            int b = 0;
+            for (int a = 1; a < x; a++){
+                if (x == 2){
+                    b = 10;
+                    break;
+                }
+                if (a == 2){
+                    b = 100;
+                    continute;
+                }
+                if (a == 3){
+                  return b;
+                }
+            }
+            return b;
+        }
+        int a = func(0);
+        int b = func(2);
+        int c = func(3);
+        int d = func(4);
+        """
+        ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 0)
+        XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 10)
+        XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 100)
+        XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 100)
+    }
+    
+    func testForInStatement(){
+        let source =
+        """
+        int func(NSArray *x){
+            int b = 0;
+            for (NSNumber *value in x){
+                if ([value intValue] == 1)
+                    b += 1;
+                else if([value intValue] == 2)
+                    b += 2;
+                else
+                    b += 3;
+            }
+            return b;
+        }
+        int a = func(@[@(1),@(2),@(3)]);
+        """
+        ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        print(scope.getValueWithIdentifier("a")!.intValue)
+        XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 6)
+    }
 }
