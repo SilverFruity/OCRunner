@@ -263,7 +263,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         ORBlockImp *expr = (ORBlockImp *)exprOrStatement;
         ORFuncDeclare *funcDeclare = expr.declare;
         MFVarDeclareChain *funcChain = [MFVarDeclareChain varDeclareChainWithNext:chain];
-        NSArray <ORTypeVarPair *>*params = funcDeclare.var.pairs;
+        NSArray <ORTypeVarPair *>*params = funcDeclare.funVar.pairs;
         for (ORTypeVarPair *param in params) {
             [funcChain addIndentifer:param.var.varname];
         }
@@ -346,7 +346,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     NSMutableArray * parameters = [[MFStack argsStack] pop];
     [parameters enumerateObjectsUsingBlock:^(MFValue * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [scope setValue:obj withIndentifier:self.var.pairs[idx].var.varname];
+        [scope setValue:obj withIndentifier:self.funVar.pairs[idx].var.varname];
     }];
     return nil;
 }
@@ -513,8 +513,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @implementation ORBlockImp(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     // C函数声明执行, 向全局作用域注册函数
-    if (scope == [MFScopeChain topScope] && self.declare && self.declare.var.ptCount == 0) {
-        NSString *funcName = self.declare.var.varname;
+    if (scope == [MFScopeChain topScope] && self.declare && self.declare.funVar.ptCount == 0) {
+        NSString *funcName = self.declare.funVar.varname;
         if ([scope getValueWithIdentifier:funcName] == nil) {
             [scope setValue:[MFValue valueInstanceWithObject:self] withIndentifier:funcName];
             return nil;
@@ -535,7 +535,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             manBlock.outScope = blockScope;
             const char *typeEncoding = OCTypeEncodingForPair(manBlock.func.declare.returnType);
             typeEncoding = mf_str_append(typeEncoding, "@?");
-            for (ORTypeVarPair *param in manBlock.func.declare.var.pairs) {
+            for (ORTypeVarPair *param in manBlock.func.declare.funVar.pairs) {
                 const char *paramTypeEncoding = OCTypeEncodingForPair(param);
                 typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
             }
