@@ -450,4 +450,19 @@ class CRunnerTests: XCTestCase {
         assert(test.arg1(NSNumber.init(value: 10)) == 10)
         
     }
+    func testMultiArgsFunCall(){
+        let source =
+        """
+        NSString *b = [NSString stringWithFormat:@"%@",sss];
+        """
+        ocparser.parseSource(source)
+        let classes = ocparser.ast.classCache.allValues as! [ORClass];
+        for classValue in classes {
+            classValue.execute(scope);
+        }
+        print(scope.getValueWithIdentifier("b"))
+    }
+    func testSequentia(){
+        
+    }
 }
