@@ -18,20 +18,17 @@
 - (int)arg1:(NSNumber *)arg1 arg2:(NSNumber *)arg2{
     return 0;
 }
-- (BOOL)testInstanceMethodReplace{
-    return NO;
-}
 + (BOOL)testClassMethodReplaceTest{
     return NO;
 }
-- (NSString *)testOriginalMethod{
-    return nil;
+- (NSInteger)testOriginalMethod{
+    return 1;
 }
 - (NSString *)testSuperMethodReplaceTest{
     return nil;
 }
-- (BOOL)testAddGlobalVar{
-    return NO;
+- (NSInteger)testAddGlobalVar{
+    return 1;
 }
 - (NSDictionary* (^)(void))testMethodParameterListAndReturnValueWithString:(NSString *)str block:(NSString *(^)(NSString *))block{
     return nil;

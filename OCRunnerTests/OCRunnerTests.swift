@@ -422,6 +422,7 @@ class CRunnerTests: XCTestCase {
     func testClassMethodReplace(){
         let source =
         """
+        int globalVar = 1111;
         @interface ORTestReplaceClass : NSObject
         - (int)test;
         - (int)arg1:(NSNumber *)arg1;
@@ -437,30 +438,47 @@ class CRunnerTests: XCTestCase {
         - (int)arg1:(NSNumber *)arg1 arg2:(NSNumber *)arg2{
             return [arg1 intValue] + [arg2 intValue];
         }
+        + (BOOL)testClassMethodReplaceTest{
+            return YES;
+        }
+        - (NSString *)testOriginalMethod{
+            return 1 + [self ORGtestOriginalMethod];
+        }
+        - (NSInteger)testAddGlobalVar{
+            return globalVar;
+        }
         @end
         """
         ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
         let classes = ocparser.ast.classCache.allValues as! [ORClass];
         for classValue in classes {
             classValue.execute(scope);
         }
         let test = ORTestReplaceClass.init()
-        assert(test.test() == 1)
-        assert(test.arg1(NSNumber.init(value: 2), arg2: NSNumber.init(value: 3)) == 5)
-        assert(test.arg1(NSNumber.init(value: 10)) == 10)
-        
+        XCTAssert(test.test() == 1)
+        XCTAssert(test.arg1(NSNumber.init(value: 2), arg2: NSNumber.init(value: 3)) == 5)
+        XCTAssert(test.arg1(NSNumber.init(value: 10)) == 10)
+        XCTAssert(ORTestReplaceClass.testMethodReplaceTest())
+        XCTAssert(test.testOriginalMethod() == 2)
+        XCTAssert(test.testAddGlobalVar() == 1111)
     }
     func testMultiArgsFunCall(){
         let source =
         """
-        NSString *b = [NSString stringWithFormat:@"%@",sss];
+        NSString *b = [NSString stringWithFormat:@"%@",@"sss"];
         """
         ocparser.parseSource(source)
-        let classes = ocparser.ast.classCache.allValues as! [ORClass];
-        for classValue in classes {
-            classValue.execute(scope);
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
         }
-        print(scope.getValueWithIdentifier("b"))
+        if let object = scope.getValueWithIdentifier("b")?.objectValue as? String{
+            XCTAssert(object == "sss",object)
+        }
     }
     func testSequentia(){
         

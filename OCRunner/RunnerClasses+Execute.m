@@ -457,8 +457,16 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @end
 @implementation ORMethodCall(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
-    id instance = [self.caller execute:scope].objectValue;
-    NSMutableArray *argValues = [NSMutableArray array];
+    MFValue *variable = [self.caller execute:scope];
+    id instance = variable.objectValue;
+    if (!instance) {
+        if (variable.classValue) {
+            instance = variable.classValue;
+        }else{
+            NSCAssert(0, @"objectValue or classValue must has one");
+        }
+    }
+    NSMutableArray <MFValue *>*argValues = [NSMutableArray array];
     for (ORValueExpression *exp in self.values){
         [argValues addObject:[exp execute:scope]];
     }
@@ -470,6 +478,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     invocation.selector = sel;
     NSUInteger argCount = [sig numberOfArguments];
     //根据MFValue的type传入值的原因: 模拟在OC中的调用
+    //FIXME: 多参数问题，self.values.count + 2 > argCount 时，采用多参数，超出参数压栈
     for (NSUInteger i = 2; i < argCount; i++) {
         const char *typeEncoding = [sig getArgumentTypeAtIndex:i];
         void *ptr = alloca(mf_size_with_encoding(typeEncoding));

@@ -15,11 +15,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (int)arg1:(NSNumber *)arg1;
 - (int)arg1:(NSNumber *)arg1 arg2:(NSNumber *)arg2;
 - (void *)valueAdress;
-- (BOOL)testInstanceMethodReplace;;
 + (BOOL)testClassMethodReplaceTest;
-- (NSString *)testOriginalMethod;
+- (NSInteger)testOriginalMethod;
 - (NSString *)testSuperMethodReplaceTest;
-- (BOOL)testAddGlobalVar;
+- (NSInteger)testAddGlobalVar;
 - (NSDictionary *(^)(void))testMethodParameterListAndReturnValueWithString:(NSString *)str block:(NSString *(^)(NSString *))block;
 @end
 
