@@ -17,7 +17,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void *)valueAdress;
 + (BOOL)testClassMethodReplaceTest;
 - (NSInteger)testOriginalMethod;
-- (NSString *)testSuperMethodReplaceTest;
 - (NSInteger)testAddGlobalVar;
 - (NSDictionary *(^)(void))testMethodParameterListAndReturnValueWithString:(NSString *)str block:(NSString *(^)(NSString *))block;
 @end

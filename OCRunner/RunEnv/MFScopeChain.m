@@ -168,14 +168,11 @@ const void *mf_propKey(NSString *propName) {
                 }
                 pos = pos.next;
                 return value;
-                
             }
-        }else{
-            MFValue *value = [pos getValueWithIdentifier:identifier];
-            if (value) {
-                pos = pos.next;
-                return value;
-            }
+        }
+        MFValue *value = [pos getValueWithIdentifier:identifier];
+        if (value) {
+            return value;
         }
         pos = pos.next;
     } while ((pos != endScope) && (self != endScope));

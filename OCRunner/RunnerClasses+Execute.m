@@ -14,6 +14,117 @@
 #import "MFVarDeclareChain.h"
 #import "MFBlock.h"
 #import "MFValue.h"
+#import <objc/message.h>
+static MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValues){
+    BOOL isClassMethod = object_isClass(instance);
+    Class superClass;
+    if (isClassMethod) {
+        superClass = class_getSuperclass(instance);
+    }else{
+        superClass = class_getSuperclass([instance class]);
+    }
+    struct objc_super *superPtr = &(struct objc_super){instance,superClass};
+    NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
+    NSUInteger argCount = sig.numberOfArguments;
+    
+    void **args = alloca(sizeof(void *) * argCount);
+    ffi_type **argTypes = alloca(sizeof(ffi_type *) * argCount);
+    
+    argTypes[0] = &ffi_type_pointer;
+    args[0] = &superPtr;
+    
+    argTypes[1] = &ffi_type_pointer;
+    args[1] = &sel;
+    
+    for (NSUInteger i = 2; i < argCount; i++) {
+        MFValue *argValue = argValues[i-2];
+        char *argTypeEncoding = (char *)[sig getArgumentTypeAtIndex:i];
+        argTypeEncoding = removeTypeEncodingPrefix(argTypeEncoding);
+#define mf_SET_FFI_TYPE_AND_ARG_CASE(_code, _type, _ffi_type_value, _sel)\
+case _code:{\
+argTypes[i] = &_ffi_type_value;\
+_type value = (_type)argValue._sel;\
+args[i] = &value;\
+break;\
+}
+        switch (*argTypeEncoding) {
+                mf_SET_FFI_TYPE_AND_ARG_CASE('c', char, ffi_type_schar, charValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('i', int, ffi_type_sint, intValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('s', short, ffi_type_sshort, shortValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('l', long, ffi_type_slong, longValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('q', long long, ffi_type_sint64, longLongValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('C', unsigned char, ffi_type_uchar, uCharValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('I', unsigned int, ffi_type_uint, uIntValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('S', unsigned short, ffi_type_ushort, uShortValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('L', unsigned long, ffi_type_ulong, uLongValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('Q', unsigned long long, ffi_type_uint64, uLongLongValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('B', BOOL, ffi_type_sint8, boolValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('f', float, ffi_type_float, floatValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('d', double, ffi_type_double, doubleValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('@', id, ffi_type_pointer, c2objectValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('#', Class, ffi_type_pointer, c2objectValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE(':', SEL, ffi_type_pointer, selValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('*', char *, ffi_type_pointer, c2pointerValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('^', id, ffi_type_pointer, c2pointerValue)
+            default:
+                NSCAssert(0, @"not support type  %s", argTypeEncoding);
+                break;
+        }
+        
+    }
+    
+    char *returnTypeEncoding = (char *)[sig methodReturnType];
+    returnTypeEncoding = removeTypeEncodingPrefix(returnTypeEncoding);
+    ffi_type *rtype = NULL;
+    void *rvalue = NULL;
+#define mf_FFI_RETURN_TYPE_CASE(_code, _ffi_type)\
+case _code:{\
+rtype = &_ffi_type;\
+rvalue = alloca(rtype->size);\
+break;\
+}
+    
+    switch (*returnTypeEncoding) {
+            mf_FFI_RETURN_TYPE_CASE('c', ffi_type_schar)
+            mf_FFI_RETURN_TYPE_CASE('i', ffi_type_sint)
+            mf_FFI_RETURN_TYPE_CASE('s', ffi_type_sshort)
+            mf_FFI_RETURN_TYPE_CASE('l', ffi_type_slong)
+            mf_FFI_RETURN_TYPE_CASE('q', ffi_type_sint64)
+            mf_FFI_RETURN_TYPE_CASE('C', ffi_type_uchar)
+            mf_FFI_RETURN_TYPE_CASE('I', ffi_type_uint)
+            mf_FFI_RETURN_TYPE_CASE('S', ffi_type_ushort)
+            mf_FFI_RETURN_TYPE_CASE('L', ffi_type_ulong)
+            mf_FFI_RETURN_TYPE_CASE('Q', ffi_type_uint64)
+            mf_FFI_RETURN_TYPE_CASE('B', ffi_type_sint8)
+            mf_FFI_RETURN_TYPE_CASE('f', ffi_type_float)
+            mf_FFI_RETURN_TYPE_CASE('d', ffi_type_double)
+            mf_FFI_RETURN_TYPE_CASE('@', ffi_type_pointer)
+            mf_FFI_RETURN_TYPE_CASE('#', ffi_type_pointer)
+            mf_FFI_RETURN_TYPE_CASE(':', ffi_type_pointer)
+            mf_FFI_RETURN_TYPE_CASE('^', ffi_type_pointer)
+            mf_FFI_RETURN_TYPE_CASE('*', ffi_type_pointer)
+            mf_FFI_RETURN_TYPE_CASE('v', ffi_type_void)
+        case '{':{
+            rtype = mf_ffi_type_with_type_encoding(returnTypeEncoding);
+            rvalue = alloca(rtype->size);
+        }
+            
+        default:
+            NSCAssert(0, @"not support type  %s", returnTypeEncoding);
+            break;
+    }
+    ffi_cif cif;
+    ffi_prep_cif(&cif, FFI_DEFAULT_ABI, (unsigned int)argCount, rtype, argTypes);
+    ffi_call(&cif, objc_msgSendSuper, rvalue, args);
+    MFValue *retValue;
+    if (*returnTypeEncoding != 'v') {
+        retValue = [[MFValue alloc] initWithCValuePointer:rvalue typeEncoding:returnTypeEncoding bridgeTransfer:NO];
+    }else{
+        retValue = [MFValue voidValueInstance];
+    }
+    return retValue;
+}
+
 static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
     const char *blockTypeEncoding = [MFBlock typeEncodingForBlock:blockValue.c2objectValue];
     NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:blockTypeEncoding];
@@ -67,10 +178,14 @@ static void methodIMP(ffi_cif *cif, void *ret, void **args, void *userdata){
     Class class  = userInfo[@"class"];
     NSString *typeEncoding = userInfo[@"typeEncoding"];
     MFScopeChain *scope = userInfo[@"scope"];
-    id assignSlf = (__bridge  id)(*(void **)args[0]);
-    [scope setValue:[MFValue valueInstanceWithObject:assignSlf] withIndentifier:@"self"];
+    id assignSelf = (__bridge  id)(*(void **)args[0]);
+    BOOL classMethod = object_isClass(assignSelf);
+    if (classMethod) {
+        [scope setValue:[MFValue valueInstanceWithClass:assignSelf] withIndentifier:@"self"];
+    }else{
+        [scope setValue:[MFValue valueInstanceWithObject:assignSelf] withIndentifier:@"self"];
+    }
     SEL sel = *(void **)args[1];
-    BOOL classMethod = object_isClass(assignSlf);
     MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:class classMethod:classMethod sel:sel];
     NSMethodSignature *methodSignature = [NSMethodSignature signatureWithObjCTypes:typeEncoding.UTF8String];
     NSMutableArray<MFValue *> *argValues = [NSMutableArray array];
@@ -83,6 +198,7 @@ static void methodIMP(ffi_cif *cif, void *ret, void **args, void *userdata){
             id block =  (__bridge id)(*(void **)args[i]);
             block = [block copy];
             argValue = [MFValue valueInstanceWithObject:block];
+            argValue.typePair.type.type = TypeBlock;
         }else{
             void *arg = args[i];
             argValue = [[MFValue alloc] initWithCValuePointer:arg typeEncoding:[methodSignature getArgumentTypeAtIndex:i] bridgeTransfer:NO];
@@ -348,7 +464,6 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }else if (exprOrStatementClass == ORReturnStatement.class){
         ORReturnStatement *returnStatement = (ORReturnStatement *)exprOrStatement;
         copy_undef_var(returnStatement.expression, chain, fromScope, destScope);
-        return;
     }else if (exprOrStatementClass == ORContinueStatement.class){
         
     }else if (exprOrStatementClass == ORBreakStatement.class){
@@ -380,11 +495,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             }
             return value;
         }
-        case OCValueSelf:{
-            return [scope getValueWithIdentifier:@"self"];
-        }
+        case OCValueSelf:
         case OCValueSuper:{
-            return [scope getValueWithIdentifier:@"super"];
+            return [scope getValueWithIdentifier:@"self"];
         }
         case OCValueSelector:{
             return [MFValue valueInstanceWithSEL:NSSelectorFromString(self.value)];
@@ -466,12 +579,14 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             NSCAssert(0, @"objectValue or classValue must has one");
         }
     }
+    SEL sel = NSSelectorFromString(self.selectorName);
     NSMutableArray <MFValue *>*argValues = [NSMutableArray array];
     for (ORValueExpression *exp in self.values){
         [argValues addObject:[exp execute:scope]];
     }
-    NSString *selector = self.selectorName;
-    SEL sel = NSSelectorFromString(selector);
+    if (self.caller.value_type == OCValueSuper) {
+        return invoke_sueper_values(instance, sel, argValues);
+    }
     NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
     NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
     invocation.target = instance;
@@ -530,7 +645,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }else{
             // global function calll
             [[MFStack argsStack] push:args];
-            ORBlockImp *imp = [scope getValueWithIdentifier:self.caller.value].objectValue;
+            ORBlockImp *imp = blockValue.objectValue;
             return [imp execute:scope];
         }
     }

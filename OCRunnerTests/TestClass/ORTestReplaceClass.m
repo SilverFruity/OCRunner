@@ -24,9 +24,6 @@
 - (NSInteger)testOriginalMethod{
     return 1;
 }
-- (NSString *)testSuperMethodReplaceTest{
-    return nil;
-}
 - (NSInteger)testAddGlobalVar{
     return 1;
 }

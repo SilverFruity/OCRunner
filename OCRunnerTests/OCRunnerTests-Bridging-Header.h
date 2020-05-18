@@ -3,3 +3,8 @@
 //
 //#import <oc2mangoLib/oc2mangoLib.h>
 #import "ORTestReplaceClass.h"
+#import "ORTestClassProperty.h"
+#import "ORTestClassIvar.h"
+#import "ORCallOCPropertyBlockTest.h"
+#import "ORCallSuperNoArgTest.h"
+
