@@ -10,10 +10,10 @@
 #import "MFStack.h"
 @class MFValue;
 NS_ASSUME_NONNULL_BEGIN
+extern const void *mf_propKey(NSString *propName);
 @interface MFScopeChain: NSObject
 @property (strong, nonatomic) NSMutableDictionary<NSString *,MFValue *> *vars;
 + (instancetype)topScope;
-@property (weak, nonatomic) id selfInstance;
 @property (strong, nonatomic) MFScopeChain *next;
 
 + (instancetype)scopeChainWithNext:(MFScopeChain *)next;

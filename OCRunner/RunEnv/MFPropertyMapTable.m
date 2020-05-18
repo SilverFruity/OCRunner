@@ -21,7 +21,6 @@
 @end
 
 @implementation MFPropertyMapTable{
-    NSMutableDictionary<NSString *, MFPropertyMapTableItem *> *_dic;
     NSLock *_lock;
 }
 

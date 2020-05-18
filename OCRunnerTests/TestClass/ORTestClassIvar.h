@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
     NSObject *_objectIvar;
     int _intIvar;
 }
-- (id)testObjectIvar;
+- (nullable id)testObjectIvar;
 - (NSInteger)testIntIvar;
 @end
 

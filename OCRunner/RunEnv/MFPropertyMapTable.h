@@ -21,7 +21,10 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface MFPropertyMapTable : NSObject
-
+{
+@public
+NSMutableDictionary<NSString *, MFPropertyMapTableItem *> *_dic;
+}
 + (instancetype)shareInstance;
 
 - (void)addPropertyMapTableItem:(MFPropertyMapTableItem *)propertyMapTableItem;

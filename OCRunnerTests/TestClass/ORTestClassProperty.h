@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (assign, nonatomic) NSInteger num;
 - (NSString *)testObjectPropertyTest;
 - (id)testWeakObjectProperty;
-- (id)testIvar;
+- (NSString *)testIvarx;
 - (NSInteger)testProMathAdd;
 
 - (NSInteger)testBasePropertyTest;

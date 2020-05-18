@@ -18,7 +18,7 @@
     return self;
 }
 
-- (id (^)(id,id))returnBlockMethod{
+- (NSString * (^)(id,id))returnBlockMethod{
     id block = ^(id arg1,id arg2){
         return [NSString stringWithFormat:@"%@%@",arg1,arg2];
     };

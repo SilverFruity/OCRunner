@@ -471,18 +471,18 @@ class CRunnerTests: XCTestCase {
             classValue.execute(scope);
         }
         let test = ORTestReplaceClass.init()
-//        XCTAssert(test.test() == 1)
-//        XCTAssert(test.arg1(NSNumber.init(value: 2), arg2: NSNumber.init(value: 3)) == 5)
-//        XCTAssert(test.arg1(NSNumber.init(value: 10)) == 10)
+        XCTAssert(test.test() == 1)
+        XCTAssert(test.arg1(NSNumber.init(value: 2), arg2: NSNumber.init(value: 3)) == 5)
+        XCTAssert(test.arg1(NSNumber.init(value: 10)) == 10)
         XCTAssert(ORTestReplaceClass.testMethodReplaceTest())
-//        XCTAssert(test.testOriginalMethod() == 2)
-//        XCTAssert(test.testAddGlobalVar() == 1111)
-//        if let dict = test.testMethodParameterListAndReturnValue(with: "ggggg") { (value) -> String in
-//            return "hhhh" + value
-//        }() as? [AnyHashable:String]{
-//            XCTAssert(dict["param1"] == "ggggg")
-//            XCTAssert(dict["param2"] == "hhhhMango")
-//        }
+        XCTAssert(test.testOriginalMethod() == 2)
+        XCTAssert(test.testAddGlobalVar() == 1111)
+        if let dict = test.testMethodParameterListAndReturnValue(with: "ggggg") { (value) -> String in
+            return "hhhh" + value
+        }() as? [AnyHashable:String]{
+            XCTAssert(dict["param1"] == "ggggg")
+            XCTAssert(dict["param2"] == "hhhhMango")
+        }
         
     }
     func testSuperMethodCall(){
@@ -517,6 +517,141 @@ class CRunnerTests: XCTestCase {
         if let object = scope.getValueWithIdentifier("b")?.objectValue as? String{
             XCTAssert(object == "sss",object)
         }
+    }
+    func testClassAddMethod(){
+        let source =
+        """
+        @implementation ORTestReplaceClass
+        - (int)otherMethod{
+            return 10;
+        }
+        - (int)test{
+            return [self otherMethod];
+        }
+        @end
+        """
+        ocparser.parseSource(source)
+        let classes = ocparser.ast.classCache.allValues as! [ORClass];
+        for classValue in classes {
+            classValue.execute(scope);
+        }
+        let test = ORTestReplaceClass.init()
+        XCTAssert(test.test() == 10)
+    }
+    func testClassProperty(){
+        let source =
+        """
+        @interface ORTestClassProperty:NSObject
+        @property(nonatomic,copy)NSString *strTypeProperty;
+        @property(nonatomic,weak)id weakObjectProperty;
+        @property (assign, nonatomic) NSInteger count;
+        @end
+        @implementation ORTestClassProperty
+        - (void)otherMethod{
+            self.strTypeProperty = @"Mango";
+        }
+
+        - (NSString *)testObjectPropertyTest{
+            [self otherMethod];
+            return self.strTypeProperty;
+        }
+
+        - (id)testWeakObjectProperty{
+            self.weakObjectProperty = [NSObject new];//下一个运行时释放
+            return self.weakObjectProperty;
+        }
+
+        - (id)testIvarx{
+            _strTypeProperty = @"Mango-testIvar";
+            return _strTypeProperty;
+        }
+        - (NSInteger)testProMathAdd{
+            self.num += 10;
+            return self.num;
+        }
+        -(NSInteger)testBasePropertyTest{
+            self.count = 100000;
+            return self.count;
+        }
+        - (NSInteger)testPropertyIvar{
+            _count  = 100001;
+            return _count;
+        }
+        @end
+        """
+        ocparser.parseSource(source)
+        let classes = ocparser.ast.classCache.allValues as! [ORClass];
+        for classValue in classes {
+            classValue.execute(scope);
+        }
+        let test = ORTestClassProperty.init()
+        XCTAssert(test.testObjectPropertyTest() == "Mango")
+        XCTAssert(test.testProMathAdd() == 10)
+        XCTAssert(test.testIvarx() == "Mango-testIvar")
+
+        XCTAssert(test.testBasePropertyTest() == 100000)
+        XCTAssert(test.testIvar() == 100001)
+        
+    }
+    func testClassIvar(){
+        let source =
+        """
+        @implementation ORTestClassIvar
+        - (id)testObjectIvar{
+            _objectIvar = [[NSObject alloc] init];
+            return _objectIvar;
+        }
+
+        - (NSInteger)testIntIvar{
+            _intIvar = 10000001;
+            return _intIvar;
+        }
+        @end
+        """
+        ocparser.parseSource(source)
+        let classes = ocparser.ast.classCache.allValues as! [ORClass];
+        for classValue in classes {
+            classValue.execute(scope);
+        }
+        let test = ORTestClassIvar.init()
+        XCTAssert(test.testObjectIvar() != nil)
+        XCTAssert(test.testIntIvar() == 10000001)
+    }
+    func testCallOCReturnBlock(){
+        let source =
+        """
+        @implementation ORCallOCPropertyBlockTest
+        - (id)testCallOCReturnBlock{
+            id ret = self.returnBlockMethod(@"a",@"b");
+            return ret;
+        }
+        @end
+        """
+        ocparser.parseSource(source)
+        let classes = ocparser.ast.classCache.allValues as! [ORClass];
+        for classValue in classes {
+            classValue.execute(scope);
+        }
+        let test = ORCallOCPropertyBlockTest.init()
+        XCTAssert(test.testCallOCReturnBlock() == "ab")
+        
+    }
+    func testSuperNoArgs(){
+        let source =
+        """
+        @implementation MFCallSuperNoArgTest
+        - (BOOL)testCallSuperNoArgTestSupser{
+            return [super testCallSuperNoArgTestSupser];
+        }
+        @end
+        """
+        ocparser.parseSource(source)
+        let classes = ocparser.ast.classCache.allValues as! [ORClass];
+        for classValue in classes {
+            classValue.execute(scope);
+        }
+        let test = MFCallSuperNoArgTest.init()
+        XCTAssert(test.testCallSuperNoArgTestSupser())
     }
     func testSequentia(){
         

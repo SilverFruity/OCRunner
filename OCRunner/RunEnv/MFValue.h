@@ -379,7 +379,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 - (void)assignFrom:(MFValue *)src;
 - (MFValue *)subscriptGetWithIndex:(MFValue *)index;
 - (void)subscriptSetValue:(MFValue *)value index:(MFValue *)index;
-- (void)subscriptSetWithIndex:(MFValue *)index value:(MFValue *)value;
+
 
 + (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding;
 + (instancetype)voidValueInstance;

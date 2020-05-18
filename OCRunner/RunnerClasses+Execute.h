@@ -97,7 +97,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 @interface ORPropertyDeclare (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
-@property (nonatomic, assign)  const objc_property_attribute_t * propertyAttributes;
+@property (nonatomic, assign, readonly)  const objc_property_attribute_t * propertyAttributes;
 @end
 @interface ORMethodDeclare (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;

@@ -16,8 +16,8 @@
 - (id)testWeakObjectProperty{
     return nil;
 }
-- (id)testIvar{
-    return 0;
+- (NSString *)testIvarx{
+    return @"";
 }
 - (NSInteger)testProMathAdd{
     return 0;
@@ -26,6 +26,6 @@
     return 0;
 }
 - (NSInteger)testPropertyIvar{
-    return nil;
+    return 0;
 }
 @end

@@ -9,5 +9,10 @@
 #import "ORTestClassIvar.h"
 
 @implementation ORTestClassIvar
-
+- (id)testObjectIvar{
+    return nil;
+}
+- (NSInteger)testIntIvar{
+    return 0;
+}
 @end

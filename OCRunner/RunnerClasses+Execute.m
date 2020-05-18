@@ -12,6 +12,7 @@
 #import "MFMethodMapTable.h"
 #import "MFPropertyMapTable.h"
 #import "MFVarDeclareChain.h"
+#import "MFWeakPropertyBox.h"
 #import "MFBlock.h"
 #import "MFValue.h"
 #import <objc/message.h>
@@ -232,10 +233,15 @@ static void replace_method(Class clazz, ORMethodImplementation *methodImp, MFSco
         typeEncoding = method_getTypeEncoding(ocMethod);
     }else{
         typeEncoding = OCTypeEncodingForPair(methodImp.declare.returnType);
+        needFreeTypeEncoding = YES;
+        typeEncoding = mf_str_append(typeEncoding, "@"); //self
+        typeEncoding = mf_str_append(typeEncoding, ":"); //_cmd
         for (ORTypeVarPair *pair in methodImp.declare.parameterTypes) {
             const char *paramTypeEncoding = OCTypeEncodingForPair(pair);
+            const char *beforeTypeEncoding = typeEncoding;
             typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
-            needFreeTypeEncoding = YES;
+            free((void *)beforeTypeEncoding);
+            free((void *)paramTypeEncoding);
         }
     }
     Class c2 = methodImp.declare.isClassMethod ? objc_getMetaClass(class_getName(clazz)) : clazz;
@@ -258,60 +264,96 @@ static void replace_method(Class clazz, ORMethodImplementation *methodImp, MFSco
         free((void *)typeEncoding);
     }
 }
-static void add_method(Class clazz, ORMethodImplementation *methodImp, MFScopeChain *scope){
-    ORMethodDeclare *declare = methodImp.declare;
-    NSString *methodName = declare.selectorName;
-    SEL sel = NSSelectorFromString(methodName);
-    
-    MFMethodMapTableItem *item = [[MFMethodMapTableItem alloc] initWithClass:clazz method:methodImp];
-    [[MFMethodMapTable shareInstance] addMethodMapTableItem:item];
-    
-    BOOL needFreeTypeEncoding = NO;
-    const char *typeEncoding;
-    Method ocMethod;
-    if (methodImp.declare.isClassMethod) {
-        ocMethod = class_getClassMethod(clazz, sel);
-    }else{
-        ocMethod = class_getInstanceMethod(clazz, sel);
-    }
-    
-    if (ocMethod) {
-        typeEncoding = method_getTypeEncoding(ocMethod);
-    }else{
-        typeEncoding = OCTypeEncodingForPair(methodImp.declare.returnType);
-        
-        for (ORTypeVarPair *pair in methodImp.declare.parameterTypes) {
-            const char *paramTypeEncoding = OCTypeEncodingForPair(pair);
-            typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
-            needFreeTypeEncoding = YES;
+
+void getterInter(ffi_cif *cif, void *ret, void **args, void *userdata){
+    ORPropertyDeclare *propDef = (__bridge ORPropertyDeclare *)userdata;
+    id _self = (__bridge id)(*(void **)args[0]);
+    NSString *propName = propDef.var.var.varname;
+    id propValue = objc_getAssociatedObject(_self, mf_propKey(propName));
+    const char *type = OCTypeEncodingForPair(propDef.var);
+    __autoreleasing MFValue *value;
+    if (!propValue) {
+        value = [MFValue defaultValueWithTypeEncoding:type];
+        [value assignToCValuePointer:ret typeEncoding:type];
+    }else if(*type == '@'){
+        if ([propValue isKindOfClass:[MFWeakPropertyBox class]]) {
+            MFWeakPropertyBox *box = propValue;
+            if (box.target) {
+                *(void **)ret = (__bridge void *)box.target;
+            }else{
+                value = [MFValue defaultValueWithTypeEncoding:type];
+                [value assignToCValuePointer:ret typeEncoding:type];
+            }
+        }else{
+            *(void **)ret = (__bridge void *)propValue;
         }
-    }
-    Class c2 = methodImp.declare.isClassMethod ? objc_getMetaClass(class_getName(clazz)) : clazz;
-    NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:typeEncoding];
-    NSMutableArray *argTypes = [NSMutableArray array];
-    for (int  i = 0 ; i < sig.numberOfArguments; i++) {
-        [argTypes addObject:[NSString stringWithUTF8String:[sig getArgumentTypeAtIndex:i]]];
-    }
-    NSDictionary *userInfo = @{@"class":c2,@"typeEncoding":@(typeEncoding), @"scope":scope};
-    void *imp = add_function(sig.methodReturnType, argTypes, methodIMP, userInfo);
-    class_addMethod(c2, sel, imp, typeEncoding);
-    if (needFreeTypeEncoding) {
-        free((void *)typeEncoding);
+    }else{
+        value = propValue;
+        [value assignToCValuePointer:ret typeEncoding:type];
     }
 }
-id registerClassGetter(id self1, SEL _cmd1) {
-    NSString *key = NSStringFromSelector(_cmd1);
-    Ivar ivar = class_getInstanceVariable([self1 class], strcat("_", key.UTF8String));
-    return object_getIvar(self1, ivar);
+void setterInter(ffi_cif *cif, void *ret, void **args, void *userdata){
+    ORPropertyDeclare *propDef = (__bridge ORPropertyDeclare *)userdata;
+    id _self = (__bridge id)(*(void **)args[0]);
+    const char *type = OCTypeEncodingForPair(propDef.var);
+    id value;
+    if (*type == '@') {
+        value = (__bridge id)(*(void **)args[2]);
+    }else{
+        value = [[MFValue alloc] initWithCValuePointer:args[2] typeEncoding:type bridgeTransfer:NO];
+    }
+    NSString *propName = propDef.var.var.varname;
+    MFPropertyModifier modifier = propDef.modifier;
+    if ((modifier & MFPropertyModifierMemMask) == MFPropertyModifierMemWeak) {
+        value = [[MFWeakPropertyBox alloc] initWithTarget:value];
+    }
+    objc_AssociationPolicy associationPolicy = mf_AssociationPolicy_with_PropertyModifier(modifier);
+    objc_setAssociatedObject(_self, mf_propKey(propName), value, associationPolicy);
 }
-void registerClassSetter(id self1, SEL _cmd1, id newValue) { //移除set
-    NSString *key = NSStringFromSelector(_cmd1);
-    key = [key substringWithRange:NSMakeRange(3, key.length - 4)]; // setXxxx: -> Xxxx
-    NSString *head = [[key substringWithRange:NSMakeRange(0, 1)] lowercaseString];
-    key = [key stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:head]; // 替换大写首字母
-    Ivar ivar = class_getInstanceVariable([self1 class], strcat("_", key.UTF8String)); //basicsViewController里面有个_dictCustomerProperty属性
-    object_setIvar(self1, ivar, newValue);
+
+static void replace_getter_method(Class clazz, ORPropertyDeclare *prop){
+    SEL getterSEL = NSSelectorFromString(prop.var.var.varname);
+    const char *retTypeEncoding  = OCTypeEncodingForPair(prop.var);
+    ffi_type *returnType = mf_ffi_type_with_type_encoding(retTypeEncoding);
+    unsigned int argCount = 2;
+    ffi_type **argTypes = malloc(sizeof(ffi_type *) * argCount);
+    argTypes[0] = &ffi_type_pointer;
+    argTypes[1] = &ffi_type_pointer;
+    void *imp = NULL;
+    ffi_cif *cifPtr = malloc(sizeof(ffi_cif));
+    ffi_prep_cif(cifPtr, FFI_DEFAULT_ABI, argCount, returnType, argTypes);
+    ffi_closure *closure = ffi_closure_alloc(sizeof(ffi_closure), (void **)&imp);
+    ffi_prep_closure_loc(closure, cifPtr, getterInter, (__bridge void *)prop, imp);
+    const char * typeEncoding = mf_str_append(retTypeEncoding, "@:");
+    class_replaceMethod(clazz, getterSEL, (IMP)imp, typeEncoding);
+    free((void *)typeEncoding);
 }
+
+static void replace_setter_method(Class clazz, ORPropertyDeclare *prop){
+    NSString *name = prop.var.var.varname;
+    NSString *str1 = [[name substringWithRange:NSMakeRange(0, 1)] uppercaseString];
+    NSString *str2 = name.length > 1 ? [name substringFromIndex:1] : nil;
+    SEL setterSEL = NSSelectorFromString([NSString stringWithFormat:@"set%@%@:",str1,str2]);
+    const char *prtTypeEncoding  = OCTypeEncodingForPair(prop.var);
+    ffi_type *returnType = &ffi_type_void;
+    unsigned int argCount = 3;
+    ffi_type **argTypes = malloc(sizeof(ffi_type *) * argCount);
+    argTypes[0] = &ffi_type_pointer;
+    argTypes[1] = &ffi_type_pointer;
+    argTypes[2] = mf_ffi_type_with_type_encoding(prtTypeEncoding);
+    if (argTypes[2] == NULL) {
+//        mf_throw_error(lineNumber, @"", @"");
+    }
+    void *imp = NULL;
+    ffi_cif *cifPtr = malloc(sizeof(ffi_cif));
+    ffi_prep_cif(cifPtr, FFI_DEFAULT_ABI, argCount, returnType, argTypes);
+    ffi_closure *closure = ffi_closure_alloc(sizeof(ffi_closure), (void **)&imp);
+    ffi_prep_closure_loc(closure, cifPtr, setterInter, (__bridge void *)prop, imp);
+    const char * typeEncoding = mf_str_append("v@:", prtTypeEncoding);
+    class_replaceMethod(clazz, setterSEL, (IMP)imp, typeEncoding);
+    free((void *)typeEncoding);
+}
+
 void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *fromScope, MFScopeChain *destScope);
 void copy_undef_vars(NSArray *exprOrStatements, MFVarDeclareChain *chain, MFScopeChain *fromScope, MFScopeChain *destScope){
     for (id exprOrStatement in exprOrStatements) {
@@ -489,10 +531,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     switch (self.value_type) {
         case OCValueVariable:{
-            MFValue *value = [scope getValueWithIdentifier:self.value];
+            MFValue *value = [scope getValueWithIdentifierInChain:self.value];
             if (!value) {
                 value = [MFValue valueInstanceWithClass:NSClassFromString(self.value)];
             }
+            NSCAssert(value, @"must exsited");
             return value;
         }
         case OCValueSelf:
@@ -632,11 +675,13 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         // TODO: 调用block
         // make.left.equalTo(xxxx);
         MFValue *value = [(ORMethodCall *)self.caller execute:scope];
-        if (value.typePair.type.type == TypeBlock) {
-            return invoke_MFBlockValue(value, args);
-        }else{
-            NSCAssert(0, @"must be a block value");
-        }
+        //FIXME: see initWithCValuePointer 'FIXME' note
+        return invoke_MFBlockValue(value, args);
+//        if (value.typePair.type.type == TypeBlock) {
+//            return invoke_MFBlockValue(value, args);
+//        }else{
+//            NSCAssert(0, @"must be a block value");
+//        }
     }
     if (self.caller.value_type == OCValueVariable) {
         MFValue *blockValue = [scope getValueWithIdentifier:self.caller.value];
@@ -785,18 +830,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             NSString *first = [[setterName substringToIndex:1] uppercaseString];
             NSString *other = setterName.length > 1 ? [setterName substringFromIndex:1] : nil;
             setterName = [NSString stringWithFormat:@"set%@%@",first,other];
-            if (methodCall.caller.value_type == OCValueSuper) {
-                Class currentClass = objc_getClass(((NSString *)methodCall.caller.value).UTF8String);
-                Class superClass = class_getSuperclass(currentClass);
-                //FIXME: set super property
-//                invoke_sueper_values([memberObjValue c2objectValue], superClass, NSSelectorFromString(memberName), @[operValue]);
-            }else{
-                ORMethodCall *setCaller = [ORMethodCall new];
-                setCaller.caller = self.value;
-                setCaller.names = [@[setterName] mutableCopy];
-                setCaller.values = [@[resultExp] mutableCopy];
-                [setCaller execute:scope];
-            }
+            ORMethodCall *setCaller = [ORMethodCall new];
+            setCaller.caller = [(ORMethodCall *)self.value caller];
+            setCaller.names = [@[setterName] mutableCopy];
+            setCaller.values = [@[resultExp] mutableCopy];
+            [setCaller execute:scope];
             break;
         }
         case OCValueCollectionGetValue:{
@@ -1175,16 +1213,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     NSString *propertyName = self.var.var.varname;
     MFValue *classValue = [scope getValueWithIdentifier:@"Class"];
     Class class = classValue.classValue;
-    objc_property_t property = class_getProperty(class, [propertyName UTF8String]);
-    //FIXME: 自动生成get set方法
-    if (property) {
-        //FIXME: replace get set
-    }else{
-        //FIXME: add property
-        class_addProperty(class, [propertyName UTF8String], self.propertyAttributes, 3);
-        class_addMethod(class, NSSelectorFromString(propertyName), (IMP)registerClassGetter, "@@:");
-        class_addMethod(class, NSSelectorFromString([NSString stringWithFormat:@"set%@:",[propertyName capitalizedString]]), (IMP)registerClassSetter, "v@:@");
-    }
+    class_replaceProperty(class, [propertyName UTF8String], self.propertyAttributes, 3);
+    MFPropertyMapTableItem *propItem = [[MFPropertyMapTableItem alloc] initWithClass:class property:self];
+    [[MFPropertyMapTable shareInstance] addPropertyMapTableItem:propItem];
+    replace_getter_method(class, self);
+    replace_setter_method(class, self);
     return nil;
 }
 - (const objc_property_attribute_t *)propertyAttributes{
@@ -1263,55 +1296,22 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 #import <objc/runtime.h>
 
 @implementation ORClass(Execute)
+/// 执行时，根据继承顺序执行
 - (nullable MFValue *)execute:(MFScopeChain *)scope{
     Class clazz = NSClassFromString(self.className);
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
-    if (clazz) {
-        // 添加Class变量到作用域
-        [current setValue:[MFValue valueInstanceWithClass:clazz] withIndentifier:@"Class"];
-        //FIXME: 注册method到作用域中,method已存在则Class中替换方法，不存在则新增
-        for (ORMethodImplementation *method in self.methods) {
-            replace_method(clazz, method, current);
-        }
-        //TODO: 注册property到作用域中,Class添加属性
-        for (ORPropertyDeclare *property in self.properties) {
-            [property execute:current];
-        }
-    }else{
-        //FIXME: 新建类
+    if (!clazz) {
         Class superClass = NSClassFromString(self.superClassName);
-        if (!superClass) {
-            //FIXME: 加入败者组，等待父类先加载
-            return nil;
-        }
-        Class newClass = objc_allocateClassPair(superClass, self.className.UTF8String, 0);
-        //FIXME: iVar
-        for (ORPropertyDeclare *property in self.properties) {
-            NSString *propertyName = property.var.var.varname;
-            class_addIvar(newClass, strcat("_", propertyName.UTF8String), sizeof(int), log2(sizeof(int)), @encode(int));
-        }
-        //FIXME: privateVar
-        for (ORTypeVarPair *privateVar in self.privateVariables) {
-            
-        }
-//        //TODO: 添加protocol
-//        for (NSString *protocolName in self.protocols) {
-//            Protocol *protocol = NSProtocolFromString(protocolName);
-//            class_addProtocol(newClass, protocol);
-//        }
-        objc_registerClassPair(newClass);
-        // 添加Class变量到当前作用域
-        [current setValue:[MFValue valueInstanceWithClass:newClass] withIndentifier:@"Class"];
-        //FIXME: 添加属性
-        for (ORPropertyDeclare *property in self.properties) {
-            [property execute:current];
-        }
-        //FIXME: 添加方法
-        for (ORMethodImplementation *method in self.methods) {
-            add_method(newClass, method, scope);
-        }
-        //TODO: 顶级作用域添加类变量
-        [[MFScopeChain topScope] setValue:[MFValue valueInstanceWithClass:newClass] withIndentifier:self.className];
+        clazz = objc_allocateClassPair(superClass, self.className.UTF8String, 0);
+        objc_registerClassPair(clazz);
+    }
+    // 添加Class变量到作用域
+    [current setValue:[MFValue valueInstanceWithClass:clazz] withIndentifier:@"Class"];
+    for (ORMethodImplementation *method in self.methods) {
+        replace_method(clazz, method, current);
+    }
+    for (ORPropertyDeclare *property in self.properties) {
+        [property execute:current];
     }
     return nil;
 }

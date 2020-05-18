@@ -46,7 +46,7 @@ static MFScopeChain *instance = nil;
     while (scope && ![scope getValueWithIdentifier:@"self"]) {
         scope = scope.next;
     }
-    return [scope getValueWithIdentifier:@"self"];;
+    return [scope getValueWithIdentifier:@"self"].objectValue;
 }
 - (void)setValue:(MFValue *)value withIndentifier:(NSString *)identier{
     [self.lock lock];
@@ -61,7 +61,7 @@ static MFScopeChain *instance = nil;
 	return value;
 }
 
-extern const void *mf_propKey(NSString *propName);
+
 const void *mf_propKey(NSString *propName) {
     static NSMutableDictionary *_propKeys;
     static dispatch_once_t onceToken;

@@ -180,7 +180,44 @@ _boolValue = (BOOL) value;
                 break;
         }
 }
-
++ (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding{
+    typeEncoding = removeTypeEncodingPrefix((char *)typeEncoding);
+    MFValue *value = [[MFValue alloc] init];
+#define setType(chr,type)\
+    case chr:\
+    [value setValueType:type];\
+    break;
+    switch (*typeEncoding) {
+            setType('c', TypeChar)
+            setType('i', TypeInt)
+            setType('s', TypeShort)
+            setType('l', TypeLong)
+            setType('q', TypeLongLong)
+            setType('C', TypeUChar)
+            setType('I', TypeUInt)
+            setType('S', TypeUShort)
+            setType('L', TypeULong)
+            setType('Q', TypeULongLong)
+            setType('B', TypeBOOL)
+            setType('f', TypeFloat)
+            setType('d', TypeDouble)
+            setType(':', TypeSEL)
+            setType('#', TypeClass)
+            setType('@', TypeObject)
+            setType('v', TypeVoid)
+        case '^':
+            value.typePair.var.ptCount += 1;
+            break;
+        case '*':
+            [value setValueType:TypeChar];
+            value.typePair.var.ptCount += 1;
+            break;
+        default:
+            NSCAssert(0, @"");
+            break;
+    }
+    return value;
+}
 - (void)assignFrom:(MFValue *)src{
 	if (_pair.type.type == TypeUnKnown) {
 		_pair = src->_pair;
@@ -264,7 +301,7 @@ break;\
 	}
 }
 
-//FIXME: 编码问题以及引用相关问题，指针数转换..
+//FIXME: 编码问题以及引用相关问题，指针数转换..，typeEncode为"@:"时，type应为TypeBlock
 - (instancetype)initWithCValuePointer:(void *)cValuePointer typeEncoding:(const char *)typeEncoding bridgeTransfer:(BOOL)bridgeTransfer  {
 	typeEncoding = removeTypeEncodingPrefix((char *)typeEncoding);
 	MFValue *retValue = [[MFValue alloc] init];

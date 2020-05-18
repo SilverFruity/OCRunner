@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ORCallOCPropertyBlockTest : NSObject
 @property(copy,nonatomic) id(^propertyBlock)(id,id);
-- (id)testCallOCReturnBlock;
+- (NSString *)testCallOCReturnBlock;
 @end
 
 NS_ASSUME_NONNULL_END
