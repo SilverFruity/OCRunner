@@ -715,4 +715,26 @@ class CRunnerTests: XCTestCase {
         })
         self.wait(for: [afterException,asyncException], timeout: 2.0)
     }
+    func testStaticVariable(){
+        source =
+        """
+        int func(){
+            static int i = 0; //静态变量只初始化一次
+            i++;
+            return i;
+        }
+        int a = func();
+        int b = func();
+        int c = func();
+        """
+        ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        exps[0].execute(scope);
+        exps[1].execute(scope);
+        XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 1)
+        exps[2].execute(scope)
+        XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 2)
+        exps[3].execute(scope)
+        XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 3)
+    }
 }

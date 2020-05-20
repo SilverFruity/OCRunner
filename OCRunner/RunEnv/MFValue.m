@@ -598,14 +598,14 @@ break;\
 //}
 //
 -(void)setObjectValue:(id)objectValue{
-    if (self.modifier & MFDeclarationModifierWeak) {
+    if (self.modifier & ORDeclarationModifierWeak) {
         _weakObj = objectValue;
     }else{
         _strongObj = objectValue;
     }
 }
 - (id)objectValue{
-    if (self.modifier & MFDeclarationModifierWeak) {
+    if (self.modifier & ORDeclarationModifierWeak) {
         return _weakObj;
     }else{
         return _strongObj;
@@ -681,7 +681,7 @@ break;\
         case TypeObject:
         case TypeBlock:
         case TypeId:{
-            if (self.modifier & MFDeclarationModifierWeak) {
+            if (self.modifier & ORDeclarationModifierWeak) {
                 retPtr = &_weakObj;
             }else{
                 retPtr = &_strongObj;

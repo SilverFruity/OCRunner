@@ -40,7 +40,6 @@
 		EE9899B624658F8900ACF2C1 /* MFMethodMapTable.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899A024658F8900ACF2C1 /* MFMethodMapTable.h */; };
 		EE9899B724658F8900ACF2C1 /* MFScopeChain.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899A124658F8900ACF2C1 /* MFScopeChain.m */; };
 		EE9899B824658F8900ACF2C1 /* MFValue.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899A224658F8900ACF2C1 /* MFValue.m */; };
-		EE9899BB2465915B00ACF2C1 /* MFDeclarationModifier.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899BA2465915B00ACF2C1 /* MFDeclarationModifier.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE9899C32465923900ACF2C1 /* MFRSA.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899BD2465923800ACF2C1 /* MFRSA.h */; };
 		EE9899C42465923900ACF2C1 /* util.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899BE2465923800ACF2C1 /* util.m */; };
 		EE9899C52465923900ACF2C1 /* MFRSA.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899BF2465923800ACF2C1 /* MFRSA.m */; };
@@ -144,7 +143,6 @@
 		EE9899A024658F8900ACF2C1 /* MFMethodMapTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFMethodMapTable.h; sourceTree = "<group>"; };
 		EE9899A124658F8900ACF2C1 /* MFScopeChain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFScopeChain.m; sourceTree = "<group>"; };
 		EE9899A224658F8900ACF2C1 /* MFValue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFValue.m; sourceTree = "<group>"; };
-		EE9899BA2465915B00ACF2C1 /* MFDeclarationModifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFDeclarationModifier.h; sourceTree = "<group>"; };
 		EE9899BD2465923800ACF2C1 /* MFRSA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFRSA.h; sourceTree = "<group>"; };
 		EE9899BE2465923800ACF2C1 /* util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = util.m; sourceTree = "<group>"; };
 		EE9899BF2465923800ACF2C1 /* MFRSA.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFRSA.m; sourceTree = "<group>"; };
@@ -276,7 +274,6 @@
 			children = (
 				042AC257246D453700070814 /* MFBlock.h */,
 				042AC256246D453700070814 /* MFBlock.m */,
-				EE9899BA2465915B00ACF2C1 /* MFDeclarationModifier.h */,
 				EE9899A024658F8900ACF2C1 /* MFMethodMapTable.h */,
 				EE98999824658F8900ACF2C1 /* MFMethodMapTable.m */,
 				EE98998E24658F8900ACF2C1 /* MFPropertyMapTable.h */,
@@ -361,7 +358,6 @@
 				042AC259246D453700070814 /* MFBlock.h in Headers */,
 				EE9899D92465924C00ACF2C1 /* ffi_x86_64.h in Headers */,
 				042AC254246D308000070814 /* ORBlockVar.h in Headers */,
-				EE9899BB2465915B00ACF2C1 /* MFDeclarationModifier.h in Headers */,
 				EE9899AD24658F8900ACF2C1 /* MFScopeChain.h in Headers */,
 				EE9899C62465923900ACF2C1 /* util.h in Headers */,
 				EE98997C24658DA600ACF2C1 /* OCRunner.h in Headers */,

@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MFDeclarationModifier.h"
 #import "RunnerClasses.h"
 #define MFValueGetValueInPointer(resultValue, fromValue)\
 do {\
@@ -368,7 +367,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @property (assign, nonatomic, nullable) SEL selValue;
 @property (assign, nonatomic, nullable) void *pointerValue;
 
-@property (assign,nonatomic)MFDeclarationModifier modifier;
+@property (assign,nonatomic)ORDeclarationModifier modifier;
 @property (strong,nonatomic)ORTypeVarPair *typePair;
 - (void)setValueType:(TypeKind)type;
 - (BOOL)isSubtantial;

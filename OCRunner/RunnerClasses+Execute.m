@@ -15,6 +15,7 @@
 #import "MFWeakPropertyBox.h"
 #import "MFBlock.h"
 #import "MFValue.h"
+#import "MFStaticVarTable.h"
 #import <objc/message.h>
 static MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValues){
     BOOL isClassMethod = object_isClass(instance);
@@ -875,15 +876,34 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @end
 @implementation ORDeclareExpression (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
-    if (self.expression) {
-        MFValue *value = [self.expression execute:scope];
-        if (!(value.typePair.type.type == TypeBlock)) {
-            value.typePair = self.pair;
+    BOOL staticVar = self.modifier & ORDeclarationModifierStatic;
+    MFValue *(^initializeBlock)(void) = ^MFValue *{
+        if (self.expression) {
+            MFValue *value = [self.expression execute:scope];
+            value.modifier = self.modifier;
+            if (value.typePair.type.type != TypeBlock) {
+                value.typePair = self.pair;
+            }
+            [scope setValue:value withIndentifier:self.pair.var.varname];
+            return value;
+        }else{
+            MFValue *value = [MFValue defaultValueWithTypeEncoding:OCTypeEncodingForPair(self.pair)];
+            value.modifier = self.modifier;
+            [scope setValue:value withIndentifier:self.pair.var.varname];
+            return value;
         }
-        [scope setValue:value withIndentifier:self.pair.var.varname];
-        return value;
+    };
+    if (staticVar) {
+        NSString *key = [NSString stringWithFormat:@"%p",(void *)self];
+        MFValue *value = [[MFStaticVarTable shareInstance] getStaticVarValueWithKey:key];
+        if (value) {
+            [scope setValue:value withIndentifier:self.pair.var.varname];
+        }else{
+            MFValue *value = initializeBlock();
+            [[MFStaticVarTable shareInstance] setStaticVarValue:value withKey:key];
+        }
     }else{
-        [scope setValue:[MFValue defaultValueWithTypeEncoding:OCTypeEncodingForPair(self.pair)] withIndentifier:self.pair.var.varname];
+        initializeBlock();
     }
     return [MFValue normalEnd];
 }@end
