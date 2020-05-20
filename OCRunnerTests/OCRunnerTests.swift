@@ -14,7 +14,7 @@ class CRunnerTests: XCTestCase {
     let ocparser = Parser.shared()
     var source = ""
     override func setUp() {
-        mf_add_built_in()
+        
     }
     override func tearDown() {
         ocparser.clear()
@@ -652,6 +652,7 @@ class CRunnerTests: XCTestCase {
         XCTAssert(test.testCallSuperNoArgTestSupser())
     }
     func testGCD(){
+        mf_add_built_in()
         let source =
         """
         @implementation ORGCDTests

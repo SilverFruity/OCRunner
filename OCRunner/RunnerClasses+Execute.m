@@ -134,7 +134,7 @@ static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
     NSUInteger numberOfArguments = [sig numberOfArguments];
     if (numberOfArguments - 1 != args.count) {
         //            mf_throw_error(expr.lineNumber, MFRuntimeErrorParameterListCountNoMatch, @"expect count: %zd, pass in cout:%zd",numberOfArguments - 1,expr.args.count);
-        return nil;
+        return [MFValue valueInstanceWithObject:nil];
     }
     //根据MFValue的type传入值的原因: 模拟在OC中的调用
     for (NSUInteger i = 1; i < numberOfArguments; i++) {
@@ -621,7 +621,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         default:
             break;
     }
-    return nil;
+    return [MFValue valueInstanceWithObject:nil];
 }
 @end
 @implementation ORMethodCall(Execute)
@@ -682,7 +682,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     NSMutableArray *args = [NSMutableArray array];
     for (ORValueExpression *exp in self.expressions){
-        [args addObject:[exp execute:scope]];
+        MFValue *value = [exp execute:scope];
+        NSCAssert(value != nil, @"value must be existed");
+        [args addObject:value];
     }
     if ([self.caller isKindOfClass:[ORMethodCall class]] && [(ORMethodCall *)self.caller isDot]){
         // TODO: 调用block
@@ -696,7 +698,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 //            NSCAssert(0, @"must be a block value");
 //        }
     }
-    if (self.caller.value_type == OCValueVariable) {
+    MFValue *blockValue = [scope getValueWithIdentifier:self.caller.value];
+    if (self.caller.value_type == OCValueVariable && blockValue != nil) {
         MFValue *blockValue = [scope getValueWithIdentifier:self.caller.value];
         if (blockValue.typePair.type.type == TypeBlock) {
             return invoke_MFBlockValue(blockValue, args);
@@ -707,7 +710,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             return [imp execute:scope];
         }
     }
-    return nil;
+    return [MFValue valueInstanceWithObject:nil];
 }
 @end
 @implementation ORBlockImp(Execute)
@@ -726,7 +729,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         NSString *funcName = self.declare.funVar.varname;
         if ([scope getValueWithIdentifier:funcName] == nil) {
             [scope setValue:[MFValue valueInstanceWithObject:self] withIndentifier:funcName];
-            return nil;
+            return [MFValue valueInstanceWithObject:nil];
         }
     }
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
@@ -1211,7 +1214,6 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         value.resultType = MFStatementResultTypeReturnEmpty;
         return value;
     }
-    return nil;
 }
 @end
 @implementation ORBreakStatement (Execute)
