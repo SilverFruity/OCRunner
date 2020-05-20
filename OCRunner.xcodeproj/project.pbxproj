@@ -16,6 +16,9 @@
 		042AC267246E49B200070814 /* ORCallOCPropertyBlockTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC266246E49B200070814 /* ORCallOCPropertyBlockTest.m */; };
 		042AC26A246E557200070814 /* ORCallSuperNoArgTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC269246E557200070814 /* ORCallSuperNoArgTest.m */; };
 		047EF859246BF68D0071F9D3 /* OCRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */; };
+		04E6659D2473C76D008DB08E /* ORTestWithObjc.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E6659C2473C76D008DB08E /* ORTestWithObjc.m */; };
+		04E665A12474D284008DB08E /* built-in.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E665A02474D284008DB08E /* built-in.m */; };
+		04E665AB2474D723008DB08E /* ORGCDTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E665AA2474D723008DB08E /* ORGCDTests.m */; };
 		EE38F997246C3C2A00E7C37B /* RunnerClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98998724658DB700ACF2C1 /* RunnerClasses.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE79FF6B246D917100ABE06F /* ORTestReplaceClass.m in Sources */ = {isa = PBXBuildFile; fileRef = EE79FF6A246D917100ABE06F /* ORTestReplaceClass.m */; };
 		EE98997524658DA600ACF2C1 /* OCRunner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE98996B24658DA600ACF2C1 /* OCRunner.framework */; };
@@ -111,6 +114,10 @@
 		042AC269246E557200070814 /* ORCallSuperNoArgTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORCallSuperNoArgTest.m; sourceTree = "<group>"; };
 		047EF857246BF68D0071F9D3 /* OCRunnerTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OCRunnerTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRunnerTests.swift; sourceTree = "<group>"; };
+		04E6659C2473C76D008DB08E /* ORTestWithObjc.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORTestWithObjc.m; sourceTree = "<group>"; };
+		04E665A02474D284008DB08E /* built-in.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "built-in.m"; sourceTree = "<group>"; };
+		04E665A92474D723008DB08E /* ORGCDTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORGCDTests.h; sourceTree = "<group>"; };
+		04E665AA2474D723008DB08E /* ORGCDTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORGCDTests.m; sourceTree = "<group>"; };
 		EE38F9CE246C5F0300E7C37B /* oc2mango.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = oc2mango.xcodeproj; path = ../../oc2mongo/oc2mango.xcodeproj; sourceTree = "<group>"; };
 		EE79FF69246D917100ABE06F /* ORTestReplaceClass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORTestReplaceClass.h; sourceTree = "<group>"; };
 		EE79FF6A246D917100ABE06F /* ORTestReplaceClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORTestReplaceClass.m; sourceTree = "<group>"; };
@@ -209,6 +216,8 @@
 				042AC266246E49B200070814 /* ORCallOCPropertyBlockTest.m */,
 				042AC268246E557200070814 /* ORCallSuperNoArgTest.h */,
 				042AC269246E557200070814 /* ORCallSuperNoArgTest.m */,
+				04E665A92474D723008DB08E /* ORGCDTests.h */,
+				04E665AA2474D723008DB08E /* ORGCDTests.m */,
 			);
 			path = TestClass;
 			sourceTree = "<group>";
@@ -239,6 +248,7 @@
 				EE98998724658DB700ACF2C1 /* RunnerClasses.h */,
 				EE98998824658DB800ACF2C1 /* RunnerClasses+Execute.h */,
 				EE98998624658DB700ACF2C1 /* RunnerClasses+Execute.m */,
+				04E665A02474D284008DB08E /* built-in.m */,
 				EE98998D24658F8900ACF2C1 /* RunEnv */,
 				EE9899C82465924C00ACF2C1 /* libffi */,
 				EE9899C12465923900ACF2C1 /* symdl */,
@@ -256,6 +266,7 @@
 				047EF857246BF68D0071F9D3 /* OCRunnerTests-Bridging-Header.h */,
 				047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */,
 				EE98997B24658DA600ACF2C1 /* Info.plist */,
+				04E6659C2473C76D008DB08E /* ORTestWithObjc.m */,
 			);
 			path = OCRunnerTests;
 			sourceTree = "<group>";
@@ -498,6 +509,7 @@
 				EE9899B724658F8900ACF2C1 /* MFScopeChain.m in Sources */,
 				EE98998A24658DB800ACF2C1 /* RunnerClasses+Execute.m in Sources */,
 				EE9899AF24658F8900ACF2C1 /* MFWeakPropertyBox.m in Sources */,
+				04E665A12474D284008DB08E /* built-in.m in Sources */,
 				042AC255246D308000070814 /* ORBlockVar.m in Sources */,
 				042AC258246D453700070814 /* MFBlock.m in Sources */,
 				EE9899C42465923900ACF2C1 /* util.m in Sources */,
@@ -513,9 +525,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04E6659D2473C76D008DB08E /* ORTestWithObjc.m in Sources */,
 				042AC267246E49B200070814 /* ORCallOCPropertyBlockTest.m in Sources */,
 				042AC264246E48ED00070814 /* ORTestClassProperty.m in Sources */,
 				042AC261246E48A400070814 /* ORTestClassIvar.m in Sources */,
+				04E665AB2474D723008DB08E /* ORGCDTests.m in Sources */,
 				EE79FF6B246D917100ABE06F /* ORTestReplaceClass.m in Sources */,
 				042AC26A246E557200070814 /* ORCallSuperNoArgTest.m in Sources */,
 				047EF859246BF68D0071F9D3 /* OCRunnerTests.swift in Sources */,

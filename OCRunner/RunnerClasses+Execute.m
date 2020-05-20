@@ -518,7 +518,20 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 }
 
 @end
+@implementation ORFuncVariable (Execute)
+- (id)copy{
+    ORFuncVariable *var = [ORFuncVariable copyFromVar:self];
+    var.pairs = self.pairs;
+    return var;
+}
+@end
 @implementation ORFuncDeclare(Execute)
+- (instancetype)copy{
+    ORFuncDeclare *declare = [ORFuncDeclare new];
+    declare.funVar = [self.funVar copy];
+    declare.returnType = self.returnType;
+    return declare;
+}
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     NSMutableArray * parameters = [[MFStack argsStack] pop];
     [parameters enumerateObjectsUsingBlock:^(MFValue * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -698,6 +711,15 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 }
 @end
 @implementation ORBlockImp(Execute)
+- (instancetype)transform2FunImp{
+    ORBlockImp *imp = [ORBlockImp new];
+    imp.declare = [self.declare copy];
+    imp.value = self.value;
+    imp.value_type = self.value_type;
+    imp.statements = self.statements;
+    imp.declare.funVar.ptCount = 0;
+    return imp;
+}
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     // C函数声明执行, 向全局作用域注册函数
     if (scope == [MFScopeChain topScope] && self.declare && self.declare.funVar.ptCount == 0) {
@@ -714,9 +736,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             MFValue *value = [MFValue new];
             [value setValueType:TypeBlock];
             MFBlock *manBlock = [[MFBlock alloc] init];
-            manBlock.func = self;
-            // 恢复为普通func
-            [self.declare becomeNormalFuncDeclare];
+            manBlock.func = [self transform2FunImp];
             MFScopeChain *blockScope = [MFScopeChain scopeChainWithNext:[MFScopeChain topScope]];
             copy_undef_var(self, [MFVarDeclareChain new], scope, blockScope);
             manBlock.outScope = blockScope;

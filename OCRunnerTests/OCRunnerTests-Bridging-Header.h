@@ -7,4 +7,4 @@
 #import "ORTestClassIvar.h"
 #import "ORCallOCPropertyBlockTest.h"
 #import "ORCallSuperNoArgTest.h"
-
+#import "ORGCDTests.h"

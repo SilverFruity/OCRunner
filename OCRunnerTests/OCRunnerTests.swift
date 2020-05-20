@@ -14,8 +14,8 @@ class CRunnerTests: XCTestCase {
     let ocparser = Parser.shared()
     var source = ""
     override func setUp() {
+        mf_add_built_in()
     }
-    
     override func tearDown() {
         ocparser.clear()
         scope.clear()
@@ -588,10 +588,8 @@ class CRunnerTests: XCTestCase {
         XCTAssert(test.testObjectPropertyTest() == "Mango")
         XCTAssert(test.testProMathAdd() == 10)
         XCTAssert(test.testIvarx() == "Mango-testIvar")
-
         XCTAssert(test.testBasePropertyTest() == 100000)
         XCTAssert(test.testIvar() == 100001)
-        
     }
     func testClassIvar(){
         let source =
@@ -653,7 +651,67 @@ class CRunnerTests: XCTestCase {
         let test = MFCallSuperNoArgTest.init()
         XCTAssert(test.testCallSuperNoArgTestSupser())
     }
-    func testSequentia(){
-        
+    func testGCD(){
+        let source =
+        """
+        @implementation ORGCDTests
+        - (void)testGCDWithCompletionBlock:(void (^)(NSString * _Nonnull))completion{
+           dispatch_queue_t queue = dispatch_queue_create("com.plliang19.mango", DISPATCH_QUEUE_SERIAL);
+           dispatch_async(queue, ^{
+               completion(@"success");
+           });
+        }
+        - (void)testGCDAfterWithCompletionBlock:(void (^)(NSString * _Nonnull))completion{
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                completion(@"success");
+            });
+        }
+        - (BOOL)testDispatchSemaphore{
+            BOOL retValue = NO;
+            dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_global_queue(0, 0), ^int{
+                retValue = YES;
+                dispatch_semaphore_signal(semaphore);
+            });
+            dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+            return retValue;
+        }
+        -(NSInteger)testDispatchSource{
+            NSInteger count = 0;
+            dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+            dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_global_queue(0, 0));
+            dispatch_source_set_timer(timer, DISPATCH_TIME_NOW, 0.1 * NSEC_PER_SEC, 0 * NSEC_PER_SEC);
+            dispatch_source_set_event_handler(timer, ^{
+                count++;
+                if (count == 10) {
+                    dispatch_suspend(timer);
+                    dispatch_semaphore_signal(semaphore);
+                }
+            });
+            dispatch_resume(timer);
+            dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+            return count;
+        }
+        @end
+        """
+        ocparser.parseSource(source)
+        let classes = ocparser.ast.classCache.allValues as! [ORClass];
+        for classValue in classes {
+            classValue.execute(scope);
+        }
+        let test = ORGCDTests.init()
+        XCTAssert(test.testDispatchSemaphore())
+        XCTAssert(test.testDispatchSource() == 10)
+        let afterException = XCTestExpectation.init(description: "async_after")
+        test.testGCDAfter { (text) in
+            XCTAssert(text == "success")
+            afterException.fulfill()
+        }
+        let asyncException = XCTestExpectation.init(description: "async")
+        test.testGCD(completionBlock: { (text) in
+            XCTAssert(text == "success")
+            asyncException.fulfill()
+        })
+        self.wait(for: [afterException,asyncException], timeout: 2.0)
     }
 }
