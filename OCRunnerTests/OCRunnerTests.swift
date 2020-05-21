@@ -24,9 +24,7 @@ class CRunnerTests: XCTestCase {
         let source = "int a = 1;"
         ocparser.parseSource(source)
         let exp = ocparser.ast.globalStatements.firstObject as! ORExpression;
-        let result = exp.execute(scope)
-        XCTAssert(result!.typePair.type.type == TypeInt)
-        XCTAssert(result!.intValue == 1)
+        exp.execute(scope)
         let scopeValue = scope.getValueWithIdentifier("a")
         XCTAssert(scopeValue!.typePair.type.type == TypeInt)
         XCTAssert(scopeValue!.intValue == 1)
@@ -40,7 +38,8 @@ class CRunnerTests: XCTestCase {
         """
         ocparser.parseSource(source)
         let exp = ocparser.ast.globalStatements.firstObject as! ORDeclareExpression;
-        let result = exp.execute(scope)
+        exp.execute(scope)
+        let result = scope.getValueWithIdentifier("a")
         XCTAssert(result!.typePair.type.type == TypeBlock)
         XCTAssert(result?.objectValue != nil) //__NSMallocBlock__
         let scopeValue = scope.getValueWithIdentifier("a")
@@ -736,5 +735,18 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 2)
         exps[3].execute(scope)
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 3)
+    }
+    func testStructGetValue(){
+        source =
+        """
+        UIView *view = [UIView new];
+        CGRect frame = view.frame;
+        """
+        ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        print(scope.getValueWithIdentifier("frame"))
     }
 }
