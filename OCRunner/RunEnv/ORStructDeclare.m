@@ -7,53 +7,102 @@
 //
 
 #import "ORStructDeclare.h"
-void structDetect(char chr, NSString *content, NSMutableString *buffer, NSUInteger lf, NSMutableArray *results){
+void removePointerOfTypeEncode(char chr, NSString *content, NSMutableString *buffer){
+    if (chr != '^') {
+        [buffer appendFormat:@"%c%@",chr,content];
+        return;
+    }
+    removePointerOfTypeEncode(content.UTF8String[0], [content substringWithRange:NSMakeRange(1, content.length - 1)], buffer);
+}
+
+NSString *startRemovePointerOfTypeEncode(const char *typeEncode){
+    NSString *content = [NSString stringWithUTF8String:typeEncode];
+    NSMutableString *buffer = [NSMutableString string];
+    removePointerOfTypeEncode(content.UTF8String[0], [content substringWithRange:NSMakeRange(1, content.length - 1)], buffer);
+    return buffer;
+}
+void detectPointerCount(char chr, NSString *content, NSUInteger *count){
+    if (chr == '^') {
+        (*count)++;
+        detectPointerCount(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],count);
+    }else{
+        return;
+    }
+}
+NSUInteger startDetectPointerCount(const char *typeEncode){
+    NSUInteger ptCount = 0;
+    NSString *content = [NSString stringWithUTF8String:typeEncode];
+    detectPointerCount(content.UTF8String[0], [content substringWithRange:NSMakeRange(1, content.length - 1)], &ptCount);
+    return ptCount;
+}
+void structNameDetect(char chr, NSString *content, NSMutableString *buffer){
+    if (chr == '=' || chr == '}') {
+        return;
+    }
+    if (chr != '{' && chr != '^') {
+        [buffer appendFormat:@"%c",chr];
+    }
+    structNameDetect(content.UTF8String[0], [content substringWithRange:NSMakeRange(1, content.length - 1)], buffer);
+}
+NSString *startStructNameDetect(const char *typeEncode){
+    NSString *content = [NSString stringWithUTF8String:typeEncode];
+    NSMutableString *buffer = [NSMutableString string];
+    structNameDetect(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer);
+    return buffer;
+}
+void structDetect(char chr, NSString *content, NSMutableString *buffer, NSMutableArray *results, NSUInteger lf, NSUInteger rt, BOOL needfirstAssign){
     [buffer appendFormat:@"%c",chr];
-    if (chr == '{'){
-        lf++;
-        if (lf == 2) {
-            buffer = [buffer substringWithRange:NSMakeRange(0, buffer.length - 1)].mutableCopy;
+    if (needfirstAssign) {
+        if (chr == '=') {
+            needfirstAssign = NO;
             [results addObject:buffer];
             buffer = [NSMutableString string];
-            [buffer appendFormat:@"%c",chr];
-            lf = 1;
         }
-        structDetect(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer, lf, results);
+        structDetect(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer, results, lf, rt, needfirstAssign);
         return;
     }
-    if (content.length == 0) {
-        [results addObject:buffer];
-        return;
+    if (chr == '{'){
+        lf++;
     }
     if (chr == '}'){
+        rt++;
+    }
+    if (lf == rt && chr != '^') {
         [results addObject:buffer];
         buffer = [NSMutableString string];
-        lf--;
+        lf = 0;
+        rt = 0;
     }
-    structDetect(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer, lf, results);
+    if (content.length == 0) {
+        return;
+    }
+    structDetect(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer, results, lf, rt, needfirstAssign);
 }
 NSMutableArray * startStructDetect(const char *typeEncode){
     NSMutableString *buffer = [NSMutableString string];
     NSString *content = [NSString stringWithUTF8String:typeEncode];
     NSMutableArray *results = [NSMutableArray array];
-    structDetect(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer, 0, results);
+    if ([content hasPrefix:@"{"]) {
+        content = [content substringWithRange:NSMakeRange(1, content.length - 2)];
+    }
+    structDetect(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer, results, 0, 0, YES);
     return results;
 }
 
-void detectTypeEncode(char chr, NSString *content, NSMutableString *buffer, NSMutableArray *types){
+void detectTypeEncodes(char chr, NSString *content, NSMutableString *buffer, NSMutableArray *types){
     [buffer appendFormat:@"%c",chr];
     if (chr != '^') {
         [types addObject:buffer];
         buffer = [NSMutableString string];
     }
     if (content.length != 0) {
-        detectTypeEncode(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer,types);
+        detectTypeEncodes(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer,types);
     }
 }
-NSMutableArray * startDetectTypeEncode(NSString *content){
+NSMutableArray * startDetectTypeEncodes(NSString *content){
     NSMutableString *buffer = [NSMutableString string];
     NSMutableArray *results = [NSMutableArray array];
-    detectTypeEncode(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer, results);
+    detectTypeEncodes(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer, results);
     return results;
 }
 
@@ -63,31 +112,14 @@ NSMutableArray * startDetectTypeEncode(NSString *content){
 }
 - (instancetype)initWithTypeEncode:(const char *)typeEncoding keys:(NSArray<NSString *> *)keys{
     self = [super init];
+    self.typeEncoding = typeEncoding;
     NSMutableArray *results = startStructDetect(typeEncoding);
-    if (results.count > 1) {
-        NSString *nameElement = results[0];
-        NSString *structName = [nameElement substringWithRange:NSMakeRange(1, nameElement.length - 2)];
-        if ([structName hasPrefix:@"_"]) {
-            structName = [structName substringWithRange:NSMakeRange(1, structName.length - 1)];
-        }
-        [results removeObjectAtIndex:0];
-        [results removeLastObject]; //remove "}"
-        self.name = structName;
-        self.keys = keys;
-        [self initialWithFieldTypeEncodes:[results copy]];
-    }else{
-        NSString *structEncode = results[0];
-        structEncode = [structEncode substringWithRange:NSMakeRange(1, structEncode.length - 2)];
-        NSArray *comps = [structEncode componentsSeparatedByString:@"="];
-        NSString *structName = comps.firstObject;
-        if ([structName hasPrefix:@"_"]) {
-            structName = [structName substringWithRange:NSMakeRange(1, structName.length - 1)];
-        }
-        self.name = structName;
-        self.keys = keys;
-        NSArray *elementEncodes = startDetectTypeEncode(comps.lastObject);
-        [self initialWithFieldTypeEncodes:[elementEncodes copy]];
-    }
+    NSString *nameElement = results[0];
+    NSString *structName = [nameElement substringWithRange:NSMakeRange(0, nameElement.length - 1)];
+    [results removeObjectAtIndex:0];
+    self.name = structName;
+    self.keys = keys;
+    [self initialWithFieldTypeEncodes:[results copy]];
     return self;
 }
 - (void)initialWithFieldTypeEncodes:(NSArray *)fieldEncodes{
@@ -114,5 +146,41 @@ NSMutableArray * startDetectTypeEncode(NSString *content){
         keyOffsets[key] = @(offset);
     }
     self.keyOffsets = keyOffsets;
+}
+@end
+
+
+@implementation ORStructDeclareTable{
+    NSMutableDictionary<NSString *, ORStructDeclare *> *_dic;
+    NSLock *_lock;
+}
+
+- (instancetype)init{
+    if (self = [super init]) {
+        _dic = [NSMutableDictionary dictionary];
+        _lock = [[NSLock alloc] init];
+    }
+    return self;
+}
++ (instancetype)shareInstance{
+    static id st_instance;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        st_instance = [[ORStructDeclareTable alloc] init];
+    });
+    return st_instance;
+}
+
+- (void)addStructDeclare:(ORStructDeclare *)structDeclare{
+    [_lock lock];
+    _dic[structDeclare.name] = structDeclare;
+    [_lock unlock];
+}
+
+- (ORStructDeclare *)getStructDeclareWithName:(NSString *)name{
+    [_lock lock];
+    ORStructDeclare *declare = _dic[name];
+    [_lock unlock];
+    return declare;
 }
 @end
