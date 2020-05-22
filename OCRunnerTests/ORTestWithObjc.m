@@ -8,22 +8,24 @@
 
 #import <XCTest/XCTest.h>
 #import <OCRunner/OCRunner.h>
-#import "MFStructDeclare.h"
+#import "ORStructDeclare.h"
 @interface ORStructField: NSObject
 @property (nonatomic,assign)void *fieldPointer;
 @property (nonatomic,copy)NSString *fieldTypeEncode;
 @end
 @implementation ORStructField
-
+- (BOOL)isStructField{
+    return *self.fieldTypeEncode.UTF8String == '{';
+}
 @end
 
 @interface ORStructValue: NSObject
 @property (nonatomic,assign) void *structPointer;
-@property (nonatomic,strong) MFStructDeclare *decalre;
+@property (nonatomic,strong) ORStructDeclare *decalre;
 - (ORStructField *)valueForKey:(NSString *)key;
 @end
 @implementation ORStructValue
-- (instancetype)initWithPointer:(void *)pointer declare:(MFStructDeclare *)decl
+- (instancetype)initWithPointer:(void *)pointer declare:(ORStructDeclare *)decl
 {
     self = [super init];
     self.structPointer = pointer;
@@ -63,55 +65,6 @@
     XCTAssert(a.size.width == 3);
     XCTAssert(a.size.height == 4);
 }
-
-NSMutableArray * startStructDetect(const char *typeEncode){
-    NSMutableString *buffer = [NSMutableString string];
-    NSString *content = [NSString stringWithUTF8String:typeEncode];
-    NSMutableArray *results = [NSMutableArray array];
-    structDetect(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer, 0, results);
-    return results;
-}
-void structDetect(char chr, NSString *content, NSMutableString *buffer, NSUInteger lf, NSMutableArray *results){
-    [buffer appendFormat:@"%c",chr];
-    if (chr == '{'){
-        lf++;
-        if (lf == 2) {
-            buffer = [buffer substringWithRange:NSMakeRange(0, buffer.length - 1)].mutableCopy;
-            [results addObject:buffer];
-            buffer = [NSMutableString string];
-            [buffer appendFormat:@"%c",chr];
-            lf = 1;
-        }
-        structDetect(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer, lf, results);
-        return;
-    }
-    if (content.length == 0) {
-        [results addObject:buffer];
-        return;
-    }
-    if (chr == '}'){
-        [results addObject:buffer];
-        buffer = [NSMutableString string];
-        lf--;
-    }
-    structDetect(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer, lf, results);
-}
-NSMutableArray * startDetectTypeEncode(NSString *content){
-    NSMutableString *buffer = [NSMutableString string];
-    NSMutableArray *results = [NSMutableArray array];
-    detectTypeEncode(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer, results);
-    return results;
-}
-void detectTypeEncode(char chr, NSString *content, NSMutableString *buffer, NSMutableArray *types){
-    [buffer appendFormat:@"%c",chr];
-    if (chr != '^') {
-        [types addObject:buffer];
-        buffer = [NSMutableString string];
-    }
-    if (content.length != 0) {
-        detectTypeEncode(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer,types);
-    }
-}
 typedef struct Element1Struct{
     int **a;
     int *b;
@@ -145,7 +98,8 @@ Element2Struct *Element2StructMake(){
     element->z = 3;
     return element;
 }
-- (void)testStructEncodeParse{
+//FIXME: 结构体三级嵌套时，有问题. self.struct.frame.size.x 需要修改startStructDetect
+- (void)testStructValueGet{
     ContainerStruct container;
     Element1Struct *element1 = Element1StructMake();
     Element2Struct *element2 = Element2StructMake();
@@ -153,11 +107,11 @@ Element2Struct *Element2StructMake(){
     container.element1Pointer = element1;
     container.element2 = *element2;
     container.element2Pointer = element2;
-    [self structDecalre:@encode(NSRange) keys:@[@"location",@"length"]];
-    [self structDecalre:@encode(CGRect) keys:@[@"origin",@"size"]];
-    MFStructDeclare *element1Decl = [self structDecalre:@encode(Element1Struct) keys:@[@"a",@"b",@"c"]];
-    MFStructDeclare *element2Decl = [self structDecalre:@encode(Element2Struct) keys:@[@"x",@"y",@"z"]];
-    MFStructDeclare *containerDecl = [self structDecalre:@encode(ContainerStruct) keys:@[@"element1",@"element1Pointer",@"element2",@"element2Pointer"]];
+    [ORStructDeclare structDecalre:@encode(NSRange) keys:@[@"location",@"length"]];
+    
+    ORStructDeclare *element1Decl = [ORStructDeclare structDecalre:@encode(Element1Struct) keys:@[@"a",@"b",@"c"]];
+    ORStructDeclare *element2Decl = [ORStructDeclare structDecalre:@encode(Element2Struct) keys:@[@"x",@"y",@"z"]];
+    ORStructDeclare *containerDecl = [ORStructDeclare structDecalre:@encode(ContainerStruct) keys:@[@"element1",@"element1Pointer",@"element2",@"element2Pointer"]];
     ORStructValue *containerValue = [[ORStructValue alloc] initWithPointer:&container declare:containerDecl];
     ORStructField *field = [containerValue fieldForKey:@"element1"];
     Element1Struct test = *(Element1Struct *)field.fieldPointer;
@@ -167,91 +121,27 @@ Element2Struct *Element2StructMake(){
     ORStructField *resultField = [element1Value fieldForKey:@"c"];
     CGFloat result = *(CGFloat *)resultField.fieldPointer;
     XCTAssert(result == 101);
+    
+    CGRect rect = CGRectMake(1, 2, 3, 4);
+    ORStructDeclare *rectDecl = [ORStructDeclare structDecalre:@encode(CGRect) keys:@[@"origin",@"size"]];
+    ORStructValue *rectValue = [[ORStructValue alloc] initWithPointer:&rect declare:rectDecl];
+    ORStructField *pointField = [rectValue fieldForKey:@"origin"];
+    ORStructDeclare *pointDecl = [ORStructDeclare structDecalre:@encode(CGPoint) keys:@[@"x",@"y"]];
+    ORStructValue *pointValue = [[ORStructValue alloc] initWithPointer:pointField.fieldPointer declare:pointDecl];
+    ORStructField *xField = [pointValue fieldForKey:@"x"];
+    ORStructField *yField = [pointValue fieldForKey:@"y"];
+    XCTAssert(*(CGFloat *)xField.fieldPointer == 1);
+    XCTAssert(*(CGFloat *)yField.fieldPointer == 2);
+    ORStructField *sizeField = [rectValue fieldForKey:@"size"];
+    ORStructDeclare *sizeDecl = [ORStructDeclare structDecalre:@encode(CGSize) keys:@[@"width",@"height"]];
+    ORStructValue *sizeValue = [[ORStructValue alloc] initWithPointer:sizeField.fieldPointer declare:sizeDecl];
+    ORStructField *widthField = [sizeValue fieldForKey:@"width"];
+    ORStructField *heightField = [sizeValue fieldForKey:@"height"];
+    XCTAssert(*(CGFloat *)widthField.fieldPointer == 3);
+    XCTAssert(*(CGFloat *)heightField.fieldPointer == 4);
+    
 }
 
-- (MFStructDeclare *)structDecalre:(const char *)encode keys:(NSArray *)keys{
-    NSMutableArray *results = startStructDetect(encode);
-    if (results.count > 1) {
-        NSString *nameElement = results[0];
-        NSString *structName = [nameElement substringWithRange:NSMakeRange(1, nameElement.length - 2)];
-        if ([structName hasPrefix:@"_"]) {
-            structName = [structName substringWithRange:NSMakeRange(1, structName.length - 1)];
-        }
-        [results removeObjectAtIndex:0];
-        [results removeLastObject]; //remove "}"
-        MFStructDeclare *declare = [MFStructDeclare new];
-        declare.name = structName;
-        declare.keys = keys;
-        NSMutableDictionary *keySizes = [NSMutableDictionary dictionary];
-        NSMutableDictionary *keyTyeps = [NSMutableDictionary dictionary];
-        XCTAssert(declare.keys.count == results.count);
-        [results enumerateObjectsUsingBlock:^(NSString *elementEncode, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSUInteger size;
-            NSGetSizeAndAlignment(elementEncode.UTF8String, &size, NULL);
-            keySizes[declare.keys[idx]] = @(size);
-            keyTyeps[declare.keys[idx]] = elementEncode;
-        }];
-        declare.keySizes = keySizes;
-        declare.keyTypeEncodes = keyTyeps;
-        NSMutableDictionary *keyOffsets = [NSMutableDictionary dictionary];
-        for (NSString *key in declare.keys){
-            NSUInteger offset = 0;
-            for (NSString *current in declare.keys) {
-                if ([current isEqualToString:key]){
-                    break;
-                }
-                offset += declare.keySizes[current].unsignedIntegerValue;
-            }
-            keyOffsets[key] = @(offset);
-        }
-        declare.keyOffsets = keyOffsets;
-        NSLog(@"%@",structName);
-        NSLog(@"%@",declare.keySizes);
-        return declare;
-    }else{
-        NSString *structEncode = results[0];
-        structEncode = [structEncode substringWithRange:NSMakeRange(1, structEncode.length - 2)];
-        NSArray *comps = [structEncode componentsSeparatedByString:@"="];
-        NSString *structName = comps.firstObject;
-        if ([structName hasPrefix:@"_"]) {
-            structName = [structName substringWithRange:NSMakeRange(1, structName.length - 1)];
-        }
-        NSArray *elementEncodes = startDetectTypeEncode(comps.lastObject);
-        MFStructDeclare *declare = [MFStructDeclare new];
-        declare.name = structName;
-        declare.keys = keys;
-        declare.keyTypeEncodes = [elementEncodes mutableCopy];
-        NSMutableDictionary *keySizes = [NSMutableDictionary dictionary];
-        NSMutableDictionary *keyTyeps = [NSMutableDictionary dictionary];
-        XCTAssert(declare.keys.count == elementEncodes.count);
-        [elementEncodes enumerateObjectsUsingBlock:^(NSString *elementEncode, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSUInteger size;
-            NSGetSizeAndAlignment(elementEncode.UTF8String, &size, NULL);
-            keySizes[declare.keys[idx]] = @(size);
-            keyTyeps[declare.keys[idx]] = elementEncode;
-        }];
-        declare.keySizes = keySizes;
-        declare.keyTypeEncodes = keyTyeps;
-        
-        NSMutableDictionary *keyOffsets = [NSMutableDictionary dictionary];
-        for (NSString *key in declare.keys){
-            NSUInteger offset = 0;
-            for (NSString *current in declare.keys) {
-                if ([current isEqualToString:key]){
-                    break;
-                }
-                offset += declare.keySizes[current].unsignedIntegerValue;
-            }
-            keyOffsets[key] = @(offset);
-        }
-        declare.keyOffsets = keyOffsets;
-        
-        NSLog(@"%@",structName);
-        NSLog(@"%@",elementEncodes);
-        NSLog(@"%@",declare.keySizes);
-        return declare;
-    }
-}
 
 - (void)testPerformanceExample {
     // This is an example of a performance test case.
