@@ -26,6 +26,7 @@ NSMutableArray * startDetectTypeEncodes(NSString *content);
 @end
 @interface ORStructDeclareTable : NSObject
 + (instancetype)shareInstance;
+- (void)addAlias:(NSString *)alias forTypeEncode:(const char *)typeEncode;
 - (void)addStructDeclare:(ORStructDeclare *)structDeclare;
 - (nullable ORStructDeclare *)getStructDeclareWithName:(NSString *)name;
 @end

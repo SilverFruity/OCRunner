@@ -170,7 +170,14 @@ NSMutableArray * startDetectTypeEncodes(NSString *content){
     });
     return st_instance;
 }
-
+- (void)addAlias:(NSString *)alias forTypeEncode:(const char *)typeEncode{
+    [_lock lock];
+    NSString *structName = startStructNameDetect(typeEncode);
+    if (_dic[structName]) {
+        _dic[alias] = _dic[structName];
+    }
+    [_lock unlock];
+}
 - (void)addStructDeclare:(ORStructDeclare *)structDeclare{
     [_lock lock];
     _dic[structDeclare.name] = structDeclare;

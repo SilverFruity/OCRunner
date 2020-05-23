@@ -8,38 +8,22 @@
 
 #import "MFValue.h"
 #import "MFScopeChain.h"
+#import "ORStructDeclare.h"
 #import <UIKit/UIKit.h>
-//static void add_built_in_struct_declare(){
-//	MFStructDeclareTable *table = [MFStructDeclareTable shareInstance];
-//
-//	MFStructDeclare *cgPoinerStructDeclare = [[MFStructDeclare alloc] initWithName:@"CGPoint" typeEncoding:"{CGPoint=dd}" keys:@[@"x",@"y"]];
-//	[table addStructDeclare:cgPoinerStructDeclare];
-//
-//	MFStructDeclare *cgSizeStructDeclare = [[MFStructDeclare alloc] initWithName:@"CGSize" typeEncoding:"{CGSize=dd}" keys:@[@"width",@"height"]];
-//	[table addStructDeclare:cgSizeStructDeclare];
-//
-//	MFStructDeclare *cgRectStructDeclare = [[MFStructDeclare alloc] initWithName:@"CGRect" typeEncoding:"{CGRect={CGPoint=dd}{CGSize=dd}}" keys:@[@"origin",@"size"]];
-//	[table addStructDeclare:cgRectStructDeclare];
-//
-//	MFStructDeclare *cgAffineTransformStructDeclare = [[MFStructDeclare alloc] initWithName:@"CGAffineTransform" typeEncoding:"{CGAffineTransform=dddddd}" keys:@[@"a",@"b",@"c", @"d", @"tx", @"ty"]];
-//	[table addStructDeclare:cgAffineTransformStructDeclare];
-//
-//	MFStructDeclare *cgVectorStructDeclare = [[MFStructDeclare alloc] initWithName:@"CGVector" typeEncoding:"{CGVector=dd}" keys:@[@"dx",@"dy"]];
-//	[table addStructDeclare:cgVectorStructDeclare];
-//
-//	MFStructDeclare *nsRangeStructDeclare = [[MFStructDeclare alloc] initWithName:@"NSRange" typeEncoding:"{_NSRange=QQ}" keys:@[@"location",@"length"]];
-//	[table addStructDeclare:nsRangeStructDeclare];
-//
-//	MFStructDeclare *uiOffsetStructDeclare = [[MFStructDeclare alloc] initWithName:@"UIOffset" typeEncoding:"{UIOffset=dd}" keys:@[@"horizontal",@"vertical"]];
-//	[table addStructDeclare:uiOffsetStructDeclare];
-//
-//	MFStructDeclare *uiEdgeInsetsStructDeclare = [[MFStructDeclare alloc] initWithName:@"UIEdgeInsets" typeEncoding:"{UIEdgeInsets=dddd}" keys:@[@"top",@"left",@"bottom",@"right"]];
-//	[table addStructDeclare:uiEdgeInsetsStructDeclare];
-//
-//	MFStructDeclare *caTransform3DStructDeclare = [[MFStructDeclare alloc] initWithName:@"CATransform3D" typeEncoding:"{CATransform3D=dddddddddddddddd}" keys:@[@"m11",@"m12",@"m13",@"m14",@"m21",@"m22",@"m23",@"m24",@"m31",@"m32",@"m33",@"m34",@"41",@"m42",@"m43",@"m44",]];
-//	[table addStructDeclare:caTransform3DStructDeclare];
-//
-//}
+static void add_built_in_struct_declare(){
+	ORStructDeclareTable *table = [ORStructDeclareTable shareInstance];
+    
+	[table addStructDeclare:[ORStructDeclare structDecalre:@encode(CGPoint) keys:@[@"x",@"y"]]];
+    [table addStructDeclare:[ORStructDeclare structDecalre:@encode(CGSize) keys:@[@"width",@"height"]]];
+    [table addStructDeclare:[ORStructDeclare structDecalre:@encode(CGRect) keys:@[@"origin",@"size"]]];
+    [table addStructDeclare:[ORStructDeclare structDecalre:@encode(CGAffineTransform) keys:@[@"a",@"b",@"c", @"d", @"tx", @"ty"]]];
+    [table addStructDeclare:[ORStructDeclare structDecalre:@encode(CGVector) keys:@[@"dx",@"dy"]]];
+    [table addStructDeclare:[ORStructDeclare structDecalre:@encode(NSRange) keys:@[@"location",@"length"]]];
+    [table addAlias:@"NSRange" forTypeEncode:@encode(NSRange)]; // @encode(NSRange) -> _NSRange
+    [table addStructDeclare:[ORStructDeclare structDecalre:@encode(UIOffset) keys:@[@"horizontal",@"vertical"]]];
+    [table addStructDeclare:[ORStructDeclare structDecalre:@encode(UIEdgeInsets) keys:@[@"top",@"left",@"bottom",@"right"]]];
+    [table addStructDeclare:[ORStructDeclare structDecalre:@encode(CATransform3D) keys:@[@"m11",@"m12",@"m13",@"m14",@"m21",@"m22",@"m23",@"m24",@"m31",@"m32",@"m33",@"m34",@"41",@"m42",@"m43",@"m44"]]];
+}
 
 static void add_gcd_build_in(){
 	/* queue */
@@ -432,7 +416,7 @@ static void add_build_in_var(){
 void mf_add_built_in(void){
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
-//		add_built_in_struct_declare();
+		add_built_in_struct_declare();
 		add_build_in_function();
 		add_build_in_var();
 		add_gcd_build_in();

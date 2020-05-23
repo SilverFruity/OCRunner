@@ -9,6 +9,7 @@
 #import "MFValue.h"
 #import "RunnerClasses.h"
 #import "util.h"
+#import "ORStructDeclare.h"
 extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return type & MFStatementResultTypeReturnMask;
 }
@@ -295,6 +296,13 @@ break;\
 		case 'v':{
 			break;
 		}
+        case '{':{
+            if (self.typePair.type.type == TypeStruct) {
+                size_t structSize = mf_size_with_encoding(typeEncoding);
+                memcpy(cvaluePointer, self.pointerValue, structSize);
+            }
+            break;
+        }
 		default:
 			NSCAssert(0, @"");
 			break;
@@ -305,7 +313,7 @@ break;\
 - (instancetype)initWithCValuePointer:(void *)cValuePointer typeEncoding:(const char *)typeEncoding bridgeTransfer:(BOOL)bridgeTransfer  {
 	typeEncoding = removeTypeEncodingPrefix((char *)typeEncoding);
 	MFValue *retValue = [[MFValue alloc] init];
-
+    retValue.typeEncode = typeEncoding;
 #define MFGO_C_VALUE_CONVER_TO_mf_VALUE_CASE(_code,_kind, _type,_sel)\
 case _code:{\
 [retValue setValueType:_kind];\
@@ -353,6 +361,15 @@ break;\
 
 			break;
 		}
+        case '{':{
+            NSString *structName = startStructNameDetect(typeEncoding);
+            [retValue setValueType:TypeStruct];
+            retValue.typePair.type.name = structName;
+            size_t size = mf_size_with_encoding(typeEncoding);
+            retValue.pointerValue = malloc(size);
+            memcpy(retValue.pointerValue, cValuePointer, size);
+            break;
+        }
 		default:
 			NSCAssert(0, @"not suppoert %s", typeEncoding);
 			break;
@@ -706,3 +723,49 @@ break;\
 
 @end
 
+@implementation MFValue (Struct)
+- (ORStructField *)fieldForKey:(NSString *)key{
+    NSCAssert(self.typePair.type.type == TypeStruct, @"must be struct");
+    NSString *structName = self.typePair.type.name;
+    ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
+    ORStructField *field = [ORStructField new];
+    NSUInteger offset = declare.keyOffsets[key].unsignedIntegerValue;
+    field.fieldPointer = self.pointerValue + offset;
+    field.fieldTypeEncode = declare.keyTypeEncodes[key];
+    return field;
+}
+@end
+
+@implementation ORStructField
+- (BOOL)isStruct{
+    NSString *ignorePointer = [self.fieldTypeEncode stringByReplacingOccurrencesOfString:@"^" withString:@""];
+    return *ignorePointer.UTF8String == '{';
+}
+- (BOOL)isStructPointer{
+    return [self isStruct] && (*self.fieldTypeEncode.UTF8String == '^');
+}
+- (MFValue *)value{
+    return [[MFValue alloc] initWithCValuePointer:self.fieldPointer typeEncoding:self.fieldTypeEncode.UTF8String bridgeTransfer:NO];;
+}
+- (ORStructField *)fieldForKey:(NSString *)key{
+    NSCAssert([self isStruct], @"must be struct");
+    return [self.value fieldForKey:key];
+}
+- (ORStructField *)getPointerValueField{
+    ORStructField *field = [ORStructField new];
+    NSUInteger pointerCount = startDetectPointerCount(self.fieldTypeEncode.UTF8String);
+    void *fieldPointer = self.fieldPointer;
+    while (pointerCount != 0) {
+        fieldPointer = *(void **)fieldPointer;
+        pointerCount--;
+    }
+    field.fieldPointer = fieldPointer;
+    field.fieldTypeEncode = startRemovePointerOfTypeEncode(self.fieldTypeEncode.UTF8String);
+    if (*field.fieldTypeEncode.UTF8String == '{') {
+        NSString *structName = [field.fieldTypeEncode substringWithRange:NSMakeRange(1, field.fieldTypeEncode.length - 2)];
+        ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
+        field.fieldTypeEncode = [NSString stringWithUTF8String:declare.typeEncoding];
+    }
+    return field;
+}
+@end

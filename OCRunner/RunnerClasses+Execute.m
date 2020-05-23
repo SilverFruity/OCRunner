@@ -16,6 +16,7 @@
 #import "MFBlock.h"
 #import "MFValue.h"
 #import "MFStaticVarTable.h"
+#import "ORStructDeclare.h"
 #import <objc/message.h>
 static MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValues){
     BOOL isClassMethod = object_isClass(instance);
@@ -628,6 +629,10 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @implementation ORMethodCall(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *variable = [self.caller execute:scope];
+    if (variable.typePair.type.type == TypeStruct) {
+        ORStructField *field = [variable fieldForKey:self.names.firstObject];
+        return field.value;
+    }
     id instance = variable.objectValue;
     if (!instance) {
         if (variable.classValue) {
@@ -883,6 +888,10 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             value.modifier = self.modifier;
             if (value.typePair.type.type != TypeBlock) {
                 value.typePair = self.pair;
+            }
+            ORStructDeclare *structDecl = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:self.pair.type.name];
+            if (structDecl) {
+                self.pair.type.type = TypeStruct;
             }
             [scope setValue:value withIndentifier:self.pair.var.varname];
             return value;

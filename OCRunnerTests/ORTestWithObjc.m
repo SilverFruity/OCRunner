@@ -9,65 +9,7 @@
 #import <XCTest/XCTest.h>
 #import <OCRunner/OCRunner.h>
 #import "ORStructDeclare.h"
-@interface ORStructField: NSObject
-@property (nonatomic,assign)void *fieldPointer;
-@property (nonatomic,copy)NSString *fieldTypeEncode;
-@end
 
-@interface ORStructValue: NSObject
-@property (nonatomic,assign) void *structPointer;
-@property (nonatomic,strong) ORStructDeclare *decalre;
-- (ORStructField *)fieldForKey:(NSString *)key;
-- (instancetype)initWithPointer:(void *)pointer declare:(ORStructDeclare *)decl;
-@end
-
-@implementation ORStructField
-- (BOOL)isStruct{
-    NSString *ignorePointer = [self.fieldTypeEncode stringByReplacingOccurrencesOfString:@"^" withString:@""];
-    return *ignorePointer.UTF8String == '{';
-}
-- (BOOL)isStructPointer{
-    return [self isStruct] && (*self.fieldTypeEncode.UTF8String == '^');
-}
-
-- (ORStructField *)fieldForKey:(NSString *)key{
-    NSCAssert([self isStruct], @"must be struct");
-    NSString *structName = startStructNameDetect(self.fieldTypeEncode.UTF8String);
-    ORStructDeclare *structDecl = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
-    ORStructValue *structValue = [[ORStructValue alloc] initWithPointer:self.fieldPointer declare:structDecl];
-    return [structValue fieldForKey:key];;
-}
-- (ORStructField *)getPointerValueField{
-    ORStructField *field = [ORStructField new];
-    NSUInteger pointerCount = startDetectPointerCount(self.fieldTypeEncode.UTF8String);
-    void *fieldPointer = self.fieldPointer;
-    while (pointerCount != 0) {
-        fieldPointer = *(void **)fieldPointer;
-        pointerCount--;
-    }
-    field.fieldPointer = fieldPointer;
-    field.fieldTypeEncode = startRemovePointerOfTypeEncode(self.fieldTypeEncode.UTF8String);
-    return field;
-}
-@end
-
-
-@implementation ORStructValue
-- (instancetype)initWithPointer:(void *)pointer declare:(ORStructDeclare *)decl
-{
-    self = [super init];
-    self.structPointer = pointer;
-    self.decalre = decl;
-    return self;
-}
-- (ORStructField *)fieldForKey:(NSString *)key{
-    ORStructField *field = [ORStructField new];
-    NSUInteger offset = self.decalre.keyOffsets[key].unsignedIntegerValue;
-    field.fieldPointer = self.structPointer + offset;
-    field.fieldTypeEncode = self.decalre.keyTypeEncodes[key];
-    return field;
-}
-@end
 @interface ORTestWithObjc : XCTestCase
 
 @end
@@ -128,7 +70,6 @@ Element2Struct *Element2StructMake(){
     element->t = *Element1StructMake();
     return element;
 }
-//FIXME: 结构体三级嵌套时，有问题. self.struct.frame.size.x 需要修改startStructDetect
 - (void)testStructTypeEncodePairse{
     ORStructDeclare *decl = [ORStructDeclare structDecalre:@encode(CGPoint) keys:@[@"x",@"y"]];
     XCTAssertEqualObjects(decl.keySizes[@"x"], @(8));
@@ -147,8 +88,7 @@ Element2Struct *Element2StructMake(){
     [[ORStructDeclareTable shareInstance] addStructDeclare:rectDecl];
     [[ORStructDeclareTable shareInstance] addStructDeclare:pointDecl];
     [[ORStructDeclareTable shareInstance] addStructDeclare:sizeDecl];
-    
-    ORStructValue *rectValue = [[ORStructValue alloc] initWithPointer:&rect declare:rectDecl];
+    MFValue *rectValue = [[MFValue alloc] initWithCValuePointer:&rect typeEncoding:rectDecl.typeEncoding bridgeTransfer:NO];
     CGFloat x = *(CGFloat *)[[rectValue fieldForKey:@"origin"] fieldForKey:@"x"].fieldPointer;
     CGFloat y = *(CGFloat *)[[rectValue fieldForKey:@"origin"] fieldForKey:@"y"].fieldPointer;
     CGFloat width = *(CGFloat *)[[rectValue fieldForKey:@"size"] fieldForKey:@"width"].fieldPointer;
@@ -174,8 +114,7 @@ Element2Struct *Element2StructMake(){
     [[ORStructDeclareTable shareInstance] addStructDeclare:element1Decl];
     [[ORStructDeclareTable shareInstance] addStructDeclare:element2Decl];
     [[ORStructDeclareTable shareInstance] addStructDeclare:containerDecl];
-    
-    ORStructValue *containerValue = [[ORStructValue alloc] initWithPointer:&container declare:containerDecl];
+    MFValue *containerValue = [[MFValue alloc] initWithCValuePointer:&container typeEncoding:containerDecl.typeEncoding bridgeTransfer:NO];
     CGFloat c3 = *(CGFloat *)[[[containerValue fieldForKey:@"element2"] fieldForKey:@"t"] fieldForKey:@"c"].fieldPointer;
     XCTAssert(c3 == 101);
     CGFloat pC3 = *(CGFloat *)[[[[containerValue fieldForKey:@"element2Pointer"] getPointerValueField] fieldForKey:@"t"] fieldForKey:@"c"].fieldPointer;

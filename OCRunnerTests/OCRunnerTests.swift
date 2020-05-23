@@ -737,16 +737,21 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 3)
     }
     func testStructGetValue(){
+        mf_add_built_in()
         source =
         """
         UIView *view = [UIView new];
+        view.frame = CGRectMake(1,2,3,4);
         CGRect frame = view.frame;
+        CGFloat a = frame.size.height;
         """
         ocparser.parseSource(source)
         let exps = ocparser.ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
-        print(scope.getValueWithIdentifier("frame"))
+        let frameValue = scope.getValueWithIdentifier("frame")!
+        XCTAssert(frameValue.typePair.type.type == TypeStruct)
+        XCTAssert(scope.getValueWithIdentifier("a")?.doubleValue == 4)
     }
 }

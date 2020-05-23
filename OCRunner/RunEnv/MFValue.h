@@ -344,7 +344,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @property (assign, nonatomic) BOOL isNormal;
 
 + (instancetype)normalEnd;
-
+@property (nonatomic,assign)const char* typeEncode;
 @property (assign, nonatomic) unsigned char uCharValue;
 @property (assign, nonatomic) unsigned short uShortValue;
 @property (assign, nonatomic) unsigned int uIntValue;
@@ -411,5 +411,20 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 - (void *)c2pointerValue;
 - (void)assignToCValuePointer:(void *)cvaluePointer typeEncoding:(const char *)typeEncoding;
 - (instancetype)initWithCValuePointer:(void *)cValuePointer typeEncoding:(const char *)typeEncoding bridgeTransfer:(BOOL)bridgeTransfer;
+@end
+
+
+@interface ORStructField: NSObject
+@property (nonatomic,assign)void *fieldPointer;
+@property (nonatomic,copy)NSString *fieldTypeEncode;
+- (BOOL)isStruct;
+- (BOOL)isStructPointer;
+- (MFValue *)value;
+- (ORStructField *)fieldForKey:(NSString *)key;
+- (ORStructField *)getPointerValueField;
+@end
+
+@interface MFValue (Struct)
+- (ORStructField *)fieldForKey:(NSString *)key;
 @end
 NS_ASSUME_NONNULL_END
