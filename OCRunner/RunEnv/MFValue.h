@@ -8,25 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "RunnerClasses.h"
-#define ValueDefineWithSuffix(suffix)\
-unsigned char uCharValue##suffix = 0;\
-unsigned short uShortValue##suffix = 0;\
-unsigned int uIntValue##suffix = 0;\
-unsigned long uLongValue##suffix = 0;\
-unsigned long long uLLongValue##suffix = 0;\
-BOOL boolValue##suffix = 0;\
-char charValue##suffix = 0;\
-short shortValue##suffix = 0;\
-int intValue##suffix = 0;\
-long longValue##suffix = 0;\
-long long lLongValue##suffix = 0;\
-float floatValue##suffix = 0;\
-float doubleValue##suffix = 0;\
-id objectValue##suffix = nil;\
-SEL selValue##suffix = 0;\
-Class classValue##suffix = nil;\
-void *pointerValue##suffix = nil;\
-
 #define MFValueGetValueInPointer(resultValue, fromValue)\
 do {\
     if (fromValue.typePair.var.ptCount > 1) {\
