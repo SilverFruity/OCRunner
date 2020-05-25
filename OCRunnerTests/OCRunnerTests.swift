@@ -21,13 +21,61 @@ class CRunnerTests: XCTestCase {
         scope.clear()
     }
     func testDeclareExpression(){
-        let source = "int a = 1;"
+        let source = """
+        char a = -1;
+        short b = -1;
+        int c = -1;
+        long d = -1;
+        long long e = -1;
+        unsigned char f = 1;
+        unsigned short g = 1;
+        unsigned int h = 1;
+        unsigned long i = 1;
+        unsigned long long j = 1;
+        float k = 0.5;
+        double l = 0.5;
+        """
         ocparser.parseSource(source)
-        let exp = ocparser.ast.globalStatements.firstObject as! ORExpression;
-        exp.execute(scope)
-        let scopeValue = scope.getValueWithIdentifier("a")
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        var scopeValue = scope.getValueWithIdentifier("a")
+        XCTAssert(scopeValue!.typePair.type.type == TypeChar)
+        XCTAssert(scopeValue!.charValue == -1)
+        scopeValue = scope.getValueWithIdentifier("b")
+        XCTAssert(scopeValue!.typePair.type.type == TypeShort)
+        XCTAssert(scopeValue!.shortValue == -1)
+        scopeValue = scope.getValueWithIdentifier("c")
         XCTAssert(scopeValue!.typePair.type.type == TypeInt)
-        XCTAssert(scopeValue!.intValue == 1)
+        XCTAssert(scopeValue!.intValue == -1)
+        scopeValue = scope.getValueWithIdentifier("d")
+        XCTAssert(scopeValue!.typePair.type.type == TypeLong)
+        XCTAssert(scopeValue!.longValue == -1)
+        scopeValue = scope.getValueWithIdentifier("e")
+        XCTAssert(scopeValue!.typePair.type.type == TypeLongLong)
+        XCTAssert(scopeValue!.longLongValue == -1)
+        scopeValue = scope.getValueWithIdentifier("f")
+        XCTAssert(scopeValue!.typePair.type.type == TypeUChar)
+        XCTAssert(scopeValue!.uCharValue == 1)
+        scopeValue = scope.getValueWithIdentifier("g")
+        XCTAssert(scopeValue!.typePair.type.type == TypeUShort)
+        XCTAssert(scopeValue!.uShortValue == 1)
+        scopeValue = scope.getValueWithIdentifier("h")
+        XCTAssert(scopeValue!.typePair.type.type == TypeUInt)
+        XCTAssert(scopeValue!.uIntValue == 1)
+        scopeValue = scope.getValueWithIdentifier("i")
+        XCTAssert(scopeValue!.typePair.type.type == TypeULong)
+        XCTAssert(scopeValue!.uLongValue == 1)
+        scopeValue = scope.getValueWithIdentifier("j")
+        XCTAssert(scopeValue!.typePair.type.type == TypeULongLong)
+        XCTAssert(scopeValue!.uLongLongValue == 1)
+        scopeValue = scope.getValueWithIdentifier("k")
+        XCTAssert(scopeValue!.typePair.type.type == TypeFloat)
+        XCTAssert(scopeValue!.floatValue == 0.5)
+        scopeValue = scope.getValueWithIdentifier("l")
+        XCTAssert(scopeValue!.typePair.type.type == TypeDouble)
+        XCTAssert(scopeValue!.doubleValue == 0.5)
     }
     func testeDeclareBlock(){
         let source =
@@ -353,7 +401,6 @@ class CRunnerTests: XCTestCase {
         }
         XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 1)
         XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 10)
-        print(scope.getValueWithIdentifier("c")!.intValue)
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 101)
         XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 101)
     }
@@ -415,7 +462,6 @@ class CRunnerTests: XCTestCase {
         for exp in exps {
             exp.execute(scope);
         }
-        print(scope.getValueWithIdentifier("a")!.intValue)
         XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 6)
     }
     func testClassMethodReplace(){
@@ -752,6 +798,23 @@ class CRunnerTests: XCTestCase {
         }
         let frameValue = scope.getValueWithIdentifier("frame")!
         XCTAssert(frameValue.typePair.type.type == TypeStruct)
-        XCTAssert(scope.getValueWithIdentifier("a")?.doubleValue == 4)
+        let aValue = scope.getValueWithIdentifier("a")!
+        XCTAssert(aValue.typePair.type.type == TypeDouble)
+        XCTAssert(aValue.doubleValue == 4, "\(aValue.doubleValue)")
+    }
+    func testDispatchOnce(){
+        mf_add_built_in()
+        source =
+        """
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            [NSObject new];
+        });
+        """
+        ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
     }
 }

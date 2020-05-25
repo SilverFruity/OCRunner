@@ -438,6 +438,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         copy_undef_var(expr.caller, chain, fromScope, destScope);
         copy_undef_var(expr.keyExp, chain, fromScope, destScope);
         return;
+    }else if (exprOrStatementClass == ORMethodCall.class){
+        ORMethodCall *expr = (ORMethodCall *)exprOrStatement;
+        copy_undef_var(expr.caller, chain, fromScope, destScope);
+        copy_undef_vars(expr.values, chain, fromScope, destScope);
+        return;
     }else if (exprOrStatementClass == ORBlockImp.class){
         ORBlockImp *expr = (ORBlockImp *)exprOrStatement;
         ORFuncDeclare *funcDeclare = expr.declare;
@@ -608,7 +613,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }
         case OCValueDouble:{
             NSString *value = self.value;
-            return [MFValue valueInstanceWithLongLong:value.doubleValue];
+            return [MFValue valueInstanceWithDouble:value.doubleValue];
         }
         case OCValueNil:{
             return [MFValue valueInstanceWithObject:nil];
