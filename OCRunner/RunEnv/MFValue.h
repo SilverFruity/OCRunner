@@ -8,6 +8,25 @@
 
 #import <Foundation/Foundation.h>
 #import "RunnerClasses.h"
+#define ValueDefineWithSuffix(suffix)\
+unsigned char uCharValue##suffix = 0;\
+unsigned short uShortValue##suffix = 0;\
+unsigned int uIntValue##suffix = 0;\
+unsigned long uLongValue##suffix = 0;\
+unsigned long long uLLongValue##suffix = 0;\
+BOOL boolValue##suffix = 0;\
+char charValue##suffix = 0;\
+short shortValue##suffix = 0;\
+int intValue##suffix = 0;\
+long longValue##suffix = 0;\
+long long lLongValue##suffix = 0;\
+float floatValue##suffix = 0;\
+float doubleValue##suffix = 0;\
+id objectValue##suffix = nil;\
+SEL selValue##suffix = 0;\
+Class classValue##suffix = nil;\
+void *pointerValue##suffix = nil;\
+
 #define MFValueGetValueInPointer(resultValue, fromValue)\
 do {\
     if (fromValue.typePair.var.ptCount > 1) {\
@@ -57,111 +76,122 @@ do {\
             break;\
     }\
 } while (0);
+#define startBox(value)\
+NSUInteger size;\
+NSGetSizeAndAlignment(value.typeEncode, &size, NULL);\
+void *box = malloc(size);\
+
+#define endBox(result)\
+result.pointer = box;\
+free(box);
 
 #define PrefixUnaryExecuteInt(operator,value,resultValue)\
 switch (value.typePair.type.type) {\
 case TypeUChar:\
-resultValue.uCharValue = (operator value.uCharValue); break;\
+*(unsigned char *)box = (operator *(unsigned char *)value.pointer); break;\
 case TypeUShort:\
-resultValue.uShortValue = (operator value.uShortValue); break;\
+*(unsigned short *)box = (operator *(unsigned short *)value.pointer); break;\
 case TypeUInt:\
-resultValue.uIntValue = (operator value.uIntValue); break;\
+*(unsigned int *)box = (operator *(unsigned int *)value.pointer); break;\
 case TypeULong:\
-resultValue.uLongValue = (operator value.uLongValue); break;\
+*(unsigned long *)box = (operator *(unsigned long *)value.pointer); break;\
 case TypeULongLong:\
-resultValue.uLongLongValue = (operator value.uLongLongValue); break;\
+*(unsigned long long *)box = (operator *(unsigned long long *)value.pointer); break;\
 case TypeBOOL:\
-resultValue.boolValue = (operator value.boolValue); break;\
+*(BOOL *)box = (operator *(BOOL *)value.pointer); break;\
 case TypeChar:\
-resultValue.charValue = (operator value.charValue); break;\
+*(char *)box = (operator *(char *)value.pointer); break;\
 case TypeShort:\
-resultValue.shortValue = (operator value.shortValue); break;\
+*(short *)box = (operator *(short *)value.pointer); break;\
 case TypeInt:\
-resultValue.intValue = (operator value.intValue); break;\
+*(int *)box = (operator *(int *)value.pointer); break;\
 case TypeLong:\
-resultValue.longValue = (operator value.longValue); break;\
+*(long *)box = (operator *(long *)value.pointer); break;\
 case TypeLongLong:\
-resultValue.longLongValue = (operator value.longLongValue); break;\
+*(long long *)box = (operator *(long long *)value.pointer); break;\
 default:\
 break;\
-}
+}\
 
 #define PrefixUnaryExecuteFloat(operator,value,resultValue)\
 switch (value.typePair.type.type) {\
 case TypeFloat:\
-resultValue.floatValue = (operator value.floatValue); break;\
+*(float *)box = (operator *(float *)value.pointer); break;\
 case TypeDouble:\
-resultValue.doubleValue = (operator value.doubleValue); break;\
+*(double *)box = (operator *(double *)value.pointer); break;\
 default:\
 break;\
-}
+}\
 
 #define SuffixUnaryExecuteInt(operator,value,resultValue)\
 switch (value.typePair.type.type) {\
 case TypeUChar:\
-resultValue.uCharValue = (value.uCharValue operator); break;\
+(*(unsigned char *)value.pointer operator); break;\
 case TypeUShort:\
-resultValue.uShortValue = (value.uShortValue operator); break;\
+(*(unsigned short *)value.pointer operator); break;\
 case TypeUInt:\
-resultValue.uIntValue = (value.uIntValue operator); break;\
+(*(unsigned int *)value.pointer operator); break;\
 case TypeULong:\
-resultValue.uLongValue = (value.uLongValue operator); break;\
+(*(unsigned long *)value.pointer operator); break;\
 case TypeULongLong:\
-resultValue.uLongLongValue = (value.uLongLongValue operator); break;\
+(*(unsigned long long *)value.pointer operator); break;\
 case TypeBOOL:\
-resultValue.boolValue = (value.boolValue operator); break;\
+(*(BOOL *)value.pointer operator); break;\
 case TypeChar:\
-resultValue.charValue = (value.charValue operator); break;\
+(*(char *)value.pointer operator); break;\
 case TypeShort:\
-resultValue.shortValue = (value.shortValue operator); break;\
+(*(short *)value.pointer operator); break;\
 case TypeInt:\
-resultValue.intValue = (value.intValue operator); break;\
+(*(int *)value.pointer operator); break;\
 case TypeLong:\
-resultValue.longValue = (value.longValue operator); break;\
+(*(long *)value.pointer operator); break;\
 case TypeLongLong:\
-resultValue.longLongValue = (value.longLongValue operator); break;\
+(*(long long *)value.pointer operator); break;\
 default:\
 break;\
-}
+}\
+resultValue.pointer = value.pointer;
+
 
 #define SuffixUnaryExecuteFloat(operator,value,resultValue)\
 switch (value.typePair.type.type) {\
 case TypeFloat:\
-resultValue.floatValue = (value.floatValue operator); break;\
+(*(float *)value.pointer operator); break;\
 case TypeDouble:\
-resultValue.doubleValue = (value.doubleValue operator); break;\
+(*(double *)value.pointer operator); break;\
 default:\
 break;\
-}
+}\
+resultValue.pointer = value.pointer;
 
 #define UnaryExecuteBaseType(resultName,operator,value)\
 switch (value.typePair.type.type) {\
 case TypeUChar:\
-resultName = operator (value.uCharValue); break;\
+resultName = operator (*(unsigned char *)value.pointer); break;\
 case TypeUShort:\
-resultName = operator (value.uShortValue); break;\
+resultName = operator (*(unsigned short *)value.pointer); break;\
 case TypeUInt:\
-resultName = operator (value.uIntValue); break;\
+resultName = operator (*(unsigned int *)value.pointer); break;\
 case TypeULong:\
-resultName = operator (value.uLongValue); break;\
+resultName = operator (*(unsigned long *)value.pointer); break;\
 case TypeULongLong:\
-resultName = operator (value.uLongLongValue); break;\
+resultName = operator (*(unsigned long long *)value.pointer); break;\
 case TypeBOOL:\
-resultName = operator (value.boolValue); break;\
+resultName = operator (*(BOOL *)value.pointer); break;\
 case TypeChar:\
-resultName = operator (value.charValue); break;\
+resultName = operator (*(char *)value.pointer); break;\
 case TypeShort:\
-resultName = operator (value.shortValue); break;\
+resultName = operator (*(short *)value.pointer); break;\
 case TypeInt:\
-resultName = operator (value.intValue); break;\
+resultName = operator (*(int *)value.pointer); break;\
 case TypeLong:\
-resultName = operator (value.longValue); break;\
+resultName = operator (*(long *)value.pointer); break;\
 case TypeLongLong:\
-resultName = operator (value.longLongValue); break;\
+resultName = operator (*(long long *)value.pointer); break;\
 case TypeFloat:\
-resultName = operator (value.floatValue); break;\
+resultName = operator (*(float *)value.pointer); break;\
 case TypeDouble:\
-resultName = operator (value.doubleValue); break;\
+resultName = operator (*(double *)value.pointer); break;\
 default:\
 break;\
 }
@@ -170,7 +200,7 @@ break;\
 #define UnaryExecute(resultName,operator,value)\
 do{\
     if (value.isPointer) {\
-        resultName = operator (value.pointerValue);\
+        resultName = operator (value.pointer);\
         break;\
     }\
     UnaryExecuteBaseType(resultName,operator,value)\
@@ -178,41 +208,46 @@ do{\
     case TypeId:\
     case TypeObject:\
     case TypeBlock:\
-    resultName = operator (value.objectValue); break;\
+    resultName = operator (*(__strong id *)value.pointer); break;\
     case TypeSEL:\
-    resultName = operator (value.selValue); break;\
+    resultName = operator (*(SEL *)value.pointer); break;\
     case TypeClass:\
-    resultName = operator (value.classValue); break;\
+    resultName = operator (*(Class *)value.pointer); break;\
     default:\
     break;\
     }\
 }while(0)
 
+#define BinaryExecute(type,leftValue,operator,rightValue)\
+( (*(type *)leftValue.pointer) operator (*(type *)rightValue.pointer) ); break;
+
+#define BoxBinaryExecute(type,leftValue,operator,rightValue)\
+*(type *)box = BinaryExecute(type,leftValue,operator,rightValue)
 
 #define BinaryExecuteInt(leftValue,operator,rightValue,resultValue)\
 switch (leftValue.typePair.type.type) {\
 case TypeUChar:\
-resultValue.uCharValue = (leftValue.uCharValue operator rightValue.uCharValue); break;\
+BoxBinaryExecute(unsigned char,leftValue,operator,rightValue)\
 case TypeUShort:\
-resultValue.uShortValue = (leftValue.uShortValue operator rightValue.uShortValue); break;\
+BoxBinaryExecute(unsigned short,leftValue,operator,rightValue)\
 case TypeUInt:\
-resultValue.uIntValue = (leftValue.uIntValue operator rightValue.uIntValue); break;\
+BoxBinaryExecute(unsigned int,leftValue,operator,rightValue)\
 case TypeULong:\
-resultValue.uLongValue = (leftValue.uLongValue operator rightValue.uLongValue); break;\
+BoxBinaryExecute(unsigned long,leftValue,operator,rightValue)\
 case TypeULongLong:\
-resultValue.uLongLongValue = (leftValue.uLongLongValue operator rightValue.uLongLongValue); break;\
+BoxBinaryExecute(unsigned long long,leftValue,operator,rightValue)\
 case TypeBOOL:\
-resultValue.boolValue = (leftValue.boolValue operator rightValue.boolValue); break;\
+BoxBinaryExecute(BOOL,leftValue,operator,rightValue)\
 case TypeChar:\
-resultValue.charValue = (leftValue.charValue operator rightValue.charValue); break;\
+BoxBinaryExecute(char,leftValue,operator,rightValue)\
 case TypeShort:\
-resultValue.shortValue = (leftValue.shortValue operator rightValue.shortValue); break;\
+BoxBinaryExecute(short,leftValue,operator,rightValue)\
 case TypeInt:\
-resultValue.intValue = (leftValue.intValue operator rightValue.intValue); break;\
+BoxBinaryExecute(int,leftValue,operator,rightValue)\
 case TypeLong:\
-resultValue.longValue = (leftValue.longValue operator rightValue.longValue); break;\
+BoxBinaryExecute(long,leftValue,operator,rightValue)\
 case TypeLongLong:\
-resultValue.longLongValue = (leftValue.longLongValue operator rightValue.longLongValue); break;\
+BoxBinaryExecute(long long,leftValue,operator,rightValue)\
 default:\
 break;\
 }
@@ -220,9 +255,9 @@ break;\
 #define BinaryExecuteFloat(leftValue,operator,rightValue,resultValue)\
 switch (leftValue.typePair.type.type) {\
 case TypeFloat:\
-resultValue.floatValue = (leftValue.floatValue operator rightValue.floatValue); break;\
+BoxBinaryExecute(float,leftValue,operator,rightValue)\
 case TypeDouble:\
-resultValue.doubleValue = (leftValue.doubleValue operator rightValue.doubleValue); break;\
+BoxBinaryExecute(double,leftValue,operator,rightValue)\
 default:\
 break;\
 }
@@ -230,45 +265,41 @@ break;\
 #define LogicBinaryOperatorExecute(leftValue,operator,rightValue)\
 BOOL logicResultValue = NO;\
 do{\
-    if (leftValue.isPointer) {\
-        logicResultValue= (leftValue.pointerValue operator rightValue.pointerValue);\
-        break;\
-    }\
     switch (leftValue.typePair.type.type) {\
     case TypeUChar:\
-    logicResultValue = (leftValue.uCharValue operator rightValue.uCharValue); break;\
+    logicResultValue = BinaryExecute(unsigned char,leftValue,operator,rightValue)\
     case TypeUShort:\
-    logicResultValue = (leftValue.uShortValue operator rightValue.uShortValue); break;\
+    logicResultValue = BinaryExecute(unsigned short,leftValue,operator,rightValue)\
     case TypeUInt:\
-    logicResultValue = (leftValue.uIntValue operator rightValue.uIntValue); break;\
+    logicResultValue = BinaryExecute(unsigned int,leftValue,operator,rightValue)\
     case TypeULong:\
-    logicResultValue = (leftValue.uLongValue operator rightValue.uLongValue); break;\
+    logicResultValue = BinaryExecute(unsigned long,leftValue,operator,rightValue)\
     case TypeULongLong:\
-    logicResultValue = (leftValue.uLongLongValue operator rightValue.uLongLongValue); break;\
+    logicResultValue = BinaryExecute(unsigned long long,leftValue,operator,rightValue)\
     case TypeBOOL:\
-    logicResultValue = (leftValue.boolValue operator rightValue.boolValue); break;\
+    logicResultValue = BinaryExecute(BOOL,leftValue,operator,rightValue)\
     case TypeChar:\
-    logicResultValue = (leftValue.charValue operator rightValue.charValue); break;\
+    logicResultValue = BinaryExecute(char,leftValue,operator,rightValue)\
     case TypeShort:\
-    logicResultValue = (leftValue.shortValue operator rightValue.shortValue); break;\
+    logicResultValue = BinaryExecute(short,leftValue,operator,rightValue)\
     case TypeInt:\
-    logicResultValue = (leftValue.intValue operator rightValue.intValue); break;\
+    logicResultValue = BinaryExecute(int,leftValue,operator,rightValue)\
     case TypeLong:\
-    logicResultValue = (leftValue.longValue operator rightValue.longValue); break;\
+    logicResultValue = BinaryExecute(long,leftValue,operator,rightValue)\
     case TypeLongLong:\
-    logicResultValue = (leftValue.longLongValue operator rightValue.longLongValue); break;\
+    logicResultValue = BinaryExecute(long long,leftValue,operator,rightValue)\
     case TypeFloat:\
-    logicResultValue = (leftValue.floatValue operator rightValue.floatValue); break;\
+    logicResultValue = BinaryExecute(float,leftValue,operator,rightValue)\
     case TypeDouble:\
-    logicResultValue = (leftValue.doubleValue operator rightValue.doubleValue); break;\
+    logicResultValue = BinaryExecute(double,leftValue,operator,rightValue)\
     case TypeId:\
     case TypeObject:\
     case TypeBlock:\
-    logicResultValue = (leftValue.objectValue operator rightValue.objectValue); break;\
+    logicResultValue = ( (*(__strong id *)leftValue.pointer) operator (*(__strong id *)rightValue.pointer) ); break;\
     case TypeSEL:\
-    logicResultValue =  (leftValue.selValue operator rightValue.selValue); break;\
+    logicResultValue = BinaryExecute(SEL,leftValue,operator,rightValue)\
     case TypeClass:\
-    logicResultValue =  (leftValue.classValue operator rightValue.classValue); break;\
+    logicResultValue = BinaryExecute(Class,leftValue,operator,rightValue)\
     default:\
     break;\
     }\
@@ -277,7 +308,7 @@ do{\
 #define MFValueSetValue(target,from)\
 do{\
     if (target.isPointer) {\
-        target.pointerValue = from.pointerValue;\
+        target.pointer = from.pointer;\
         break;\
     }\
     switch (target.typePair.type.type) {\
@@ -334,6 +365,14 @@ typedef NS_ENUM(NSInteger, MFStatementResultType) {
     MFStatementResultTypeReturnMask = 0xF0
 };
 @class ORTypeVarPair;
+
+@interface ORTypeVarPair(Convert)
+- (const char *)typeEncode;
++ (instancetype)objectTypePair;
++ (instancetype)pointerTypePair;
+@end
+ORTypeVarPair *typePairWithTypeEncode(const char *tyepEncode);
+
 extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @interface MFValue : NSObject
 
@@ -344,45 +383,32 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @property (assign, nonatomic) BOOL isNormal;
 
 + (instancetype)normalEnd;
-@property (nonatomic,assign)const char* typeEncode;
-@property (assign, nonatomic) unsigned char uCharValue;
-@property (assign, nonatomic) unsigned short uShortValue;
-@property (assign, nonatomic) unsigned int uIntValue;
-@property (assign, nonatomic) unsigned long uLongValue;
-@property (assign, nonatomic) unsigned long long uLongLongValue;
 
-@property (assign, nonatomic) char charValue;
-@property (assign, nonatomic) short shortValue;
-@property (assign, nonatomic) int intValue;
-@property (assign, nonatomic) long longValue;
-@property (assign, nonatomic) long long longLongValue;
-
-@property (assign, nonatomic) BOOL boolValue;
-
-@property (assign, nonatomic) float floatValue;
-@property (assign, nonatomic) double doubleValue;
-
-@property (nonatomic,nullable) id objectValue;
-@property (strong, nonatomic, nullable) Class classValue;
-@property (assign, nonatomic, nullable) SEL selValue;
-@property (assign, nonatomic, nullable) void *pointerValue;
-
-@property (assign,nonatomic)ORDeclarationModifier modifier;
-@property (strong,nonatomic)ORTypeVarPair *typePair;
-- (void)setValueType:(TypeKind)type;
-- (BOOL)isSubtantial;
-- (BOOL)isObject;
-- (BOOL)isMember;
-- (BOOL)isBaseValue;
-- (BOOL)isPointer;
 - (void)assignFrom:(MFValue *)src;
 - (MFValue *)subscriptGetWithIndex:(MFValue *)index;
 - (void)subscriptSetValue:(MFValue *)value index:(MFValue *)index;
 
+@property (nonatomic,nullable) id objectValue;
+@property (nonatomic,assign)void *pointer;
+@property (nonatomic,assign)const char* typeEncode;
+@property (assign,nonatomic)ORDeclarationModifier modifier;
+@property (strong,nonatomic)ORTypeVarPair *typePair;
 
 + (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding;
-+ (instancetype)voidValueInstance;
+- (instancetype)initTypeEncode:(const char *)tyepEncode pointer:(nullable void *)pointer;
+- (instancetype)initTypeKind:(TypeKind)TypeKind pointer:(void *)pointer;
+- (instancetype)initTypePair:(ORTypeVarPair *)typePair pointer:(void *)pointer;
 
+- (BOOL)isPointer;
+- (BOOL)isMember;
+- (BOOL)isSubtantial;
+- (BOOL)isObject;
+- (BOOL)isBaseValue;
+- (void)setValueType:(TypeKind)type;
+
+- (void)writePointer:(void *)pointer typeEncode:(const char *)typeEncode;
+
++ (instancetype)voidValueInstance;
 + (instancetype)valueInstanceWithBOOL:(BOOL)boolValue;
 + (instancetype)valueInstanceWithUChar:(unsigned char)uCharValue;
 + (instancetype)valueInstanceWithUShort:(unsigned short)uShortValue;
@@ -402,15 +428,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 + (instancetype)valueInstanceWithSEL:(SEL)selValue;
 + (instancetype)valueInstanceWithCstring:(nullable const char *)cstringValue;
 + (instancetype)valueInstanceWithPointer:(nullable void *)pointerValue;
-+ (instancetype)valueInstanceWithStruct:(void *)structValue typeEncoding:(const char *)typeEncoding copyData:(BOOL)copyData;
 
-- (instancetype)nsStringValue;
-- (void *)valuePointer;
 
-- (id)c2objectValue;
-- (void *)c2pointerValue;
-- (void)assignToCValuePointer:(void *)cvaluePointer typeEncoding:(const char *)typeEncoding;
-- (instancetype)initWithCValuePointer:(void *)cValuePointer typeEncoding:(const char *)typeEncoding bridgeTransfer:(BOOL)bridgeTransfer;
 @end
 
 

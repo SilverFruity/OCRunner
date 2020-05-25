@@ -43,32 +43,36 @@ static MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *a
         MFValue *argValue = argValues[i-2];
         char *argTypeEncoding = (char *)[sig getArgumentTypeAtIndex:i];
         argTypeEncoding = removeTypeEncodingPrefix(argTypeEncoding);
-#define mf_SET_FFI_TYPE_AND_ARG_CASE(_code, _type, _ffi_type_value, _sel)\
+#define mf_SET_FFI_TYPE_AND_ARG_CASE(_code,_ffi_type_value)\
 case _code:{\
 argTypes[i] = &_ffi_type_value;\
-_type value = (_type)argValue._sel;\
-args[i] = &value;\
+args[i] = argValue.pointer;\
 break;\
 }
         switch (*argTypeEncoding) {
-                mf_SET_FFI_TYPE_AND_ARG_CASE('c', char, ffi_type_schar, charValue)
-                mf_SET_FFI_TYPE_AND_ARG_CASE('i', int, ffi_type_sint, intValue)
-                mf_SET_FFI_TYPE_AND_ARG_CASE('s', short, ffi_type_sshort, shortValue)
-                mf_SET_FFI_TYPE_AND_ARG_CASE('l', long, ffi_type_slong, longValue)
-                mf_SET_FFI_TYPE_AND_ARG_CASE('q', long long, ffi_type_sint64, longLongValue)
-                mf_SET_FFI_TYPE_AND_ARG_CASE('C', unsigned char, ffi_type_uchar, uCharValue)
-                mf_SET_FFI_TYPE_AND_ARG_CASE('I', unsigned int, ffi_type_uint, uIntValue)
-                mf_SET_FFI_TYPE_AND_ARG_CASE('S', unsigned short, ffi_type_ushort, uShortValue)
-                mf_SET_FFI_TYPE_AND_ARG_CASE('L', unsigned long, ffi_type_ulong, uLongValue)
-                mf_SET_FFI_TYPE_AND_ARG_CASE('Q', unsigned long long, ffi_type_uint64, uLongLongValue)
-                mf_SET_FFI_TYPE_AND_ARG_CASE('B', BOOL, ffi_type_sint8, boolValue)
-                mf_SET_FFI_TYPE_AND_ARG_CASE('f', float, ffi_type_float, floatValue)
-                mf_SET_FFI_TYPE_AND_ARG_CASE('d', double, ffi_type_double, doubleValue)
-                mf_SET_FFI_TYPE_AND_ARG_CASE('@', id, ffi_type_pointer, c2objectValue)
-                mf_SET_FFI_TYPE_AND_ARG_CASE('#', Class, ffi_type_pointer, c2objectValue)
-                mf_SET_FFI_TYPE_AND_ARG_CASE(':', SEL, ffi_type_pointer, selValue)
-                mf_SET_FFI_TYPE_AND_ARG_CASE('*', char *, ffi_type_pointer, c2pointerValue)
-                mf_SET_FFI_TYPE_AND_ARG_CASE('^', id, ffi_type_pointer, c2pointerValue)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('c', ffi_type_schar)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('i', ffi_type_sint)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('s', ffi_type_sshort)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('l', ffi_type_slong)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('q', ffi_type_sint64)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('C', ffi_type_uchar)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('I', ffi_type_uint)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('S', ffi_type_ushort)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('L', ffi_type_ulong)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('Q', ffi_type_uint64)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('B', ffi_type_sint8)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('f', ffi_type_float)
+                mf_SET_FFI_TYPE_AND_ARG_CASE('d', ffi_type_double)
+            case '@':
+            case ':':
+            case '#':
+            case '^':
+            case '*':
+            {
+                argTypes[i] = &ffi_type_pointer;
+                args[i] = argValue.pointer;
+                break;
+            }
             default:
                 NSCAssert(0, @"not support type  %s", argTypeEncoding);
                 break;
@@ -120,19 +124,15 @@ break;\
     ffi_prep_cif(&cif, FFI_DEFAULT_ABI, (unsigned int)argCount, rtype, argTypes);
     ffi_call(&cif, objc_msgSendSuper, rvalue, args);
     MFValue *retValue;
-    if (*returnTypeEncoding != 'v') {
-        retValue = [[MFValue alloc] initWithCValuePointer:rvalue typeEncoding:returnTypeEncoding bridgeTransfer:NO];
-    }else{
-        retValue = [MFValue voidValueInstance];
-    }
+    retValue = [[MFValue alloc] initTypeEncode:returnTypeEncoding pointer:rvalue];
     return retValue;
 }
 
 static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
-    const char *blockTypeEncoding = [MFBlock typeEncodingForBlock:blockValue.c2objectValue];
+    const char *blockTypeEncoding = [MFBlock typeEncodingForBlock:blockValue.pointer];
     NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:blockTypeEncoding];
     NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
-    [invocation setTarget:blockValue.objectValue];
+    [invocation setTarget:blockValue.pointer];
     NSUInteger numberOfArguments = [sig numberOfArguments];
     if (numberOfArguments - 1 != args.count) {
         //            mf_throw_error(expr.lineNumber, MFRuntimeErrorParameterListCountNoMatch, @"expect count: %zd, pass in cout:%zd",numberOfArguments - 1,expr.args.count);
@@ -140,25 +140,16 @@ static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
     }
     //根据MFValue的type传入值的原因: 模拟在OC中的调用
     for (NSUInteger i = 1; i < numberOfArguments; i++) {
-        const char *typeEncoding = [sig getArgumentTypeAtIndex:i];
-        void *ptr = alloca(mf_size_with_encoding(typeEncoding));
         __autoreleasing MFValue *argValue = args[i -1];
-        [argValue assignToCValuePointer:ptr typeEncoding:typeEncoding];
-        [invocation setArgument:ptr atIndex:i];
+        [invocation setArgument:argValue.pointer atIndex:i];
         
     }
     [invocation invoke];
     const char *retType = [sig methodReturnType];
     retType = removeTypeEncodingPrefix((char *)retType);
-    MFValue *retValue;
-    if (*retType != 'v') {
-        void *retValuePtr = alloca(mf_size_with_encoding(retType));
-        [invocation getReturnValue:retValuePtr];
-        retValue = [[MFValue alloc] initWithCValuePointer:retValuePtr typeEncoding:retType bridgeTransfer:NO];
-    }else{
-        retValue = [MFValue voidValueInstance];
-    }
-    return retValue;
+    void *retValuePtr = alloca(mf_size_with_encoding(retType));
+    [invocation getReturnValue:retValuePtr];
+    return [[MFValue alloc] initTypeEncode:retType pointer:retValuePtr];;
 }
 static void *add_function(const char *funcReturnType, NSMutableArray <NSString *>*argTypes, void (*executeFunc)(ffi_cif*,void*,void**,void*), NSDictionary *userInfo){
     void *imp = NULL;
@@ -204,14 +195,13 @@ static void methodIMP(ffi_cif *cif, void *ret, void **args, void *userdata){
             argValue.typePair.type.type = TypeBlock;
         }else{
             void *arg = args[i];
-            argValue = [[MFValue alloc] initWithCValuePointer:arg typeEncoding:[methodSignature getArgumentTypeAtIndex:i] bridgeTransfer:NO];
+            argValue = [[MFValue alloc] initTypeEncode:[methodSignature getArgumentTypeAtIndex:i] pointer:arg];
         }
-        
         [argValues addObject:argValue];
     }
     [[MFStack argsStack] push:argValues];
     __autoreleasing MFValue *retValue = [map.methodImp execute:scope];
-    [retValue assignToCValuePointer:ret typeEncoding:[methodSignature methodReturnType]];
+    ret = retValue.pointer;
 }
 
 
@@ -276,7 +266,7 @@ void getterInter(ffi_cif *cif, void *ret, void **args, void *userdata){
     __autoreleasing MFValue *value;
     if (!propValue) {
         value = [MFValue defaultValueWithTypeEncoding:type];
-        [value assignToCValuePointer:ret typeEncoding:type];
+        [value writePointer:ret typeEncode:type];
     }else if(*type == '@'){
         if ([propValue isKindOfClass:[MFWeakPropertyBox class]]) {
             MFWeakPropertyBox *box = propValue;
@@ -284,14 +274,14 @@ void getterInter(ffi_cif *cif, void *ret, void **args, void *userdata){
                 *(void **)ret = (__bridge void *)box.target;
             }else{
                 value = [MFValue defaultValueWithTypeEncoding:type];
-                [value assignToCValuePointer:ret typeEncoding:type];
+                [value writePointer:ret typeEncode:type];
             }
         }else{
             *(void **)ret = (__bridge void *)propValue;
         }
     }else{
         value = propValue;
-        [value assignToCValuePointer:ret typeEncoding:type];
+        [value writePointer:ret typeEncode:type];
     }
 }
 void setterInter(ffi_cif *cif, void *ret, void **args, void *userdata){
@@ -302,7 +292,7 @@ void setterInter(ffi_cif *cif, void *ret, void **args, void *userdata){
     if (*type == '@') {
         value = (__bridge id)(*(void **)args[2]);
     }else{
-        value = [[MFValue alloc] initWithCValuePointer:args[2] typeEncoding:type bridgeTransfer:NO];
+        value = [[MFValue alloc] initTypeEncode:type pointer:args[2]];
     }
     NSString *propName = propDef.var.var.varname;
     MFPropertyModifier modifier = propDef.modifier;
@@ -640,8 +630,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }
     id instance = variable.objectValue;
     if (!instance) {
-        if (variable.classValue) {
-            instance = variable.classValue;
+        if (variable.typePair.type.type == TypeClass) {
+            instance = *(Class *)variable.pointer;
         }else{
             NSCAssert(0, @"objectValue or classValue must has one");
         }
@@ -664,7 +654,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     for (NSUInteger i = 2; i < argCount; i++) {
         const char *typeEncoding = [sig getArgumentTypeAtIndex:i];
         void *ptr = alloca(mf_size_with_encoding(typeEncoding));
-        [argValues[i-2] assignToCValuePointer:ptr typeEncoding:typeEncoding];
+        [argValues[i-2] writePointer:ptr typeEncode:typeEncoding];
         [invocation setArgument:ptr atIndex:i];
     }
     // func replaceIMP execute
@@ -678,9 +668,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         NSString *selectorName = NSStringFromSelector(sel);
         if ([selectorName isEqualToString:@"alloc"] || [selectorName isEqualToString:@"new"] ||
             [selectorName isEqualToString:@"copy"] || [selectorName isEqualToString:@"mutableCopy"]) {
-            retValue = [[MFValue alloc] initWithCValuePointer:retValuePointer typeEncoding:returnType bridgeTransfer:YES];
+            retValue = [[MFValue alloc] initTypeEncode:returnType pointer:retValuePointer];
+//            retValue = [[MFValue alloc] initWithCValuePointer:retValuePointer typeEncoding:returnType bridgeTransfer:YES];
         }else{
-            retValue = [[MFValue alloc] initWithCValuePointer:retValuePointer typeEncoding:returnType bridgeTransfer:NO];
+            retValue = [[MFValue alloc] initTypeEncode:returnType pointer:retValuePointer];
+//            retValue = [[MFValue alloc] initWithCValuePointer:retValuePointer typeEncoding:returnType bridgeTransfer:NO];
         }
         
         free(retValuePointer);
@@ -762,7 +754,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             }
             manBlock.typeEncoding = typeEncoding;
             __autoreleasing id ocBlock = [manBlock ocBlock];
-            value.objectValue = ocBlock;
+            value.pointer = &ocBlock;
             CFRelease((__bridge void *)ocBlock);
             return value;
         }else{
@@ -938,13 +930,16 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             break;
         }
         case UnaryOperatorIncrementPrefix:{
+            startBox(currentValue);
             PrefixUnaryExecuteInt(++, currentValue , resultValue);
-            PrefixUnaryExecuteFloat(++, currentValue , resultValue);
+            endBox(resultValue);
             break;
         }
         case UnaryOperatorDecrementPrefix:{
+            startBox(currentValue);
             PrefixUnaryExecuteInt(--, currentValue , resultValue);
             PrefixUnaryExecuteFloat(--, currentValue , resultValue);
+            endBox(resultValue);
             break;
         }
         case UnaryOperatorNot:{
@@ -956,25 +951,26 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             return [MFValue valueInstanceWithLongLong:result];
         }
         case UnaryOperatorBiteNot:{
+            startBox(currentValue);
             PrefixUnaryExecuteInt(~, currentValue , resultValue);
+            endBox(resultValue);
             break;
         }
         case UnaryOperatorNegative:{
+            startBox(currentValue);
             PrefixUnaryExecuteInt(-, currentValue , resultValue);
             PrefixUnaryExecuteFloat(-, currentValue , resultValue);;
+            endBox(resultValue);
             break;
         }
         case UnaryOperatorAdressPoint:{
-            resultValue.pointerValue = [currentValue valuePointer];
+            void *pointer = currentValue.pointer;
+            resultValue.pointer = &pointer;
             resultValue.typePair.var.ptCount += 1;
             return resultValue;
         }
         case UnaryOperatorAdressValue:{
-            if (currentValue.typePair.var.ptCount > 1) {
-                resultValue.pointerValue = *(void **)currentValue.pointerValue;
-            }else{
-                MFValueGetValueInPointer(resultValue, currentValue);
-            }
+            resultValue.pointer = *(void **)currentValue.pointer;
             resultValue.typePair.var.ptCount -= 1;
             return resultValue;
         }
@@ -989,49 +985,70 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     MFValue *leftValue = [self.left execute:scope];
     MFValue *resultValue = [MFValue new];
     [resultValue setValueType:leftValue.typePair.type.type];
+    
     switch (self.operatorType) {
         case BinaryOperatorAdd:{
+            startBox(leftValue);
             BinaryExecuteInt(leftValue, +, rightValue, resultValue);
             BinaryExecuteFloat(leftValue, +, rightValue, resultValue);
+            endBox(resultValue);
             break;
         }
         case BinaryOperatorSub:{
+            startBox(leftValue);
             BinaryExecuteInt(leftValue, -, rightValue, resultValue);
             BinaryExecuteFloat(leftValue, -, rightValue, resultValue);
+            endBox(resultValue);
             break;
         }
         case BinaryOperatorDiv:{
+            startBox(leftValue);
             BinaryExecuteInt(leftValue, /, rightValue, resultValue);
             BinaryExecuteFloat(leftValue, /, rightValue, resultValue);
+            endBox(resultValue);
             break;
         }
         case BinaryOperatorMulti:{
+            startBox(leftValue);
             BinaryExecuteInt(leftValue, *, rightValue, resultValue);
             BinaryExecuteFloat(leftValue, *, rightValue, resultValue);
+            endBox(resultValue);
             break;
         }
         case BinaryOperatorMod:{
+            startBox(leftValue);
             BinaryExecuteInt(leftValue, %, rightValue, resultValue);
+            endBox(resultValue);
             break;
         }
         case BinaryOperatorShiftLeft:{
+            startBox(leftValue);
             BinaryExecuteInt(leftValue, <<, rightValue, resultValue);
+            endBox(resultValue);
             break;
         }
         case BinaryOperatorShiftRight:{
+            startBox(leftValue);
             BinaryExecuteInt(leftValue, >>, rightValue, resultValue);
+            endBox(resultValue);
             break;
         }
         case BinaryOperatorAnd:{
+            startBox(leftValue);
             BinaryExecuteInt(leftValue, &, rightValue, resultValue);
+            endBox(resultValue);
             break;
         }
         case BinaryOperatorOr:{
+            startBox(leftValue);
             BinaryExecuteInt(leftValue, |, rightValue, resultValue);
+            endBox(resultValue);
             break;
         }
         case BinaryOperatorXor:{
+            startBox(leftValue);
             BinaryExecuteInt(leftValue, ^, rightValue, resultValue);
+            endBox(resultValue);
             break;
         }
         case BinaryOperatorLT:{
@@ -1268,7 +1285,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     NSString *propertyName = self.var.var.varname;
     MFValue *classValue = [scope getValueWithIdentifier:@"Class"];
-    Class class = classValue.classValue;
+    Class class = *(Class *)classValue.pointer;
     class_replaceProperty(class, [propertyName UTF8String], self.propertyAttributes, 3);
     MFPropertyMapTableItem *propItem = [[MFPropertyMapTableItem alloc] initWithClass:class property:self];
     [[MFPropertyMapTable shareInstance] addPropertyMapTableItem:propItem];

@@ -46,7 +46,7 @@ static MFScopeChain *instance = nil;
     while (scope && ![scope getValueWithIdentifier:@"self"]) {
         scope = scope.next;
     }
-    return [scope getValueWithIdentifier:@"self"].objectValue;
+    return [scope getValueWithIdentifier:@"self"].pointer;
 }
 - (void)setValue:(MFValue *)value withIndentifier:(NSString *)identier{
     [self.lock lock];
@@ -99,7 +99,7 @@ const void *mf_propKey(NSString *propName) {
                 id associationValue = value;
                 const char *type = OCTypeEncodingForPair(propDef.var);
                 if (*type == '@') {
-                    associationValue = [value objectValue];
+                    associationValue = (__bridge id)(*(void **)value.pointer);
                 }
                 MFPropertyModifier modifier = propDef.modifier;
                 if ((modifier & MFPropertyModifierMemMask) == MFPropertyModifierMemWeak) {
@@ -110,10 +110,10 @@ const void *mf_propKey(NSString *propName) {
             }else if((ivar = class_getInstanceVariable(object_getClass(pos.instance),identifier.UTF8String))){
                 const char *ivarEncoding = ivar_getTypeEncoding(ivar);
                 if (*ivarEncoding == '@') {
-                    object_setIvar(pos.instance, ivar, [value c2objectValue]);
+                    object_setIvar(pos.instance, ivar, value.pointer);
                 }else{
                     void *ptr = (__bridge void *)(pos.instance) +  ivar_getOffset(ivar);
-                    [value assignToCValuePointer:ptr typeEncoding:ivarEncoding];
+                    [value writePointer:ptr typeEncode:ivarEncoding];
                 }
                 return;
                 
@@ -148,9 +148,10 @@ const void *mf_propKey(NSString *propName) {
                 }else if(*type == '@'){
                     if ([propValue isKindOfClass:[MFWeakPropertyBox class]]) {
                         MFWeakPropertyBox *box = propValue;
-                        value = [MFValue valueInstanceWithObject:box.target];
+                        MFValue *weakValue = box.target;
+                        value = [[MFValue alloc] initTypeKind:TypeObject pointer:&weakValue];
                     }else{
-                        value = [MFValue valueInstanceWithObject:propValue];
+                        value = [[MFValue alloc] initTypeKind:TypeObject pointer:&propValue];
                     }
                 }
                 pos = pos.next;
@@ -161,10 +162,10 @@ const void *mf_propKey(NSString *propName) {
                 const char *ivarEncoding = ivar_getTypeEncoding(ivar);
                 if (*ivarEncoding == '@') {
                     id ivarValue = object_getIvar(pos.instance, ivar);
-                    value = [MFValue valueInstanceWithObject:ivarValue];
+                    value = [[MFValue alloc] initTypeKind:TypeObject pointer:&ivarValue];
                 }else{
                     void *ptr = (__bridge void *)(pos.instance) +  ivar_getOffset(ivar);
-                    value = [[MFValue alloc] initWithCValuePointer:ptr typeEncoding:ivarEncoding bridgeTransfer:NO];
+                    value = [[MFValue alloc] initTypeEncode:ivarEncoding pointer:&ptr];
                 }
                 pos = pos.next;
                 return value;

@@ -33,13 +33,13 @@ static void blockInter(ffi_cif *cif, void *ret, void **args, void *userdata){
     // 在OC中，传入值都为原数值并非MFValue，需要转换
     for (NSUInteger i = 1; i < numberOfArguments ; i++) {
         void *arg = args[i];
-        MFValue *argValue = [[MFValue alloc] initWithCValuePointer:arg typeEncoding:[sig getArgumentTypeAtIndex:i] bridgeTransfer:NO];
+        MFValue *argValue = [[MFValue alloc] initTypeEncode:[sig getArgumentTypeAtIndex:i] pointer:arg];
         [argValues addObject:argValue];
         
     }
     [[MFStack argsStack] push:argValues];
     __autoreleasing MFValue *retValue = [func execute:mangoBlock.outScope];
-    [retValue assignToCValuePointer:ret typeEncoding:[sig methodReturnType]];
+    ret = retValue.pointer;
 }
 
 @implementation MFBlock{
