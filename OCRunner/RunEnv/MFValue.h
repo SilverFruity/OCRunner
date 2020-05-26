@@ -8,55 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "RunnerClasses.h"
-#define MFValueGetValueInPointer(resultValue, fromValue)\
-do {\
-    if (fromValue.typePair.var.ptCount > 1) {\
-        resultValue.pointerValue = *(void **)fromValue.pointerValue;\
-        break;\
-    }\
-    switch (fromValue.typePair.type.type) {\
-        case TypeUChar:\
-            resultValue.uCharValue = *(unsigned char *)fromValue.pointerValue; break;\
-        case TypeUShort:\
-            resultValue.uShortValue = *(unsigned short *)fromValue.pointerValue; break;\
-        case TypeUInt:\
-            resultValue.uIntValue = *(unsigned int *)fromValue.pointerValue; break;\
-        case TypeULong:\
-            resultValue.uLongValue = *(unsigned long *)fromValue.pointerValue; break;\
-        case TypeULongLong:\
-            resultValue.uLongLongValue = *(unsigned long long *)fromValue.pointerValue; break;\
-        case TypeBOOL:\
-            resultValue.boolValue = *(BOOL *)fromValue.pointerValue; break;\
-        case TypeChar:\
-            resultValue.charValue = *(char *)fromValue.pointerValue; break;\
-        case TypeShort:\
-            resultValue.shortValue = *(short *)fromValue.pointerValue; break;\
-        case TypeInt:\
-            resultValue.intValue = *(int *)fromValue.pointerValue; break;\
-        case TypeLong:\
-            resultValue.longValue = *(long *)fromValue.pointerValue; break;\
-        case TypeLongLong:\
-            resultValue.longLongValue = *(long long *)fromValue.pointerValue; break;\
-        case TypeFloat:\
-            resultValue.floatValue = *(double *)fromValue.pointerValue; break;\
-        case TypeDouble:\
-            resultValue.doubleValue = *(double *)fromValue.pointerValue; break;\
-        case TypeId:\
-        case TypeObject:\
-        case TypeBlock:{\
-            resultValue.objectValue = *(__strong id *)fromValue.pointerValue;\
-            break;\
-        }\
-        case TypeSEL:\
-            resultValue.selValue = *(SEL *)fromValue.pointerValue; break;\
-            break;\
-        case TypeClass:\
-            resultValue.classValue = *(Class *)fromValue.pointerValue; break;\
-            break;\
-        default:\
-            break;\
-    }\
-} while (0);
 #define startBox(value)\
 NSUInteger size;\
 NSGetSizeAndAlignment(value.typeEncode, &size, NULL);\
@@ -67,7 +18,7 @@ result.pointer = box;\
 free(box);
 
 #define PrefixUnaryExecuteInt(operator,value,resultValue)\
-switch (value.typePair.type.type) {\
+switch (value.type) {\
 case TypeUChar:\
 *(unsigned char *)box = (operator *(unsigned char *)value.pointer); break;\
 case TypeUShort:\
@@ -95,7 +46,7 @@ break;\
 }\
 
 #define PrefixUnaryExecuteFloat(operator,value,resultValue)\
-switch (value.typePair.type.type) {\
+switch (value.type) {\
 case TypeFloat:\
 *(float *)box = (operator *(float *)value.pointer); break;\
 case TypeDouble:\
@@ -105,7 +56,7 @@ break;\
 }\
 
 #define SuffixUnaryExecuteInt(operator,value,resultValue)\
-switch (value.typePair.type.type) {\
+switch (value.type) {\
 case TypeUChar:\
 (*(unsigned char *)value.pointer operator); break;\
 case TypeUShort:\
@@ -135,7 +86,7 @@ resultValue.pointer = value.pointer;
 
 
 #define SuffixUnaryExecuteFloat(operator,value,resultValue)\
-switch (value.typePair.type.type) {\
+switch (value.type) {\
 case TypeFloat:\
 (*(float *)value.pointer operator); break;\
 case TypeDouble:\
@@ -146,7 +97,7 @@ break;\
 resultValue.pointer = value.pointer;
 
 #define UnaryExecuteBaseType(resultName,operator,value)\
-switch (value.typePair.type.type) {\
+switch (value.type) {\
 case TypeUChar:\
 resultName = operator (*(unsigned char *)value.pointer); break;\
 case TypeUShort:\
@@ -185,7 +136,7 @@ do{\
         break;\
     }\
     UnaryExecuteBaseType(resultName,operator,value)\
-    switch (value.typePair.type.type) {\
+    switch (value.type) {\
     case TypeId:\
     case TypeObject:\
     case TypeBlock:\
@@ -206,7 +157,7 @@ do{\
 *(type *)box = BinaryExecute(type,leftValue,operator,rightValue)
 
 #define BinaryExecuteInt(leftValue,operator,rightValue,resultValue)\
-switch (leftValue.typePair.type.type) {\
+switch (leftValue.type) {\
 case TypeUChar:\
 BoxBinaryExecute(unsigned char,leftValue,operator,rightValue)\
 case TypeUShort:\
@@ -234,7 +185,7 @@ break;\
 }
 
 #define BinaryExecuteFloat(leftValue,operator,rightValue,resultValue)\
-switch (leftValue.typePair.type.type) {\
+switch (leftValue.type) {\
 case TypeFloat:\
 BoxBinaryExecute(float,leftValue,operator,rightValue)\
 case TypeDouble:\
@@ -246,7 +197,7 @@ break;\
 #define LogicBinaryOperatorExecute(leftValue,operator,rightValue)\
 BOOL logicResultValue = NO;\
 do{\
-    switch (leftValue.typePair.type.type) {\
+    switch (leftValue.type) {\
     case TypeUChar:\
     logicResultValue = BinaryExecute(unsigned char,leftValue,operator,rightValue)\
     case TypeUShort:\
@@ -347,84 +298,95 @@ typedef NS_ENUM(NSInteger, MFStatementResultType) {
 };
 @class ORTypeVarPair;
 
-@interface ORTypeVarPair(Convert)
-- (const char *)typeEncode;
-+ (instancetype)objectTypePair;
-+ (instancetype)pointerTypePair;
-@end
+
 ORTypeVarPair *typePairWithTypeEncode(const char *tyepEncode);
 
 extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
+
 @interface MFValue : NSObject
-
 @property (assign, nonatomic) MFStatementResultType resultType;
-@property (assign, nonatomic) BOOL isReturn;
-@property (assign, nonatomic) BOOL isContinue;
-@property (assign, nonatomic) BOOL isBreak;
-@property (assign, nonatomic) BOOL isNormal;
-
-+ (instancetype)normalEnd;
-
-- (void)assignFrom:(MFValue *)src;
-- (MFValue *)subscriptGetWithIndex:(MFValue *)index;
-- (void)subscriptSetValue:(MFValue *)value index:(MFValue *)index;
-
-@property (nonatomic,nullable) id objectValue;
-@property (nonatomic,assign)void *pointer;
-@property (nonatomic,assign)const char* typeEncode;
 @property (assign,nonatomic)ORDeclarationModifier modifier;
-@property (strong,nonatomic)ORTypeVarPair *typePair;
+@property (assign,nonatomic)TypeKind type;
+@property (strong,nonatomic)NSString *typeName;
+@property (assign,nonatomic)NSInteger pointerCount;
+@property (nonatomic,assign)const char* typeEncode;
+@property (nonatomic,assign)void *pointer;
 
 + (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding;
++ (instancetype)valueWithTypeKind:(TypeKind)TypeKind pointer:(nullable void *)pointer;
++ (instancetype)valueWithTypePair:(ORTypeVarPair *)typePair pointer:(nullable void *)pointer;
 - (instancetype)initTypeEncode:(const char *)tyepEncode pointer:(nullable void *)pointer;
-- (instancetype)initTypeKind:(TypeKind)TypeKind pointer:(void *)pointer;
-- (instancetype)initTypePair:(ORTypeVarPair *)typePair pointer:(void *)pointer;
-
-- (BOOL)isPointer;
-- (BOOL)isMember;
-- (BOOL)isSubtantial;
-- (BOOL)isObject;
-- (BOOL)isBaseValue;
-- (void)setValueType:(TypeKind)type;
 
 - (void)writePointer:(void *)pointer typeEncode:(const char *)typeEncode;
+- (void)setTypeInfoWithValue:(MFValue *)value;
+- (void)setTypeInfoWithTypePair:(ORTypeVarPair *)typePair;
+- (void)assignFrom:(MFValue *)src;
 
-+ (instancetype)voidValueInstance;
-+ (instancetype)valueInstanceWithBOOL:(BOOL)boolValue;
-+ (instancetype)valueInstanceWithUChar:(unsigned char)uCharValue;
-+ (instancetype)valueInstanceWithUShort:(unsigned short)uShortValue;
-+ (instancetype)valueInstanceWithUInt:(unsigned int)uIntValue;
-+ (instancetype)valueInstanceWithULong:(unsigned long)uLongValue;
-+ (instancetype)valueInstanceWithULongLong:(unsigned long long)uLongLongValue;
-+ (instancetype)valueInstanceWithChar:(char)charValue;
-+ (instancetype)valueInstanceWithShort:(short)shortValue;
-+ (instancetype)valueInstanceWithInt:(int)intValue;
-+ (instancetype)valueInstanceWithLong:(long)longValue;
-+ (instancetype)valueInstanceWithLongLong:(long long)longLongValue;
-+ (instancetype)valueInstanceWithFloat:(float)floatValue;
-+ (instancetype)valueInstanceWithDouble:(double)doubleValue;
-+ (instancetype)valueInstanceWithObject:(nullable id)objValue;
-+ (instancetype)valueInstanceWithBlock:(nullable id)blockValue;
-+ (instancetype)valueInstanceWithClass:(nullable Class)clazzValue;
-+ (instancetype)valueInstanceWithSEL:(SEL)selValue;
-+ (instancetype)valueInstanceWithCstring:(nullable const char *)cstringValue;
-+ (instancetype)valueInstanceWithPointer:(nullable void *)pointerValue;
+- (BOOL)isPointer;
+- (BOOL)isSubtantial;
 
-
-@end
-
-
-@interface ORStructField: NSObject
-@property (nonatomic,assign)void *fieldPointer;
-@property (nonatomic,copy)NSString *fieldTypeEncode;
-- (BOOL)isStruct;
-- (BOOL)isStructPointer;
-- (MFValue *)value;
-- (ORStructField *)fieldForKey:(NSString *)key;
-- (ORStructField *)getPointerValueField;
+- (MFValue *)subscriptGetWithIndex:(MFValue *)index;
+- (void)subscriptSetValue:(MFValue *)value index:(MFValue *)index;
 @end
 
 @interface MFValue (Struct)
-- (ORStructField *)fieldForKey:(NSString *)key;
+- (BOOL)isStruct;
+- (BOOL)isStructPointer;
+- (MFValue *)fieldForKey:(NSString *)key;
+- (MFValue *)getPointerValueField;
+@end
+
+@interface MFValue (MFStatementResultType)
+@property (assign, nonatomic, readonly) BOOL isReturn;
+@property (assign, nonatomic, readonly) BOOL isContinue;
+@property (assign, nonatomic, readonly) BOOL isBreak;
+@property (assign, nonatomic, readonly) BOOL isNormal;
++ (instancetype)normalEnd;
+@end
+
+@interface MFValue (ValueType)
+
+
+@property (assign, nonatomic, readonly) unsigned char uCharValue;
+@property (assign, nonatomic, readonly) unsigned short uShortValue;
+@property (assign, nonatomic, readonly) unsigned int uIntValue;
+@property (assign, nonatomic, readonly) unsigned long uLongValue;
+@property (assign, nonatomic, readonly) unsigned long long uLongLongValue;
+
+@property (assign, nonatomic, readonly) char charValue;
+@property (assign, nonatomic, readonly) short shortValue;
+@property (assign, nonatomic, readonly) int intValue;
+@property (assign, nonatomic, readonly) long longValue;
+@property (assign, nonatomic, readonly) long long longLongValue;
+
+@property (assign, nonatomic, readonly) BOOL boolValue;
+
+@property (assign, nonatomic, readonly) float floatValue;
+@property (assign, nonatomic, readonly) double doubleValue;
+
+@property (nonatomic, nullable, readonly) id objectValue;
+@property (nonatomic, nullable, readonly) Class classValue;
+@property (nonatomic, nullable, readonly) SEL selValue;
+
++ (instancetype)voidValue;
++ (instancetype)valueWithBOOL:(BOOL)boolValue;
++ (instancetype)valueWithUChar:(unsigned char)uCharValue;
++ (instancetype)valueWithUShort:(unsigned short)uShortValue;
++ (instancetype)valueWithUInt:(unsigned int)uIntValue;
++ (instancetype)valueWithULong:(unsigned long)uLongValue;
++ (instancetype)valueWithULongLong:(unsigned long long)uLongLongValue;
++ (instancetype)valueWithChar:(char)charValue;
++ (instancetype)valueWithShort:(short)shortValue;
++ (instancetype)valueWithInt:(int)intValue;
++ (instancetype)valueWithLong:(long)longValue;
++ (instancetype)valueWithLongLong:(long long)longLongValue;
++ (instancetype)valueWithFloat:(float)floatValue;
++ (instancetype)valueWithDouble:(double)doubleValue;
++ (instancetype)valueWithObject:(nullable id)objValue;
++ (instancetype)valueWithBlock:(nullable id)blockValue;
++ (instancetype)valueWithClass:(nullable Class)clazzValue;
++ (instancetype)valueWithSEL:(SEL)selValue;
++ (instancetype)valueWithCString:(char *)pointerValue;
++ (instancetype)valueWithPointer:(nullable void *)pointerValue;
 @end
 NS_ASSUME_NONNULL_END

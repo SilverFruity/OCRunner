@@ -14,6 +14,7 @@
 #import "MFWeakPropertyBox.h"
 #import "util.h"
 #import "RunnerClasses+Execute.h"
+#import "ORTypeVarPair+TypeEncode.h"
 @interface MFScopeChain()
 @property (strong,nonatomic)NSLock *lock;
 @end
@@ -97,7 +98,7 @@ const void *mf_propKey(NSString *propName) {
             Ivar ivar;
             if (propDef) {
                 id associationValue = value;
-                const char *type = OCTypeEncodingForPair(propDef.var);
+                const char *type = propDef.var.typeEncode;
                 if (*type == '@') {
                     associationValue = (__bridge id)(*(void **)value.pointer);
                 }
@@ -121,6 +122,7 @@ const void *mf_propKey(NSString *propName) {
 		}else{
 			MFValue *srcValue = [pos getValueWithIdentifier:identifier];
 			if (srcValue) {
+                
 				[srcValue assignFrom:value];
 				return;
 			}
@@ -141,7 +143,7 @@ const void *mf_propKey(NSString *propName) {
             Ivar ivar;
             if (propDef) {
                 id propValue = objc_getAssociatedObject(pos.instance, mf_propKey(propName));
-                const char *type = OCTypeEncodingForPair(propDef.var);
+                const char *type = propDef.var.typeEncode;
                 MFValue *value = propValue;
                 if (!propValue) {
                     value = [MFValue defaultValueWithTypeEncoding:type];
@@ -149,9 +151,9 @@ const void *mf_propKey(NSString *propName) {
                     if ([propValue isKindOfClass:[MFWeakPropertyBox class]]) {
                         MFWeakPropertyBox *box = propValue;
                         MFValue *weakValue = box.target;
-                        value = [[MFValue alloc] initTypeKind:TypeObject pointer:&weakValue];
+                        value = [MFValue valueWithTypeKind:TypeObject pointer:&weakValue];
                     }else{
-                        value = [[MFValue alloc] initTypeKind:TypeObject pointer:&propValue];
+                        value = [MFValue valueWithTypeKind:TypeObject pointer:&propValue];
                     }
                 }
                 pos = pos.next;
@@ -162,7 +164,7 @@ const void *mf_propKey(NSString *propName) {
                 const char *ivarEncoding = ivar_getTypeEncoding(ivar);
                 if (*ivarEncoding == '@') {
                     id ivarValue = object_getIvar(pos.instance, ivar);
-                    value = [[MFValue alloc] initTypeKind:TypeObject pointer:&ivarValue];
+                    value = [MFValue valueWithTypeKind:TypeObject pointer:&ivarValue];
                 }else{
                     void *ptr = (__bridge void *)(pos.instance) +  ivar_getOffset(ivar);
                     value = [[MFValue alloc] initTypeEncode:ivarEncoding pointer:&ptr];

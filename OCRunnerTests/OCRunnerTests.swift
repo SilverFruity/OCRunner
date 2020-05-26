@@ -41,40 +41,39 @@ class CRunnerTests: XCTestCase {
             exp.execute(scope);
         }
         var scopeValue = scope.getValueWithIdentifier("a")
-        XCTAssert(scopeValue!.typePair.type.type == TypeChar)
+        XCTAssert(scopeValue!.type == TypeChar)
         XCTAssert(scopeValue!.charValue == -1)
         scopeValue = scope.getValueWithIdentifier("b")
-        XCTAssert(scopeValue!.typePair.type.type == TypeShort)
+        XCTAssert(scopeValue!.type == TypeShort)
         XCTAssert(scopeValue!.shortValue == -1)
         scopeValue = scope.getValueWithIdentifier("c")
-        XCTAssert(scopeValue!.typePair.type.type == TypeInt)
+        XCTAssert(scopeValue!.type == TypeInt)
         XCTAssert(scopeValue!.intValue == -1)
         scopeValue = scope.getValueWithIdentifier("d")
-        XCTAssert(scopeValue!.typePair.type.type == TypeLong)
+        XCTAssert(scopeValue!.type == TypeLong)
         XCTAssert(scopeValue!.longValue == -1)
         scopeValue = scope.getValueWithIdentifier("e")
-        XCTAssert(scopeValue!.typePair.type.type == TypeLongLong)
+        XCTAssert(scopeValue!.type == TypeLongLong)
         XCTAssert(scopeValue!.longLongValue == -1)
         scopeValue = scope.getValueWithIdentifier("f")
-        XCTAssert(scopeValue!.typePair.type.type == TypeUChar)
+        XCTAssert(scopeValue!.type == TypeUChar)
         XCTAssert(scopeValue!.uCharValue == 1)
         scopeValue = scope.getValueWithIdentifier("g")
-        XCTAssert(scopeValue!.typePair.type.type == TypeUShort)
+        XCTAssert(scopeValue!.type == TypeUShort)
         XCTAssert(scopeValue!.uShortValue == 1)
         scopeValue = scope.getValueWithIdentifier("h")
-        XCTAssert(scopeValue!.typePair.type.type == TypeUInt)
+        XCTAssert(scopeValue!.type == TypeUInt)
         XCTAssert(scopeValue!.uIntValue == 1)
         scopeValue = scope.getValueWithIdentifier("i")
-        XCTAssert(scopeValue!.typePair.type.type == TypeULong)
+        XCTAssert(scopeValue!.type == TypeULong)
         XCTAssert(scopeValue!.uLongValue == 1)
         scopeValue = scope.getValueWithIdentifier("j")
-        XCTAssert(scopeValue!.typePair.type.type == TypeULongLong)
+        XCTAssert(scopeValue!.type == TypeULongLong)
         XCTAssert(scopeValue!.uLongLongValue == 1)
         scopeValue = scope.getValueWithIdentifier("k")
-        XCTAssert(scopeValue!.typePair.type.type == TypeFloat)
-        XCTAssert(scopeValue!.floatValue == 0.5)
+        XCTAssert(scopeValue!.type == TypeFloat)
         scopeValue = scope.getValueWithIdentifier("l")
-        XCTAssert(scopeValue!.typePair.type.type == TypeDouble)
+        XCTAssert(scopeValue!.type == TypeDouble)
         XCTAssert(scopeValue!.doubleValue == 0.5)
     }
     func testeDeclareBlock(){
@@ -88,10 +87,10 @@ class CRunnerTests: XCTestCase {
         let exp = ocparser.ast.globalStatements.firstObject as! ORDeclareExpression;
         exp.execute(scope)
         let result = scope.getValueWithIdentifier("a")
-        XCTAssert(result!.typePair.type.type == TypeBlock)
+        XCTAssert(result!.type == TypeBlock)
         XCTAssert(result?.objectValue != nil) //__NSMallocBlock__
         let scopeValue = scope.getValueWithIdentifier("a")
-        XCTAssert(scopeValue!.typePair.type.type == TypeBlock)
+        XCTAssert(scopeValue!.type == TypeBlock)
         XCTAssert(scopeValue?.objectValue != nil) //__NSMallocBlock__
     }
     func testBlockExecute(){
@@ -109,8 +108,8 @@ class CRunnerTests: XCTestCase {
             exp.execute(scope);
         }
         let scopeValue = scope.getValueWithIdentifier("b")
-        XCTAssert(scopeValue!.typePair.type.type == TypeInt)
-        XCTAssert(scopeValue!.typePair.type.type == TypeInt)
+        XCTAssert(scopeValue!.type == TypeInt)
+        XCTAssert(scopeValue!.type == TypeInt)
         XCTAssert(scopeValue!.intValue == 2)
     }
     func testBlockCopyValue(){
@@ -129,8 +128,8 @@ class CRunnerTests: XCTestCase {
         }
         let scopeValue = scope.getValueWithIdentifier("b")
         XCTAssert(scope.vars.count == 3)
-        XCTAssert(scopeValue!.typePair.type.type == TypeInt)
-        XCTAssert(scopeValue!.typePair.type.type == TypeInt)
+        XCTAssert(scopeValue!.type == TypeInt)
+        XCTAssert(scopeValue!.type == TypeInt)
         XCTAssert(scopeValue!.intValue == 3)
     }
     func testUnaryExpresssion() {
@@ -797,9 +796,9 @@ class CRunnerTests: XCTestCase {
             exp.execute(scope);
         }
         let frameValue = scope.getValueWithIdentifier("frame")!
-        XCTAssert(frameValue.typePair.type.type == TypeStruct)
+        XCTAssert(frameValue.type == TypeStruct)
         let aValue = scope.getValueWithIdentifier("a")!
-        XCTAssert(aValue.typePair.type.type == TypeDouble)
+        XCTAssert(aValue.type == TypeDouble)
         XCTAssert(aValue.doubleValue == 4, "\(aValue.doubleValue)")
     }
     func testDispatchOnce(){

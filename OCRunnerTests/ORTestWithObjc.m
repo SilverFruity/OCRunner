@@ -25,9 +25,9 @@
 }
 
 - (void)testExample {
-    MFValue *value = [MFValue valueInstanceWithPointer:&CGRectMake];
+    MFValue *value = [MFValue valueWithPointer:&CGRectMake];
     CGRect (*func)(CGFloat,CGFloat,CGFloat,CGFloat);
-    func = value.pointerValue;
+    func = value.pointer;
     CGRect a = (*func)(1,2,3,4);
     XCTAssert(a.origin.x == 1);
     XCTAssert(a.origin.y == 2);
@@ -88,11 +88,12 @@ Element2Struct *Element2StructMake(){
     [[ORStructDeclareTable shareInstance] addStructDeclare:rectDecl];
     [[ORStructDeclareTable shareInstance] addStructDeclare:pointDecl];
     [[ORStructDeclareTable shareInstance] addStructDeclare:sizeDecl];
-    MFValue *rectValue = [[MFValue alloc] initWithCValuePointer:&rect typeEncoding:rectDecl.typeEncoding bridgeTransfer:NO];
-    CGFloat x = *(CGFloat *)[[rectValue fieldForKey:@"origin"] fieldForKey:@"x"].fieldPointer;
-    CGFloat y = *(CGFloat *)[[rectValue fieldForKey:@"origin"] fieldForKey:@"y"].fieldPointer;
-    CGFloat width = *(CGFloat *)[[rectValue fieldForKey:@"size"] fieldForKey:@"width"].fieldPointer;
-    CGFloat height = *(CGFloat *)[[rectValue fieldForKey:@"size"] fieldForKey:@"height"].fieldPointer;
+    
+    MFValue *rectValue = [[MFValue alloc] initTypeEncode:rectDecl.typeEncoding pointer:&rect];
+    CGFloat x = *(CGFloat *)[[rectValue fieldForKey:@"origin"] fieldForKey:@"x"].pointer;
+    CGFloat y = *(CGFloat *)[[rectValue fieldForKey:@"origin"] fieldForKey:@"y"].pointer;
+    CGFloat width = *(CGFloat *)[[rectValue fieldForKey:@"size"] fieldForKey:@"width"].pointer;
+    CGFloat height = *(CGFloat *)[[rectValue fieldForKey:@"size"] fieldForKey:@"height"].pointer;
     XCTAssert(x == 1);
     XCTAssert(y == 2);
     XCTAssert(width == 3);
@@ -114,14 +115,15 @@ Element2Struct *Element2StructMake(){
     [[ORStructDeclareTable shareInstance] addStructDeclare:element1Decl];
     [[ORStructDeclareTable shareInstance] addStructDeclare:element2Decl];
     [[ORStructDeclareTable shareInstance] addStructDeclare:containerDecl];
-    MFValue *containerValue = [[MFValue alloc] initWithCValuePointer:&container typeEncoding:containerDecl.typeEncoding bridgeTransfer:NO];
-    CGFloat c3 = *(CGFloat *)[[[containerValue fieldForKey:@"element2"] fieldForKey:@"t"] fieldForKey:@"c"].fieldPointer;
+    
+    MFValue *containerValue = [[MFValue alloc] initTypeEncode:containerDecl.typeEncoding pointer:&container];
+    CGFloat c3 = *(CGFloat *)[[[containerValue fieldForKey:@"element2"] fieldForKey:@"t"] fieldForKey:@"c"].pointer;
     XCTAssert(c3 == 101);
-    CGFloat pC3 = *(CGFloat *)[[[[containerValue fieldForKey:@"element2Pointer"] getPointerValueField] fieldForKey:@"t"] fieldForKey:@"c"].fieldPointer;
+    CGFloat pC3 = *(CGFloat *)[[[[containerValue fieldForKey:@"element2Pointer"] getPointerValueField] fieldForKey:@"t"] fieldForKey:@"c"].pointer;
     XCTAssert(pC3 == 101);
-    int p1b = *(int *)[[[containerValue fieldForKey:@"element1"] fieldForKey:@"b"] getPointerValueField].fieldPointer;
+    int p1b = *(int *)[[[containerValue fieldForKey:@"element1"] fieldForKey:@"b"] getPointerValueField].pointer;
     XCTAssert(p1b == 100);
-    int p2a = *(int *)[[[containerValue fieldForKey:@"element1"] fieldForKey:@"a"] getPointerValueField].fieldPointer;
+    int p2a = *(int *)[[[containerValue fieldForKey:@"element1"] fieldForKey:@"a"] getPointerValueField].pointer;
     XCTAssert(p2a == 100);
 }
 

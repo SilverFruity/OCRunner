@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0408F01B247D027B004F703D /* ORTypeVarPair+TypeEncode.h in Headers */ = {isa = PBXBuildFile; fileRef = 0408F019247D027B004F703D /* ORTypeVarPair+TypeEncode.h */; };
+		0408F01C247D027B004F703D /* ORTypeVarPair+TypeEncode.m in Sources */ = {isa = PBXBuildFile; fileRef = 0408F01A247D027B004F703D /* ORTypeVarPair+TypeEncode.m */; };
 		042AC254246D308000070814 /* ORBlockVar.h in Headers */ = {isa = PBXBuildFile; fileRef = 042AC252246D308000070814 /* ORBlockVar.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		042AC255246D308000070814 /* ORBlockVar.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC253246D308000070814 /* ORBlockVar.m */; };
 		042AC258246D453700070814 /* MFBlock.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC256246D453700070814 /* MFBlock.m */; };
@@ -103,6 +105,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0408F019247D027B004F703D /* ORTypeVarPair+TypeEncode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ORTypeVarPair+TypeEncode.h"; sourceTree = "<group>"; };
+		0408F01A247D027B004F703D /* ORTypeVarPair+TypeEncode.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "ORTypeVarPair+TypeEncode.m"; sourceTree = "<group>"; };
 		042AC252246D308000070814 /* ORBlockVar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORBlockVar.h; sourceTree = "<group>"; };
 		042AC253246D308000070814 /* ORBlockVar.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORBlockVar.m; sourceTree = "<group>"; };
 		042AC256246D453700070814 /* MFBlock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFBlock.m; sourceTree = "<group>"; };
@@ -257,6 +261,8 @@
 				EE197B832478DD190049CFDA /* ORInterpreter.h */,
 				EE197B842478DD190049CFDA /* ORInterpreter.m */,
 				04E665A02474D284008DB08E /* built-in.m */,
+				0408F019247D027B004F703D /* ORTypeVarPair+TypeEncode.h */,
+				0408F01A247D027B004F703D /* ORTypeVarPair+TypeEncode.m */,
 				EE98998D24658F8900ACF2C1 /* RunEnv */,
 				EE9899C82465924C00ACF2C1 /* libffi */,
 				EE9899C12465923900ACF2C1 /* symdl */,
@@ -376,6 +382,7 @@
 				EE98997C24658DA600ACF2C1 /* OCRunner.h in Headers */,
 				EEA2AC83246855F100B08407 /* MFStack.h in Headers */,
 				EE9899AC24658F8900ACF2C1 /* MFValue.h in Headers */,
+				0408F01B247D027B004F703D /* ORTypeVarPair+TypeEncode.h in Headers */,
 				EE98998C24658DB800ACF2C1 /* RunnerClasses+Execute.h in Headers */,
 				EE9899DD2465924C00ACF2C1 /* ffi.h in Headers */,
 				EE9899A724658F8900ACF2C1 /* runenv.h in Headers */,
@@ -528,6 +535,7 @@
 				EE9899B124658F8900ACF2C1 /* MFPropertyMapTable.m in Sources */,
 				EE9899AE24658F8900ACF2C1 /* MFMethodMapTable.m in Sources */,
 				EEA2AC82246855F100B08407 /* MFStack.m in Sources */,
+				0408F01C247D027B004F703D /* ORTypeVarPair+TypeEncode.m in Sources */,
 				EE9899B324658F8900ACF2C1 /* MFVarDeclareChain.m in Sources */,
 				EE197B862478DD190049CFDA /* ORInterpreter.m in Sources */,
 			);

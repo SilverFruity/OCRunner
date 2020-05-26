@@ -109,6 +109,5 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 
-char *const OCTypeEncodingForPair(ORTypeVarPair * pair);
 
 NS_ASSUME_NONNULL_END
