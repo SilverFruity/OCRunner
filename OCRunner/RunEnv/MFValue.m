@@ -22,7 +22,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 + (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding{
     typeEncoding = removeTypeEncodingPrefix((char *)typeEncoding);
     MFValue *value = [[MFValue alloc] initTypeEncode:typeEncoding pointer:NULL];
-    *(NSUInteger *)value.pointer = 0;
+    NSUInteger a = 0;
+    value.pointer = &a;
     return value;
 }
 + (instancetype)valueWithTypeKind:(TypeKind)TypeKind pointer:(void *)pointer{
@@ -31,19 +32,25 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 + (instancetype)valueWithTypePair:(ORTypeVarPair *)typePair pointer:(void *)pointer{
     return [[[self class] alloc] initTypeEncode:typePair.typeEncode pointer:pointer];
 }
+- (instancetype)initTypeEncode:(const char *)typeEncoding{
+    self = [super init];
+    self.typeEncode = typeEncoding;
+    self.pointer = NULL;
+    return self;
+}
 - (instancetype)initTypeEncode:(const char *)typeEncoding pointer:(void *)pointer{
     self = [super init];
     self.typeEncode = typeEncoding;
-    if (pointer != NULL) {
-        self.pointer = pointer;
-    }else{
-        _pointer = NULL;
-    }
+    self.pointer = pointer;
     return self;
 }
 - (void)setPointer:(void *)pointer{
+    if (pointer == NULL) {
+        _pointer = pointer;
+        return;
+    }
     if (_pointer != NULL) {
-        free(pointer);
+        free(_pointer);
     }
     NSUInteger size;
     NSGetSizeAndAlignment(self.typeEncode, &size, NULL);
@@ -174,11 +181,17 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     self.pointer = src.pointer;
 }
 
-//FIXME: 编码问题以及引用相关问题，指针数转换..
 - (void)writePointer:(void *)pointer typeEncode:(const char *)typeEncode{
-    NSUInteger size;
-    NSGetSizeAndAlignment(typeEncode, &size, NULL);
-    memcpy(pointer, self.pointer, size);
+    NSUInteger resultSize;
+    NSGetSizeAndAlignment(typeEncode, &resultSize, NULL);
+    memset(pointer, 0, resultSize);
+    NSUInteger currentSize;
+    NSGetSizeAndAlignment(self.typeEncode, &currentSize, NULL);
+    if (currentSize < resultSize){
+        memcpy(pointer, self.pointer, currentSize);
+    }else{
+        memcpy(pointer, self.pointer, resultSize);
+    }
 }
 
 
@@ -193,7 +206,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 - (BOOL)isStructPointer{
     return [self isStruct] && (*self.typeEncode == '^');
 }
-- (MFValue *)getPointerValueField{
+- (MFValue *)getResutlInPointer{
     MFValue *field = [MFValue new];
     NSUInteger pointerCount = startDetectPointerCount(self.typeEncode);
     void *fieldPointer = self.pointer;
@@ -201,17 +214,18 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
         fieldPointer = *(void **)fieldPointer;
         pointerCount--;
     }
-    field.pointer = fieldPointer;
-    field.typeEncode = startRemovePointerOfTypeEncode(self.typeEncode).UTF8String;
-    field.pointerCount = 0;
-    if (*field.typeEncode == '{') {
-        NSString *encode = [NSString stringWithUTF8String:field.typeEncode];
-        NSString *structName = [encode substringWithRange:NSMakeRange(1, strlen(field.typeEncode) - 2)];
+    const char *removedPointerTypeEncode = startRemovePointerOfTypeEncode(self.typeEncode).UTF8String;
+    if (*removedPointerTypeEncode == '{') {
+        NSString *encode = [NSString stringWithUTF8String:removedPointerTypeEncode];
+        NSString *structName = [encode substringWithRange:NSMakeRange(1, strlen(removedPointerTypeEncode) - 2)];
         ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
         field.typeEncode = declare.typeEncoding;
         field.type = TypeStruct;
         field.typeName = structName;
+    }else{
+        field.typeEncode = removedPointerTypeEncode;
     }
+    field.pointer = fieldPointer;
     return field;
 }
 - (MFValue *)fieldForKey:(NSString *)key{
@@ -237,7 +251,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return self.resultType == MFStatementResultTypeNormal;
 }
 + (instancetype)normalEnd{
-    MFValue *value = [MFValue new];
+    MFValue *value = [MFValue voidValue];
     value.resultType = MFStatementResultTypeNormal;
     return value;
 }
@@ -341,9 +355,15 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return [MFValue valueWithTypeKind:TypeDouble pointer:&doubleValue];
 }
 + (instancetype)valueWithObject:(id)objValue{
+    if (objValue) {
+        CFBridgingRetain(objValue);
+    }
     return [MFValue valueWithTypeKind:TypeObject pointer:&objValue];
 }
 + (instancetype)valueWithBlock:(id)blockValue{
+    if (blockValue) {
+        CFBridgingRetain(blockValue);
+    }
     return [MFValue valueWithTypeKind:TypeBlock pointer:&blockValue];
 }
 + (instancetype)valueWithClass:(Class)clazzValue{

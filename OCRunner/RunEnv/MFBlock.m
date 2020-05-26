@@ -39,7 +39,7 @@ static void blockInter(ffi_cif *cif, void *ret, void **args, void *userdata){
     }
     [[MFStack argsStack] push:argValues];
     __autoreleasing MFValue *retValue = [func execute:mangoBlock.outScope];
-    ret = retValue.pointer;
+    [retValue writePointer:ret typeEncode:[sig methodReturnType]];
 }
 
 @implementation MFBlock{

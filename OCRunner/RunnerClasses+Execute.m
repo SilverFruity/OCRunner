@@ -131,10 +131,10 @@ break;\
 }
 
 static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
-    const char *blockTypeEncoding = [MFBlock typeEncodingForBlock:blockValue.pointer];
+    const char *blockTypeEncoding = [MFBlock typeEncodingForBlock:blockValue.objectValue];
     NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:blockTypeEncoding];
     NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
-    [invocation setTarget:blockValue.pointer];
+    [invocation setTarget:blockValue.objectValue];
     NSUInteger numberOfArguments = [sig numberOfArguments];
     if (numberOfArguments - 1 != args.count) {
         //            mf_throw_error(expr.lineNumber, MFRuntimeErrorParameterListCountNoMatch, @"expect count: %zd, pass in cout:%zd",numberOfArguments - 1,expr.args.count);
@@ -149,6 +149,9 @@ static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
     [invocation invoke];
     const char *retType = [sig methodReturnType];
     retType = removeTypeEncodingPrefix((char *)retType);
+    if (*retType == 'v') {
+        return [MFValue voidValue];
+    }
     void *retValuePtr = alloca(mf_size_with_encoding(retType));
     [invocation getReturnValue:retValuePtr];
     return [[MFValue alloc] initTypeEncode:retType pointer:retValuePtr];;
@@ -203,7 +206,7 @@ static void methodIMP(ffi_cif *cif, void *ret, void **args, void *userdata){
     }
     [[MFStack argsStack] push:argValues];
     __autoreleasing MFValue *retValue = [map.methodImp execute:scope];
-    ret = retValue.pointer;
+    [retValue writePointer:ret typeEncode:[methodSignature methodReturnType]];
 }
 
 
@@ -662,24 +665,21 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     [invocation invoke];
     char *returnType = (char *)[sig methodReturnType];
     returnType = removeTypeEncodingPrefix(returnType);
-    MFValue *retValue;
-    if (*returnType != 'v') {
-        void *retValuePointer = malloc([sig methodReturnLength]);
-        [invocation getReturnValue:retValuePointer];
-        NSString *selectorName = NSStringFromSelector(sel);
-        if ([selectorName isEqualToString:@"alloc"] || [selectorName isEqualToString:@"new"] ||
-            [selectorName isEqualToString:@"copy"] || [selectorName isEqualToString:@"mutableCopy"]) {
-            retValue = [[MFValue alloc] initTypeEncode:returnType pointer:retValuePointer];
-        }else{
-            retValue = [[MFValue alloc] initTypeEncode:returnType pointer:retValuePointer];
-        }
-        
-        free(retValuePointer);
-    }else{
-        retValue = [MFValue voidValue];
+    if (*returnType == 'v') {
+        return [MFValue voidValue];
     }
-    return retValue;
-}@end
+    void *retValuePointer = alloca([sig methodReturnLength]);
+    [invocation getReturnValue:retValuePointer];
+    NSString *selectorName = NSStringFromSelector(sel);
+    if ([selectorName isEqualToString:@"alloc"] || [selectorName isEqualToString:@"new"] ||
+        [selectorName isEqualToString:@"copy"] || [selectorName isEqualToString:@"mutableCopy"]) {
+        return [[MFValue alloc] initTypeEncode:returnType pointer:retValuePointer];
+    }else{
+        return [[MFValue alloc] initTypeEncode:returnType pointer:retValuePointer];
+    }
+    
+}
+@end
 @implementation ORCFuncCall(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     NSMutableArray *args = [NSMutableArray array];
@@ -731,7 +731,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         NSString *funcName = self.declare.funVar.varname;
         if ([scope getValueWithIdentifier:funcName] == nil) {
             [scope setValue:[MFValue valueWithObject:self] withIndentifier:funcName];
-            return [MFValue valueWithObject:nil];
+            return [MFValue voidValue];
         }
     }
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
@@ -751,7 +751,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             }
             manBlock.typeEncoding = typeEncoding;
             __autoreleasing id ocBlock = [manBlock ocBlock];
-            MFValue *value = [MFValue valueWithTypeKind:TypeBlock pointer:&ocBlock];
+            MFValue *value = [MFValue valueWithBlock:ocBlock];
             CFRelease((__bridge void *)ocBlock);
             return value;
         }else{
@@ -885,13 +885,24 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             }
             ORStructDeclare *structDecl = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:self.pair.type.name];
             if (structDecl) {
-                self.pair.type.type = TypeStruct;
+                value.type = TypeStruct;
+            }
+            if (value.type == TypeObject && [value.objectValue isMemberOfClass:[NSObject class]]) {
+                NSString *reason = [NSString stringWithFormat:@"Unknown Class: %@",value.typeName];
+                @throw [NSException exceptionWithName:@"OCRunner" reason:reason userInfo:nil];
             }
             [scope setValue:value withIndentifier:self.pair.var.varname];
             return value;
         }else{
             MFValue *value = [MFValue defaultValueWithTypeEncoding:self.pair.typeEncode];
             value.modifier = self.modifier;
+            [value setTypeInfoWithTypePair:self.pair];
+            if (value.type == TypeObject
+                && NSClassFromString(value.typeName) == nil
+                && ![value.typeName isEqualToString:@"id"]) {
+                NSString *reason = [NSString stringWithFormat:@"Unknown Class: %@",value.typeName];
+                @throw [NSException exceptionWithName:@"OCRunner" reason:reason userInfo:nil];
+            }
             [scope setValue:value withIndentifier:self.pair.var.varname];
             return value;
         }
@@ -913,29 +924,32 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @implementation ORUnaryExpression (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *currentValue = [self.value execute:scope];
-    MFValue *resultValue = [MFValue new];
-    [resultValue setTypeInfoWithValue:currentValue];
+    MFValue *resultValue = [[MFValue alloc] initTypeEncode:currentValue.typeEncode];
     switch (self.operatorType) {
         case UnaryOperatorIncrementSuffix:{
-            SuffixUnaryExecuteInt(++, currentValue , resultValue);
-            SuffixUnaryExecuteFloat(++, currentValue , resultValue);
+            startBox(resultValue);
+            SuffixUnaryExecuteInt(++, currentValue);
+            SuffixUnaryExecuteFloat(++, currentValue);
+            endBox(resultValue);
             break;
         }
         case UnaryOperatorDecrementSuffix:{
-            SuffixUnaryExecuteInt(--, currentValue , resultValue);
-            SuffixUnaryExecuteFloat(--, currentValue , resultValue);
+            startBox(resultValue);
+            SuffixUnaryExecuteInt(--, currentValue);
+            SuffixUnaryExecuteFloat(--, currentValue);
+            endBox(resultValue);
             break;
         }
         case UnaryOperatorIncrementPrefix:{
-            startBox(currentValue);
-            PrefixUnaryExecuteInt(++, currentValue , resultValue);
+            startBox(resultValue);
+            PrefixUnaryExecuteInt(++, currentValue);
             endBox(resultValue);
             break;
         }
         case UnaryOperatorDecrementPrefix:{
-            startBox(currentValue);
-            PrefixUnaryExecuteInt(--, currentValue , resultValue);
-            PrefixUnaryExecuteFloat(--, currentValue , resultValue);
+            startBox(resultValue);
+            PrefixUnaryExecuteInt(--, currentValue);
+            PrefixUnaryExecuteFloat(--, currentValue);
             endBox(resultValue);
             break;
         }
@@ -948,15 +962,15 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             return [MFValue valueWithLongLong:result];
         }
         case UnaryOperatorBiteNot:{
-            startBox(currentValue);
-            PrefixUnaryExecuteInt(~, currentValue , resultValue);
+            startBox(resultValue);
+            PrefixUnaryExecuteInt(~, currentValue);
             endBox(resultValue);
             break;
         }
         case UnaryOperatorNegative:{
-            startBox(currentValue);
-            PrefixUnaryExecuteInt(-, currentValue , resultValue);
-            PrefixUnaryExecuteFloat(-, currentValue , resultValue);;
+            startBox(resultValue);
+            PrefixUnaryExecuteInt(-, currentValue);
+            PrefixUnaryExecuteFloat(-, currentValue);;
             endBox(resultValue);
             break;
         }
@@ -980,8 +994,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *rightValue = [self.right execute:scope];
     MFValue *leftValue = [self.left execute:scope];
-    MFValue *resultValue = [MFValue new];
-    [resultValue setTypeInfoWithValue:leftValue];
+    MFValue *resultValue = [[MFValue alloc] initTypeEncode:leftValue.typeEncode];
     switch (self.operatorType) {
         case BinaryOperatorAdd:{
             startBox(leftValue);

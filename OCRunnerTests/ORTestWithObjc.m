@@ -26,9 +26,9 @@
 
 - (void)testExample {
     MFValue *value = [MFValue valueWithPointer:&CGRectMake];
-    CGRect (*func)(CGFloat,CGFloat,CGFloat,CGFloat);
+    CGRect (**func)(CGFloat,CGFloat,CGFloat,CGFloat);
     func = value.pointer;
-    CGRect a = (*func)(1,2,3,4);
+    CGRect a = (**func)(1,2,3,4);
     XCTAssert(a.origin.x == 1);
     XCTAssert(a.origin.y == 2);
     XCTAssert(a.size.width == 3);
@@ -117,13 +117,13 @@ Element2Struct *Element2StructMake(){
     [[ORStructDeclareTable shareInstance] addStructDeclare:containerDecl];
     
     MFValue *containerValue = [[MFValue alloc] initTypeEncode:containerDecl.typeEncoding pointer:&container];
-    CGFloat c3 = *(CGFloat *)[[[containerValue fieldForKey:@"element2"] fieldForKey:@"t"] fieldForKey:@"c"].pointer;
+    CGFloat c3 = [[[containerValue fieldForKey:@"element2"] fieldForKey:@"t"] fieldForKey:@"c"].doubleValue;
     XCTAssert(c3 == 101);
-    CGFloat pC3 = *(CGFloat *)[[[[containerValue fieldForKey:@"element2Pointer"] getPointerValueField] fieldForKey:@"t"] fieldForKey:@"c"].pointer;
+    CGFloat pC3 = [[[[containerValue fieldForKey:@"element2Pointer"] getResutlInPointer] fieldForKey:@"t"] fieldForKey:@"c"].doubleValue;
     XCTAssert(pC3 == 101);
-    int p1b = *(int *)[[[containerValue fieldForKey:@"element1"] fieldForKey:@"b"] getPointerValueField].pointer;
+    int p1b = [[[containerValue fieldForKey:@"element1"] fieldForKey:@"b"] getResutlInPointer].intValue;
     XCTAssert(p1b == 100);
-    int p2a = *(int *)[[[containerValue fieldForKey:@"element1"] fieldForKey:@"a"] getPointerValueField].pointer;
+    int p2a = [[[containerValue fieldForKey:@"element1"] fieldForKey:@"a"] getResutlInPointer].intValue;
     XCTAssert(p2a == 100);
 }
 

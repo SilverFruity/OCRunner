@@ -17,7 +17,7 @@ void *box = malloc(size);\
 result.pointer = box;\
 free(box);
 
-#define PrefixUnaryExecuteInt(operator,value,resultValue)\
+#define PrefixUnaryExecuteInt(operator,value)\
 switch (value.type) {\
 case TypeUChar:\
 *(unsigned char *)box = (operator *(unsigned char *)value.pointer); break;\
@@ -45,7 +45,7 @@ default:\
 break;\
 }\
 
-#define PrefixUnaryExecuteFloat(operator,value,resultValue)\
+#define PrefixUnaryExecuteFloat(operator,value)\
 switch (value.type) {\
 case TypeFloat:\
 *(float *)box = (operator *(float *)value.pointer); break;\
@@ -55,46 +55,44 @@ default:\
 break;\
 }\
 
-#define SuffixUnaryExecuteInt(operator,value,resultValue)\
+#define SuffixUnaryExecuteInt(operator,value)\
 switch (value.type) {\
 case TypeUChar:\
-(*(unsigned char *)value.pointer operator); break;\
+*(unsigned char *)box = ((*(unsigned char *)value.pointer) operator); break;\
 case TypeUShort:\
-(*(unsigned short *)value.pointer operator); break;\
+*(unsigned short *)box = ((*(unsigned short *)value.pointer) operator); break;\
 case TypeUInt:\
-(*(unsigned int *)value.pointer operator); break;\
+*(unsigned int *)box = ((*(unsigned int *)value.pointer) operator); break;\
 case TypeULong:\
-(*(unsigned long *)value.pointer operator); break;\
+*(unsigned long *)box = ((*(unsigned long *)value.pointer) operator); break;\
 case TypeULongLong:\
-(*(unsigned long long *)value.pointer operator); break;\
+*(unsigned long long *)box = ((*(unsigned long long *)value.pointer) operator); break;\
 case TypeBOOL:\
-(*(BOOL *)value.pointer operator); break;\
+*(BOOL *)box = ((*(BOOL *)value.pointer) operator); break;\
 case TypeChar:\
-(*(char *)value.pointer operator); break;\
+*(char *)box = ((*(char *)value.pointer) operator); break;\
 case TypeShort:\
-(*(short *)value.pointer operator); break;\
+*(short *)box = ((*(short *)value.pointer) operator); break;\
 case TypeInt:\
-(*(int *)value.pointer operator); break;\
+*(int *)box = ((*(int *)value.pointer) operator); break;\
 case TypeLong:\
-(*(long *)value.pointer operator); break;\
+*(long *)box = ((*(long *)value.pointer) operator); break;\
 case TypeLongLong:\
-(*(long long *)value.pointer operator); break;\
+*(long long *)box = ((*(long long *)value.pointer) operator); break;\
 default:\
 break;\
 }\
-resultValue.pointer = value.pointer;
 
 
-#define SuffixUnaryExecuteFloat(operator,value,resultValue)\
+#define SuffixUnaryExecuteFloat(operator,value)\
 switch (value.type) {\
 case TypeFloat:\
-(*(float *)value.pointer operator); break;\
+*(float *)box = ((*(float *)value.pointer) operator); break;\
 case TypeDouble:\
-(*(double *)value.pointer operator); break;\
+*(double *)box = ((*(double *)value.pointer) operator); break;\
 default:\
 break;\
 }\
-resultValue.pointer = value.pointer;
 
 #define UnaryExecuteBaseType(resultName,operator,value)\
 switch (value.type) {\
@@ -310,11 +308,12 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @property (strong,nonatomic)NSString *typeName;
 @property (assign,nonatomic)NSInteger pointerCount;
 @property (nonatomic,assign)const char* typeEncode;
-@property (nonatomic,assign)void *pointer;
+@property (nonatomic,assign, nullable)void *pointer;
 
 + (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding;
 + (instancetype)valueWithTypeKind:(TypeKind)TypeKind pointer:(nullable void *)pointer;
 + (instancetype)valueWithTypePair:(ORTypeVarPair *)typePair pointer:(nullable void *)pointer;
+- (instancetype)initTypeEncode:(const char *)typeEncoding;
 - (instancetype)initTypeEncode:(const char *)tyepEncode pointer:(nullable void *)pointer;
 
 - (void)writePointer:(void *)pointer typeEncode:(const char *)typeEncode;
@@ -333,7 +332,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 - (BOOL)isStruct;
 - (BOOL)isStructPointer;
 - (MFValue *)fieldForKey:(NSString *)key;
-- (MFValue *)getPointerValueField;
+- (MFValue *)getResutlInPointer;
 @end
 
 @interface MFValue (MFStatementResultType)

@@ -12,6 +12,7 @@ void removePointerOfTypeEncode(char chr, NSString *content, NSMutableString *buf
         [buffer appendFormat:@"%c%@",chr,content];
         return;
     }
+    if (content.length == 0) return;
     removePointerOfTypeEncode(content.UTF8String[0], [content substringWithRange:NSMakeRange(1, content.length - 1)], buffer);
 }
 
@@ -24,6 +25,7 @@ NSString *startRemovePointerOfTypeEncode(const char *typeEncode){
 void detectPointerCount(char chr, NSString *content, NSUInteger *count){
     if (chr == '^') {
         (*count)++;
+        if (content.length == 0) return;
         detectPointerCount(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],count);
     }else{
         return;
@@ -42,6 +44,7 @@ void structNameDetect(char chr, NSString *content, NSMutableString *buffer){
     if (chr != '{' && chr != '^') {
         [buffer appendFormat:@"%c",chr];
     }
+    if (content.length == 0) return;
     structNameDetect(content.UTF8String[0], [content substringWithRange:NSMakeRange(1, content.length - 1)], buffer);
 }
 NSString *startStructNameDetect(const char *typeEncode){

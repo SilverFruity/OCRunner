@@ -64,7 +64,7 @@ append(code); break;
             break;
     }
     append("\0");
-    char *const result = malloc(sizeof(char) * 20);
+    char * result = malloc(sizeof(char) * 20);
     strcpy(result, encoding);
     return result;
 }
