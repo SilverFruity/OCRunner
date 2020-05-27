@@ -126,6 +126,18 @@ Element2Struct *Element2StructMake(){
     int p2a = [[[containerValue fieldForKey:@"element1"] fieldForKey:@"a"] getResutlInPointer].intValue;
     XCTAssert(p2a == 100);
 }
+- (void)testPointerDetect{
+    NSUInteger pointerCount = startDetectPointerCount("^^^d");
+    XCTAssert(pointerCount == 3);
+}
+- (void)testStructDetect{
+    NSArray *results = startStructDetect("{CGPointer=dd}");
+    XCTAssertEqualObjects(results[0], @"CGPointer=");
+    XCTAssertEqualObjects(results[1], @"d");
+    XCTAssertEqualObjects(results[2], @"d");
+    NSArray *results1 = startStructDetect("d");
+    XCTAssert(results1.count == 0);
+}
 
 - (void)testPerformanceExample {
     // This is an example of a performance test case.

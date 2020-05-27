@@ -7,88 +7,87 @@
 //
 
 #import "ORStructDeclare.h"
-void removePointerOfTypeEncode(char chr, NSString *content, NSMutableString *buffer){
-    if (chr != '^') {
-        [buffer appendFormat:@"%c%@",chr,content];
+void removePointerOfTypeEncode(const char *chr, NSMutableString *buffer){
+    if (strlen(chr) == 0) return;
+    if (*chr != '^') {
+        [buffer appendFormat:@"%s",chr];
         return;
     }
-    if (content.length == 0) return;
-    removePointerOfTypeEncode(content.UTF8String[0], [content substringWithRange:NSMakeRange(1, content.length - 1)], buffer);
+    removePointerOfTypeEncode(++chr, buffer);
 }
 
 NSString *startRemovePointerOfTypeEncode(const char *typeEncode){
-    NSString *content = [NSString stringWithUTF8String:typeEncode];
     NSMutableString *buffer = [NSMutableString string];
-    removePointerOfTypeEncode(content.UTF8String[0], [content substringWithRange:NSMakeRange(1, content.length - 1)], buffer);
+    removePointerOfTypeEncode(typeEncode, buffer);
     return buffer;
 }
-void detectPointerCount(char chr, NSString *content, NSUInteger *count){
-    if (chr == '^') {
+void detectPointerCount(const char *chr, NSUInteger *count){
+    if (*chr == '^') {
         (*count)++;
-        if (content.length == 0) return;
-        detectPointerCount(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],count);
+        if (strlen(chr) == 0) return;
+        detectPointerCount(++chr,count);
     }else{
         return;
     }
 }
 NSUInteger startDetectPointerCount(const char *typeEncode){
     NSUInteger ptCount = 0;
-    NSString *content = [NSString stringWithUTF8String:typeEncode];
-    detectPointerCount(content.UTF8String[0], [content substringWithRange:NSMakeRange(1, content.length - 1)], &ptCount);
+    detectPointerCount(typeEncode, &ptCount);
     return ptCount;
 }
-void structNameDetect(char chr, NSString *content, NSMutableString *buffer){
-    if (chr == '=' || chr == '}') {
+void structNameDetect(const char *chr, NSMutableString *buffer){
+    if (strlen(chr) == 0) return;
+    if (*chr == '=' || *chr == '}') {
         return;
     }
-    if (chr != '{' && chr != '^') {
-        [buffer appendFormat:@"%c",chr];
+    if (*chr != '{' && *chr != '^') {
+        [buffer appendFormat:@"%c",*chr];
     }
-    if (content.length == 0) return;
-    structNameDetect(content.UTF8String[0], [content substringWithRange:NSMakeRange(1, content.length - 1)], buffer);
+    structNameDetect(++chr, buffer);
 }
 NSString *startStructNameDetect(const char *typeEncode){
-    NSString *content = [NSString stringWithUTF8String:typeEncode];
     NSMutableString *buffer = [NSMutableString string];
-    structNameDetect(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer);
+    structNameDetect(typeEncode,buffer);
     return buffer;
 }
-void structDetect(char chr, NSString *content, NSMutableString *buffer, NSMutableArray *results, NSUInteger lf, NSUInteger rt, BOOL needfirstAssign){
-    [buffer appendFormat:@"%c",chr];
+void structDetect(const char *chr, NSMutableString *buffer, NSMutableArray *results, NSUInteger lf, NSUInteger rt, BOOL needfirstAssign){
+    if (strlen(chr) == 0) return;
+    [buffer appendFormat:@"%c",*chr];
     if (needfirstAssign) {
-        if (chr == '=') {
+        if (*chr == '=') {
             needfirstAssign = NO;
             [results addObject:buffer];
             buffer = [NSMutableString string];
         }
-        structDetect(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer, results, lf, rt, needfirstAssign);
+        structDetect(++chr,buffer, results, lf, rt, needfirstAssign);
         return;
     }
-    if (chr == '{'){
+    if (*chr == '{'){
         lf++;
     }
-    if (chr == '}'){
+    if (*chr == '}'){
         rt++;
     }
-    if (lf == rt && chr != '^') {
+    if (lf == rt && *chr != '^') {
         [results addObject:buffer];
         buffer = [NSMutableString string];
         lf = 0;
         rt = 0;
     }
-    if (content.length == 0) {
-        return;
-    }
-    structDetect(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer, results, lf, rt, needfirstAssign);
+    structDetect(++chr,buffer, results, lf, rt, needfirstAssign);
 }
 NSMutableArray * startStructDetect(const char *typeEncode){
     NSMutableString *buffer = [NSMutableString string];
-    NSString *content = [NSString stringWithUTF8String:typeEncode];
     NSMutableArray *results = [NSMutableArray array];
-    if ([content hasPrefix:@"{"]) {
-        content = [content substringWithRange:NSMakeRange(1, content.length - 2)];
+    size_t length = strlen(typeEncode);
+    char content[length + 1];
+    if (*typeEncode == '{') {
+        // remove '{' '}'
+        strlcpy(content, typeEncode + 1, length - 1);
+    }else{
+        strlcpy(content, typeEncode, length);
     }
-    structDetect(content.UTF8String[0],[content substringWithRange:NSMakeRange(1, content.length - 1)],buffer, results, 0, 0, YES);
+    structDetect(content,buffer, results, 0, 0, YES);
     return results;
 }
 
