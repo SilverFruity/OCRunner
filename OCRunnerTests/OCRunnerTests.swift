@@ -749,8 +749,7 @@ class CRunnerTests: XCTestCase {
         }
         let test = ORGCDTests.init()
         XCTAssert(test.testDispatchSemaphore())
-        //FIXME: 使用指针后关于引用计数的问题。
-//        XCTAssert(test.testDispatchSource() == 10)
+        XCTAssert(test.testDispatchSource() == 10)
         let afterException = XCTestExpectation.init(description: "async_after")
         test.testGCDAfter { (text) in
             XCTAssert(text == "success")

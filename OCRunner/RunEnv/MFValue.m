@@ -16,6 +16,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return type & MFStatementResultTypeReturnMask;
 }
 @interface MFValue()
+@property (nonatomic,strong)id objectValue;
+@property (nonatomic,weak)id weakObjectValue;
 @end
 
 @implementation MFValue
@@ -52,11 +54,21 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     if (_pointer != NULL) {
         free(_pointer);
     }
+    if (*self.typeEncode == '@') {
+        self.objectValue = *(__strong id *)pointer;
+    }
     NSUInteger size;
     NSGetSizeAndAlignment(self.typeEncode, &size, NULL);
     void *dst = malloc(size);
     memcpy(dst, pointer, size);
     _pointer = dst;
+}
+- (void)setModifier:(ORDeclarationModifier)modifier{
+    if (modifier & ORDeclarationModifierWeak) {
+        self.weakObjectValue = self.objectValue;
+        self.objectValue = nil;
+    }
+    _modifier = modifier;
 }
 - (id)objectValue{
     return *(__strong id *)self.pointer;
@@ -355,15 +367,9 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return [MFValue valueWithTypeKind:TypeDouble pointer:&doubleValue];
 }
 + (instancetype)valueWithObject:(id)objValue{
-    if (objValue) {
-        CFBridgingRetain(objValue);
-    }
     return [MFValue valueWithTypeKind:TypeObject pointer:&objValue];
 }
 + (instancetype)valueWithBlock:(id)blockValue{
-    if (blockValue) {
-        CFBridgingRetain(blockValue);
-    }
     return [MFValue valueWithTypeKind:TypeBlock pointer:&blockValue];
 }
 + (instancetype)valueWithClass:(Class)clazzValue{
