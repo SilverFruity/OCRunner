@@ -9,8 +9,6 @@
 /* Begin PBXBuildFile section */
 		0408F01B247D027B004F703D /* ORTypeVarPair+TypeEncode.h in Headers */ = {isa = PBXBuildFile; fileRef = 0408F019247D027B004F703D /* ORTypeVarPair+TypeEncode.h */; };
 		0408F01C247D027B004F703D /* ORTypeVarPair+TypeEncode.m in Sources */ = {isa = PBXBuildFile; fileRef = 0408F01A247D027B004F703D /* ORTypeVarPair+TypeEncode.m */; };
-		042AC254246D308000070814 /* ORBlockVar.h in Headers */ = {isa = PBXBuildFile; fileRef = 042AC252246D308000070814 /* ORBlockVar.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		042AC255246D308000070814 /* ORBlockVar.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC253246D308000070814 /* ORBlockVar.m */; };
 		042AC258246D453700070814 /* MFBlock.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC256246D453700070814 /* MFBlock.m */; };
 		042AC259246D453700070814 /* MFBlock.h in Headers */ = {isa = PBXBuildFile; fileRef = 042AC257246D453700070814 /* MFBlock.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		042AC261246E48A400070814 /* ORTestClassIvar.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC260246E48A400070814 /* ORTestClassIvar.m */; };
@@ -46,9 +44,7 @@
 		EE9899B624658F8900ACF2C1 /* MFMethodMapTable.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899A024658F8900ACF2C1 /* MFMethodMapTable.h */; };
 		EE9899B724658F8900ACF2C1 /* MFScopeChain.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899A124658F8900ACF2C1 /* MFScopeChain.m */; };
 		EE9899B824658F8900ACF2C1 /* MFValue.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899A224658F8900ACF2C1 /* MFValue.m */; };
-		EE9899C32465923900ACF2C1 /* MFRSA.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899BD2465923800ACF2C1 /* MFRSA.h */; };
 		EE9899C42465923900ACF2C1 /* util.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899BE2465923800ACF2C1 /* util.m */; };
-		EE9899C52465923900ACF2C1 /* MFRSA.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899BF2465923800ACF2C1 /* MFRSA.m */; };
 		EE9899C62465923900ACF2C1 /* util.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899C02465923800ACF2C1 /* util.h */; };
 		EE9899C72465923900ACF2C1 /* symdl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE9899C22465923900ACF2C1 /* symdl.framework */; };
 		EE9899D42465924C00ACF2C1 /* ffitarget_arm64.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899C92465924C00ACF2C1 /* ffitarget_arm64.h */; };
@@ -107,8 +103,6 @@
 /* Begin PBXFileReference section */
 		0408F019247D027B004F703D /* ORTypeVarPair+TypeEncode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ORTypeVarPair+TypeEncode.h"; sourceTree = "<group>"; };
 		0408F01A247D027B004F703D /* ORTypeVarPair+TypeEncode.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "ORTypeVarPair+TypeEncode.m"; sourceTree = "<group>"; };
-		042AC252246D308000070814 /* ORBlockVar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORBlockVar.h; sourceTree = "<group>"; };
-		042AC253246D308000070814 /* ORBlockVar.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORBlockVar.m; sourceTree = "<group>"; };
 		042AC256246D453700070814 /* MFBlock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFBlock.m; sourceTree = "<group>"; };
 		042AC257246D453700070814 /* MFBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFBlock.h; sourceTree = "<group>"; };
 		042AC25F246E48A400070814 /* ORTestClassIvar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORTestClassIvar.h; sourceTree = "<group>"; };
@@ -155,9 +149,7 @@
 		EE9899A024658F8900ACF2C1 /* MFMethodMapTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFMethodMapTable.h; sourceTree = "<group>"; };
 		EE9899A124658F8900ACF2C1 /* MFScopeChain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFScopeChain.m; sourceTree = "<group>"; };
 		EE9899A224658F8900ACF2C1 /* MFValue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFValue.m; sourceTree = "<group>"; };
-		EE9899BD2465923800ACF2C1 /* MFRSA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFRSA.h; sourceTree = "<group>"; };
 		EE9899BE2465923800ACF2C1 /* util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = util.m; sourceTree = "<group>"; };
-		EE9899BF2465923800ACF2C1 /* MFRSA.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFRSA.m; sourceTree = "<group>"; };
 		EE9899C02465923800ACF2C1 /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
 		EE9899C22465923900ACF2C1 /* symdl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = symdl.framework; sourceTree = "<group>"; };
 		EE9899C92465924C00ACF2C1 /* ffitarget_arm64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffitarget_arm64.h; sourceTree = "<group>"; };
@@ -304,8 +296,6 @@
 				EE98999A24658F8900ACF2C1 /* MFStaticVarTable.m */,
 				EE98999624658F8900ACF2C1 /* MFValue.h */,
 				EE9899A224658F8900ACF2C1 /* MFValue.m */,
-				042AC252246D308000070814 /* ORBlockVar.h */,
-				042AC253246D308000070814 /* ORBlockVar.m */,
 				EE98999324658F8900ACF2C1 /* MFVarDeclareChain.h */,
 				EE98999D24658F8900ACF2C1 /* MFVarDeclareChain.m */,
 				EE98999024658F8900ACF2C1 /* MFWeakPropertyBox.h */,
@@ -318,8 +308,6 @@
 		EE9899BC2465923800ACF2C1 /* Util */ = {
 			isa = PBXGroup;
 			children = (
-				EE9899BD2465923800ACF2C1 /* MFRSA.h */,
-				EE9899BF2465923800ACF2C1 /* MFRSA.m */,
 				EE9899C02465923800ACF2C1 /* util.h */,
 				EE9899BE2465923800ACF2C1 /* util.m */,
 			);
@@ -359,7 +347,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EE9899C32465923900ACF2C1 /* MFRSA.h in Headers */,
 				EE9899DA2465924C00ACF2C1 /* ffitarget_arm.h in Headers */,
 				EE9899D62465924C00ACF2C1 /* ffi_arm.h in Headers */,
 				EE9899D82465924C00ACF2C1 /* ffitarget_x86_64.h in Headers */,
@@ -375,7 +362,6 @@
 				EE9899D52465924C00ACF2C1 /* ffitarget.h in Headers */,
 				042AC259246D453700070814 /* MFBlock.h in Headers */,
 				EE9899D92465924C00ACF2C1 /* ffi_x86_64.h in Headers */,
-				042AC254246D308000070814 /* ORBlockVar.h in Headers */,
 				EE9899AD24658F8900ACF2C1 /* MFScopeChain.h in Headers */,
 				EE197B852478DD190049CFDA /* ORInterpreter.h in Headers */,
 				EE9899C62465923900ACF2C1 /* util.h in Headers */,
@@ -521,14 +507,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EE9899C52465923900ACF2C1 /* MFRSA.m in Sources */,
 				EE9899B024658F8900ACF2C1 /* MFStaticVarTable.m in Sources */,
 				EE9899B724658F8900ACF2C1 /* MFScopeChain.m in Sources */,
 				EE98998A24658DB800ACF2C1 /* RunnerClasses+Execute.m in Sources */,
 				04E665B924763090008DB08E /* ORStructDeclare.m in Sources */,
 				EE9899AF24658F8900ACF2C1 /* MFWeakPropertyBox.m in Sources */,
 				04E665A12474D284008DB08E /* built-in.m in Sources */,
-				042AC255246D308000070814 /* ORBlockVar.m in Sources */,
 				042AC258246D453700070814 /* MFBlock.m in Sources */,
 				EE9899C42465923900ACF2C1 /* util.m in Sources */,
 				EE9899B824658F8900ACF2C1 /* MFValue.m in Sources */,
