@@ -559,7 +559,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             return [scope getValueWithIdentifier:@"self"];
         }
         case OCValueSelector:{
-            return [MFValue valueWithSEL:NSSelectorFromString(self.value)];
+            NSString *value = self.value;
+            NSString *selector = [value substringWithRange:NSMakeRange(10, value.length - 11)];
+            return [MFValue valueWithSEL:NSSelectorFromString(selector)];
         }
 //        case OCValueProtocol:{
 //            return [MFValue valueInstanceWithObject:NSProtocolFromString(self.value)];

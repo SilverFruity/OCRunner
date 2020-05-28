@@ -67,6 +67,10 @@
         make.top.equalTo(self.view).offset(100);
     }];
     //label.text = [[ShareInstance shared] cacheForKey:@"1"];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"点击" style:UIBarButtonItemStylePlain target:self action:@selector(showNext)];
+}
+- (void)showNext{
+    [self.navigationController pushViewController:[UIViewController new] animated:YES];
 }
 
 @end
