@@ -17,6 +17,8 @@
 		042AC26A246E557200070814 /* ORCallSuperNoArgTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC269246E557200070814 /* ORCallSuperNoArgTest.m */; };
 		047EF859246BF68D0071F9D3 /* OCRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */; };
 		048FAA3E247FA4820036F5EE /* built-in.h in Headers */ = {isa = PBXBuildFile; fileRef = 048FAA3B247FA47C0036F5EE /* built-in.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		048FAA85247FB6CA0036F5EE /* oc2mangoLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 048FAA79247FB6180036F5EE /* oc2mangoLib.framework */; };
+		048FAA86247FB6CA0036F5EE /* oc2mangoLib.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 048FAA79247FB6180036F5EE /* oc2mangoLib.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		04E6659D2473C76D008DB08E /* ORTestWithObjc.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E6659C2473C76D008DB08E /* ORTestWithObjc.m */; };
 		04E665A12474D284008DB08E /* built-in.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E665A02474D284008DB08E /* built-in.m */; };
 		04E665AB2474D723008DB08E /* ORGCDTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E665AA2474D723008DB08E /* ORGCDTests.m */; };
@@ -85,6 +87,13 @@
 			remoteGlobalIDString = EED67A762270AE0F0015AC02;
 			remoteInfo = oc2mangoLibTests;
 		};
+		048FAA88247FB6D40036F5EE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = EED67A6D2270AE0E0015AC02;
+			remoteInfo = oc2mangoLib;
+		};
 		EE98997624658DA600ACF2C1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = EE98996224658DA600ACF2C1 /* Project object */;
@@ -93,6 +102,20 @@
 			remoteInfo = OCRunner;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		048FAA87247FB6CA0036F5EE /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				048FAA86247FB6CA0036F5EE /* oc2mangoLib.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		0408F019247D027B004F703D /* ORTypeVarPair+TypeEncode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ORTypeVarPair+TypeEncode.h"; sourceTree = "<group>"; };
@@ -169,6 +192,7 @@
 			files = (
 				EE9899C72465923900ACF2C1 /* symdl.framework in Frameworks */,
 				EE9899DC2465924C00ACF2C1 /* libffi.a in Frameworks */,
+				048FAA85247FB6CA0036F5EE /* oc2mangoLib.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -385,10 +409,12 @@
 				EE98996724658DA600ACF2C1 /* Sources */,
 				EE98996824658DA600ACF2C1 /* Frameworks */,
 				EE98996924658DA600ACF2C1 /* Resources */,
+				048FAA87247FB6CA0036F5EE /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				048FAA89247FB6D40036F5EE /* PBXTargetDependency */,
 			);
 			name = OCRunner;
 			productName = OCRunner;
@@ -539,6 +565,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		048FAA89247FB6D40036F5EE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = oc2mangoLib;
+			targetProxy = 048FAA88247FB6D40036F5EE /* PBXContainerItemProxy */;
+		};
 		EE98997724658DA600ACF2C1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = EE98996A24658DA600ACF2C1 /* OCRunner */;
