@@ -109,5 +109,17 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 
+@interface ORStructExpressoin (Execute) <OCExecute>
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
+@end
+
+@interface OREnumExpressoin (Execute) <OCExecute>
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
+@end
+
+@interface ORTypedefExpressoin (Execute) <OCExecute>
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
+@end
+
 
 NS_ASSUME_NONNULL_END

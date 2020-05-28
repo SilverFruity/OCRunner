@@ -1405,3 +1405,57 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 }
 @end
 
+
+@implementation ORStructExpressoin (Execute)
+- (nullable MFValue *)execute:(MFScopeChain *)scope{
+    NSMutableString *typeEncode = [@"{" mutableCopy];
+    NSMutableArray *keys = [NSMutableArray array];
+    for (ORTypeVarPair *pair in self.fields) {
+        [typeEncode appendFormat:@"%s",pair.typeEncode];
+        //TODO: struct 嵌套的问题
+        [keys addObject:pair.var.varname];
+    }
+    [typeEncode appendString:@"}"];
+    ORStructDeclare *declare = [ORStructDeclare structDecalre:typeEncode.UTF8String keys:keys];
+    [[ORStructDeclareTable shareInstance] addStructDeclare:declare];
+    return [MFValue voidValue];
+}
+@end
+
+@implementation OREnumExpressoin (Execute)
+- (nullable MFValue *)execute:(MFScopeChain *)scope{
+    NSMutableDictionary *keyValues = [NSMutableDictionary dictionary];
+    const char *typeEncode = makeTypeVarPair(makeTypeSpecial(self.valueType), nil).typeEncode;
+    MFValue *lastValue = nil;
+    for (id exp in self.fields) {
+        if ([exp isKindOfClass:[ORAssignExpression class]]) {
+            lastValue = [[(ORAssignExpression *)exp expression] execute:scope];
+            lastValue.typeEncode = typeEncode;
+            [scope setValue:lastValue withIndentifier:[(ORAssignExpression *)exp value].value];
+        }else if ([exp isKindOfClass:[ORValueExpression class]]){
+            if (lastValue) {
+                lastValue = [MFValue valueWithULongLong:lastValue.uLongValue + 1];
+                lastValue.typeEncode = typeEncode;
+                [scope setValue:lastValue withIndentifier:[(ORValueExpression *)exp value]];
+            }else{
+                lastValue = [MFValue valueWithULongLong:0];
+                lastValue.typeEncode = typeEncode;
+                [scope setValue:lastValue withIndentifier:[(ORValueExpression *)exp value]];
+            }
+        }
+    }
+    //TODO: regiseter enum identifier
+    return [MFValue voidValue];
+}
+@end
+
+@implementation ORTypedefExpressoin (Execute)
+- (nullable MFValue *)execute:(MFScopeChain *)scope{
+    //TODO: regiseter typedef identfiter type
+    // enum
+    // struct
+    // typename
+    return [MFValue voidValue];
+}
+@end
+
