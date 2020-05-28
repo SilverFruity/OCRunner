@@ -16,6 +16,9 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"ViewController1" ofType:nil];
+    NSString *data = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+    [ORInterpreter excute:data];
     return YES;
 }
 

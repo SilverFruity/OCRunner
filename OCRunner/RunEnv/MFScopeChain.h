@@ -8,10 +8,10 @@
 
 #import <Foundation/Foundation.h>
 #import "MFStack.h"
+#import "built-in.h"
 @class MFValue;
 NS_ASSUME_NONNULL_BEGIN
 extern const void *mf_propKey(NSString *propName);
-extern void mf_add_built_in(void);
 @interface MFScopeChain: NSObject
 @property (strong, nonatomic) NSMutableDictionary<NSString *,MFValue *> *vars;
 + (instancetype)topScope;
@@ -27,7 +27,3 @@ extern void mf_add_built_in(void);
 - (void)clear;
 @end
 NS_ASSUME_NONNULL_END
-
-
-
-

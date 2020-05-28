@@ -16,6 +16,7 @@
 		042AC267246E49B200070814 /* ORCallOCPropertyBlockTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC266246E49B200070814 /* ORCallOCPropertyBlockTest.m */; };
 		042AC26A246E557200070814 /* ORCallSuperNoArgTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC269246E557200070814 /* ORCallSuperNoArgTest.m */; };
 		047EF859246BF68D0071F9D3 /* OCRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */; };
+		048FAA3E247FA4820036F5EE /* built-in.h in Headers */ = {isa = PBXBuildFile; fileRef = 048FAA3B247FA47C0036F5EE /* built-in.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04E6659D2473C76D008DB08E /* ORTestWithObjc.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E6659C2473C76D008DB08E /* ORTestWithObjc.m */; };
 		04E665A12474D284008DB08E /* built-in.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E665A02474D284008DB08E /* built-in.m */; };
 		04E665AB2474D723008DB08E /* ORGCDTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E665AA2474D723008DB08E /* ORGCDTests.m */; };
@@ -115,6 +116,7 @@
 		042AC269246E557200070814 /* ORCallSuperNoArgTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORCallSuperNoArgTest.m; sourceTree = "<group>"; };
 		047EF857246BF68D0071F9D3 /* OCRunnerTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OCRunnerTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRunnerTests.swift; sourceTree = "<group>"; };
+		048FAA3B247FA47C0036F5EE /* built-in.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "built-in.h"; sourceTree = "<group>"; };
 		04E6659C2473C76D008DB08E /* ORTestWithObjc.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORTestWithObjc.m; sourceTree = "<group>"; };
 		04E665A02474D284008DB08E /* built-in.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "built-in.m"; sourceTree = "<group>"; };
 		04E665A92474D723008DB08E /* ORGCDTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORGCDTests.h; sourceTree = "<group>"; };
@@ -252,6 +254,7 @@
 				EE98998624658DB700ACF2C1 /* RunnerClasses+Execute.m */,
 				EE197B832478DD190049CFDA /* ORInterpreter.h */,
 				EE197B842478DD190049CFDA /* ORInterpreter.m */,
+				048FAA3B247FA47C0036F5EE /* built-in.h */,
 				04E665A02474D284008DB08E /* built-in.m */,
 				0408F019247D027B004F703D /* ORTypeVarPair+TypeEncode.h */,
 				0408F01A247D027B004F703D /* ORTypeVarPair+TypeEncode.m */,
@@ -351,6 +354,7 @@
 				EE9899D62465924C00ACF2C1 /* ffi_arm.h in Headers */,
 				EE9899D82465924C00ACF2C1 /* ffitarget_x86_64.h in Headers */,
 				EE9899A924658F8900ACF2C1 /* MFVarDeclareChain.h in Headers */,
+				048FAA3E247FA4820036F5EE /* built-in.h in Headers */,
 				EE9899A624658F8900ACF2C1 /* MFWeakPropertyBox.h in Headers */,
 				EE9899A424658F8900ACF2C1 /* MFPropertyMapTable.h in Headers */,
 				EE9899DE2465924C00ACF2C1 /* ffi_arm64.h in Headers */,

@@ -11,6 +11,24 @@
 #import "util.h"
 #import "ORStructDeclare.h"
 #import "ORTypeVarPair+TypeEncode.h"
+#define MFValueBridge(target,resultType)\
+resultType result;\
+switch (target.type) {\
+    case TypeUChar: result = (resultType)*(unsigned char *)target.pointer; break;\
+    case TypeUInt: result = (resultType)*(unsigned int *)target.pointer; break;\
+    case TypeUShort: result = (resultType)*(unsigned short *)target.pointer; break;\
+    case TypeULong: result = (resultType)*(unsigned long *)target.pointer; break;\
+    case TypeULongLong: result = (resultType)*(unsigned long long *)target.pointer; break;\
+    case TypeBOOL: result = (resultType)*(BOOL *)target.pointer; break;\
+    case TypeChar: result = (resultType)*(char *)target.pointer; break;\
+    case TypeShort: result = (resultType)*(short *)target.pointer; break;\
+    case TypeInt: result = (resultType)*(int *)target.pointer; break;\
+    case TypeLong: result = (resultType)*(long *)target.pointer; break;\
+    case TypeLongLong: result = (resultType)*(long long *)target.pointer; break;\
+    case TypeFloat: result = (resultType)*(float *)target.pointer; break;\
+    case TypeDouble: result = (resultType)*(double *)target.pointer; break;\
+    default: result = 0;\
+}
 
 extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return type & MFStatementResultTypeReturnMask;
@@ -47,6 +65,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return self;
 }
 - (void)setPointer:(void *)pointer{
+    NSCAssert(self.typeEncode != NULL, @"TypeEncode must exist");
     if (pointer == NULL) {
         _pointer = pointer;
         return;
@@ -80,58 +99,180 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     }
 }
 - (void)setTypeEncode:(const char *)typeEncode{
-    _typeEncode = typeEncode;
     if (strcmp(typeEncode, "@?") == 0) {
+        _typeEncode = typeEncode;
         self.type = TypeBlock;
         return;
     }
-    self.pointerCount = (NSInteger)startDetectPointerCount(typeEncode);
+    TypeKind type = TypeVoid;
+    NSString *typeName = nil;
+    NSUInteger pointerCount;
+    pointerCount = (NSInteger)startDetectPointerCount(typeEncode);
     const char *removedPointerEncode = startRemovePointerOfTypeEncode(typeEncode).UTF8String;
     switch (*removedPointerEncode) {
-        case 'c': self.type = TypeChar; break;
-        case 'i': self.type = TypeInt; break;
-        case 's': self.type = TypeShort; break;
-        case 'l': self.type = TypeLong; break;
-        case 'q': self.type = TypeLongLong; break;
-        case 'C': self.type = TypeUChar; break;
-        case 'I': self.type = TypeUInt; break;
-        case 'S': self.type = TypeUShort; break;
-        case 'L': self.type = TypeULong; break;
-        case 'Q': self.type = TypeULongLong; break;
-        case 'B': self.type = TypeBOOL; break;
-        case 'f': self.type = TypeFloat; break;
-        case 'd': self.type = TypeDouble; break;
-        case ':': self.type = TypeSEL; break;
+        case 'c': type = TypeChar; break;
+        case 'i': type = TypeInt; break;
+        case 's': type = TypeShort; break;
+        case 'l': type = TypeLong; break;
+        case 'q': type = TypeLongLong; break;
+        case 'C': type = TypeUChar; break;
+        case 'I': type = TypeUInt; break;
+        case 'S': type = TypeUShort; break;
+        case 'L': type = TypeULong; break;
+        case 'Q': type = TypeULongLong; break;
+        case 'B': type = TypeBOOL; break;
+        case 'f': type = TypeFloat; break;
+        case 'd': type = TypeDouble; break;
+        case ':': type = TypeSEL; break;
         case '*':{
-            self.type = TypeChar;
-            self.pointerCount += 1;
+            type = TypeChar;
+            pointerCount += 1;
             break;
         }
         case '#':{
-            self.typeName = @"Class";
-            self.type = TypeClass;
+            typeName = @"Class";
+            type = TypeClass;
             break;
         }
         case '@':{
-            self.type = TypeObject;
+            type = TypeObject;
             break;
         }
         case '{':{
-            self.type = TypeStruct;
-            self.typeName = startStructNameDetect(typeEncode);
+            type = TypeStruct;
+            typeName = startStructNameDetect(typeEncode);
             break;
         }
         default:
             break;
     }
+    
+    do {
+        if ((self.type & TypeBaseMask) == 0) break;
+        if (self.type == type) break;
+        if (pointerCount != 0) break;
+        if (self.pointer == NULL) break;
+        //基础类型转换
+        switch (type) {
+            case TypeUChar:{
+                MFValueBridge(self, unsigned char)
+                _typeEncode = typeEncode;
+                self.pointer = &result;
+                break;
+            }
+            case TypeUInt:{
+                MFValueBridge(self, unsigned int)
+                _typeEncode = typeEncode;
+                self.pointer = &result;
+                break;
+            }
+            case TypeUShort:{
+                MFValueBridge(self, unsigned short)
+                _typeEncode = typeEncode;
+                self.pointer = &result;
+                break;
+            }
+            case TypeULong:{
+                MFValueBridge(self, unsigned long)
+                _typeEncode = typeEncode;
+                self.pointer = &result;
+                break;
+            }
+            case TypeULongLong:{
+                MFValueBridge(self, unsigned long long)
+                _typeEncode = typeEncode;
+                self.pointer = &result;
+                break;
+            }
+            case TypeBOOL:{
+                MFValueBridge(self, BOOL)
+                _typeEncode = typeEncode;
+                self.pointer = &result;
+                break;
+            }
+            case TypeChar:{
+                MFValueBridge(self, char)
+                _typeEncode = typeEncode;
+                self.pointer = &result;
+                break;
+            }
+            case TypeShort:{
+                MFValueBridge(self, short)
+                _typeEncode = typeEncode;
+                self.pointer = &result;
+                break;
+            }
+            case TypeInt:{
+                MFValueBridge(self, int)
+                _typeEncode = typeEncode;
+                self.pointer = &result;
+                break;
+            }
+            case TypeLong:{
+                MFValueBridge(self, long)
+                _typeEncode = typeEncode;
+                self.pointer = &result;
+                break;
+            }
+            case TypeLongLong:{
+                MFValueBridge(self, long long)
+                _typeEncode = typeEncode;
+                self.pointer = &result;
+                break;
+            }
+            case TypeFloat:{
+                MFValueBridge(self, float)
+                _typeEncode = typeEncode;
+                self.pointer = &result;
+                break;
+            }
+            case TypeDouble:{
+                MFValueBridge(self, double)
+                _typeEncode = typeEncode;
+                self.pointer = &result;
+                break;
+            }
+            default: break;
+        }
+    } while (0);
+    _typeEncode = typeEncode;
+    self.type = type;
+    self.pointerCount = pointerCount;
+    if (typeName != nil) {
+        self.typeName = typeName;
+    }
+}
+- (void)setTypeInfoWithValue:(MFValue *)value{
+    self.typeEncode = value.typeEncode;
+    self.typeName = value.typeName;
+}
+- (void)setTypeInfoWithTypePair:(ORTypeVarPair *)typePair{
+    self.typeName = typePair.type.name;
+    self.typeEncode = typePair.typeEncode;
 }
 
+- (void)assignFrom:(MFValue *)src{
+    [self setTypeInfoWithValue:src];
+    self.pointer = src.pointer;
+}
+
+- (void)writePointer:(void *)pointer typeEncode:(const char *)typeEncode{
+    NSUInteger resultSize;
+    NSGetSizeAndAlignment(typeEncode, &resultSize, NULL);
+    memset(pointer, 0, resultSize);
+    NSUInteger currentSize;
+    NSGetSizeAndAlignment(self.typeEncode, &currentSize, NULL);
+    if (currentSize < resultSize){
+        memcpy(pointer, self.pointer, currentSize);
+    }else{
+        memcpy(pointer, self.pointer, resultSize);
+    }
+}
 - (BOOL)isSubtantial{
     BOOL result = NO;
     UnaryExecute(result, !, self);
     return !result;
 }
-
 - (BOOL)isMember{
     return self.type & TypeBaseMask;
 }
@@ -174,39 +315,6 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             break;
     }
 }
-
-- (void)setTypeInfoWithValue:(MFValue *)value{
-    self.typeEncode = value.typeEncode;
-    self.type = value.type;
-    self.typeName = value.typeName;
-    self.pointerCount = value.pointerCount;
-}
-- (void)setTypeInfoWithTypePair:(ORTypeVarPair *)typePair{
-    self.typeName = typePair.type.name;
-    self.typeEncode = typePair.typeEncode;
-    self.type = typePair.type.type;
-    self.pointerCount = typePair.var.ptCount;
-}
-
-- (void)assignFrom:(MFValue *)src{
-    [self setTypeInfoWithValue:src];
-    self.pointer = src.pointer;
-}
-
-- (void)writePointer:(void *)pointer typeEncode:(const char *)typeEncode{
-    NSUInteger resultSize;
-    NSGetSizeAndAlignment(typeEncode, &resultSize, NULL);
-    memset(pointer, 0, resultSize);
-    NSUInteger currentSize;
-    NSGetSizeAndAlignment(self.typeEncode, &currentSize, NULL);
-    if (currentSize < resultSize){
-        memcpy(pointer, self.pointer, currentSize);
-    }else{
-        memcpy(pointer, self.pointer, resultSize);
-    }
-}
-
-
 @end
 
 @implementation MFValue (Struct)
@@ -271,48 +379,61 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 @end
 
 
+
+
+
 @implementation MFValue (ValueType)
 - (unsigned char)uCharValue{
-    return *(unsigned char *)self.pointer;
+    MFValueBridge(self, unsigned char);
+    return result;
 }
 - (unsigned short)uShortValue{
-    return *(unsigned short *)self.pointer;
+    MFValueBridge(self, unsigned short);
+    return result;
 }
 - (unsigned int)uIntValue{
-    return *(unsigned int *)self.pointer;
+    MFValueBridge(self, unsigned int);
+    return result;
 }
 - (unsigned long)uLongValue{
-    return *(unsigned long *)self.pointer;
+    MFValueBridge(self, unsigned long);
+    return result;
 }
 - (unsigned long long)uLongLongValue{
-    return *(unsigned long long *)self.pointer;
+    MFValueBridge(self, unsigned long long);
+    return result;
 }
-
 - (char)charValue{
-    return *(char *)self.pointer;
+    MFValueBridge(self, char);
+    return result;
 }
 - (short)shortValue{
-    return *(short *)self.pointer;
+    MFValueBridge(self, short);
+    return result;
 }
 - (int)intValue{
-    return *(int *)self.pointer;
+    MFValueBridge(self, int);
+    return result;
 }
 - (long)longValue{
-    return *(long *)self.pointer;
+    MFValueBridge(self, long);
+    return result;
 }
 - (long long)longLongValue{
-    return *(long long *)self.pointer;
+    MFValueBridge(self, long long);
+    return result;
 }
-
 - (BOOL)boolValue{
-    return *(BOOL *)self.pointer;
+    MFValueBridge(self, BOOL);
+    return result;
 }
-
 - (float)floatValue{
-    return *(float *)self.pointer;
+    MFValueBridge(self, float);
+    return result;
 }
 - (double)doubleValue{
-    return *(double *)self.pointer;
+    MFValueBridge(self, double);
+    return result;
 }
 - (id)objectValue{
     return *(__strong id *)self.pointer;

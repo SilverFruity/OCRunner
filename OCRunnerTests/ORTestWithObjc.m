@@ -138,7 +138,27 @@ Element2Struct *Element2StructMake(){
     NSArray *results1 = startStructDetect("d");
     XCTAssert(results1.count == 0);
 }
-
+- (void)testStructGetValue{
+    MFScopeChain *scope = [MFScopeChain topScope];
+    or_add_build_in();
+    NSString * source =
+    @"UIView *view = [UIView new];"
+    "view.frame = CGRectMake(1,2,3,4);"
+    "CGRect frame = view.frame;"
+    "CGFloat a = frame.size.height;";
+    [OCParser parseSource:source];
+    for (id <OCExecute> exp in OCParser.ast.globalStatements) {
+        [exp execute:scope];
+    }
+    MFValue *frameValue = [scope getValueWithIdentifier:@"frame"];
+    XCTAssert(frameValue.type == TypeStruct);
+    MFValue * aValue = [scope getValueWithIdentifier:@"a"];
+    XCTAssert(aValue.type == TypeDouble);
+//    //FIXME: 类型转换问题，aValue.intValue == 4 测试则通过
+    XCTAssert(aValue.doubleValue == 4);
+    [OCParser clear];
+    [scope clear];
+}
 - (void)testPerformanceExample {
     // This is an example of a performance test case.
     [self measureBlock:^{

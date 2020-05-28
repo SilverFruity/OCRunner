@@ -142,9 +142,10 @@ static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
     }
     //根据MFValue的type传入值的原因: 模拟在OC中的调用
     for (NSUInteger i = 1; i < numberOfArguments; i++) {
-        __autoreleasing MFValue *argValue = args[i -1];
+        MFValue *argValue = args[i -1];
+        // 基础类型转换
+        argValue.typeEncode = [sig getArgumentTypeAtIndex:i];
         [invocation setArgument:argValue.pointer atIndex:i];
-        
     }
     [invocation invoke];
     const char *retType = [sig methodReturnType];
@@ -656,10 +657,10 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     //根据MFValue的type传入值的原因: 模拟在OC中的调用
     //FIXME: 多参数问题，self.values.count + 2 > argCount 时，采用多参数，超出参数压栈
     for (NSUInteger i = 2; i < argCount; i++) {
-        const char *typeEncoding = [sig getArgumentTypeAtIndex:i];
-        void *ptr = alloca(mf_size_with_encoding(typeEncoding));
-        [argValues[i-2] writePointer:ptr typeEncode:typeEncoding];
-        [invocation setArgument:ptr atIndex:i];
+        MFValue *value = argValues[i-2];
+        // 基础类型转换
+        value.typeEncode = [sig getArgumentTypeAtIndex:i];
+        [invocation setArgument:value.pointer atIndex:i];
     }
     // func replaceIMP execute
     [invocation invoke];
@@ -702,7 +703,6 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }
     MFValue *blockValue = [scope getValueWithIdentifier:self.caller.value];
     if (self.caller.value_type == OCValueVariable && blockValue != nil) {
-        MFValue *blockValue = [scope getValueWithIdentifier:self.caller.value];
         if (blockValue.type == TypeBlock) {
             return invoke_MFBlockValue(blockValue, args);
         }else{
@@ -885,7 +885,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             }
             ORStructDeclare *structDecl = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:self.pair.type.name];
             if (structDecl) {
-                value.type = TypeStruct;
+                value.typeEncode = structDecl.typeEncoding;
             }
             if (value.type == TypeObject && [value.objectValue isMemberOfClass:[NSObject class]]) {
                 NSString *reason = [NSString stringWithFormat:@"Unknown Class: %@",value.typeName];

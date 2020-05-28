@@ -73,7 +73,6 @@ class CRunnerTests: XCTestCase {
         scopeValue = scope.getValueWithIdentifier("k")
         XCTAssert(scopeValue!.type == TypeFloat)
         XCTAssert(scopeValue!.floatValue == 0.5)
-        //FIXME: 同为类型转换问题
         scopeValue = scope.getValueWithIdentifier("l")
         XCTAssert(scopeValue!.type == TypeDouble)
         XCTAssert(scopeValue!.doubleValue == 0.5)
@@ -783,27 +782,6 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 2)
         exps[3].execute(scope)
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 3)
-    }
-    func testStructGetValue(){
-        mf_add_built_in()
-        source =
-        """
-        UIView *view = [UIView new];
-        view.frame = CGRectMake(1,2,3,4);
-        CGRect frame = view.frame;
-        CGFloat a = frame.size.height;
-        """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
-        for exp in exps {
-            exp.execute(scope);
-        }
-        let frameValue = scope.getValueWithIdentifier("frame")!
-        XCTAssert(frameValue.type == TypeStruct)
-        let aValue = scope.getValueWithIdentifier("a")!
-        XCTAssert(aValue.type == TypeDouble)
-        //FIXME: 类型转换问题，aValue.intValue == 4 测试则通过
-        XCTAssert(aValue.doubleValue == 4, "\(aValue.doubleValue)")
     }
 //    func testDispatchOnce(){
 //        mf_add_built_in()
