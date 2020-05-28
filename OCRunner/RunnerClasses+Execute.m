@@ -1386,6 +1386,10 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
     if (!clazz) {
         Class superClass = NSClassFromString(self.superClassName);
+        if (!superClass) {
+            // 针对仅实现 @implementation xxxx @end 的类, 默认继承NSObjectt
+            superClass = [NSObject class];
+        }
         clazz = objc_allocateClassPair(superClass, self.className.UTF8String, 0);
         objc_registerClassPair(clazz);
     }

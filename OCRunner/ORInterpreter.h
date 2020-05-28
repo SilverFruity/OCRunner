@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
-
+@class ORClass;
 @interface ORInterpreter : NSObject
 + (void)excute:(NSString *)string;
 @end

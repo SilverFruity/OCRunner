@@ -423,6 +423,7 @@ void mf_add_built_in(void){
 	});
 }
 
+// for unit test
 void or_add_build_in(void){
     add_built_in_struct_declare();
     add_build_in_function();
