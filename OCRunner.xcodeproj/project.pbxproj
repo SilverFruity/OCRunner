@@ -64,33 +64,26 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		EE38F9D4246C5F0300E7C37B /* PBXContainerItemProxy */ = {
+		048FAA76247FB6180036F5EE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = EE38F9CE246C5F0300E7C37B /* oc2mango.xcodeproj */;
+			containerPortal = 048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = EE6E6CCF225E488000616C7E;
 			remoteInfo = oc2mango;
 		};
-		EE38F9D6246C5F0300E7C37B /* PBXContainerItemProxy */ = {
+		048FAA78247FB6180036F5EE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = EE38F9CE246C5F0300E7C37B /* oc2mango.xcodeproj */;
+			containerPortal = 048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = EED67A6E2270AE0E0015AC02;
 			remoteInfo = oc2mangoLib;
 		};
-		EE38F9D8246C5F0300E7C37B /* PBXContainerItemProxy */ = {
+		048FAA7A247FB6180036F5EE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = EE38F9CE246C5F0300E7C37B /* oc2mango.xcodeproj */;
+			containerPortal = 048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = EED67A762270AE0F0015AC02;
 			remoteInfo = oc2mangoLibTests;
-		};
-		EE38F9DE246C5F5500E7C37B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = EE38F9CE246C5F0300E7C37B /* oc2mango.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = EED67A6D2270AE0E0015AC02;
-			remoteInfo = oc2mangoLib;
 		};
 		EE98997624658DA600ACF2C1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -117,6 +110,7 @@
 		047EF857246BF68D0071F9D3 /* OCRunnerTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OCRunnerTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRunnerTests.swift; sourceTree = "<group>"; };
 		048FAA3B247FA47C0036F5EE /* built-in.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "built-in.h"; sourceTree = "<group>"; };
+		048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = oc2mango.xcodeproj; path = oc2mango/oc2mango.xcodeproj; sourceTree = SOURCE_ROOT; };
 		04E6659C2473C76D008DB08E /* ORTestWithObjc.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORTestWithObjc.m; sourceTree = "<group>"; };
 		04E665A02474D284008DB08E /* built-in.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "built-in.m"; sourceTree = "<group>"; };
 		04E665A92474D723008DB08E /* ORGCDTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORGCDTests.h; sourceTree = "<group>"; };
@@ -125,7 +119,6 @@
 		04E665B724763090008DB08E /* ORStructDeclare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORStructDeclare.m; sourceTree = "<group>"; };
 		EE197B832478DD190049CFDA /* ORInterpreter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORInterpreter.h; sourceTree = "<group>"; };
 		EE197B842478DD190049CFDA /* ORInterpreter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORInterpreter.m; sourceTree = "<group>"; };
-		EE38F9CE246C5F0300E7C37B /* oc2mango.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = oc2mango.xcodeproj; path = ../../oc2mongo/oc2mango.xcodeproj; sourceTree = "<group>"; };
 		EE79FF69246D917100ABE06F /* ORTestReplaceClass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORTestReplaceClass.h; sourceTree = "<group>"; };
 		EE79FF6A246D917100ABE06F /* ORTestReplaceClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORTestReplaceClass.m; sourceTree = "<group>"; };
 		EE98996B24658DA600ACF2C1 /* OCRunner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OCRunner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -190,21 +183,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		048FAA71247FB6180036F5EE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				048FAA77247FB6180036F5EE /* oc2mango */,
+				048FAA79247FB6180036F5EE /* oc2mangoLib.framework */,
+				048FAA7B247FB6180036F5EE /* oc2mangoLibTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		EE38F9B7246C5E9500E7C37B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		EE38F9CF246C5F0300E7C37B /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				EE38F9D5246C5F0300E7C37B /* oc2mango */,
-				EE38F9D7246C5F0300E7C37B /* oc2mangoLib.framework */,
-				EE38F9D9246C5F0300E7C37B /* oc2mangoLibTests.xctest */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		EE79FF66246D915C00ABE06F /* TestClass */ = {
@@ -248,7 +241,7 @@
 		EE98996D24658DA600ACF2C1 /* OCRunner */ = {
 			isa = PBXGroup;
 			children = (
-				EE38F9CE246C5F0300E7C37B /* oc2mango.xcodeproj */,
+				048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */,
 				EE98998724658DB700ACF2C1 /* RunnerClasses.h */,
 				EE98998824658DB800ACF2C1 /* RunnerClasses+Execute.h */,
 				EE98998624658DB700ACF2C1 /* RunnerClasses+Execute.m */,
@@ -396,7 +389,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				EE38F9DF246C5F5500E7C37B /* PBXTargetDependency */,
 			);
 			name = OCRunner;
 			productName = OCRunner;
@@ -453,8 +445,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = EE38F9CF246C5F0300E7C37B /* Products */;
-					ProjectRef = EE38F9CE246C5F0300E7C37B /* oc2mango.xcodeproj */;
+					ProductGroup = 048FAA71247FB6180036F5EE /* Products */;
+					ProjectRef = 048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -466,25 +458,25 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		EE38F9D5246C5F0300E7C37B /* oc2mango */ = {
+		048FAA77247FB6180036F5EE /* oc2mango */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
 			path = oc2mango;
-			remoteRef = EE38F9D4246C5F0300E7C37B /* PBXContainerItemProxy */;
+			remoteRef = 048FAA76247FB6180036F5EE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		EE38F9D7246C5F0300E7C37B /* oc2mangoLib.framework */ = {
+		048FAA79247FB6180036F5EE /* oc2mangoLib.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = oc2mangoLib.framework;
-			remoteRef = EE38F9D6246C5F0300E7C37B /* PBXContainerItemProxy */;
+			remoteRef = 048FAA78247FB6180036F5EE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		EE38F9D9246C5F0300E7C37B /* oc2mangoLibTests.xctest */ = {
+		048FAA7B247FB6180036F5EE /* oc2mangoLibTests.xctest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = oc2mangoLibTests.xctest;
-			remoteRef = EE38F9D8246C5F0300E7C37B /* PBXContainerItemProxy */;
+			remoteRef = 048FAA7A247FB6180036F5EE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -547,11 +539,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		EE38F9DF246C5F5500E7C37B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = oc2mangoLib;
-			targetProxy = EE38F9DE246C5F5500E7C37B /* PBXContainerItemProxy */;
-		};
 		EE98997724658DA600ACF2C1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = EE98996A24658DA600ACF2C1 /* OCRunner */;

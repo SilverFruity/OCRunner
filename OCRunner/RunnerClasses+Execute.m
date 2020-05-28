@@ -900,7 +900,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             if (value.type == TypeObject
                 && NSClassFromString(value.typeName) == nil
                 && ![value.typeName isEqualToString:@"id"]) {
-                NSString *reason = [NSString stringWithFormat:@"Unknown Class: %@",value.typeName];
+                NSString *reason = [NSString stringWithFormat:@"Unknown Type Identifier: %@",value.typeName];
                 @throw [NSException exceptionWithName:@"OCRunner" reason:reason userInfo:nil];
             }
             [scope setValue:value withIndentifier:self.pair.var.varname];
