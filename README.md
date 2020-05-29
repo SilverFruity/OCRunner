@@ -19,6 +19,7 @@ git clone --recursive https://github.com/SilverFruity/OCRunner.git
 ## 与Objective-C当前存在的语法差异
 
 ### 预编译指令
+
 不支持预编译指令 #define #if等
 
 ### Protcol协议
@@ -30,6 +31,16 @@ git clone --recursive https://github.com/SilverFruity/OCRunner.git
 @end
 NSArray <NSObject*>*array;
 ```
+### 多参数问题
+
+```objective-c
+// 这些都不支持
+[NSString stringWithFormat:@"%@",@"a"];
+NSLog(@"%@",@"a")
+// 等等
+```
+
+
 ### 类修复问题
 
 * 问题1: 我有个类有abcde5个方法以及若干属性，如果我只想对其中的A方法进行重写，我要把其他几个都带上吗？ 答: 只需要重写A方法
@@ -228,4 +239,7 @@ typedef IntegerType dispatch_once_t;
 * UI_APPEARANCE_SELECTOR
 * NS_ASSUME_NONNULL_BEGIN
 * NS_ASSUME_NONNULL_BEGIN
+
+强烈建议看看单元测试中支持的语法。
+
 
