@@ -803,7 +803,7 @@ class CRunnerTests: XCTestCase {
     func testEnumDeclare(){
         source =
         """
-        typedef enum UIControlEvents: NSUInteger {
+        typedef enum: NSUInteger{
             UIControlEventTouchDown                                         = 1 <<  0,      // on all touch downs
             UIControlEventTouchDownRepeat                                   = 1 <<  1,      // on multiple touchdowns (tap count > 1)
             UIControlEventTouchDragInside                                   = 1 <<  2,
