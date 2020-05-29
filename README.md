@@ -15,6 +15,7 @@ git submodule update --init --recursive
 git clone --recursive https://github.com/SilverFruity/OCRunner.git
 ```
 
+
 ## 与Objective-C当前存在的语法差异
 
 ### 预编译指令
@@ -119,6 +120,7 @@ struct CGSize {
 第一种:
 
 ```objective-c
+// 需要在App中添加
 // 结构体
 ORStructDeclareTable *table = [ORStructDeclareTable shareInstance];
 [table addStructDeclare:[ORStructDeclare structDecalre:@encode(CGPoint) keys:@[@"x",@"y"]]];
@@ -156,10 +158,12 @@ id GlobalValue = [NSObject new]; //在OCRunner中是可以作为全局变量的
 typedef，目前还有typedef嵌套问题。
 
 ```objective-c
+// 脚本中使用
 typedef NSInteger dispatch_once_t;
 ```
 
 ```objective-c
+// 脚本中使用
 // 问题代码
 typedef long long IntegerType;
 typedef IntegerType dispatch_once_t;
@@ -170,6 +174,7 @@ typedef IntegerType dispatch_once_t;
 目前只能使用这种方式
 
 ```objective-c
+// 需要在App中添加
 // 全局函数
 [MFScopeChain.topScope setValue:[MFValue valueWithBlock:^void(dispatch_queue_t queue, void (^block)(void)) {
 		dispatch_async(queue, ^{
