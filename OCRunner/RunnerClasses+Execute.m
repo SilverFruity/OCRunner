@@ -607,7 +607,12 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }
         case OCValueInt:{
             NSString *value = self.value;
-            return [MFValue valueWithLongLong:value.longLongValue];
+            if ([value hasPrefix:@"0x"]) {
+                long interger = strtol(value.UTF8String, NULL, 16);
+                return [MFValue valueWithLongLong:interger];
+            }else{
+                return [MFValue valueWithLongLong:value.longLongValue];
+            }
         }
         case OCValueDouble:{
             NSString *value = self.value;
@@ -633,7 +638,18 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *variable = [self.caller execute:scope];
     if (variable.type == TypeStruct) {
-        return [variable fieldForKey:self.names.firstObject];;
+        if ([self.names.firstObject hasPrefix:@"set"]) {
+            NSString *setterName = self.names.firstObject;
+            ORExpression *valueExp = self.values.firstObject;
+            NSString *fieldKey = [setterName substringFromIndex:3];
+            NSString *first = [[fieldKey substringToIndex:1] lowercaseString];
+            NSString *other = setterName.length > 1 ? [fieldKey substringFromIndex:1] : @"";
+            fieldKey = [NSString stringWithFormat:@"%@%@", first, other];
+            [variable setFieldWithValue:[valueExp execute:scope] forKey:fieldKey];
+            return [MFValue voidValue];
+        }else{
+            return [variable fieldForKey:self.names.firstObject];
+        }
     }
     id instance = variable.objectValue;
     if (!instance) {
@@ -853,7 +869,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             //调用对象setter方法
             NSString *setterName = methodCall.names.firstObject;
             NSString *first = [[setterName substringToIndex:1] uppercaseString];
-            NSString *other = setterName.length > 1 ? [setterName substringFromIndex:1] : nil;
+            NSString *other = setterName.length > 1 ? [setterName substringFromIndex:1] : @"";
             setterName = [NSString stringWithFormat:@"set%@%@",first,other];
             ORMethodCall *setCaller = [ORMethodCall new];
             setCaller.caller = [(ORMethodCall *)self.value caller];
@@ -882,13 +898,12 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         if (self.expression) {
             MFValue *value = [self.expression execute:scope];
             value.modifier = self.modifier;
-            if (value.type != TypeBlock) {
-                [value setTypeInfoWithTypePair:self.pair];
-            }
+            [value setTypeInfoWithTypePair:self.pair];
             ORStructDeclare *structDecl = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:self.pair.type.name];
             if (structDecl) {
                 value.typeEncode = structDecl.typeEncoding;
             }
+            [value setTypeBySearchInTypeSymbolTable];
             if (value.type == TypeObject && [value.objectValue isMemberOfClass:[NSObject class]]) {
                 NSString *reason = [NSString stringWithFormat:@"Unknown Class: %@",value.typeName];
                 @throw [NSException exceptionWithName:@"OCRunner" reason:reason userInfo:nil];
@@ -899,6 +914,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             MFValue *value = [MFValue defaultValueWithTypeEncoding:self.pair.typeEncode];
             value.modifier = self.modifier;
             [value setTypeInfoWithTypePair:self.pair];
+            [value setTypeBySearchInTypeSymbolTable];
             if (value.type == TypeObject
                 && NSClassFromString(value.typeName) == nil
                 && ![value.typeName isEqualToString:@"id"]) {
@@ -1410,23 +1426,35 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 - (nullable MFValue *)execute:(MFScopeChain *)scope{
     NSMutableString *typeEncode = [@"{" mutableCopy];
     NSMutableArray *keys = [NSMutableArray array];
+    [typeEncode appendString:self.sturctName];
+    [typeEncode appendString:@"="];
     for (ORTypeVarPair *pair in self.fields) {
         [typeEncode appendFormat:@"%s",pair.typeEncode];
-        //TODO: struct 嵌套的问题
-        //TODO: struct 嵌套层级排序，类似ORClass
+        //FIXME: struct 嵌套的问题
+        //FIXME: struct 嵌套层级排序，类似ORClass
         [keys addObject:pair.var.varname];
     }
     [typeEncode appendString:@"}"];
+    
     ORStructDeclare *declare = [ORStructDeclare structDecalre:typeEncode.UTF8String keys:keys];
     [[ORStructDeclareTable shareInstance] addStructDeclare:declare];
+    
+    ORTypeSpecial *special = [ORTypeSpecial specialWithType:TypeStruct name:self.sturctName];
+    ORTypeVarPair *pair = [[ORTypeVarPair alloc] init];
+    pair.type = special;
+    // 类型表注册全局类型
+    [[ORTypeSymbolTable shareInstance] addTypePair:pair forName:self.sturctName];
+    
     return [MFValue voidValue];
 }
 @end
 
 @implementation OREnumExpressoin (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope{
-    NSMutableDictionary *keyValues = [NSMutableDictionary dictionary];
-    const char *typeEncode = makeTypeVarPair(makeTypeSpecial(self.valueType), nil).typeEncode;
+    ORTypeSpecial *special = [ORTypeSpecial specialWithType:self.valueType name:self.enumName];
+    ORTypeVarPair *pair = [[ORTypeVarPair alloc] init];
+    pair.type = special;
+    const char *typeEncode = pair.typeEncode;
     MFValue *lastValue = nil;
     // 注册全局变量
     for (id exp in self.fields) {
@@ -1448,18 +1476,31 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             NSCAssert(NO, @"must be ORAssignExpression and ORValueExpression");
         }
     }
-    //TODO: regiseter enum identifier
     // 类型表注册全局类型
+    if (self.enumName) {
+        [[ORTypeSymbolTable shareInstance] addTypePair:pair forName:self.enumName];
+    }
     return [MFValue voidValue];
 }
 @end
 
 @implementation ORTypedefExpressoin (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope{
-    //TODO: regiseter typedef identfiter type
-    // enum
-    // struct
-    // typename
+    if ([self.expression isKindOfClass:[ORTypeVarPair class]]) {
+        [[ORTypeSymbolTable shareInstance] addTypePair:self.expression forName:self.typeNewName];
+    }else if ([self.expression isKindOfClass:[ORStructExpressoin class]]){
+        ORStructExpressoin *structExp = self.expression;
+        [structExp execute:scope];
+    }else if ([self.expression isKindOfClass:[OREnumExpressoin class]]){
+        OREnumExpressoin *enumExp = self.expression;
+        [enumExp execute:scope];
+        ORTypeSpecial *special = [ORTypeSpecial specialWithType:enumExp.valueType name:self.typeNewName];
+        ORTypeVarPair *pair = [[ORTypeVarPair alloc] init];
+        pair.type = special;
+        [[ORTypeSymbolTable shareInstance] addTypePair:pair forName:self.typeNewName];
+    }else{
+        NSCAssert(NO, @"must be ORTypeVarPair, ORStructExpressoin,  OREnumExpressoin");
+    }
     return [MFValue voidValue];
 }
 @end

@@ -13,15 +13,15 @@
 
 @implementation ORInterpreter
 + (void)excute:(NSString *)string{
-    //TODO: 添加内置结构体、函数、变量等
+    //添加内置结构体、函数、变量等
     mf_add_built_in();
     MFScopeChain *scope = [MFScopeChain topScope];
     [OCParser parseSource:string];
-    //TODO: 注册Class
+    //注册Class
     for (id <OCExecute> clazz in OCParser.ast.sortClasses){
         [clazz execute:scope];
     }
-    //TODO: 执行全局变量，全局函数声明
+    //执行全局变量，全局函数声明
     for (id <OCExecute> expression in OCParser.ast.globalStatements) {
         [expression execute:scope];
     }

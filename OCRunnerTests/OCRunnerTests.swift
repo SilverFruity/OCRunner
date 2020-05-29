@@ -698,7 +698,7 @@ class CRunnerTests: XCTestCase {
         XCTAssert(test.testCallSuperNoArgTestSupser())
     }
     func testGCD(){
-        mf_add_built_in()
+        or_add_build_in()
         let source =
         """
         @implementation ORGCDTests
@@ -783,19 +783,97 @@ class CRunnerTests: XCTestCase {
         exps[3].execute(scope)
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 3)
     }
-//    func testDispatchOnce(){
-//        mf_add_built_in()
-//        source =
-//        """
-//        static dispatch_once_t onceToken;
-//        dispatch_once(&onceToken, ^{
-//            [NSObject new];
-//        });
-//        """
-//        ocparser.parseSource(source)
-//        let exps = ocparser.ast.globalStatements as! [ORExpression]
-//        for exp in exps {
-//            exp.execute(scope);
-//        }
-//    }
+    func testDispatchOnce(){
+        mf_add_built_in()
+        source =
+        """
+        typedef NSInteger dispatch_once_t;
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            [NSObject new];
+        });
+        """
+        ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
+    }
+    
+    func testEnumDeclare(){
+        source =
+        """
+        typedef enum UIControlEvents: NSUInteger {
+            UIControlEventTouchDown                                         = 1 <<  0,      // on all touch downs
+            UIControlEventTouchDownRepeat                                   = 1 <<  1,      // on multiple touchdowns (tap count > 1)
+            UIControlEventTouchDragInside                                   = 1 <<  2,
+            UIControlEventTouchDragOutside                                  = 1 <<  3,
+            UIControlEventTouchDragEnter                                    = 1 <<  4,
+            UIControlEventTouchDragExit                                     = 1 <<  5,
+            UIControlEventTouchUpInside                                     = 1 <<  6,
+            UIControlEventTouchUpOutside                                    = 1 <<  7,
+            UIControlEventTouchCancel                                       = 1 <<  8,
+
+            UIControlEventValueChanged                                      = 1 << 12,     // sliders, etc.
+            UIControlEventPrimaryActionTriggered                            = 1 << 13,     // semantic action: for buttons, etc.
+
+            UIControlEventEditingDidBegin                                   = 1 << 16,     // UITextField
+            UIControlEventEditingChanged                                    = 1 << 17,
+            UIControlEventEditingDidEnd                                     = 1 << 18,
+            UIControlEventEditingDidEndOnExit                               = 1 << 19,     // 'return key' ending editing
+
+            UIControlEventAllTouchEvents                                    = 0x00000FFF,  // for touch events
+            UIControlEventAllEditingEvents                                  = 0x000F0000,  // for UITextField
+            UIControlEventApplicationReserved                               = 0x0F000000,  // range available for application use
+            UIControlEventSystemReserved                                    = 0xF0000000,  // range reserved for internal framework use
+            UIControlEventAllEvents                                         = 0xFFFFFFFF
+        }UIControlEvents;
+        """
+        ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventTouchDown")!.uLongLongValue == 1 <<  0)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventTouchDownRepeat")!.uLongLongValue == 1 <<  1)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventTouchDragInside")!.uLongLongValue == 1 <<  2)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventTouchDragOutside")!.uLongLongValue == 1 <<  3)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventTouchDragEnter")!.uLongLongValue == 1 <<  4)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventTouchDragExit")!.uLongLongValue == 1 <<  5)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventTouchUpInside")!.uLongLongValue == 1 <<  6)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventTouchUpOutside")!.uLongLongValue == 1 <<  7)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventTouchCancel")!.uLongLongValue == 1 <<  8)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventValueChanged")!.uLongLongValue == 1 << 12)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventPrimaryActionTriggered")!.uLongLongValue == 1 << 13)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventEditingDidBegin")!.uLongLongValue == 1 << 16)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventEditingChanged")!.uLongLongValue == 1 << 17)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventEditingDidEnd")!.uLongLongValue == 1 << 18)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventEditingDidEndOnExit")!.uLongLongValue == 1 << 19)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventAllTouchEvents")!.uLongLongValue == 0x00000FFF)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventAllEditingEvents")!.uLongLongValue == 0x000F0000)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventApplicationReserved")!.uLongLongValue == 0x0F000000)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventSystemReserved")!.uLongLongValue == 0xF0000000)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventAllEvents")!.uLongLongValue == 0xFFFFFFFF)
+    }
+    
+    func testStructDeclare(){
+        source =
+        """
+        struct CGPoint {
+            CGFloat x;
+            CGFloat y;
+        };
+        CGPoint CGPointMake(CGFloat x, CGFloat y){
+          CGPoint p; p.x = x; p.y = y; return p;
+        }
+        CGPoint p = CGPointMake(0.1,0.1);
+        CGFloat a = p.x;
+        """
+        ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        XCTAssert(scope.getValueWithIdentifier("a")!.doubleValue == 0.1)
+    }
 }

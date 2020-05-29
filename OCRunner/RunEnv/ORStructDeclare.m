@@ -201,7 +201,7 @@ NSMutableArray * startDetectTypeEncodes(NSString *content){
 @implementation ORTypeVarPair (Struct)
 - (ORStructDeclare *)strcutDeclare{
     NSCAssert(self.type.type == TypeStruct, @"must be TypeStruct");
-    return [[ORStructDeclareTable shareInstance] getStructDeclareWithName:self.var.varname];
+    return [[ORStructDeclareTable shareInstance] getStructDeclareWithName:self.type.name];
 }
 @end
 @implementation ORTypeSymbolTable{
@@ -220,7 +220,7 @@ NSMutableArray * startDetectTypeEncodes(NSString *content){
     static id st_instance;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        st_instance = [[ORStructDeclareTable alloc] init];
+        st_instance = [[ORTypeSymbolTable alloc] init];
     });
     return st_instance;
 }
@@ -229,9 +229,14 @@ NSMutableArray * startDetectTypeEncodes(NSString *content){
     [self addTypePair:typePair forName:typePair.var.varname];
 }
 - (void)addTypePair:(ORTypeVarPair *)typePair forName:(NSString *)typeName{
+    [_lock lock];
     _table[typeName] = typePair;
+    [_lock unlock];
 }
 - (ORTypeVarPair *)typePairForTypeName:(NSString *)typeName{
-    return _table[typeName];
+    [_lock lock];
+    ORTypeVarPair *typePair = _table[typeName];
+    [_lock unlock];
+    return typePair;
 }
 @end

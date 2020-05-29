@@ -154,7 +154,6 @@ Element2Struct *Element2StructMake(){
     XCTAssert(frameValue.type == TypeStruct);
     MFValue * aValue = [scope getValueWithIdentifier:@"a"];
     XCTAssert(aValue.type == TypeDouble);
-//    //FIXME: 类型转换问题，aValue.intValue == 4 测试则通过
     XCTAssert(aValue.doubleValue == 4);
     [OCParser clear];
     [scope clear];

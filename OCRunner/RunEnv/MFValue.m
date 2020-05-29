@@ -104,6 +104,9 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
         self.type = TypeBlock;
         return;
     }
+    if (self.type == TypeBlock) {
+        return;
+    }
     TypeKind type = TypeVoid;
     NSString *typeName = nil;
     NSUInteger pointerCount;
@@ -256,6 +259,21 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     self.pointer = src.pointer;
 }
 
+- (void)setTypeBySearchInTypeSymbolTable{
+    do {
+         if (!self.typeName) break;
+         ORTypeVarPair *pair = [[ORTypeSymbolTable shareInstance] typePairForTypeName:self.typeName];
+         if (!pair) break;
+         if (pair.type.type == TypeStruct) {
+             ORStructDeclare *structDecl = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:pair.type.name];
+             if (!structDecl) break;
+             self.typeEncode = structDecl.typeEncoding;
+         }else{
+             [self setTypeInfoWithTypePair:pair];
+         }
+     } while (0);
+}
+
 - (void)writePointer:(void *)pointer typeEncode:(const char *)typeEncode{
     NSUInteger resultSize;
     NSGetSizeAndAlignment(typeEncode, &resultSize, NULL);
@@ -354,6 +372,14 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
     NSUInteger offset = declare.keyOffsets[key].unsignedIntegerValue;
     return [[MFValue alloc] initTypeEncode:declare.keyTypeEncodes[key].UTF8String pointer:self.pointer + offset];;
+}
+- (void)setFieldWithValue:(MFValue *)value forKey:(NSString *)key;{
+    NSCAssert(self.type == TypeStruct, @"must be struct");
+    NSString *structName = self.typeName;
+    ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
+    NSUInteger offset = declare.keyOffsets[key].unsignedIntegerValue;
+    void *pointer = self.pointer + offset;
+    [value writePointer:pointer typeEncode:declare.keyTypeEncodes[key].UTF8String];
 }
 @end
 
