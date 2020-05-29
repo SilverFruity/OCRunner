@@ -172,13 +172,16 @@ NSMutableArray * startDetectTypeEncodes(NSString *content){
     });
     return st_instance;
 }
-- (void)addAlias:(NSString *)alias forTypeEncode:(const char *)typeEncode{
+- (void)addAlias:(NSString *)alias forTypeName:(NSString *)name{
     [_lock lock];
-    NSString *structName = startStructNameDetect(typeEncode);
-    if (_dic[structName]) {
-        _dic[alias] = _dic[structName];
+    if (_dic[name]) {
+        _dic[alias] = _dic[name];
     }
     [_lock unlock];
+}
+- (void)addAlias:(NSString *)alias forStructTypeEncode:(const char *)typeEncode{
+    NSString *structName = startStructNameDetect(typeEncode);
+    [self addAlias:alias forTypeName:structName];
 }
 - (void)addStructDeclare:(ORStructDeclare *)structDeclare{
     [_lock lock];
@@ -191,5 +194,44 @@ NSMutableArray * startDetectTypeEncodes(NSString *content){
     ORStructDeclare *declare = _dic[name];
     [_lock unlock];
     return declare;
+}
+@end
+
+
+@implementation ORTypeVarPair (Struct)
+- (ORStructDeclare *)strcutDeclare{
+    NSCAssert(self.type.type == TypeStruct, @"must be TypeStruct");
+    return [[ORStructDeclareTable shareInstance] getStructDeclareWithName:self.var.varname];
+}
+@end
+@implementation ORTypeSymbolTable{
+    NSMutableDictionary<NSString *, ORTypeVarPair *> *_table;
+    NSLock *_lock;
+}
+
+- (instancetype)init{
+    if (self = [super init]) {
+        _table = [NSMutableDictionary dictionary];
+        _lock = [[NSLock alloc] init];
+    }
+    return self;
+}
++ (instancetype)shareInstance{
+    static id st_instance;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        st_instance = [[ORStructDeclareTable alloc] init];
+    });
+    return st_instance;
+}
+- (void)addTypePair:(ORTypeVarPair *)typePair{
+    NSCAssert(typePair.var.varname != nil, @"");
+    [self addTypePair:typePair forName:typePair.var.varname];
+}
+- (void)addTypePair:(ORTypeVarPair *)typePair forName:(NSString *)typeName{
+    _table[typeName] = typePair;
+}
+- (ORTypeVarPair *)typePairForTypeName:(NSString *)typeName{
+    return _table[typeName];
 }
 @end

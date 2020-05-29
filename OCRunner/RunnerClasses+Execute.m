@@ -1413,6 +1413,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     for (ORTypeVarPair *pair in self.fields) {
         [typeEncode appendFormat:@"%s",pair.typeEncode];
         //TODO: struct 嵌套的问题
+        //TODO: struct 嵌套层级排序，类似ORClass
         [keys addObject:pair.var.varname];
     }
     [typeEncode appendString:@"}"];
@@ -1427,6 +1428,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     NSMutableDictionary *keyValues = [NSMutableDictionary dictionary];
     const char *typeEncode = makeTypeVarPair(makeTypeSpecial(self.valueType), nil).typeEncode;
     MFValue *lastValue = nil;
+    // 注册全局变量
     for (id exp in self.fields) {
         if ([exp isKindOfClass:[ORAssignExpression class]]) {
             lastValue = [[(ORAssignExpression *)exp expression] execute:scope];
@@ -1434,17 +1436,20 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             [scope setValue:lastValue withIndentifier:[(ORAssignExpression *)exp value].value];
         }else if ([exp isKindOfClass:[ORValueExpression class]]){
             if (lastValue) {
-                lastValue = [MFValue valueWithULongLong:lastValue.uLongValue + 1];
+                lastValue = [MFValue valueWithLongLong:lastValue.longLongValue + 1];
                 lastValue.typeEncode = typeEncode;
                 [scope setValue:lastValue withIndentifier:[(ORValueExpression *)exp value]];
             }else{
-                lastValue = [MFValue valueWithULongLong:0];
+                lastValue = [MFValue valueWithLongLong:0];
                 lastValue.typeEncode = typeEncode;
                 [scope setValue:lastValue withIndentifier:[(ORValueExpression *)exp value]];
             }
+        }else{
+            NSCAssert(NO, @"must be ORAssignExpression and ORValueExpression");
         }
     }
     //TODO: regiseter enum identifier
+    // 类型表注册全局类型
     return [MFValue voidValue];
 }
 @end

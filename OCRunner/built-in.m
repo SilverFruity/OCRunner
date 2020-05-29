@@ -19,7 +19,7 @@ static void add_built_in_struct_declare(){
     [table addStructDeclare:[ORStructDeclare structDecalre:@encode(CGAffineTransform) keys:@[@"a",@"b",@"c", @"d", @"tx", @"ty"]]];
     [table addStructDeclare:[ORStructDeclare structDecalre:@encode(CGVector) keys:@[@"dx",@"dy"]]];
     [table addStructDeclare:[ORStructDeclare structDecalre:@encode(NSRange) keys:@[@"location",@"length"]]];
-    [table addAlias:@"NSRange" forTypeEncode:@encode(NSRange)]; // @encode(NSRange) -> _NSRange
+    [table addAlias:@"NSRange" forStructTypeEncode:@encode(NSRange)]; // @encode(NSRange) -> _NSRange
     [table addStructDeclare:[ORStructDeclare structDecalre:@encode(UIOffset) keys:@[@"horizontal",@"vertical"]]];
     [table addStructDeclare:[ORStructDeclare structDecalre:@encode(UIEdgeInsets) keys:@[@"top",@"left",@"bottom",@"right"]]];
     [table addStructDeclare:[ORStructDeclare structDecalre:@encode(CATransform3D) keys:@[@"m11",@"m12",@"m13",@"m14",@"m21",@"m22",@"m23",@"m24",@"m31",@"m32",@"m33",@"m34",@"41",@"m42",@"m43",@"m44"]]];

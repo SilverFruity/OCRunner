@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "RunnerClasses+Execute.h"
 NS_ASSUME_NONNULL_BEGIN
 NSString *startRemovePointerOfTypeEncode(const char *typeEncode);
 NSUInteger startDetectPointerCount(const char *typeEncode);
@@ -26,8 +27,20 @@ NSMutableArray * startDetectTypeEncodes(NSString *content);
 @end
 @interface ORStructDeclareTable : NSObject
 + (instancetype)shareInstance;
-- (void)addAlias:(NSString *)alias forTypeEncode:(const char *)typeEncode;
+- (void)addAlias:(NSString *)alias forTypeName:(NSString *)name;
+- (void)addAlias:(NSString *)alias forStructTypeEncode:(const char *)typeEncode;
 - (void)addStructDeclare:(ORStructDeclare *)structDeclare;
 - (nullable ORStructDeclare *)getStructDeclareWithName:(NSString *)name;
+@end
+
+
+@interface ORTypeVarPair (Struct)
+- (ORStructDeclare *)strcutDeclare;
+@end
+@interface ORTypeSymbolTable: NSObject
++ (instancetype)shareInstance;
+- (void)addTypePair:(ORTypeVarPair *)typePair;
+- (void)addTypePair:(ORTypeVarPair *)typePair forName:(NSString *)typeName;
+- (ORTypeVarPair *)typePairForTypeName:(NSString *)typeName;
 @end
 NS_ASSUME_NONNULL_END
