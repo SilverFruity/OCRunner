@@ -14,15 +14,7 @@ git submodule update --init --recursive
 git clone --recursive https://github.com/SilverFruity/OCRunner.git
 ```
 
-## 暂不支持
-
-struct
-
-enum
-
 ## 无法识别
-
-typedef, enum, struct
 
 类型转换 不能识别：a = (CFString) a; 。 能识别 a = (CFString *) a;
 
