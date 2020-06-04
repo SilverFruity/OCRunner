@@ -22,6 +22,8 @@
 		EE480ED424794CF8003E4970 /* OCRunner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE480ECC24794CE5003E4970 /* OCRunner.framework */; };
 		EE480ED524794CF8003E4970 /* OCRunner.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = EE480ECC24794CE5003E4970 /* OCRunner.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		EE480EDC24794D90003E4970 /* ViewController1 in Resources */ = {isa = PBXBuildFile; fileRef = EE480EDA24794D4E003E4970 /* ViewController1 */; };
+		EE50145824890C9200B463BB /* oc2mangoLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE50145724890C9200B463BB /* oc2mangoLib.framework */; };
+		EE50145924890C9200B463BB /* oc2mangoLib.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = EE50145724890C9200B463BB /* oc2mangoLib.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +64,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				EE50145924890C9200B463BB /* oc2mangoLib.framework in Embed Frameworks */,
 				EE480ED524794CF8003E4970 /* OCRunner.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -98,6 +101,7 @@
 		EE480EBA24794CDB003E4970 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EE480EC624794CE5003E4970 /* OCRunner.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OCRunner.xcodeproj; path = ../../OCRunner.xcodeproj; sourceTree = "<group>"; };
 		EE480EDA24794D4E003E4970 /* ViewController1 */ = {isa = PBXFileReference; lastKnownFileType = text; path = ViewController1; sourceTree = "<group>"; };
+		EE50145724890C9200B463BB /* oc2mangoLib.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = oc2mangoLib.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8ECD6A6C4329F993D0A3813 /* libPods-OCRunnerDemoTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OCRunnerDemoTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -108,6 +112,7 @@
 			files = (
 				EE480ED424794CF8003E4970 /* OCRunner.framework in Frameworks */,
 				7D6603D481606E4E07D7EFB1 /* libPods-OCRunnerDemo.a in Frameworks */,
+				EE50145824890C9200B463BB /* oc2mangoLib.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -215,6 +220,7 @@
 		EE480ED124794CF8003E4970 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				EE50145724890C9200B463BB /* oc2mangoLib.framework */,
 				DCBFA559983A905FB3160F6B /* libPods-OCRunnerDemo.a */,
 				31523A39AEA633D61E30EF8E /* libPods-OCRunnerDemo-OCRunnerDemoUITests.a */,
 				F8ECD6A6C4329F993D0A3813 /* libPods-OCRunnerDemoTests.a */,

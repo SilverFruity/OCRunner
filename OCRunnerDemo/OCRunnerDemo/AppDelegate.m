@@ -8,6 +8,8 @@
 
 #import "AppDelegate.h"
 #import <OCRunner/OCRunner.h>
+#import <OCRunner/ORMultiArgsCall.h>
+#import <objc/message.h>
 @interface AppDelegate ()
 
 @end
@@ -19,6 +21,26 @@
     NSString *path = [[NSBundle mainBundle] pathForResource:@"ViewController1" ofType:nil];
     NSString *data = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
     [ORInterpreter excute:data];
+    
+#ifdef __arm64__
+    int value1 = 1;
+    int value2 = 2;
+    int value3 = 3;
+    char *format = "printf%d %d %d xxx\n";
+    void *a[4] = {&format, &value1, &value2, &value3};
+    ORMultiArgsCFunCall(a, 4, &printf);
+    
+    NSString *format1 = @"%d %f method";
+    int value4 = 1000;
+    double value5 = 22.22;
+    void *b[3] = {&format1, &value4, &value5};
+    NSString *value = (__bridge NSString *)(ORMultiArgsMethodCall([NSString class], @selector(stringWithFormat:), b, 3, &objc_msgSend));
+    NSLog(@"%@",value);
+#endif
+    
+#if __x86_64__  &&  TARGET_OS_SIMULATOR  &&  !TARGET_OS_IOSMAC
+    NSLog(@"SIMULATOR");
+#endif
     return YES;
 }
 
