@@ -2,17 +2,19 @@
 OCRunner is a DSL using Objective-C syntax，OCRunner is also an iOS App hotfix SDK. You can use OCRunner method replace any Objective-C method.
 ## Demo运行: 
 
+目前无法在模拟上运行，只支持真机。
+
 直接下载zip，是无法正常运行的。必须通过git clone
+
+```shell
+git clone --recursive https://github.com/SilverFruity/OCRunner.git
+```
+或者
 
 ```shell
 git clone https://github.com/SilverFruity/OCRunner.git
 cd OCRunner
 git submodule update --init --recursive
-```
-或者
-
-```shell
-git clone --recursive https://github.com/SilverFruity/OCRunner.git
 ```
 
 关于单元测试，必须在arm64下运行。
@@ -247,3 +249,4 @@ typedef IntegerType dispatch_once_t;
 * NS_ASSUME_NONNULL_BEGIN
 
 强烈建议看看单元测试中支持的语法。
+
