@@ -29,7 +29,7 @@ OCRunner framework的单元测试，当前无法在模拟器上运行，并不�
 
 目前在arm64下，最多支持8个参数
 
-**void *function (id target, SEL sel, void *a1, void *a2, void * a3, void * a4, void *a5, void *a6)**
+**void \*function (id target, SEL sel, void \*a1, void \*a2, void \*a3, void \*a4, void \*a5, void \*a6)**
 
 ### 预编译指令
 
