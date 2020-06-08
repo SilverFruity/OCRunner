@@ -25,6 +25,12 @@ OCRunner framework的单元测试，当前无法在模拟器上运行，并不�
 
 ## 与Objective-C当前存在的语法差异
 
+### 方法调用，参数个数的限制
+
+目前在arm64下，最多支持8个参数
+
+**void *function (id target, SEL sel, void *a1, void *a2, void * a3, void * a4, void *a5, void *a6)**
+
 ### 预编译指令
 
 不支持预编译指令 #define #if等
@@ -249,4 +255,3 @@ typedef IntegerType dispatch_once_t;
 * NS_ASSUME_NONNULL_BEGIN
 
 强烈建议看看单元测试中支持的语法。
-
