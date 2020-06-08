@@ -31,6 +31,8 @@ OCRunner framework的单元测试，当前无法在模拟器上运行，并不�
 
 **void \*function (id target, SEL sel, void \*a1, void \*a2, void \*a3, void \*a4, void \*a5, void \*a6)**
 
+相对的，在方法调用时，最多支持6个参数。第一个和第二个被target和sel占用。
+
 ### 预编译指令
 
 不支持预编译指令 #define #if等
@@ -255,3 +257,4 @@ typedef IntegerType dispatch_once_t;
 * NS_ASSUME_NONNULL_BEGIN
 
 强烈建议看看单元测试中支持的语法。
+
