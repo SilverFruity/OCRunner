@@ -15,6 +15,11 @@ git submodule update --init --recursive
 git clone --recursive https://github.com/SilverFruity/OCRunner.git
 ```
 
+关于单元测试，必须在arm64下运行。
+
+OCRunner framework的单元测试，当前无法在模拟器上运行，并不支持x86_64。
+
+单元测试已经转移到OCRunnerDemo下。
 
 ## 与Objective-C当前存在的语法差异
 
@@ -34,8 +39,9 @@ NSArray <NSObject*>*array;
 ### 多参数问题
 
 ```objective-c
-// 这些都不支持
+// 可以直接使用
 [NSString stringWithFormat:@"%@",@"a"];
+// 函数，现在还在寻找一个最轻松的方案
 NSLog(@"%@",@"a")
 // 等等
 ```
@@ -241,5 +247,3 @@ typedef IntegerType dispatch_once_t;
 * NS_ASSUME_NONNULL_BEGIN
 
 强烈建议看看单元测试中支持的语法。
-
-
