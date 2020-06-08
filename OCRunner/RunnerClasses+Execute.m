@@ -157,59 +157,57 @@ static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
     [invocation getReturnValue:retValuePtr];
     return [[MFValue alloc] initTypeEncode:retType pointer:retValuePtr];;
 }
-static void *add_function(const char *funcReturnType, NSMutableArray <NSString *>*argTypes, void (*executeFunc)(ffi_cif*,void*,void**,void*), NSDictionary *userInfo){
-    void *imp = NULL;
-    ffi_cif *cif = malloc(sizeof(ffi_cif));//不可以free
-    ffi_closure *closure = ffi_closure_alloc(sizeof(ffi_closure), (void **)&imp);
-    ffi_type *returnType = mf_ffi_type_with_type_encoding(funcReturnType);
-    ffi_type **args = malloc(sizeof(ffi_type *) * (unsigned int)argTypes.count);
-    for (int  i = 0 ; i < argTypes.count; i++) {
-        args[i] = mf_ffi_type_with_type_encoding(argTypes[i].UTF8String);
-    }
-    if(ffi_prep_cif(cif, FFI_DEFAULT_ABI, (unsigned int)argTypes.count, returnType, args) == FFI_OK)
-    {
-        CFTypeRef cfuserInfo = (__bridge_retained CFTypeRef)userInfo;
-        ffi_prep_closure_loc(closure, cif, executeFunc, (void *)cfuserInfo, imp);
-    }
-    return imp;
-}
-static void methodIMP(ffi_cif *cif, void *ret, void **args, void *userdata){
-    NSDictionary * userInfo = (__bridge id)userdata;// 不可以进行释放
-    Class class  = userInfo[@"class"];
-    NSString *typeEncoding = userInfo[@"typeEncoding"];
-    MFScopeChain *scope = userInfo[@"scope"];
-    id assignSelf = (__bridge  id)(*(void **)args[0]);
-    BOOL classMethod = object_isClass(assignSelf);
+static void methodIMP(void){
+    void *args[8];
+    __asm__ volatile
+    (
+     "str x0, [%[args]]\n"
+     "str x1, [%[args], #0x8]\n"
+     "str x2, [%[args], #0x10]\n"
+     "str x3, [%[args], #0x18]\n"
+     "str x4, [%[args], #0x20]\n"
+     "str x5, [%[args], #0x28]\n"
+     "str x6, [%[args], #0x30]\n"
+     "str x7, [%[args], #0x38]\n"
+     :
+     : [args]"r"(args)
+     );
+    MFScopeChain *scope = [MFScopeChain topScope];
+    id target = (__bridge id) args[0];
+    SEL sel = (SEL)args[1];
+    BOOL classMethod = object_isClass(target);
+    Class class;
     if (classMethod) {
-        [scope setValue:[MFValue valueWithClass:assignSelf] withIndentifier:@"self"];
+        [scope setValue:[MFValue valueWithClass:target] withIndentifier:@"self"];
+        class = objc_getMetaClass(NSStringFromClass(target).UTF8String);
     }else{
-        [scope setValue:[MFValue valueWithObject:assignSelf] withIndentifier:@"self"];
+        [scope setValue:[MFValue valueWithObject:target] withIndentifier:@"self"];
+        class = [target class];
     }
-    SEL sel = *(void **)args[1];
     MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:class classMethod:classMethod sel:sel];
-    NSMethodSignature *methodSignature = [NSMethodSignature signatureWithObjCTypes:typeEncoding.UTF8String];
+    NSMethodSignature *methodSignature = [target methodSignatureForSelector:sel];
     NSMutableArray<MFValue *> *argValues = [NSMutableArray array];
     NSUInteger numberOfArguments = [methodSignature numberOfArguments];
     // 在OC中，传入值都为原数值并非MFValue，需要转换
     for (NSUInteger i = 2; i < numberOfArguments; i++) {
-        MFValue *argValue;
-        const char *type = [methodSignature getArgumentTypeAtIndex:i];
-        if (strcmp(type, "@?") == 0) {
-            id block =  (__bridge id)(*(void **)args[i]);
-            block = [block copy];
-            argValue = [MFValue valueWithObject:block];
-            argValue.type = TypeBlock;
-        }else{
-            void *arg = args[i];
-            argValue = [[MFValue alloc] initTypeEncode:[methodSignature getArgumentTypeAtIndex:i] pointer:arg];
-        }
+        void *arg = args[i];
+        MFValue *argValue = [[MFValue alloc] initTypeEncode:[methodSignature getArgumentTypeAtIndex:i] pointer:&arg];
         [argValues addObject:argValue];
     }
     [[MFStack argsStack] push:argValues];
-    __autoreleasing MFValue *retValue = [map.methodImp execute:scope];
-    [retValue writePointer:ret typeEncode:[methodSignature methodReturnType]];
+    MFValue *value = [map.methodImp execute:scope];
+    __autoreleasing MFValue *retValue = [MFValue defaultValueWithTypeEncoding:[methodSignature methodReturnType]];
+    if (retValue.type == TypeVoid){
+        return;
+    }
+    retValue.pointer = value.pointer;
+    __asm__ volatile
+    (
+     "mov x0, %[ret]\n"
+     :
+     : [ret]"r"(retValue.pointer)
+     );
 }
-
 
 static void replace_method(Class clazz, ORMethodImplementation *methodImp, MFScopeChain *scope){
     ORMethodDeclare *declare = methodImp.declare;
@@ -250,14 +248,7 @@ static void replace_method(Class clazz, ORMethodImplementation *methodImp, MFSco
             class_addMethod(c2, orgSel, method_getImplementation(ocMethod), typeEncoding);
         }
     }
-    NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:typeEncoding];
-    NSMutableArray *argTypes = [NSMutableArray array];
-    for (int  i = 0 ; i < sig.numberOfArguments; i++) {
-        [argTypes addObject:[NSString stringWithUTF8String:[sig getArgumentTypeAtIndex:i]]];
-    }
-    NSDictionary *userInfo = @{@"class":c2,@"typeEncoding":@(typeEncoding), @"scope":scope};
-    void *imp = add_function(sig.methodReturnType, argTypes, methodIMP, userInfo);
-    class_replaceMethod(c2, sel, imp, typeEncoding);
+    class_replaceMethod(c2, sel, &methodIMP, typeEncoding);
     if (needFreeTypeEncoding) {
         free((void *)typeEncoding);
     }
@@ -290,6 +281,36 @@ void getterInter(ffi_cif *cif, void *ret, void **args, void *userdata){
         [value writePointer:ret typeEncode:type];
     }
 }
+void getterImp(id target, SEL sel){
+    NSString *propName = NSStringFromSelector(sel);
+    ORPropertyDeclare *propDef = [[MFPropertyMapTable shareInstance] getPropertyMapTableItemWith:[target class] name:propName].property;
+    id propValue = objc_getAssociatedObject(target, mf_propKey(propName));
+    const char *type = propDef.var.typeEncode;
+    __autoreleasing MFValue *retValue = [MFValue defaultValueWithTypeEncoding:type];
+    if (retValue.type == TypeVoid){
+        return;
+    }
+    if (!propValue) {
+        retValue = [MFValue defaultValueWithTypeEncoding:type];
+    }else if([propValue isKindOfClass:[MFWeakPropertyBox class]]){
+        MFWeakPropertyBox *box = propValue;
+        if (box.target) {
+            id value = box.target;
+            retValue.pointer = &value;
+        }else{
+            retValue = [MFValue defaultValueWithTypeEncoding:type];
+        }
+    }else{
+        retValue.pointer = &propValue;
+    }
+    __asm__ volatile
+    (
+     "mov x0, %[ret]\n"
+     :
+     : [ret]"r"(retValue.pointer)
+     );
+
+}
 void setterInter(ffi_cif *cif, void *ret, void **args, void *userdata){
     ORPropertyDeclare *propDef = (__bridge ORPropertyDeclare *)userdata;
     id _self = (__bridge id)(*(void **)args[0]);
@@ -308,22 +329,28 @@ void setterInter(ffi_cif *cif, void *ret, void **args, void *userdata){
     objc_AssociationPolicy associationPolicy = mf_AssociationPolicy_with_PropertyModifier(modifier);
     objc_setAssociatedObject(_self, mf_propKey(propName), value, associationPolicy);
 }
+void setterImp(id target, SEL sel, void *newValue){
+    NSMethodSignature *sign = [target methodSignatureForSelector:sel];
+    const char *type = [sign getArgumentTypeAtIndex:2];
+    id value = [[MFValue alloc] initTypeEncode:type pointer:&newValue];;
+    NSString *setter = NSStringFromSelector(sel);
+    NSString *name = [setter substringWithRange:NSMakeRange(3, setter.length - 3)];
+    NSString *first = [setter substringWithRange:NSMakeRange(0, 1)].lowercaseString;
+    NSString *propName = [NSString stringWithFormat:@"%@%@",first,[name substringFromIndex:1]];
+    ORPropertyDeclare *propDef = [[MFPropertyMapTable shareInstance] getPropertyMapTableItemWith:[target class] name:propName].property;
+    MFPropertyModifier modifier = propDef.modifier;
+    if ((modifier & MFPropertyModifierMemMask) == MFPropertyModifierMemWeak) {
+        value = [[MFWeakPropertyBox alloc] initWithTarget:value];
+    }
+    objc_AssociationPolicy associationPolicy = mf_AssociationPolicy_with_PropertyModifier(modifier);
+    objc_setAssociatedObject(target, mf_propKey(propName), value, associationPolicy);
+}
 
 static void replace_getter_method(Class clazz, ORPropertyDeclare *prop){
     SEL getterSEL = NSSelectorFromString(prop.var.var.varname);
     const char *retTypeEncoding  = prop.var.typeEncode;
-    ffi_type *returnType = mf_ffi_type_with_type_encoding(retTypeEncoding);
-    unsigned int argCount = 2;
-    ffi_type **argTypes = malloc(sizeof(ffi_type *) * argCount);
-    argTypes[0] = &ffi_type_pointer;
-    argTypes[1] = &ffi_type_pointer;
-    void *imp = NULL;
-    ffi_cif *cifPtr = malloc(sizeof(ffi_cif));
-    ffi_prep_cif(cifPtr, FFI_DEFAULT_ABI, argCount, returnType, argTypes);
-    ffi_closure *closure = ffi_closure_alloc(sizeof(ffi_closure), (void **)&imp);
-    ffi_prep_closure_loc(closure, cifPtr, getterInter, (__bridge void *)prop, imp);
     const char * typeEncoding = mf_str_append(retTypeEncoding, "@:");
-    class_replaceMethod(clazz, getterSEL, (IMP)imp, typeEncoding);
+    class_replaceMethod(clazz, getterSEL, &getterImp, typeEncoding);
     free((void *)typeEncoding);
 }
 
@@ -333,22 +360,8 @@ static void replace_setter_method(Class clazz, ORPropertyDeclare *prop){
     NSString *str2 = name.length > 1 ? [name substringFromIndex:1] : nil;
     SEL setterSEL = NSSelectorFromString([NSString stringWithFormat:@"set%@%@:",str1,str2]);
     const char *prtTypeEncoding  = prop.var.typeEncode;
-    ffi_type *returnType = &ffi_type_void;
-    unsigned int argCount = 3;
-    ffi_type **argTypes = malloc(sizeof(ffi_type *) * argCount);
-    argTypes[0] = &ffi_type_pointer;
-    argTypes[1] = &ffi_type_pointer;
-    argTypes[2] = mf_ffi_type_with_type_encoding(prtTypeEncoding);
-    if (argTypes[2] == NULL) {
-//        mf_throw_error(lineNumber, @"", @"");
-    }
-    void *imp = NULL;
-    ffi_cif *cifPtr = malloc(sizeof(ffi_cif));
-    ffi_prep_cif(cifPtr, FFI_DEFAULT_ABI, argCount, returnType, argTypes);
-    ffi_closure *closure = ffi_closure_alloc(sizeof(ffi_closure), (void **)&imp);
-    ffi_prep_closure_loc(closure, cifPtr, setterInter, (__bridge void *)prop, imp);
     const char * typeEncoding = mf_str_append("v@:", prtTypeEncoding);
-    class_replaceMethod(clazz, setterSEL, (IMP)imp, typeEncoding);
+    class_replaceMethod(clazz, setterSEL, &setterImp, typeEncoding);
     free((void *)typeEncoding);
 }
 
