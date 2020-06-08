@@ -20,4 +20,5 @@ FOUNDATION_EXPORT const unsigned char OCRunnerVersionString[];
 #import <OCRunner/MFScopeChain.h>
 #import <OCRunner/RunnerClasses+Execute.h>
 #import <OCRunner/ORInterpreter.h>
+#import <OCRunner/ORStructDeclare.h>
 

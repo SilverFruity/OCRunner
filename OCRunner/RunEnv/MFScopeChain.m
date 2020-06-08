@@ -108,6 +108,7 @@ const void *mf_propKey(NSString *propName) {
                 }
                 objc_AssociationPolicy associationPolicy = mf_AssociationPolicy_with_PropertyModifier(modifier);
                 objc_setAssociatedObject(pos.instance, mf_propKey(propName), associationValue, associationPolicy);
+                return;
             }else if((ivar = class_getInstanceVariable(object_getClass(pos.instance),identifier.UTF8String))){
                 const char *ivarEncoding = ivar_getTypeEncoding(ivar);
                 if (*ivarEncoding == '@') {
@@ -118,17 +119,13 @@ const void *mf_propKey(NSString *propName) {
                     [value writePointer:ptr typeEncode:ivarEncoding];
                 }
                 return;
-                
             }
-		}else{
-			MFValue *srcValue = [pos getValueWithIdentifier:identifier];
-			if (srcValue) {
-                
-				[srcValue assignFrom:value];
-				return;
-			}
 		}
-		
+        MFValue *srcValue = [pos getValueWithIdentifier:identifier];
+        if (srcValue) {
+            [srcValue assignFrom:value];
+            return;
+        }
 	}
 }
 

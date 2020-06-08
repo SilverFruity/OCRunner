@@ -301,7 +301,7 @@ ORTypeVarPair *typePairWithTypeEncode(const char *tyepEncode);
 
 extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 
-@interface MFValue : NSObject
+@interface MFValue : NSObject <NSCopying>
 @property (assign, nonatomic) MFStatementResultType resultType;
 @property (assign,nonatomic)ORDeclarationModifier modifier;
 @property (assign,nonatomic)TypeKind type;

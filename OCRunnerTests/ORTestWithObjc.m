@@ -8,7 +8,6 @@
 
 #import <XCTest/XCTest.h>
 #import <OCRunner/OCRunner.h>
-#import "ORStructDeclare.h"
 
 @interface ORTestWithObjc : XCTestCase
 

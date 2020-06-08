@@ -7,14 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
-
+@class MFValue;
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MFWeakPropertyBox : NSObject
 
-@property (weak)id target;
+@property (weak)MFValue *target;
 
-- (instancetype)initWithTarget:(id)target;
+- (instancetype)initWithTarget:(MFValue *)target;
 
 @end
 

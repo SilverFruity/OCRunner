@@ -530,25 +530,6 @@ class CRunnerTests: XCTestCase {
         }
         
     }
-    func testSuperMethodCall(){
-        let source =
-        """
-        @implementation MFCallSuperNoArgTest
-        - (BOOL)testCallSuperNoArgTestSupser{
-            return [super testCallSuperNoArgTestSupser];
-        }
-        @end
-        """
-        ocparser.parseSource(source)
-
-        let classes = ocparser.ast.classCache.allValues as! [ORClass];
-        for classValue in classes {
-            classValue.execute(scope);
-        }
-        
-        let test = MFCallSuperNoArgTest.init()
-        XCTAssert(test.testCallSuperNoArgTestSupser())
-    }
     func testMultiArgsFunCall(){
         let source =
         """
@@ -679,6 +660,25 @@ class CRunnerTests: XCTestCase {
         let test = ORCallOCPropertyBlockTest.init()
         XCTAssert(test.testCallOCReturnBlock() == "ab")
         
+    }
+    func testSuperMethodCall(){
+        let source =
+        """
+        @implementation MFCallSuperNoArgTest
+        - (BOOL)testCallSuperNoArgTestSupser{
+            return [super testCallSuperNoArgTestSupser];
+        }
+        @end
+        """
+        ocparser.parseSource(source)
+
+        let classes = ocparser.ast.classCache.allValues as! [ORClass];
+        for classValue in classes {
+            classValue.execute(scope);
+        }
+        
+        let test = MFCallSuperNoArgTest.init()
+        XCTAssert(test.testCallSuperNoArgTestSupser())
     }
     func testSuperNoArgs(){
         let source =

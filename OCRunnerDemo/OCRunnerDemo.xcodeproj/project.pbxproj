@@ -24,6 +24,14 @@
 		EE480EDC24794D90003E4970 /* ViewController1 in Resources */ = {isa = PBXBuildFile; fileRef = EE480EDA24794D4E003E4970 /* ViewController1 */; };
 		EE50145824890C9200B463BB /* oc2mangoLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE50145724890C9200B463BB /* oc2mangoLib.framework */; };
 		EE50145924890C9200B463BB /* oc2mangoLib.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = EE50145724890C9200B463BB /* oc2mangoLib.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		EEBF333E248E848100DDE2E9 /* OCRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEBF333D248E848100DDE2E9 /* OCRunnerTests.swift */; };
+		EEBF334C248E84AA00DDE2E9 /* ORCallOCPropertyBlockTest.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3340248E84A900DDE2E9 /* ORCallOCPropertyBlockTest.m */; };
+		EEBF334D248E84AA00DDE2E9 /* ORCallSuperNoArgTest.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3343248E84A900DDE2E9 /* ORCallSuperNoArgTest.m */; };
+		EEBF334E248E84AA00DDE2E9 /* ORTestClassProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3344248E84A900DDE2E9 /* ORTestClassProperty.m */; };
+		EEBF334F248E84AA00DDE2E9 /* ORTestClassIvar.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3347248E84A900DDE2E9 /* ORTestClassIvar.m */; };
+		EEBF3350248E84AA00DDE2E9 /* ORGCDTests.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3348248E84A900DDE2E9 /* ORGCDTests.m */; };
+		EEBF3351248E84AA00DDE2E9 /* ORTestReplaceClass.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF334A248E84A900DDE2E9 /* ORTestReplaceClass.m */; };
+		EEBF3353248E84D100DDE2E9 /* ORTestWithObjc.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3352248E84D100DDE2E9 /* ORTestWithObjc.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +62,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = EE98997424658DA600ACF2C1;
 			remoteInfo = OCRunnerTests;
+		};
+		EEBF3330248E639400DDE2E9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EE480EC624794CE5003E4970 /* OCRunner.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = EE98996A24658DA600ACF2C1;
+			remoteInfo = OCRunner;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -102,6 +117,21 @@
 		EE480EC624794CE5003E4970 /* OCRunner.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OCRunner.xcodeproj; path = ../../OCRunner.xcodeproj; sourceTree = "<group>"; };
 		EE480EDA24794D4E003E4970 /* ViewController1 */ = {isa = PBXFileReference; lastKnownFileType = text; path = ViewController1; sourceTree = "<group>"; };
 		EE50145724890C9200B463BB /* oc2mangoLib.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = oc2mangoLib.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EEBF3312248E61FC00DDE2E9 /* OCRunnerDemoTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OCRunnerDemoTests-Bridging-Header.h"; sourceTree = "<group>"; };
+		EEBF333D248E848100DDE2E9 /* OCRunnerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = OCRunnerTests.swift; path = ../../OCRunnerTests/OCRunnerTests.swift; sourceTree = "<group>"; };
+		EEBF3340248E84A900DDE2E9 /* ORCallOCPropertyBlockTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORCallOCPropertyBlockTest.m; sourceTree = "<group>"; };
+		EEBF3341248E84A900DDE2E9 /* ORGCDTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORGCDTests.h; sourceTree = "<group>"; };
+		EEBF3342248E84A900DDE2E9 /* ORTestClassIvar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORTestClassIvar.h; sourceTree = "<group>"; };
+		EEBF3343248E84A900DDE2E9 /* ORCallSuperNoArgTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORCallSuperNoArgTest.m; sourceTree = "<group>"; };
+		EEBF3344248E84A900DDE2E9 /* ORTestClassProperty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORTestClassProperty.m; sourceTree = "<group>"; };
+		EEBF3345248E84A900DDE2E9 /* ORTestReplaceClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORTestReplaceClass.h; sourceTree = "<group>"; };
+		EEBF3346248E84A900DDE2E9 /* ORCallOCPropertyBlockTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORCallOCPropertyBlockTest.h; sourceTree = "<group>"; };
+		EEBF3347248E84A900DDE2E9 /* ORTestClassIvar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORTestClassIvar.m; sourceTree = "<group>"; };
+		EEBF3348248E84A900DDE2E9 /* ORGCDTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORGCDTests.m; sourceTree = "<group>"; };
+		EEBF3349248E84A900DDE2E9 /* ORCallSuperNoArgTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORCallSuperNoArgTest.h; sourceTree = "<group>"; };
+		EEBF334A248E84A900DDE2E9 /* ORTestReplaceClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORTestReplaceClass.m; sourceTree = "<group>"; };
+		EEBF334B248E84A900DDE2E9 /* ORTestClassProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORTestClassProperty.h; sourceTree = "<group>"; };
+		EEBF3352248E84D100DDE2E9 /* ORTestWithObjc.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ORTestWithObjc.m; path = ../../OCRunnerTests/ORTestWithObjc.m; sourceTree = "<group>"; };
 		F8ECD6A6C4329F993D0A3813 /* libPods-OCRunnerDemoTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-OCRunnerDemoTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -193,8 +223,12 @@
 		EE480EAC24794CDB003E4970 /* OCRunnerDemoTests */ = {
 			isa = PBXGroup;
 			children = (
+				EEBF3352248E84D100DDE2E9 /* ORTestWithObjc.m */,
+				EEBF333F248E84A900DDE2E9 /* TestClass */,
+				EEBF333D248E848100DDE2E9 /* OCRunnerTests.swift */,
 				EE480EAD24794CDB003E4970 /* OCRunnerDemoTests.m */,
 				EE480EAF24794CDB003E4970 /* Info.plist */,
+				EEBF3312248E61FC00DDE2E9 /* OCRunnerDemoTests-Bridging-Header.h */,
 			);
 			path = OCRunnerDemoTests;
 			sourceTree = "<group>";
@@ -228,6 +262,26 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		EEBF333F248E84A900DDE2E9 /* TestClass */ = {
+			isa = PBXGroup;
+			children = (
+				EEBF3346248E84A900DDE2E9 /* ORCallOCPropertyBlockTest.h */,
+				EEBF3340248E84A900DDE2E9 /* ORCallOCPropertyBlockTest.m */,
+				EEBF3349248E84A900DDE2E9 /* ORCallSuperNoArgTest.h */,
+				EEBF3343248E84A900DDE2E9 /* ORCallSuperNoArgTest.m */,
+				EEBF3341248E84A900DDE2E9 /* ORGCDTests.h */,
+				EEBF3348248E84A900DDE2E9 /* ORGCDTests.m */,
+				EEBF3342248E84A900DDE2E9 /* ORTestClassIvar.h */,
+				EEBF3347248E84A900DDE2E9 /* ORTestClassIvar.m */,
+				EEBF334B248E84A900DDE2E9 /* ORTestClassProperty.h */,
+				EEBF3344248E84A900DDE2E9 /* ORTestClassProperty.m */,
+				EEBF3345248E84A900DDE2E9 /* ORTestReplaceClass.h */,
+				EEBF334A248E84A900DDE2E9 /* ORTestReplaceClass.m */,
+			);
+			name = TestClass;
+			path = ../../OCRunnerTests/TestClass;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -244,6 +298,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				EEBF3331248E639400DDE2E9 /* PBXTargetDependency */,
 			);
 			name = OCRunnerDemo;
 			productName = OCRunnerDemo;
@@ -302,6 +357,7 @@
 					};
 					EE480EA824794CDB003E4970 = {
 						CreatedOnToolsVersion = 11.5;
+						LastSwiftMigration = 1150;
 						TestTargetID = EE480E8D24794CDA003E4970;
 					};
 					EE480EB324794CDB003E4970 = {
@@ -466,7 +522,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EEBF3350248E84AA00DDE2E9 /* ORGCDTests.m in Sources */,
+				EEBF334D248E84AA00DDE2E9 /* ORCallSuperNoArgTest.m in Sources */,
+				EEBF3351248E84AA00DDE2E9 /* ORTestReplaceClass.m in Sources */,
 				EE480EAE24794CDB003E4970 /* OCRunnerDemoTests.m in Sources */,
+				EEBF3353248E84D100DDE2E9 /* ORTestWithObjc.m in Sources */,
+				EEBF334E248E84AA00DDE2E9 /* ORTestClassProperty.m in Sources */,
+				EEBF334F248E84AA00DDE2E9 /* ORTestClassIvar.m in Sources */,
+				EEBF334C248E84AA00DDE2E9 /* ORCallOCPropertyBlockTest.m in Sources */,
+				EEBF333E248E848100DDE2E9 /* OCRunnerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -490,6 +554,11 @@
 			isa = PBXTargetDependency;
 			target = EE480E8D24794CDA003E4970 /* OCRunnerDemo */;
 			targetProxy = EE480EB524794CDB003E4970 /* PBXContainerItemProxy */;
+		};
+		EEBF3331248E639400DDE2E9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = OCRunner;
+			targetProxy = EEBF3330248E639400DDE2E9 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -631,7 +700,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = SH4YVD7HDL;
 				INFOPLIST_FILE = OCRunnerDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -650,7 +719,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = SH4YVD7HDL;
 				INFOPLIST_FILE = OCRunnerDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -666,10 +735,12 @@
 			baseConfigurationReference = 78A59A40FE631D2A2F858AB7 /* Pods-OCRunnerDemoTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = SH4YVD7HDL;
 				INFOPLIST_FILE = OCRunnerDemoTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -677,7 +748,10 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = silverfruity.OCRunnerDemoTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TARGETED_DEVICE_FAMILY = "1,2";
+				SWIFT_OBJC_BRIDGING_HEADER = "OCRunnerDemoTests/OCRunnerDemoTests-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OCRunnerDemo.app/OCRunnerDemo";
 			};
 			name = Debug;
@@ -687,10 +761,12 @@
 			baseConfigurationReference = 0EA667C064BFFB79847D34F5 /* Pods-OCRunnerDemoTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = SH4YVD7HDL;
 				INFOPLIST_FILE = OCRunnerDemoTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -698,7 +774,9 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = silverfruity.OCRunnerDemoTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TARGETED_DEVICE_FAMILY = "1,2";
+				SWIFT_OBJC_BRIDGING_HEADER = "OCRunnerDemoTests/OCRunnerDemoTests-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OCRunnerDemo.app/OCRunnerDemo";
 			};
 			name = Release;
@@ -710,6 +788,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = SH4YVD7HDL;
 				INFOPLIST_FILE = OCRunnerDemoUITests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -717,7 +796,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = silverfruity.OCRunnerDemoUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = OCRunnerDemo;
 			};
 			name = Debug;
@@ -729,6 +808,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = SH4YVD7HDL;
 				INFOPLIST_FILE = OCRunnerDemoUITests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -736,7 +816,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = silverfruity.OCRunnerDemoUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = OCRunnerDemo;
 			};
 			name = Release;

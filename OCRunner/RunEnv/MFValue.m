@@ -23,7 +23,7 @@ switch (target.type) {\
     case TypeChar: result = (resultType)*(char *)target.pointer; break;\
     case TypeShort: result = (resultType)*(short *)target.pointer; break;\
     case TypeInt: result = (resultType)*(int *)target.pointer; break;\
-    case TypeLong: result = (resultType)*(long *)target.pointer; break;\
+    case TypeLong: result = (resultType)*(int *)target.pointer; break;\
     case TypeLongLong: result = (resultType)*(long long *)target.pointer; break;\
     case TypeFloat: result = (resultType)*(float *)target.pointer; break;\
     case TypeDouble: result = (resultType)*(double *)target.pointer; break;\
@@ -79,11 +79,12 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     NSUInteger size;
     NSGetSizeAndAlignment(self.typeEncode, &size, NULL);
     void *dst = malloc(size);
+    memset(dst, 0, size);
     memcpy(dst, pointer, size);
     _pointer = dst;
 }
 - (void)setModifier:(ORDeclarationModifier)modifier{
-    if (modifier & ORDeclarationModifierWeak) {
+    if (modifier & ORDeclarationModifierWeak && (self.type == TypeObject || self.type == TypeBlock)) {
         self.weakObjectValue = self.objectValue;
         self.objectValue = nil;
     }
@@ -333,6 +334,15 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             break;
     }
 }
+- (nonnull id)copyWithZone:(nullable NSZone *)zone {
+    MFValue *value = [MFValue defaultValueWithTypeEncoding:self.typeEncode];
+    value.pointer = self.pointer;
+    value.typeName = self.typeName;
+    value.modifier = self.modifier;
+    value.resultType = self.resultType;
+    return value;
+}
+
 @end
 
 @implementation MFValue (Struct)
@@ -442,7 +452,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return result;
 }
 - (long)longValue{
-    MFValueBridge(self, long);
+    //NOTE: arm64下， NSGetSizeAndAlignment long 为4字节，sizeof(long)为8字节，当为负数时，会出现问题。所以将long改为int。
+    MFValueBridge(self, int);
     return result;
 }
 - (long long)longLongValue{
@@ -475,7 +486,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 
 + (instancetype)valueWithBOOL:(BOOL)boolValue{
-    return [MFValue valueWithTypeKind:TypeChar pointer:&boolValue];
+    return [MFValue valueWithTypeKind:TypeBOOL pointer:&boolValue];
 }
 + (instancetype)valueWithUChar:(unsigned char)uCharValue{
     return [MFValue valueWithTypeKind:TypeUChar pointer:&uCharValue];
