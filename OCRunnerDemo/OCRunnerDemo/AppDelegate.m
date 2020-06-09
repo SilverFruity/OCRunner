@@ -10,6 +10,9 @@
 #import <OCRunner/OCRunner.h>
 #import <OCRunner/ORMultiArgsCall.h>
 #import <objc/message.h>
+#import <OCRunner/SymbolSearch.h>
+#import <OCRunner/ORSearchedFunction.h>
+
 @interface AppDelegate ()
 
 @end
@@ -21,7 +24,13 @@
     NSString *path = [[NSBundle mainBundle] pathForResource:@"ViewController1" ofType:nil];
     NSString *data = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
     [ORInterpreter excute:data];
-    
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        NSDictionary <NSString *, ORSearchedFunction *>*table = [ORSearchedFunction functionTableForNames:@[@"NSLog"]];
+        void (*testLog)(NSString *format,...);
+        testLog = table[@"NSLog"].pointer;
+        testLog(@"%@",@"hahah");
+    });
+
 #ifdef __arm64__
     int value1 = 1;
     int value2 = 2;
