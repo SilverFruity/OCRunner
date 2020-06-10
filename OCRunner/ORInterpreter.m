@@ -10,6 +10,9 @@
 #import <oc2mangoLib/oc2mangoLib.h>
 #import "RunnerClasses+Execute.h"
 #import "MFScopeChain.h"
+#import "ORSearchedFunction.h"
+#import "MFValue.h"
+#import "ORStructDeclare.h"
 
 @implementation ORInterpreter
 + (void)excute:(NSString *)string{
@@ -25,5 +28,29 @@
     for (id <OCExecute> expression in OCParser.ast.globalStatements) {
         [expression execute:scope];
     }
+}
++ (void)excuteGlobalDeclare:(NSString *)string{
+    MFScopeChain *scope = [MFScopeChain topScope];
+    [OCParser parseSource:string];
+    NSMutableArray <ORTypeVarPair *>*funcVars = [NSMutableArray array];
+    NSMutableArray *names = [NSMutableArray array];
+    for (id <OCExecute> expression in OCParser.ast.globalStatements) {
+        if ([expression isKindOfClass:[ORDeclareExpression class]]) {
+            ORTypeVarPair *pair = [(ORDeclareExpression *)expression pair];
+            if ([pair.var isKindOfClass:[ORFuncVariable class]]) {
+                [funcVars addObject:pair];
+                [names addObject:pair.var.varname];
+                continue;
+            }
+        }
+        [expression execute:scope];
+    }
+    NSDictionary *table = [ORSearchedFunction functionTableForNames:names];
+    for (ORTypeVarPair *pair in funcVars) {
+        ORSearchedFunction *function = table[pair.var.varname];
+        function.funPair = pair;
+        [scope setValue:[MFValue valueWithObject:function] withIndentifier:function.name];
+    }
+    [OCParser clear];
 }
 @end

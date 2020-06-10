@@ -114,7 +114,9 @@ NSMutableArray * startDetectTypeEncodes(NSString *content){
 }
 - (instancetype)initWithTypeEncode:(const char *)typeEncoding keys:(NSArray<NSString *> *)keys{
     self = [super init];
-    self.typeEncoding = typeEncoding;
+    char *encode = malloc(sizeof(char) * (strlen(typeEncoding) + 1) );
+    strcpy(encode, typeEncoding);
+    self.typeEncoding = encode;
     NSMutableArray *results = startStructDetect(typeEncoding);
     NSString *nameElement = results[0];
     NSString *structName = [nameElement substringWithRange:NSMakeRange(0, nameElement.length - 1)];
@@ -148,6 +150,13 @@ NSMutableArray * startDetectTypeEncodes(NSString *content){
         keyOffsets[key] = @(offset);
     }
     self.keyOffsets = keyOffsets;
+}
+- (void)dealloc
+{
+    if (self.typeEncoding != NULL) {
+        void *encode = (void *)self.typeEncoding;
+        free(encode);
+    }
 }
 @end
 

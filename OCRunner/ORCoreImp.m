@@ -195,3 +195,58 @@ MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValue
     retValue.pointer = &result;
     return retValue;
 }
+
+void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue * returnValue){
+    void (*function)(void) = funptr;
+    NSMutableArray <MFValue *>*intValues = [NSMutableArray array];
+    NSMutableArray <MFValue *>*floatValues = [NSMutableArray array];
+    [argValues enumerateObjectsUsingBlock:^(MFValue * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (obj.isFloat) {
+            [floatValues addObject:obj];
+        }else{
+            [intValues addObject:obj];
+        }
+    }];
+    void *intArgs[8] = { 0, 0, 0, 0, 0, 0, 0, 0};
+    void *floatArgs[8] = { 0, 0, 0, 0, 0, 0, 0, 0};
+    for (int i = 0 ; i < intValues.count; i++) {
+        intArgs[i] = *(void **)intValues[i].pointer;
+    }
+    for (int i = 0 ; i < floatValues.count; i++) {
+        floatArgs[i] = *(void **)floatValues[i].pointer;
+    }
+    void *result = returnValue.pointer;
+    __asm__ volatile
+    (
+     "ldr x0, [%[args]]\n"
+     "ldr x1, [%[args], #0x8]\n"
+     "ldr x2, [%[args], #0x10]\n"
+     "ldr x3, [%[args], #0x18]\n"
+     "ldr x4, [%[args], #0x20]\n"
+     "ldr x5, [%[args], #0x28]\n"
+     "ldr x6, [%[args], #0x30]\n"
+     "ldr x7, [%[args], #0x38]\n"
+     :
+     : [args]"r"(intArgs)
+     );
+    __asm__ volatile
+    (
+     "ldr d0, [%[args]]\n"
+     "ldr d1, [%[args], #0x8]\n"
+     "ldr d2, [%[args], #0x10]\n"
+     "ldr d3, [%[args], #0x18]\n"
+     "ldr d4, [%[args], #0x20]\n"
+     "ldr d5, [%[args], #0x28]\n"
+     "ldr d6, [%[args], #0x30]\n"
+     "ldr d7, [%[args], #0x38]\n"
+     :
+     : [args]"r"(floatArgs)
+     );
+    function();
+    __asm__ volatile
+    (
+     "mov %[result], x0\n"
+     : [result]"=r"(result)
+     :
+     );
+}

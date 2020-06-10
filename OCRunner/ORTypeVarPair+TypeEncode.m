@@ -92,3 +92,54 @@ append(code); break;
     return typePair;
 }
 @end
+
+#import "ORStructDeclare.h"
+ORTypeVarPair * ORTypeVarPairForTypeEncode(const char *typeEncode){
+    TypeKind type = TypeVoid;
+    ORTypeVarPair *pair = [ORTypeVarPair new];
+    pair.var = [ORVariable new];
+    pair.type = [ORTypeSpecial new];
+    NSUInteger pointerCount;
+    pointerCount = (NSInteger)startDetectPointerCount(typeEncode);
+    NSString *typename = nil;
+    const char *removedPointerEncode = startRemovePointerOfTypeEncode(typeEncode).UTF8String;
+    switch (*removedPointerEncode) {
+        case 'c': type =TypeChar; break;
+        case 'i': type =TypeInt; break;
+        case 's': type =TypeShort; break;
+        case 'l': type =TypeLong; break;
+        case 'q': type =TypeLongLong; break;
+        case 'C': type =TypeUChar; break;
+        case 'I': type =TypeUInt; break;
+        case 'S': type =TypeUShort; break;
+        case 'L': type =TypeULong; break;
+        case 'Q': type =TypeULongLong; break;
+        case 'B': type =TypeBOOL; break;
+        case 'f': type =TypeFloat; break;
+        case 'd': type =TypeDouble; break;
+        case ':': type =TypeSEL; break;
+        case '*':{
+            type =TypeChar;
+            pointerCount += 1;
+            break;
+        }
+        case '#':{
+            type =TypeClass;
+            typename = @"Class";
+        }
+        case '@':{
+            type =TypeObject;
+            break;
+        }
+        case '{':{
+            type =TypeStruct;
+            typename = startStructNameDetect(typeEncode);
+        }
+        default:
+            break;
+    }
+    pair.type.type = type;
+    pair.var.ptCount = pointerCount;
+    pair.type.name = typename;
+    return pair;
+}

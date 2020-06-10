@@ -10,21 +10,6 @@
 #import "MFScopeChain.h"
 #import "ORStructDeclare.h"
 #import <UIKit/UIKit.h>
-static void add_built_in_struct_declare(){
-	ORStructDeclareTable *table = [ORStructDeclareTable shareInstance];
-    
-	[table addStructDeclare:[ORStructDeclare structDecalre:@encode(CGPoint) keys:@[@"x",@"y"]]];
-    [table addStructDeclare:[ORStructDeclare structDecalre:@encode(CGSize) keys:@[@"width",@"height"]]];
-    [table addStructDeclare:[ORStructDeclare structDecalre:@encode(CGRect) keys:@[@"origin",@"size"]]];
-    [table addStructDeclare:[ORStructDeclare structDecalre:@encode(CGAffineTransform) keys:@[@"a",@"b",@"c", @"d", @"tx", @"ty"]]];
-    [table addStructDeclare:[ORStructDeclare structDecalre:@encode(CGVector) keys:@[@"dx",@"dy"]]];
-    [table addStructDeclare:[ORStructDeclare structDecalre:@encode(NSRange) keys:@[@"location",@"length"]]];
-    [table addAlias:@"NSRange" forStructTypeEncode:@encode(NSRange)]; // @encode(NSRange) -> _NSRange
-    [table addStructDeclare:[ORStructDeclare structDecalre:@encode(UIOffset) keys:@[@"horizontal",@"vertical"]]];
-    [table addStructDeclare:[ORStructDeclare structDecalre:@encode(UIEdgeInsets) keys:@[@"top",@"left",@"bottom",@"right"]]];
-    [table addStructDeclare:[ORStructDeclare structDecalre:@encode(CATransform3D) keys:@[@"m11",@"m12",@"m13",@"m14",@"m21",@"m22",@"m23",@"m24",@"m31",@"m32",@"m33",@"m34",@"41",@"m42",@"m43",@"m44"]]];
-}
-
 static void add_gcd_build_in(){
 	/* queue */
     [MFScopeChain.topScope setValue:[MFValue valueWithLongLong:DISPATCH_QUEUE_PRIORITY_HIGH] withIndentifier:@"DISPATCH_QUEUE_PRIORITY_HIGH"];
@@ -270,80 +255,9 @@ static void add_gcd_build_in(){
 }
 
 static void add_build_in_function(){
-	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^CGPoint(CGFloat x, CGFloat y){
-		return CGPointMake(x, y);
-	}] withIndentifier:@"CGPointMake"];
-	
-	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^CGSize(CGFloat width, CGFloat height){
-		return CGSizeMake(width, height);
-	}] withIndentifier:@"CGSizeMake"];
-	
-	
-	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^CGRect (CGFloat x, CGFloat y, CGFloat width, CGFloat height){
-		return CGRectMake(x, y, width, height);
-	}] withIndentifier:@"CGRectMake"];
-	
-	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^NSRange(NSUInteger loc, NSUInteger len){
-		return NSMakeRange(loc, len);
-	}] withIndentifier:@"NSMakeRange"];
-	
-	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^UIOffset(CGFloat horizontal, CGFloat vertical){
-		return UIOffsetMake(horizontal, vertical);
-	}] withIndentifier:@"UIOffsetMake"];
-	
-	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^UIEdgeInsets(CGFloat top, CGFloat left, CGFloat bottom, CGFloat right){
-		return UIEdgeInsetsMake(top, left, bottom, right);
-	}] withIndentifier:@"UIEdgeInsetsMake"];
-	
-	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^CGVector(CGFloat dx, CGFloat dy){
-		return CGVectorMake(dx, dy);
-	}] withIndentifier:@"CGVectorMake"];
-	
 	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^ CGAffineTransform(CGFloat a, CGFloat b, CGFloat c, CGFloat d, CGFloat tx, CGFloat ty){
 		return CGAffineTransformMake(a, b, c, d, tx, ty);
 	}] withIndentifier:@"CGAffineTransformMake"];
-	
-	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^CGAffineTransform(CGFloat sx, CGFloat sy){
-		return CGAffineTransformMakeScale(sx, sy);
-	}] withIndentifier:@"CGAffineTransformMakeScale"];
-	
-	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^CGAffineTransform(CGFloat angle){
-		return CGAffineTransformMakeRotation(angle);
-	}] withIndentifier:@"CGAffineTransformMakeRotation"];
-	
-	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^CGAffineTransform(CGFloat tx, CGFloat ty){
-		return CGAffineTransformMakeTranslation(tx, ty);
-	}] withIndentifier:@"CGAffineTransformMakeTranslation"];
-	
-	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^CGAffineTransform(CGAffineTransform t, CGFloat angle){
-		return CGAffineTransformRotate(t, angle);
-	}] withIndentifier:@"CGAffineTransformRotate"];
-	
-	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^CGAffineTransform(CGAffineTransform t1, CGAffineTransform t2){
-		return CGAffineTransformConcat(t1,t2);
-	}] withIndentifier:@"CGAffineTransformConcat"];
-	
-	
-	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^CGAffineTransform(CGAffineTransform t, CGFloat sx, CGFloat sy){
-		return CGAffineTransformScale(t, sx, sy);
-	}] withIndentifier:@"CGAffineTransformScale"];
-	
-	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^CGAffineTransform(CGAffineTransform t, CGFloat tx, CGFloat ty){
-		return CGAffineTransformTranslate(t, tx, ty);
-	}] withIndentifier:@"CGAffineTransformTranslate"];
-
-	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^CGAffineTransform(NSString * _Nonnull string){
-		return CGAffineTransformFromString(string);
-	}] withIndentifier:@"CGAffineTransformFromString"];
-
-	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^CATransform3D(CGFloat sx, CGFloat sy, CGFloat sz){
-		return CATransform3DMakeScale(sx, sy, sz);
-	}] withIndentifier:@"CATransform3DMakeScale"];
-	
-	
-	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^void (id obj){
-		NSLog(@"%@",obj);
-	}] withIndentifier:@"NSLog"];
     	
 }
 static void add_build_in_var(){
@@ -355,47 +269,6 @@ static void add_build_in_var(){
 	[MFScopeChain.topScope setValue:[MFValue valueWithDouble:M_PI_4] withIndentifier:@"M_PI_4"];
 	[MFScopeChain.topScope setValue:[MFValue valueWithDouble:M_1_PI] withIndentifier:@"M_1_PI"];
 	[MFScopeChain.topScope setValue:[MFValue valueWithDouble:M_2_PI] withIndentifier:@"M_2_PI"];
-    
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventTouchDown] withIndentifier:@"UIControlEventTouchDown"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventTouchDownRepeat] withIndentifier:@"UIControlEventTouchDownRepeat"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventTouchDragInside] withIndentifier:@"UIControlEventTouchDragInside"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventTouchDragOutside] withIndentifier:@"UIControlEventTouchDragOutside"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventTouchDragEnter] withIndentifier:@"UIControlEventTouchDragEnter"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventTouchDragExit] withIndentifier:@"UIControlEventTouchDragExit"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventTouchUpInside] withIndentifier:@"UIControlEventTouchUpInside"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventTouchUpOutside] withIndentifier:@"UIControlEventTouchUpOutside"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventTouchCancel] withIndentifier:@"UIControlEventTouchCancel"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventValueChanged] withIndentifier:@"UIControlEventValueChanged"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:1 << 13] withIndentifier:@"UIControlEventPrimaryActionTriggered"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventEditingDidBegin] withIndentifier:@"UIControlEventEditingDidBegin"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventEditingChanged] withIndentifier:@"UIControlEventEditingChanged"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventEditingDidEnd] withIndentifier:@"UIControlEventEditingDidEnd"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventEditingDidEndOnExit] withIndentifier:@"UIControlEventEditingDidEndOnExit"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventAllTouchEvents] withIndentifier:@"UIControlEventAllTouchEvents"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventAllEditingEvents] withIndentifier:@"UIControlEventAllEditingEvents"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventApplicationReserved] withIndentifier:@"UIControlEventApplicationReserved"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventSystemReserved] withIndentifier:@"UIControlEventSystemReserved"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventAllEvents] withIndentifier:@"UIControlEventAllEvents"];
-    
-    [MFScopeChain.topScope setValue:[MFValue valueWithLongLong:UIControlContentVerticalAlignmentCenter] withIndentifier:@"UIControlContentVerticalAlignmentCenter"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithLongLong:UIControlContentVerticalAlignmentTop] withIndentifier:@"UIControlContentVerticalAlignmentTop"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithLongLong:UIControlContentVerticalAlignmentBottom] withIndentifier:@"UIControlContentVerticalAlignmentBottom"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithLongLong:UIControlContentVerticalAlignmentFill] withIndentifier:@"UIControlContentVerticalAlignmentFill"];
-    
-    [MFScopeChain.topScope setValue:[MFValue valueWithLongLong:UIControlContentHorizontalAlignmentCenter] withIndentifier:@"UIControlContentHorizontalAlignmentCenter"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithLongLong:UIControlContentHorizontalAlignmentLeft] withIndentifier:@"UIControlContentHorizontalAlignmentLeft"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithLongLong:UIControlContentHorizontalAlignmentRight] withIndentifier:@"UIControlContentHorizontalAlignmentRight"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithLongLong:UIControlContentHorizontalAlignmentFill] withIndentifier:@"UIControlContentHorizontalAlignmentFill"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithLongLong:4] withIndentifier:@"UIControlContentHorizontalAlignmentLeading"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithLongLong:5] withIndentifier:@"UIControlContentHorizontalAlignmentTrailing"];
-    
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlStateNormal] withIndentifier:@"UIControlStateNormal"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlStateHighlighted] withIndentifier:@"UIControlStateHighlighted"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlStateDisabled] withIndentifier:@"UIControlStateDisabled"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlStateSelected] withIndentifier:@"UIControlStateSelected"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:1 << 3] withIndentifier:@"UIControlStateFocused"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlStateApplication] withIndentifier:@"UIControlStateApplication"];
-    [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlStateReserved] withIndentifier:@"UIControlStateReserved"];
 	
 	UIDevice *device = [UIDevice currentDevice];
 	NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
@@ -412,11 +285,13 @@ static void add_build_in_var(){
     
 	
 }
-
+#import "ORInterpreter.h"
 void mf_add_built_in(void){
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
-		add_built_in_struct_declare();
+        NSString *path = [[NSBundle bundleForClass:[MFValue class]] pathForResource:@"UIKitRefrences" ofType:nil];
+        NSString *data = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+        [ORInterpreter excuteGlobalDeclare:data];
 		add_build_in_function();
 		add_build_in_var();
 		add_gcd_build_in();
@@ -425,7 +300,9 @@ void mf_add_built_in(void){
 
 // for unit test
 void or_add_build_in(void){
-    add_built_in_struct_declare();
+    NSString *path = [[NSBundle bundleForClass:[MFValue class]] pathForResource:@"UIKitRefrences" ofType:nil];
+    NSString *data = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+    [ORInterpreter excuteGlobalDeclare:data];
     add_build_in_function();
     add_build_in_var();
     add_gcd_build_in();

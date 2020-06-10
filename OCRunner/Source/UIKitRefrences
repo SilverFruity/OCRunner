@@ -1,0 +1,277 @@
+void NSLog(NSString *format, ...);
+
+typedef enum: NSUInteger{
+    UIControlEventTouchDown                                         = 1 <<  0,
+    UIControlEventTouchDownRepeat                                   = 1 <<  1,
+    UIControlEventTouchDragInside                                   = 1 <<  2,
+    UIControlEventTouchDragOutside                                  = 1 <<  3,
+    UIControlEventTouchDragEnter                                    = 1 <<  4,
+    UIControlEventTouchDragExit                                     = 1 <<  5,
+    UIControlEventTouchUpInside                                     = 1 <<  6,
+    UIControlEventTouchUpOutside                                    = 1 <<  7,
+    UIControlEventTouchCancel                                       = 1 <<  8,
+
+    UIControlEventValueChanged                                      = 1 << 12,
+    UIControlEventPrimaryActionTriggered  = 1 << 13,
+
+    UIControlEventEditingDidBegin                                   = 1 << 16,
+    UIControlEventEditingChanged                                    = 1 << 17,
+    UIControlEventEditingDidEnd                                     = 1 << 18,
+    UIControlEventEditingDidEndOnExit                               = 1 << 19,
+
+    UIControlEventAllTouchEvents                                    = 0x00000FFF,
+    UIControlEventAllEditingEvents                                  = 0x000F0000,
+    UIControlEventApplicationReserved                               = 0x0F000000,
+    UIControlEventSystemReserved                                    = 0xF0000000,
+    UIControlEventAllEvents                                         = 0xFFFFFFFF
+}UIControlEvents;
+
+typedef enum: NSInteger{
+    UIControlContentVerticalAlignmentCenter        = 0,
+    UIControlContentVerticalAlignmentTop           = 1,
+    UIControlContentVerticalAlignmentBottom        = 2,
+    UIControlContentVerticalAlignmentFill          = 3
+}UIControlContentVerticalAlignment;
+
+typedef enum: NSInteger{
+    UIControlContentHorizontalAlignmentCenter = 0,
+    UIControlContentHorizontalAlignmentLeft   = 1,
+    UIControlContentHorizontalAlignmentRight  = 2,
+    UIControlContentHorizontalAlignmentFill   = 3,
+    UIControlContentHorizontalAlignmentLeading   = 4,
+    UIControlContentHorizontalAlignmentTrailing  = 5
+}UIControlContentHorizontalAlignment;
+
+typedef enum: NSUInteger{
+    UIControlStateNormal       = 0,
+    UIControlStateHighlighted  = 1 << 0,
+    UIControlStateDisabled     = 1 << 1,
+    UIControlStateSelected     = 1 << 2,
+    UIControlStateFocused  = 1 << 3,
+    UIControlStateApplication  = 0x00FF0000,
+    UIControlStateReserved     = 0xFF000000
+}UIControlState;
+
+struct CGPoint {
+    CGFloat x;
+    CGFloat y;
+};
+
+struct CGSize {
+    CGFloat width;
+    CGFloat height;
+};
+
+struct CGVector {
+    CGFloat dx;
+    CGFloat dy;
+};
+
+struct CGRect {
+    CGPoint origin;
+    CGSize size;
+};
+
+typedef struct _NSRange {
+    NSUInteger location;
+    NSUInteger length;
+} NSRange;
+
+typedef struct UIOffset {
+    CGFloat horizontal, vertical;
+} UIOffset;
+
+CGPoint CGPointMake(CGFloat x, CGFloat y)
+{
+  CGPoint p; p.x = x; p.y = y; return p;
+}
+
+CGSize CGSizeMake(CGFloat width, CGFloat height)
+{
+  CGSize size; size.width = width; size.height = height; return size;
+}
+
+CGVector CGVectorMake(CGFloat dx, CGFloat dy)
+{
+  CGVector vector; vector.dx = dx; vector.dy = dy; return vector;
+}
+
+CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
+{
+  CGRect rect;
+  rect.origin.x = x; rect.origin.y = y;
+  rect.size.width = width; rect.size.height = height;
+  return rect;
+}
+NSRange NSMakeRange(NSUInteger loc, NSUInteger len) {
+    NSRange r;
+    r.location = loc;
+    r.length = len;
+    return r;
+}
+UIOffset UIOffsetMake(CGFloat horizontal, CGFloat vertical) {
+    UIOffset offset;
+    offset.horizontal = horizontal;
+    offset.vertical = vertical;
+    return offset;
+}
+
+typedef enum: NSUInteger {
+    UIRectEdgeNone   = 0,
+    UIRectEdgeTop    = 1 << 0,
+    UIRectEdgeLeft   = 1 << 1,
+    UIRectEdgeBottom = 1 << 2,
+    UIRectEdgeRight  = 1 << 3,
+    UIRectEdgeAll    = UIRectEdgeTop | UIRectEdgeLeft | UIRectEdgeBottom | UIRectEdgeRight
+} UIRectEdge;
+
+typedef enum: NSUInteger {
+    UIRectCornerTopLeft     = 1 << 0,
+    UIRectCornerTopRight    = 1 << 1,
+    UIRectCornerBottomLeft  = 1 << 2,
+    UIRectCornerBottomRight = 1 << 3,
+    UIRectCornerAllCorners  = 0xFF
+}UIRectCorner;
+
+typedef enum: NSUInteger {
+    UIAxisNeither    = 0,
+    UIAxisHorizontal = 1 << 0,
+    UIAxisVertical   = 1 << 1,
+    UIAxisBoth       = (UIAxisHorizontal | UIAxisVertical)
+}UIAxis;
+
+typedef struct UIEdgeInsets {
+    CGFloat top, left, bottom, right;
+} UIEdgeInsets;
+UIEdgeInsets UIEdgeInsetsMake(CGFloat top, CGFloat left, CGFloat bottom, CGFloat right);
+
+struct CGAffineTransform {
+  CGFloat a, b, c, d;
+  CGFloat tx, ty;
+};
+
+struct CATransform3D
+{
+  CGFloat m11, m12, m13, m14;
+  CGFloat m21, m22, m23, m24;
+  CGFloat m31, m32, m33, m34;
+  CGFloat m41, m42, m43, m44;
+};
+
+CATransform3D CATransform3DIdentity;
+
+bool CATransform3DIsIdentity (CATransform3D t);
+
+bool CATransform3DEqualToTransform (CATransform3D a, CATransform3D b);
+
+CATransform3D CATransform3DMakeTranslation (CGFloat tx, CGFloat ty, CGFloat tz);
+
+CATransform3D CATransform3DMakeScale (CGFloat sx, CGFloat sy, CGFloat sz);
+
+CATransform3D CATransform3DMakeRotation (CGFloat angle, CGFloat x, CGFloat y, CGFloat z);
+
+CATransform3D CATransform3DTranslate (CATransform3D t, CGFloat tx, CGFloat ty, CGFloat tz);
+
+CATransform3D CATransform3DScale (CATransform3D t, CGFloat sx, CGFloat sy, CGFloat sz);
+
+CATransform3D CATransform3DRotate (CATransform3D t, CGFloat angle, CGFloat x, CGFloat y, CGFloat z);
+
+CATransform3D CATransform3DConcat (CATransform3D a, CATransform3D b);
+
+CATransform3D CATransform3DInvert (CATransform3D t);
+
+CATransform3D CATransform3DMakeAffineTransform (CGAffineTransform m);
+
+bool CATransform3DIsAffine (CATransform3D t);
+
+
+const CGAffineTransform CGAffineTransformIdentity;
+  
+
+ /* Return the transform [ a b c d tx ty ]. */
+
+ CGAffineTransform CGAffineTransformMake(CGFloat a, CGFloat b,
+   CGFloat c, CGFloat d, CGFloat tx, CGFloat ty);
+  
+
+ /* Return a transform which translates by `(tx, ty)':
+      t' = [ 1 0 0 1 tx ty ] */
+
+ CGAffineTransform CGAffineTransformMakeTranslation(CGFloat tx,
+   CGFloat ty);
+
+ /* Return a transform which scales by `(sx, sy)':
+      t' = [ sx 0 0 sy 0 0 ] */
+
+ CGAffineTransform CGAffineTransformMakeScale(CGFloat sx, CGFloat sy);
+  
+
+ /* Return a transform which rotates by `angle' radians:
+      t' = [ cos(angle) sin(angle) -sin(angle) cos(angle) 0 0 ] */
+
+ CGAffineTransform CGAffineTransformMakeRotation(CGFloat angle);
+  
+
+ /* Return true if `t' is the identity transform, false otherwise. */
+
+ bool CGAffineTransformIsIdentity(CGAffineTransform t);
+   
+
+ /* Translate `t' by `(tx, ty)' and return the result:
+      t' = [ 1 0 0 1 tx ty ] * t */
+
+ CGAffineTransform CGAffineTransformTranslate(CGAffineTransform t,
+   CGFloat tx, CGFloat ty);
+
+ /* Scale `t' by `(sx, sy)' and return the result:
+      t' = [ sx 0 0 sy 0 0 ] * t */
+
+ CGAffineTransform CGAffineTransformScale(CGAffineTransform t,
+   CGFloat sx, CGFloat sy);
+
+ /* Rotate `t' by `angle' radians and return the result:
+      t' =  [ cos(angle) sin(angle) -sin(angle) cos(angle) 0 0 ] * t */
+
+ CGAffineTransform CGAffineTransformRotate(CGAffineTransform t,
+   CGFloat angle);
+
+ /* Invert `t' and return the result. If `t' has zero determinant, then `t'
+    is returned unchanged. */
+
+ CGAffineTransform CGAffineTransformInvert(CGAffineTransform t);
+  
+
+ /* Concatenate `t2' to `t1' and return the result:
+      t' = t1 * t2 */
+
+ CGAffineTransform CGAffineTransformConcat(CGAffineTransform t1,
+   CGAffineTransform t2);
+
+ /* Return true if `t1' and `t2' are equal, false otherwise. */
+
+ bool CGAffineTransformEqualToTransform(CGAffineTransform t1,
+   CGAffineTransform t2);
+
+ /* Transform `point' by `t' and return the result:
+      p' = p * t
+    where p = [ x y 1 ]. */
+
+ CGPoint CGPointApplyAffineTransform(CGPoint point,
+   CGAffineTransform t);
+
+ /* Transform `size' by `t' and return the result:
+      s' = s * t
+    where s = [ width height 0 ]. */
+
+ CGSize CGSizeApplyAffineTransform(CGSize size, CGAffineTransform t);
+  
+
+ /* Transform `rect' by `t' and return the result. Since affine transforms do
+    not preserve rectangles in general, this function returns the smallest
+    rectangle which contains the transformed corner points of `rect'. If `t'
+    consists solely of scales, flips and translations, then the returned
+    rectangle coincides with the rectangle constructed from the four
+    transformed corners. */
+
+ CGRect CGRectApplyAffineTransform(CGRect rect, CGAffineTransform t);
+   

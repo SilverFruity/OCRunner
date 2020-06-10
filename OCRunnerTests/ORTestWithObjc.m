@@ -137,8 +137,52 @@ Element2Struct *Element2StructMake(){
     NSArray *results1 = startStructDetect("d");
     XCTAssert(results1.count == 0);
 }
+- (void)testStructSetValue{
+    MFScopeChain *scope = [MFScopeChain topScope];
+    or_add_build_in();
+    NSString * source =
+    @"CGSize size;"
+    "size.width = 100;"
+    "size.height = 100;";
+    [OCParser parseSource:source];
+    for (id <OCExecute> exp in OCParser.ast.globalStatements) {
+        [exp execute:scope];
+    }
+    MFValue *sizeValue = [scope getValueWithIdentifier:@"size"];
+    CGSize size = *(CGSize *) sizeValue.pointer;
+    XCTAssert(sizeValue.type == TypeStruct);
+    XCTAssert(size.width == 100);
+    XCTAssert(size.height == 100);
+    [OCParser clear];
+    [scope clear];
+}
+- (void)testStructSetValueMutilLevel{
+    MFScopeChain *scope = [MFScopeChain topScope];
+    or_add_build_in();
+    NSString * source =
+    @"CGRect rect;"
+    "rect.origin.x = 10;"
+    "rect.origin.y = 10;"
+    "rect.size.width = 100;"
+    "rect.size.height = 100;";
+    [OCParser parseSource:source];
+    for (id <OCExecute> exp in OCParser.ast.globalStatements) {
+        [exp execute:scope];
+    }
+    MFValue *rectValue = [scope getValueWithIdentifier:@"rect"];
+    CGRect rect = *(CGRect *) rectValue.pointer;
+    XCTAssert(rectValue.type == TypeStruct);
+    XCTAssert(rect.origin.x == 10);
+    XCTAssert(rect.origin.y == 10);
+    XCTAssert(rect.size.width == 100);
+    XCTAssert(rect.size.height == 100);
+    [OCParser clear];
+    [scope clear];
+}
 - (void)testStructGetValue{
     MFScopeChain *scope = [MFScopeChain topScope];
+    [scope clear];
+    [OCParser clear];
     or_add_build_in();
     NSString * source =
     @"UIView *view = [UIView new];"
@@ -150,6 +194,8 @@ Element2Struct *Element2StructMake(){
         [exp execute:scope];
     }
     MFValue *frameValue = [scope getValueWithIdentifier:@"frame"];
+    CGRect rect = *(CGRect *) frameValue.pointer;
+    NSLog(@"%@",[NSValue valueWithCGRect:rect]);
     XCTAssert(frameValue.type == TypeStruct);
     MFValue * aValue = [scope getValueWithIdentifier:@"a"];
     XCTAssert(aValue.type == TypeDouble);

@@ -19,7 +19,7 @@
  ORMultiArgsCFunCall(a, 4, &printf);
  NOTE: 目前只支持(xx a, ...) 一个固定参数的情况
  */
-extern void ORMultiArgsCFunCall(void **args, NSUInteger count, void *funcPt);
+extern void * ORMultiArgsCFunCall(void **args, NSUInteger count, void *funcPt);
 
 /*
  Example:

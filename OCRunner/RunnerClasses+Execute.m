@@ -21,6 +21,7 @@
 #import "ORTypeVarPair+TypeEncode.h"
 #import "ORCoreImp.h"
 #import "ORMultiArgsCall.h"
+#import "ORSearchedFunction.h"
 
 static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
     const char *blockTypeEncoding = [MFBlock typeEncodingForBlock:blockValue.objectValue];
@@ -410,7 +411,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             [variable setFieldWithValue:[valueExp execute:scope] forKey:fieldKey];
             return [MFValue voidValue];
         }else{
-            return [variable fieldForKey:self.names.firstObject];
+            MFValue *value = [variable fieldForKey:self.names.firstObject];
+            return value;
         }
     }
     id instance = variable.objectValue;
@@ -496,10 +498,19 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         if (blockValue.type == TypeBlock) {
             return invoke_MFBlockValue(blockValue, args);
         }else{
-            // global function calll
-            [[MFStack argsStack] push:args];
-            ORBlockImp *imp = blockValue.objectValue;
-            return [imp execute:scope];
+            if ([blockValue.objectValue isKindOfClass:[ORBlockImp class]]) {
+                // global function calll
+                [[MFStack argsStack] push:args];
+                ORBlockImp *imp = blockValue.objectValue;
+                MFValue *result = [imp execute:scope];
+                return result;
+            }else if ([blockValue.objectValue isKindOfClass:[ORSearchedFunction class]]) {
+                ORSearchedFunction *function = blockValue.objectValue;
+                [[MFStack argsStack] push:args];
+                MFValue *result = [function execute:scope];
+                return result;
+            }
+            
         }
     }
     return [MFValue valueWithObject:nil];
@@ -1200,14 +1211,24 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     NSMutableArray *keys = [NSMutableArray array];
     [typeEncode appendString:self.sturctName];
     [typeEncode appendString:@"="];
-    for (ORTypeVarPair *pair in self.fields) {
-        [typeEncode appendFormat:@"%s",pair.typeEncode];
+    for (ORDeclareExpression *exp in self.fields) {
+        NSString *typeName = exp.pair.type.name;
+        ORTypeVarPair *registerPair = [[ORTypeSymbolTable shareInstance] typePairForTypeName:typeName];
+        if (registerPair) {
+            if (registerPair.type.type == TypeStruct) {
+                ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:typeName];
+                [typeEncode appendFormat:@"%s",declare.typeEncoding];
+            }else{
+                [typeEncode appendFormat:@"%s",registerPair.typeEncode];
+            }
+        }else{
+            [typeEncode appendFormat:@"%s",exp.pair.typeEncode];
+        }
         //FIXME: struct 嵌套的问题
         //FIXME: struct 嵌套层级排序，类似ORClass
-        [keys addObject:pair.var.varname];
+        [keys addObject:exp.pair.var.varname];
     }
     [typeEncode appendString:@"}"];
-    
     ORStructDeclare *declare = [ORStructDeclare structDecalre:typeEncode.UTF8String keys:keys];
     [[ORStructDeclareTable shareInstance] addStructDeclare:declare];
     
@@ -1263,6 +1284,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }else if ([self.expression isKindOfClass:[ORStructExpressoin class]]){
         ORStructExpressoin *structExp = self.expression;
         [structExp execute:scope];
+        ORTypeVarPair *pair = [[ORTypeSymbolTable shareInstance] typePairForTypeName:structExp.sturctName];
+        [[ORTypeSymbolTable shareInstance] addTypePair:pair forName:self.typeNewName];
     }else if ([self.expression isKindOfClass:[OREnumExpressoin class]]){
         OREnumExpressoin *enumExp = self.expression;
         [enumExp execute:scope];

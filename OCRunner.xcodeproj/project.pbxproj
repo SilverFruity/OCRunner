@@ -60,6 +60,7 @@
 		EEA2AC83246855F100B08407 /* MFStack.h in Headers */ = {isa = PBXBuildFile; fileRef = EEA2AC81246855F100B08407 /* MFStack.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EEBF3334248E674300DDE2E9 /* ORCoreImp.h in Headers */ = {isa = PBXBuildFile; fileRef = EEBF3332248E674300DDE2E9 /* ORCoreImp.h */; };
 		EEBF3335248E674300DDE2E9 /* ORCoreImp.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3333248E674300DDE2E9 /* ORCoreImp.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		EEBF336D248FBB9D00DDE2E9 /* UIKitRefrences in Resources */ = {isa = PBXBuildFile; fileRef = EEBF336C248FBB9D00DDE2E9 /* UIKitRefrences */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -177,6 +178,7 @@
 		EEA2AC81246855F100B08407 /* MFStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFStack.h; sourceTree = "<group>"; };
 		EEBF3332248E674300DDE2E9 /* ORCoreImp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORCoreImp.h; sourceTree = "<group>"; };
 		EEBF3333248E674300DDE2E9 /* ORCoreImp.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORCoreImp.m; sourceTree = "<group>"; };
+		EEBF336C248FBB9D00DDE2E9 /* UIKitRefrences */ = {isa = PBXFileReference; lastKnownFileType = text; path = UIKitRefrences; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -272,6 +274,7 @@
 				EE98998D24658F8900ACF2C1 /* RunEnv */,
 				EE9899BC2465923800ACF2C1 /* Util */,
 				EE98996E24658DA600ACF2C1 /* OCRunner.h */,
+				EEBF3369248FBB4100DDE2E9 /* Source */,
 				EE98996F24658DA600ACF2C1 /* Info.plist */,
 			);
 			path = OCRunner;
@@ -331,6 +334,14 @@
 				EE9899BE2465923800ACF2C1 /* util.m */,
 			);
 			path = Util;
+			sourceTree = "<group>";
+		};
+		EEBF3369248FBB4100DDE2E9 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				EEBF336C248FBB9D00DDE2E9 /* UIKitRefrences */,
+			);
+			path = Source;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -479,6 +490,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EEBF336D248FBB9D00DDE2E9 /* UIKitRefrences in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -10,7 +10,6 @@
 #import <OCRunner/OCRunner.h>
 #import <OCRunner/ORMultiArgsCall.h>
 #import <objc/message.h>
-#import <OCRunner/SymbolSearch.h>
 #import <OCRunner/ORSearchedFunction.h>
 
 @interface AppDelegate ()

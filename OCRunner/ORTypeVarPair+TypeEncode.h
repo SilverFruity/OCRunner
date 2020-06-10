@@ -22,4 +22,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)objectTypePair;
 + (instancetype)pointerTypePair;
 @end
+
+ORTypeVarPair * ORTypeVarPairForTypeEncode(const char *typeEncode);
 NS_ASSUME_NONNULL_END

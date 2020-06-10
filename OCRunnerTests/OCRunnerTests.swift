@@ -876,4 +876,30 @@ class CRunnerTests: XCTestCase {
         }
         XCTAssert(scope.getValueWithIdentifier("a")!.doubleValue == 0.1)
     }
+    
+    func testStructDeclares(){
+        source =
+        """
+        struct CGPoint {
+            CGFloat x;
+            CGFloat y;
+        };
+
+        struct CGSize {
+            CGFloat width;
+            CGFloat height;
+        };
+        struct CGRect {
+            CGPoint origin;
+            CGSize size;
+        };
+        """
+        ocparser.parseSource(source)
+        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        let rect = ORStructDeclareTable.shareInstance().getStructDeclare(withName: "CGRect")
+        print(NSString.init(utf8String: rect!.typeEncoding) == "{CGRect={CGPoint=dd}{CGSize=dd}}")
+    }
 }

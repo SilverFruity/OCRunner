@@ -324,6 +324,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 
 - (BOOL)isPointer;
 - (BOOL)isSubtantial;
+- (BOOL)isInteger;
+- (BOOL)isFloat;
 
 - (MFValue *)subscriptGetWithIndex:(MFValue *)index;
 - (void)subscriptSetValue:(MFValue *)value index:(MFValue *)index;
