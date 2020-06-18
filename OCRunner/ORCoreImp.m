@@ -196,8 +196,13 @@ MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValue
     return retValue;
 }
 
-void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue * returnValue){
-    void (*function)(void) = funptr;
+void *invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue * returnValue){
+    if (returnValue.isStruct) {
+        return NULL;
+    }
+    for (MFValue *arg in argValues) {
+        if (arg.isStruct) return NULL;
+    }
     NSMutableArray <MFValue *>*intValues = [NSMutableArray array];
     NSMutableArray <MFValue *>*floatValues = [NSMutableArray array];
     [argValues enumerateObjectsUsingBlock:^(MFValue * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -218,35 +223,23 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
     void *result = returnValue.pointer;
     __asm__ volatile
     (
-     "ldr x0, [%[args]]\n"
-     "ldr x1, [%[args], #0x8]\n"
-     "ldr x2, [%[args], #0x10]\n"
-     "ldr x3, [%[args], #0x18]\n"
-     "ldr x4, [%[args], #0x20]\n"
-     "ldr x5, [%[args], #0x28]\n"
-     "ldr x6, [%[args], #0x30]\n"
-     "ldr x7, [%[args], #0x38]\n"
+     "ldp x0, x1, [%[iargs]]\n"
+     "ldp x2, x3, [%[iargs], 16]\n"
+     "ldp x4, x5, [%[iargs], 32]\n"
+     "ldp x6, x7, [%[iargs], 48]\n"
+     "ldp q0, q1, [%[fargs]]\n"
+     "ldp q2, q3, [%[fargs], 16]\n"
+     "ldp q4, q5, [%[fargs], 32]\n"
+     "ldp q6, q7, [%[fargs], 48]\n"
+     "blr x0\n"
      :
-     : [args]"r"(intArgs)
+     : [iargs]"r"(intArgs), [fargs]"r"(floatArgs)
      );
-    __asm__ volatile
-    (
-     "ldr d0, [%[args]]\n"
-     "ldr d1, [%[args], #0x8]\n"
-     "ldr d2, [%[args], #0x10]\n"
-     "ldr d3, [%[args], #0x18]\n"
-     "ldr d4, [%[args], #0x20]\n"
-     "ldr d5, [%[args], #0x28]\n"
-     "ldr d6, [%[args], #0x30]\n"
-     "ldr d7, [%[args], #0x38]\n"
-     :
-     : [args]"r"(floatArgs)
-     );
-    function();
     __asm__ volatile
     (
      "mov %[result], x0\n"
      : [result]"=r"(result)
      :
      );
+    return result;
 }
