@@ -380,6 +380,14 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     void *pointer = self.pointer + offset;
     [value writePointer:pointer typeEncode:declare.keyTypeEncodes[key].UTF8String];
 }
+- (void)enumerateStructFieldsUsingBlock:(void (^)(MFValue * _Nonnull, NSUInteger))block{
+    NSString *structName = self.typeName;
+    ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
+    for (int i = 0 ; i < declare.keys.count; i++) {
+        MFValue *field = [self fieldForKey:declare.keys[i]];
+        block(field,i);
+    }
+}
 @end
 
 @implementation MFValue (MFStatementResultType)

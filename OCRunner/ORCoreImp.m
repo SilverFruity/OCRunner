@@ -15,6 +15,7 @@
 #import "MFPropertyMapTable.h"
 #import "ORTypeVarPair+TypeEncode.h"
 #import "util.h"
+#import "ORStructDeclare.h"
 
 void methodIMP(void){
     void *args[8];
@@ -200,25 +201,33 @@ void *invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValu
     if (returnValue.isStruct) {
         return NULL;
     }
+    
     for (MFValue *arg in argValues) {
         if (arg.isStruct) return NULL;
     }
-    NSMutableArray <MFValue *>*intValues = [NSMutableArray array];
-    NSMutableArray <MFValue *>*floatValues = [NSMutableArray array];
+    NSMutableArray <MFValue *>*generalRegisterValues = [NSMutableArray array];
+    NSMutableArray <MFValue *>*floatRegisterValues = [NSMutableArray array];
     [argValues enumerateObjectsUsingBlock:^(MFValue * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if (obj.isFloat) {
-            [floatValues addObject:obj];
+        if (obj.isStruct && !obj.isPointer){
+            [obj enumerateStructFieldsUsingBlock:^(MFValue * _Nonnull field, NSUInteger idx) {
+                
+            }];
         }else{
-            [intValues addObject:obj];
+            if (obj.isFloat) {
+                [floatRegisterValues addObject:obj];
+            }else{
+                [generalRegisterValues addObject:obj];
+            }
         }
     }];
+    
     void *intArgs[8] = { 0, 0, 0, 0, 0, 0, 0, 0};
     void *floatArgs[8] = { 0, 0, 0, 0, 0, 0, 0, 0};
-    for (int i = 0 ; i < intValues.count; i++) {
-        intArgs[i] = *(void **)intValues[i].pointer;
+    for (int i = 0 ; i < generalRegisterValues.count; i++) {
+        intArgs[i] = *(void **)generalRegisterValues[i].pointer;
     }
-    for (int i = 0 ; i < floatValues.count; i++) {
-        floatArgs[i] = *(void **)floatValues[i].pointer;
+    for (int i = 0 ; i < floatRegisterValues.count; i++) {
+        floatArgs[i] = *(void **)floatRegisterValues[i].pointer;
     }
     void *result = returnValue.pointer;
     __asm__ volatile
