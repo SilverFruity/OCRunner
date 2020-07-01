@@ -210,6 +210,54 @@ Element2Struct *Element2StructMake(){
     XCTAssert(fieldCountInStructMemeryLayoutEncode(result.UTF8String) == 6);
     XCTAssert(fieldCountInStructMemeryLayoutEncode("^^f^fdd^^dd") == 6);
 }
+
+typedef struct MyStruct
+{
+    char a;         // 1 byte
+    int b;          // 4 bytes
+    short c;        // 2 bytes
+    long long d;    // 8 bytes
+    char e;         // 1 byte
+}MyStruct;
+typedef struct MyStruct1 {
+    double b;   // size：8
+    int c;      // size：4
+    char a;     // size：1
+    short d;    // size：2
+} MyStruct1;
+typedef struct MyStruct2 {
+    double b;   // size：8
+    char a;     // size：1
+    int c;      // size：4
+    short d;    // size：2
+} MyStruct2;
+- (void)testStructMemoryAlignment{
+    NSUInteger size = 0;
+    NSUInteger alig = 0;
+    const char *code = detectStructMemeryLayoutEncodeCode(@encode(MyStruct)).UTF8String;
+    while (code != NULL && *code != '\0') {
+        code = NSGetSizeAndAlignment(code, &size, &alig);
+        NSLog(@"%lu %lu %s",size,alig,code);
+    }
+    ORStructDeclare *declare = [[ORStructDeclare alloc] initWithTypeEncode:@encode(MyStruct) keys:@[@"a",@"b",@"c",@"d",@"e"]];
+    XCTAssert([declare.keyOffsets[@"a"] isEqualToNumber:@(0)]);
+    XCTAssert([declare.keyOffsets[@"b"] isEqualToNumber:@(4)]);
+    XCTAssert([declare.keyOffsets[@"c"] isEqualToNumber:@(8)]);
+    XCTAssert([declare.keyOffsets[@"d"] isEqualToNumber:@(16)]);
+    XCTAssert([declare.keyOffsets[@"e"] isEqualToNumber:@(24)]);
+    
+    ORStructDeclare *declare1 = [[ORStructDeclare alloc] initWithTypeEncode:@encode(MyStruct1) keys:@[@"b",@"c",@"a",@"d"]];
+    XCTAssert([declare1.keyOffsets[@"b"] isEqualToNumber:@(0)]);
+    XCTAssert([declare1.keyOffsets[@"c"] isEqualToNumber:@(8)]);
+    XCTAssert([declare1.keyOffsets[@"a"] isEqualToNumber:@(12)]);
+    XCTAssert([declare1.keyOffsets[@"d"] isEqualToNumber:@(14)]);
+    
+    ORStructDeclare *declare2 = [[ORStructDeclare alloc] initWithTypeEncode:@encode(MyStruct2) keys:@[@"b",@"a",@"c",@"d"]];
+    XCTAssert([declare2.keyOffsets[@"b"] isEqualToNumber:@(0)]);
+    XCTAssert([declare2.keyOffsets[@"a"] isEqualToNumber:@(8)]);
+    XCTAssert([declare2.keyOffsets[@"c"] isEqualToNumber:@(12)]);
+    XCTAssert([declare2.keyOffsets[@"d"] isEqualToNumber:@(16)]);
+}
 - (void)testPerformanceExample {
     // This is an example of a performance test case.
     [self measureBlock:^{

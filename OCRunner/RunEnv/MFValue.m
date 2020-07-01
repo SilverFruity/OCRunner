@@ -276,13 +276,13 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return self.type & TypeBaseMask;
 }
 - (BOOL)isInteger{
-    if (self.pointer) {
+    if (self.isPointer) {
         return NO;
     }
     return self.type <= TypeLongLong && self.type !=  TypeVoid;
 }
 - (BOOL)isFloat{
-    if (self.pointer) {
+    if (self.isPointer) {
         return NO;
     }
     return self.type == TypeFloat || self.type == TypeDouble;
@@ -408,12 +408,16 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     void *pointer = self.pointer + offset;
     [value writePointer:pointer typeEncode:declare.keyTypeEncodes[key].UTF8String];
 }
-- (void)enumerateStructFieldsUsingBlock:(void (^)(MFValue * _Nonnull, NSUInteger))block{
+- (void)enumerateStructFieldsUsingBlock:(void (^)(MFValue *field, NSUInteger idx, BOOL *stop))block{
     NSString *structName = self.typeName;
     ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
     for (int i = 0 ; i < declare.keys.count; i++) {
         MFValue *field = [self fieldForKey:declare.keys[i]];
-        block(field,i);
+        BOOL stop = NO;
+        block(field,i, &stop);
+        if (stop) {
+            break;
+        }
     }
 }
 @end

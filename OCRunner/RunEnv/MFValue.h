@@ -340,7 +340,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 - (void)setFieldWithValue:(MFValue *)value forKey:(NSString *)key;
 - (MFValue *)fieldForKey:(NSString *)key;
 - (MFValue *)getResutlInPointer;
-- (void)enumerateStructFieldsUsingBlock:(void (^)(MFValue *field, NSUInteger idx))block;
+- (void)enumerateStructFieldsUsingBlock:(void (^)(MFValue *field, NSUInteger idx, BOOL *stop))block;
 @end
 
 @interface MFValue (MFStatementResultType)

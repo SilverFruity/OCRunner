@@ -178,16 +178,23 @@ NSUInteger fieldCountInStructMemeryLayoutEncode(const char *typeEncode){
     }];
     self.keySizes = keySizes;
     self.keyTypeEncodes = keyTyeps;
-    NSMutableDictionary *keyOffsets = [NSMutableDictionary dictionary];
-    for (NSString *key in self.keys){
-        NSUInteger offset = 0;
-        for (NSString *current in self.keys) {
-            if ([current isEqualToString:key]){
-                break;
-            }
-            offset += self.keySizes[current].unsignedIntegerValue;
+    // 内存对齐
+    // 第一个变量的偏移量为0，其余变量的偏移量需要是变量内存大小的的整数倍
+    NSMutableDictionary <NSString *,NSNumber *>*keyOffsets = [NSMutableDictionary dictionary];
+    for (int i = 0; i < self.keys.count; i++) {
+        if (i == 0) {
+            keyOffsets[self.keys[i]] = @(0);
+            continue;
         }
-        keyOffsets[key] = @(offset);
+        NSString *lastKey = self.keys[i - 1];
+        NSUInteger lastSize = self.keySizes[lastKey].unsignedIntValue;
+        NSUInteger lastOffset = keyOffsets[lastKey].unsignedIntValue;
+        NSUInteger offset = lastOffset + lastSize;
+        NSUInteger size = self.keySizes[self.keys[i]].unsignedIntegerValue;
+        if (offset % size != 0) {
+            offset = (ABS(offset - 1) / size + 1) * size;
+        }
+        keyOffsets[self.keys[i]] = @(offset);
     }
     self.keyOffsets = keyOffsets;
 }

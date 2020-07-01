@@ -63,7 +63,11 @@
         }
         result = ORMultiArgsCFunCall(multiArgs, args.count, self.pointer);
     }
-    returnValue.pointer = &result;
+    if (returnValue.isStruct) {
+        returnValue.pointer = result;
+    }else{
+        returnValue.pointer = &result;
+    }
     return returnValue;
 }
 

@@ -197,44 +197,89 @@ MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValue
     retValue.pointer = &result;
     return retValue;
 }
-NSUInteger NGRN = 0;
-NSUInteger NSRN = 0;
-void **NSAA = NULL;
-#define FUNC_ARGS_LAYOUT_BEGIN void **CUR_SP = NULL;\
-__asm__ volatile\
+//NOTE: https://developer.arm.com/documentation/100986/0000 #Procedure Call Standard for the ARM 64-bit Architecture
+//NOTE: https://juejin.im/post/5d14623ef265da1bb47d7635#heading-12
+static NSUInteger NGRN = 0; // Next General Register Number
+static NSUInteger NSRN = 0; // Next SIMD Register Number
+static char *NSAA = NULL; // Next Stack Argument Address
+static char *CSP = NULL; // Current Stack Pointer
+#define FUNC_ARGS_LAYOUT_BEGIN(stack) __asm__ volatile\
 (\
  "mov %[csp], sp\n"\
- : [csp]"=r"(CUR_SP)\
+ : [csp]"=r"(CSP)\
  :\
  );\
-NGRN = 0; NSRN = 0; NSAA = CUR_SP;
+NGRN = 0; NSRN = 0; NSAA = (char *)stack;
 #define FUNC_ARGS_LAYOUT_END NGRN = 0; NSRN = 0; NSAA = NULL;
 void prepareForArgs(NSMutableArray *args){
     for (int i = 0; i < args.count; i++) {
         MFValue *arg = args[i];
+//        if (arg.isHFAStruct) {
+//            continue;
+//        }
         // B.4 the size of composite type > 16, copy the memery and use the pointer
         if (arg.isStruct && arg.memerySize > 16){
             void *pointer = arg.pointer;
-            MFValue *copied = [MFValue valueWithPointer:&pointer];
+            MFValue *copied = [MFValue valueWithPointer:pointer];
             args[i] = copied;
         }
     }
 }
-void flatMapArgument(MFValue *arg, void **generalValues,void **floatValues, void *stack){
+void structStoeInRegister(BOOL isHFA, MFValue *aggregate, void **generalValues,void **floatValues){
+    [aggregate enumerateStructFieldsUsingBlock:^(MFValue * _Nonnull field, NSUInteger idx, BOOL *stop) {
+        if (field.isStruct) {
+            structStoeInRegister(isHFA, field, generalValues, floatValues);
+            *stop = YES;
+        }
+        if (isHFA) {
+            floatValues[NSRN] = *(void **)field.pointer;
+            NSRN++;
+        }else{
+            generalValues[NSRN] = *(void **)field.pointer;
+            NGRN++;
+        }
+    }];
+}
+void flatMapArgument(MFValue *arg, void **generalValues,void **floatValues){
+#define NSAA_SET_OFFSET(argument) NSAA += (ABS(argument.memerySize - 1) / 8 + 1) * 8;
+#define COPY_ARG_TO_STACK(argument) memcpy(NSAA, argument.pointer, argument.memerySize);\
+        NSAA_SET_OFFSET(argument);
     if (arg.isFloat) {
-        floatValues[NSRN] = *(void **)arg.pointer;
-        NSRN++;
-        return;
-    }
-    if (arg.isHFAStruct) {
-        NSUInteger argCount = arg.structLayoutFieldCount;
-        if (NSRN + argCount <= 8) {
-            //TODO: set args to floatValues
-            NSRN += argCount;
+        if (NSRN < 8) {
+            floatValues[NSRN] = *(void **)arg.pointer;
+            NSRN++;
+            return;
+        }else{
+            COPY_ARG_TO_STACK(arg)
             return;
         }
-        if (NSRN == 8) {
-            
+    }
+    // aggregate: struct and array
+    if (arg.isStruct) {
+        if (arg.isHFAStruct) {
+            NSUInteger argCount = arg.structLayoutFieldCount;
+            if (NSRN + argCount <= 8) {
+                //set args to float register
+                structStoeInRegister(YES, arg, generalValues, floatValues);
+                NSRN += argCount;
+                return;
+            }else{
+                COPY_ARG_TO_STACK(arg)
+                return;
+            }
+        // Composite Types
+        }else{
+            NSUInteger memsize = arg.memerySize;
+            NSUInteger needGRN = ABS(memsize - 1) / 8 + 1;
+            if (8 - NGRN >= needGRN) {
+                //set args to general register
+                structStoeInRegister(NO, arg, generalValues, floatValues);
+                NSRN += needGRN;
+                return;
+            }else{
+                COPY_ARG_TO_STACK(arg)
+                return;
+            }
         }
     }
     if (arg.isInteger || arg.isPointer) {
@@ -242,23 +287,18 @@ void flatMapArgument(MFValue *arg, void **generalValues,void **floatValues, void
             generalValues[NGRN] = *(void **)arg.pointer;
             NGRN++;
             return;
+        }else{
+            COPY_ARG_TO_STACK(arg)
+            return;
         }
     }
-//    if (!arg.isPointer && arg.isStruct){
-//        [arg enumerateStructFieldsUsingBlock:^(MFValue * _Nonnull field, NSUInteger idx) {
-//            flatMapArgument(field, gargs, fargs);
-//        }];
-//    }else{
-//        if (arg.isFloat) {
-//            [fargs addObject:arg];
-//        }else{
-//            [gargs addObject:arg];
-//        }
-//    }
 }
 void *invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue * returnValue){
+    if (funptr == NULL) {
+        return NULL;
+    }
     // Stag A:
-    FUNC_ARGS_LAYOUT_BEGIN
+    
     NSMutableArray *args = [argValues mutableCopy];
     // Stag B: only use B.4
     prepareForArgs(args);
@@ -268,9 +308,11 @@ void *invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValu
     memset(generalArgs, 0, sizeof(generalArgs));
     memset(floatArgs, 0, sizeof(floatArgs));
     memset(stackMem, 0, sizeof(stackMem));
+    
+    FUNC_ARGS_LAYOUT_BEGIN(stackMem)
     // Stag C:
     for (MFValue *arg in args) {
-        flatMapArgument(arg, generalArgs, floatArgs, stackMem);
+        flatMapArgument(arg, generalArgs, floatArgs);
     }
     FUNC_ARGS_LAYOUT_END
     void *result = returnValue.pointer;
@@ -285,16 +327,11 @@ void *invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValu
      "ldp d4, d5, [%[fargs], 32]\n"
      "ldp d6, d7, [%[fargs], 48]\n"
      "mov sp, %[stack]\n"
-     "blr x0\n"
-     "mov sp, %[psp]\n"
-     :
-     : [iargs]"r"(generalArgs), [fargs]"r"(floatArgs), [stack]"r"(stackMem), [psp]"r"(CUR_SP)
-     );
-    __asm__ volatile
-    (
-     "mov %[result], x0\n"
+     "blr %[func]\n"
+     "mov %[result], x8\n"
+     "mov sp, %[csp]\n"
      : [result]"=r"(result)
-     :
+     : [func]"r"(funptr),[iargs]"r"(generalArgs), [fargs]"r"(floatArgs), [stack]"r"(stackMem), [csp]"r"(CSP)
      );
     return result;
 }
