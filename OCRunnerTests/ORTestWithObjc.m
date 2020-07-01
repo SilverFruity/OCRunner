@@ -203,6 +203,13 @@ Element2Struct *Element2StructMake(){
     [OCParser clear];
     [scope clear];
 }
+- (void)testDetectStructMemeryLayoutCode{
+    NSString *result = detectStructMemeryLayoutEncodeCode("{CGRect={CGPoint=ff{CGPoint=dd}}{CGSize=dd}}");
+    XCTAssert([result isEqualToString:@"ffdddd"]);
+    XCTAssert(isHomogeneousFloatingPointAggregate(result.UTF8String));
+    XCTAssert(fieldCountInStructMemeryLayoutEncode(result.UTF8String) == 6);
+    XCTAssert(fieldCountInStructMemeryLayoutEncode("^^f^fdd^^dd") == 6);
+}
 - (void)testPerformanceExample {
     // This is an example of a performance test case.
     [self measureBlock:^{

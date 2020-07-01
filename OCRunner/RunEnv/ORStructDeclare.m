@@ -108,6 +108,46 @@ NSMutableArray * startDetectTypeEncodes(NSString *content){
     return results;
 }
 
+// {CGRect={CGPoint={CGPoint=dd}{CGSize=dd}} -> dddd
+NSString * detectStructMemeryLayoutEncodeCode(const char *typeEncode){
+    NSMutableString *result = [NSMutableString string];
+    BOOL startLayout = NO;
+    while (typeEncode != NULL && *typeEncode != '\0') {
+        if (*typeEncode == '=') {
+            startLayout = YES;
+            typeEncode++;
+            continue;
+        }
+        if (*typeEncode == '}' || *typeEncode == '{') {
+            startLayout = NO;
+        }
+        if (startLayout) {
+            [result appendFormat:@"%c",*typeEncode];
+        }
+        typeEncode++;
+    }
+    return [result copy];
+}
+BOOL isHomogeneousFloatingPointAggregate(const char *typeEncode){
+    while (typeEncode != NULL && *typeEncode != '\0') {
+        if (*typeEncode != 'f' && *typeEncode != 'd') {
+            return NO;
+        }
+        typeEncode++;
+    }
+    return YES;
+}
+NSUInteger fieldCountInStructMemeryLayoutEncode(const char *typeEncode){
+    NSUInteger count = 0;
+    while (typeEncode != NULL && *typeEncode != '\0') {
+        if (*typeEncode != '^') {
+            count++;
+        }
+        typeEncode++;
+    }
+    return count;
+}
+
 @implementation ORStructDeclare
 + (instancetype)structDecalre:(const char *)encode keys:(NSArray *)keys{
     return [[self alloc] initWithTypeEncode:encode keys:keys];

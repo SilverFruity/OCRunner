@@ -276,13 +276,27 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return self.type & TypeBaseMask;
 }
 - (BOOL)isInteger{
+    if (self.pointer) {
+        return NO;
+    }
     return self.type <= TypeLongLong && self.type !=  TypeVoid;
 }
 - (BOOL)isFloat{
+    if (self.pointer) {
+        return NO;
+    }
     return self.type == TypeFloat || self.type == TypeDouble;
 }
 - (BOOL)isPointer{
     return *self.typeEncode == '^';
+}
+- (NSUInteger)memerySize{
+    if (self.typeEncode == NULL) {
+        return 0;
+    }
+    NSUInteger size;
+    NSGetSizeAndAlignment(self.typeEncode, &size, NULL);
+    return size;
 }
 - (MFValue *)subscriptGetWithIndex:(MFValue *)index{
     if (index.type & TypeBaseMask) {
@@ -332,12 +346,26 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 
 @implementation MFValue (Struct)
 - (BOOL)isStruct{
+   return *self.typeEncode == '{';
+}
+- (BOOL)isStructPointer{
+    return [self isStructValueOrPointer] && (*self.typeEncode == '^');
+}
+- (BOOL)isStructValueOrPointer{
     NSString *encode = [NSString stringWithUTF8String:self.typeEncode];
     NSString *ignorePointer = [encode stringByReplacingOccurrencesOfString:@"^" withString:@""];
     return *ignorePointer.UTF8String == '{';
 }
-- (BOOL)isStructPointer{
-    return [self isStruct] && (*self.typeEncode == '^');
+- (BOOL)isHFAStruct{
+    if (!self.isStruct) {
+        return NO;
+    }
+    NSString *typeencode = detectStructMemeryLayoutEncodeCode(self.typeEncode);
+    return isHomogeneousFloatingPointAggregate(typeencode.UTF8String);
+}
+- (NSUInteger)structLayoutFieldCount{
+    NSString *typeencode = detectStructMemeryLayoutEncodeCode(self.typeEncode);
+    return fieldCountInStructMemeryLayoutEncode(typeencode.UTF8String);
 }
 - (MFValue *)getResutlInPointer{
     MFValue *field = [MFValue new];

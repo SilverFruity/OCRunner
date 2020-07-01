@@ -74,19 +74,20 @@ void methodIMP(void){
 }
 
 void blockInter(struct MFSimulateBlock *block){
-    void *args[8];
+    void *intArgs[8];
+    void *floatArgs[8];
     __asm__ volatile
     (
-     "str x0, [%[args]]\n"
-     "str x1, [%[args], #0x8]\n"
-     "str x2, [%[args], #0x10]\n"
-     "str x3, [%[args], #0x18]\n"
-     "str x4, [%[args], #0x20]\n"
-     "str x5, [%[args], #0x28]\n"
-     "str x6, [%[args], #0x30]\n"
-     "str x7, [%[args], #0x38]\n"
+     "stp x0, x1, [%[iargs]]\n"
+     "stp x2, x3, [%[iargs], 16]\n"
+     "stp x4, x5, [%[iargs], 32]\n"
+     "stp x6, x7, [%[iargs], 48]\n"
+     "stp d0, d1, [%[fargs]]\n"
+     "stp d2, d3, [%[fargs], 16]\n"
+     "stp d4, d5, [%[fargs], 32]\n"
+     "stp d6, d7, [%[fargs], 48]\n"
      :
-     : [args]"r"(args)
+     : [iargs]"r"(intArgs), [fargs]"r"(floatArgs)
      );
     NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:block->descriptor->signature];
     NSUInteger numberOfArguments = [sig numberOfArguments];
@@ -94,7 +95,7 @@ void blockInter(struct MFSimulateBlock *block){
     // 在OC中，传入值都为原数值并非MFValue，需要转换
     NSMutableArray *argValues = [NSMutableArray array];
     for (NSUInteger i = 1; i < numberOfArguments ; i++) {
-        void *arg = args[i];
+        void *arg = intArgs[i];
         MFValue *argValue = [[MFValue alloc] initTypeEncode:[sig getArgumentTypeAtIndex:i] pointer:&arg];
         [argValues addObject:argValue];
     }
@@ -196,39 +197,82 @@ MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValue
     retValue.pointer = &result;
     return retValue;
 }
-
-void *invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue * returnValue){
-    if (returnValue.isStruct) {
-        return NULL;
-    }
-    
-    for (MFValue *arg in argValues) {
-        if (arg.isStruct) return NULL;
-    }
-    NSMutableArray <MFValue *>*generalRegisterValues = [NSMutableArray array];
-    NSMutableArray <MFValue *>*floatRegisterValues = [NSMutableArray array];
-    [argValues enumerateObjectsUsingBlock:^(MFValue * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if (obj.isStruct && !obj.isPointer){
-            [obj enumerateStructFieldsUsingBlock:^(MFValue * _Nonnull field, NSUInteger idx) {
-                
-            }];
-        }else{
-            if (obj.isFloat) {
-                [floatRegisterValues addObject:obj];
-            }else{
-                [generalRegisterValues addObject:obj];
-            }
+NSUInteger NGRN = 0;
+NSUInteger NSRN = 0;
+void **NSAA = NULL;
+#define FUNC_ARGS_LAYOUT_BEGIN void **CUR_SP = NULL;\
+__asm__ volatile\
+(\
+ "mov %[csp], sp\n"\
+ : [csp]"=r"(CUR_SP)\
+ :\
+ );\
+NGRN = 0; NSRN = 0; NSAA = CUR_SP;
+#define FUNC_ARGS_LAYOUT_END NGRN = 0; NSRN = 0; NSAA = NULL;
+void prepareForArgs(NSMutableArray *args){
+    for (int i = 0; i < args.count; i++) {
+        MFValue *arg = args[i];
+        // B.4 the size of composite type > 16, copy the memery and use the pointer
+        if (arg.isStruct && arg.memerySize > 16){
+            void *pointer = arg.pointer;
+            MFValue *copied = [MFValue valueWithPointer:&pointer];
+            args[i] = copied;
         }
-    }];
-    
-    void *intArgs[8] = { 0, 0, 0, 0, 0, 0, 0, 0};
-    void *floatArgs[8] = { 0, 0, 0, 0, 0, 0, 0, 0};
-    for (int i = 0 ; i < generalRegisterValues.count; i++) {
-        intArgs[i] = *(void **)generalRegisterValues[i].pointer;
     }
-    for (int i = 0 ; i < floatRegisterValues.count; i++) {
-        floatArgs[i] = *(void **)floatRegisterValues[i].pointer;
+}
+void flatMapArgument(MFValue *arg, void **generalValues,void **floatValues, void *stack){
+    if (arg.isFloat) {
+        floatValues[NSRN] = *(void **)arg.pointer;
+        NSRN++;
+        return;
     }
+    if (arg.isHFAStruct) {
+        NSUInteger argCount = arg.structLayoutFieldCount;
+        if (NSRN + argCount <= 8) {
+            //TODO: set args to floatValues
+            NSRN += argCount;
+            return;
+        }
+        if (NSRN == 8) {
+            
+        }
+    }
+    if (arg.isInteger || arg.isPointer) {
+        if (NGRN < 8) {
+            generalValues[NGRN] = *(void **)arg.pointer;
+            NGRN++;
+            return;
+        }
+    }
+//    if (!arg.isPointer && arg.isStruct){
+//        [arg enumerateStructFieldsUsingBlock:^(MFValue * _Nonnull field, NSUInteger idx) {
+//            flatMapArgument(field, gargs, fargs);
+//        }];
+//    }else{
+//        if (arg.isFloat) {
+//            [fargs addObject:arg];
+//        }else{
+//            [gargs addObject:arg];
+//        }
+//    }
+}
+void *invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue * returnValue){
+    // Stag A:
+    FUNC_ARGS_LAYOUT_BEGIN
+    NSMutableArray *args = [argValues mutableCopy];
+    // Stag B: only use B.4
+    prepareForArgs(args);
+    void *generalArgs[8];
+    void *floatArgs[8];
+    void *stackMem[64];
+    memset(generalArgs, 0, sizeof(generalArgs));
+    memset(floatArgs, 0, sizeof(floatArgs));
+    memset(stackMem, 0, sizeof(stackMem));
+    // Stag C:
+    for (MFValue *arg in args) {
+        flatMapArgument(arg, generalArgs, floatArgs, stackMem);
+    }
+    FUNC_ARGS_LAYOUT_END
     void *result = returnValue.pointer;
     __asm__ volatile
     (
@@ -236,13 +280,15 @@ void *invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValu
      "ldp x2, x3, [%[iargs], 16]\n"
      "ldp x4, x5, [%[iargs], 32]\n"
      "ldp x6, x7, [%[iargs], 48]\n"
-     "ldp q0, q1, [%[fargs]]\n"
-     "ldp q2, q3, [%[fargs], 16]\n"
-     "ldp q4, q5, [%[fargs], 32]\n"
-     "ldp q6, q7, [%[fargs], 48]\n"
+     "ldp d0, d1, [%[fargs]]\n"
+     "ldp d2, d3, [%[fargs], 16]\n"
+     "ldp d4, d5, [%[fargs], 32]\n"
+     "ldp d6, d7, [%[fargs], 48]\n"
+     "mov sp, %[stack]\n"
      "blr x0\n"
+     "mov sp, %[psp]\n"
      :
-     : [iargs]"r"(intArgs), [fargs]"r"(floatArgs)
+     : [iargs]"r"(generalArgs), [fargs]"r"(floatArgs), [stack]"r"(stackMem), [psp]"r"(CUR_SP)
      );
     __asm__ volatile
     (

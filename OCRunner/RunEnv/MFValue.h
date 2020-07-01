@@ -326,7 +326,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 - (BOOL)isSubtantial;
 - (BOOL)isInteger;
 - (BOOL)isFloat;
-
+- (NSUInteger)memerySize;
 - (MFValue *)subscriptGetWithIndex:(MFValue *)index;
 - (void)subscriptSetValue:(MFValue *)value index:(MFValue *)index;
 @end
@@ -334,6 +334,9 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @interface MFValue (Struct)
 - (BOOL)isStruct;
 - (BOOL)isStructPointer;
+- (BOOL)isStructValueOrPointer;
+- (BOOL)isHFAStruct;
+- (NSUInteger)structLayoutFieldCount;
 - (void)setFieldWithValue:(MFValue *)value forKey:(NSString *)key;
 - (MFValue *)fieldForKey:(NSString *)key;
 - (MFValue *)getResutlInPointer;
