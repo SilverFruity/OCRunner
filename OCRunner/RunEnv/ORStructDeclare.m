@@ -192,7 +192,7 @@ NSUInteger fieldCountInStructMemeryLayoutEncode(const char *typeEncode){
         NSUInteger offset = lastOffset + lastSize;
         NSUInteger size = self.keySizes[self.keys[i]].unsignedIntegerValue;
         if (offset % size != 0) {
-            offset = (ABS(offset - 1) / size + 1) * size;
+            offset = ((offset + size - 1) / size) * size;
         }
         keyOffsets[self.keys[i]] = @(offset);
     }

@@ -199,32 +199,25 @@ MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValue
 }
 //NOTE: https://developer.arm.com/documentation/100986/0000 #Procedure Call Standard for the ARM 64-bit Architecture
 //NOTE: https://juejin.im/post/5d14623ef265da1bb47d7635#heading-12
+#define G_REG_SIZE 8
+#define V_REG_SIZE 8
+#define N_G_ARG_REG 8 // The Number Of General Register
+#define N_V_ARG_REG 8 // The Number Of Float-Point Register
+
 static NSUInteger NGRN = 0; // Next General Register Number
 static NSUInteger NSRN = 0; // Next SIMD Register Number
 static char *NSAA = NULL; // Next Stack Argument Address
 static char *CSP = NULL; // Current Stack Pointer
 #define FUNC_ARGS_LAYOUT_BEGIN(stack) __asm__ volatile\
 (\
- "mov %[csp], sp\n"\
- : [csp]"=r"(CSP)\
- :\
- );\
+"mov %[csp], sp\n"\
+: [csp]"=r"(CSP)\
+:\
+);\
 NGRN = 0; NSRN = 0; NSAA = (char *)stack;
 #define FUNC_ARGS_LAYOUT_END NGRN = 0; NSRN = 0; NSAA = NULL;
-void prepareForArgs(NSMutableArray *args){
-    for (int i = 0; i < args.count; i++) {
-        MFValue *arg = args[i];
-//        if (arg.isHFAStruct) {
-//            continue;
-//        }
-        // B.4 the size of composite type > 16, copy the memery and use the pointer
-        if (arg.isStruct && arg.memerySize > 16){
-            void *pointer = arg.pointer;
-            MFValue *copied = [MFValue valueWithPointer:pointer];
-            args[i] = copied;
-        }
-    }
-}
+#define USEED_STACK_SZIE(stack) NSAA - (char *)stack
+
 void structStoeInRegister(BOOL isHFA, MFValue *aggregate, void **generalValues,void **floatValues){
     [aggregate enumerateStructFieldsUsingBlock:^(MFValue * _Nonnull field, NSUInteger idx, BOOL *stop) {
         if (field.isStruct) {
@@ -235,73 +228,79 @@ void structStoeInRegister(BOOL isHFA, MFValue *aggregate, void **generalValues,v
             floatValues[NSRN] = *(void **)field.pointer;
             NSRN++;
         }else{
-            generalValues[NSRN] = *(void **)field.pointer;
+            generalValues[NGRN] = *(void **)field.pointer;
             NGRN++;
         }
     }];
 }
 void flatMapArgument(MFValue *arg, void **generalValues,void **floatValues){
-#define NSAA_SET_OFFSET(argument) NSAA += (ABS(argument.memerySize - 1) / 8 + 1) * 8;
-#define COPY_ARG_TO_STACK(argument) memcpy(NSAA, argument.pointer, argument.memerySize);\
-        NSAA_SET_OFFSET(argument);
-    if (arg.isFloat) {
-        if (NSRN < 8) {
-            floatValues[NSRN] = *(void **)arg.pointer;
-            NSRN++;
-            return;
-        }else{
-            COPY_ARG_TO_STACK(arg)
-            return;
-        }
-    }
-    // aggregate: struct and array
-    if (arg.isStruct) {
-        if (arg.isHFAStruct) {
-            NSUInteger argCount = arg.structLayoutFieldCount;
-            if (NSRN + argCount <= 8) {
-                //set args to float register
-                structStoeInRegister(YES, arg, generalValues, floatValues);
-                NSRN += argCount;
-                return;
-            }else{
-                COPY_ARG_TO_STACK(arg)
-                return;
-            }
-        // Composite Types
-        }else{
-            NSUInteger memsize = arg.memerySize;
-            NSUInteger needGRN = ABS(memsize - 1) / 8 + 1;
-            if (8 - NGRN >= needGRN) {
-                //set args to general register
-                structStoeInRegister(NO, arg, generalValues, floatValues);
-                NSRN += needGRN;
-                return;
-            }else{
-                COPY_ARG_TO_STACK(arg)
-                return;
-            }
-        }
-    }
-    if (arg.isInteger || arg.isPointer) {
+#define COPY_ARG_TO_STACK(argument)\
+memcpy(NSAA, argument.pointer, argument.memerySize);\
+NSAA += (argument.memerySize + 7) / 8;
+    if (arg.isInteger || arg.isPointer || arg.isObject) {
         if (NGRN < 8) {
             generalValues[NGRN] = *(void **)arg.pointer;
             NGRN++;
             return;
         }else{
+            NGRN = N_G_ARG_REG;
             COPY_ARG_TO_STACK(arg)
             return;
         }
+    }else if (arg.isFloat) {
+        if (NSRN < 8) {
+            floatValues[NSRN] = *(void **)arg.pointer;
+            NSRN++;
+            return;
+        }else{
+            NSRN = N_V_ARG_REG;
+            COPY_ARG_TO_STACK(arg)
+            return;
+        }
+    // Composite Types
+    // aggregate: struct and array
+    }else if (arg.isStruct) {
+        if (arg.isHFAStruct) {
+            //FIXME: only in iOS ???
+            if (arg.memerySize > 32) {
+                void *pointer = arg.pointer;
+                MFValue *copied = [MFValue valueWithPointer:pointer];
+                flatMapArgument(copied, generalValues, floatValues);
+                return;
+            }
+            NSUInteger argCount = arg.structLayoutFieldCount;
+            if (NSRN + argCount <= 8) {
+                //set args to float register
+                structStoeInRegister(YES, arg, generalValues, floatValues);
+                return;
+            }else{
+                COPY_ARG_TO_STACK(arg)
+                return;
+            }
+        }else if (arg.memerySize > 16){
+            void *pointer = arg.pointer;
+            MFValue *copied = [MFValue valueWithPointer:pointer];
+            flatMapArgument(copied, generalValues, floatValues);
+        }else{
+            NSUInteger memsize = arg.memerySize;
+            NSUInteger needGRN = (memsize + 7) / 8;
+            if (8 - NGRN >= needGRN) {
+                //set args to general register
+                structStoeInRegister(NO, arg, generalValues, floatValues);
+                return;
+            }else{
+                COPY_ARG_TO_STACK(arg)
+                return;
+            }
+        }
     }
 }
-void *invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue * returnValue){
+void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, void **ret){
     if (funptr == NULL) {
-        return NULL;
+        return;
     }
     // Stag A:
-    
     NSMutableArray *args = [argValues mutableCopy];
-    // Stag B: only use B.4
-    prepareForArgs(args);
     void *generalArgs[8];
     void *floatArgs[8];
     void *stackMem[64];
@@ -314,8 +313,9 @@ void *invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValu
     for (MFValue *arg in args) {
         flatMapArgument(arg, generalArgs, floatArgs);
     }
+    NSLog(@"%ld", USEED_STACK_SZIE(stackMem));
     FUNC_ARGS_LAYOUT_END
-    void *result = returnValue.pointer;
+    void *result = NULL;
     __asm__ volatile
     (
      "ldp x0, x1, [%[iargs]]\n"
@@ -333,5 +333,7 @@ void *invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValu
      : [result]"=r"(result)
      : [func]"r"(funptr),[iargs]"r"(generalArgs), [fargs]"r"(floatArgs), [stack]"r"(stackMem), [csp]"r"(CSP)
      );
-    return result;
+    if (ret != NULL) {
+        *ret = result;
+    }
 }

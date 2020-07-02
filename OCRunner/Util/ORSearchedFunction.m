@@ -53,7 +53,12 @@
     MFValue *returnValue = [MFValue defaultValueWithTypeEncoding:typeEncode];
     void *result = NULL;
     if (!self.funVar.isMultiArgs) {
-        result = invoke_functionPointer(self.pointer, args, returnValue);
+        invoke_functionPointer(self.pointer, args, &result);
+        if (returnValue.isStruct) {
+            returnValue.pointer = result;
+        }else{
+            returnValue.pointer = &result;
+        }
     }else{
         //多参数
         void *multiArgs[args.count];
@@ -62,10 +67,6 @@
             multiArgs[i] = *pointer;
         }
         result = ORMultiArgsCFunCall(multiArgs, args.count, self.pointer);
-    }
-    if (returnValue.isStruct) {
-        returnValue.pointer = result;
-    }else{
         returnValue.pointer = &result;
     }
     return returnValue;

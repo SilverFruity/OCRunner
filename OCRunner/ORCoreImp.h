@@ -14,5 +14,4 @@ extern void methodIMP(void);
 extern void getterImp(id target, SEL sel);
 extern void setterImp(id target, SEL sel, void *newValue);
 extern MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValues);
-/// 不支持返回值和参数为结构体
-extern void *invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue * returnValue);
+extern void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, void **ret);

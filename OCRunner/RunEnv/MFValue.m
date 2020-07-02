@@ -272,9 +272,6 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     UnaryExecute(result, !, self);
     return !result;
 }
-- (BOOL)isMember{
-    return self.type & TypeBaseMask;
-}
 - (BOOL)isInteger{
     if (self.isPointer) {
         return NO;
@@ -286,6 +283,12 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
         return NO;
     }
     return self.type == TypeFloat || self.type == TypeDouble;
+}
+- (BOOL)isObject{
+    if (self.isPointer) {
+        return NO;
+    }
+    return self.type == TypeObject || self.type == TypeClass || self.type == TypeId || self.type == TypeSEL;
 }
 - (BOOL)isPointer{
     return *self.typeEncode == '^';
@@ -560,7 +563,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return [MFValue valueWithTypeKind:TypeBlock pointer:&blockValue];
 }
 + (instancetype)valueWithClass:(Class)clazzValue{
-    return [MFValue valueWithTypeKind:TypeSEL pointer:&clazzValue];
+    return [MFValue valueWithTypeKind:TypeClass pointer:&clazzValue];
 }
 + (instancetype)valueWithSEL:(SEL)selValue{
     return [MFValue valueWithTypeKind:TypeSEL pointer:&selValue];

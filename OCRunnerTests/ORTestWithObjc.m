@@ -8,7 +8,8 @@
 
 #import <XCTest/XCTest.h>
 #import <OCRunner/OCRunner.h>
-
+#import <OCRunner/ORCoreImp.h>
+#import <objc/message.h>
 @interface ORTestWithObjc : XCTestCase
 
 @end
@@ -106,7 +107,7 @@ Element2Struct *Element2StructMake(){
     container.element1Pointer = element1;
     container.element2 = *element2;
     container.element2Pointer = element2;
-
+    
     ORStructDeclare *element1Decl = [ORStructDeclare structDecalre:@encode(Element1Struct) keys:@[@"a",@"b",@"c"]];
     ORStructDeclare *element2Decl = [ORStructDeclare structDecalre:@encode(Element2Struct) keys:@[@"x",@"y",@"z",@"t"]];
     ORStructDeclare *containerDecl = [ORStructDeclare structDecalre:@encode(ContainerStruct) keys:@[@"element1",@"element1Pointer",@"element2",@"element2Pointer"]];
@@ -257,6 +258,17 @@ typedef struct MyStruct2 {
     XCTAssert([declare2.keyOffsets[@"a"] isEqualToNumber:@(8)]);
     XCTAssert([declare2.keyOffsets[@"c"] isEqualToNumber:@(12)]);
     XCTAssert([declare2.keyOffsets[@"d"] isEqualToNumber:@(16)]);
+}
+
+- (void)testCallFunctionPointer{
+    UIView *view = [UIView new];
+    CGRect rect = CGRectMake(1, 2, 3, 4);
+    void *result = NULL;
+    invoke_functionPointer(&objc_msgSend, @[[MFValue valueWithObject:view],
+                                            [MFValue valueWithSEL:@selector(setFrame:)],
+                                            [[MFValue alloc] initTypeEncode:@encode(CGRect) pointer:&rect]], &result);
+    
+    XCTAssert(CGRectEqualToRect(view.frame, rect));
 }
 - (void)testPerformanceExample {
     // This is an example of a performance test case.
