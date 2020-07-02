@@ -203,58 +203,113 @@ MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValue
 #define V_REG_SIZE 8
 #define N_G_ARG_REG 8 // The Number Of General Register
 #define N_V_ARG_REG 8 // The Number Of Float-Point Register
+#define ARGS_SIZE N_V_ARG_REG*V_REG_SIZE+N_G_ARG_REG*G_REG_SIZE
+typedef struct{
+    NSUInteger NGRN;
+    NSUInteger NSRN;
+    NSUInteger NSAA;
+}CallRegisterState;
 
-static NSUInteger NGRN = 0; // Next General Register Number
-static NSUInteger NSRN = 0; // Next SIMD Register Number
-static char *NSAA = NULL; // Next Stack Argument Address
-static char *CSP = NULL; // Current Stack Pointer
-#define FUNC_ARGS_LAYOUT_BEGIN(stack) __asm__ volatile\
-(\
-"mov %[csp], sp\n"\
-: [csp]"=r"(CSP)\
-:\
-);\
-NGRN = 0; NSRN = 0; NSAA = (char *)stack;
-#define FUNC_ARGS_LAYOUT_END NGRN = 0; NSRN = 0; NSAA = NULL;
-#define USEED_STACK_SZIE(stack) NSAA - (char *)stack
+typedef struct {
+    CallRegisterState *state;
+    void *generalRegister;
+    void *floatRegister;
+    char *stackMemeries;
+}CallContext;
 
-void structStoeInRegister(BOOL isHFA, MFValue *aggregate, void **generalValues,void **floatValues){
+void prepareForStackSize(MFValue *arg, CallRegisterState *state){
+    if (arg.isInteger || arg.isPointer || arg.isObject) {
+        if (state->NGRN < N_G_ARG_REG) {
+            state->NGRN++;
+            return;
+        }
+        state->NGRN = N_G_ARG_REG;
+        state->NSAA += (arg.memerySize + 7) / 8;
+    }else if (arg.isFloat) {
+        if (state->NSRN < N_V_ARG_REG) {
+            state->NSRN++;
+            return;
+        }
+        state->NSRN = N_V_ARG_REG;
+        state->NSAA += (arg.memerySize + 7) / 8;
+    // Composite Types
+    // aggregate: struct and array
+    }else if (arg.isStruct) {
+        if (arg.isHFAStruct) {
+            //FIXME: only in iOS ???
+            if (arg.memerySize > 32) {
+                MFValue *copied = [MFValue valueWithPointer:arg.pointer];
+                prepareForStackSize(copied, state);
+                return;
+            }
+            NSUInteger argCount = arg.structLayoutFieldCount;
+            if (state->NSRN + argCount <= N_V_ARG_REG) {
+                //set args to float register
+                state->NSRN += argCount;
+                return;
+            }
+            state->NSRN = N_V_ARG_REG;
+            state->NSAA += (arg.memerySize + 7) / 8;
+        }else if (arg.memerySize > 16){
+            MFValue *copied = [MFValue valueWithPointer:arg.pointer];
+            prepareForStackSize(copied, state);
+        }else{
+            NSUInteger memsize = arg.memerySize;
+            NSUInteger needGRN = (memsize + 7) / 8;
+            if (8 - state->NGRN >= needGRN) {
+                //set args to general register
+                state->NGRN += needGRN;
+                return;
+            }
+            state->NGRN = N_V_ARG_REG;
+            state->NSAA += (arg.memerySize + 7) / 8;
+        }
+    }
+}
+
+void structStoeInRegister(BOOL isHFA, MFValue *aggregate, CallContext ctx){
     [aggregate enumerateStructFieldsUsingBlock:^(MFValue * _Nonnull field, NSUInteger idx, BOOL *stop) {
         if (field.isStruct) {
-            structStoeInRegister(isHFA, field, generalValues, floatValues);
+            structStoeInRegister(isHFA, field, ctx);
             *stop = YES;
         }
+        CallRegisterState *state = ctx.state;
+        void *pointer = field.pointer;
         if (isHFA) {
-            floatValues[NSRN] = *(void **)field.pointer;
-            NSRN++;
+            memcpy(ctx.floatRegister+state->NSRN, pointer, field.memerySize);
+            state->NSRN++;
         }else{
-            generalValues[NGRN] = *(void **)field.pointer;
-            NGRN++;
+            memcpy(ctx.generalRegister+state->NGRN, pointer, field.memerySize);
+            state->NGRN++;
         }
     }];
 }
-void flatMapArgument(MFValue *arg, void **generalValues,void **floatValues){
-#define COPY_ARG_TO_STACK(argument)\
-memcpy(NSAA, argument.pointer, argument.memerySize);\
-NSAA += (argument.memerySize + 7) / 8;
+void flatMapArgument(MFValue *arg, CallContext ctx){
+    CallRegisterState *state = ctx.state;
     if (arg.isInteger || arg.isPointer || arg.isObject) {
-        if (NGRN < 8) {
-            generalValues[NGRN] = *(void **)arg.pointer;
-            NGRN++;
+        if (state->NGRN < N_G_ARG_REG) {
+            void *pointer = arg.pointer;
+            memcpy(ctx.generalRegister + state->NGRN, pointer, arg.memerySize);
+            state->NGRN++;
             return;
         }else{
-            NGRN = N_G_ARG_REG;
-            COPY_ARG_TO_STACK(arg)
+            state->NGRN = N_G_ARG_REG;
+            void *pointer = arg.pointer;
+            memcpy(ctx.stackMemeries + state->NSAA, pointer, arg.memerySize);
+            state->NSAA += (arg.memerySize + 7) / 8;
             return;
         }
     }else if (arg.isFloat) {
-        if (NSRN < 8) {
-            floatValues[NSRN] = *(void **)arg.pointer;
-            NSRN++;
+        if (state->NSRN < N_V_ARG_REG) {
+            void *pointer = arg.pointer;
+            memcpy(ctx.floatRegister+state->NSRN, pointer, arg.memerySize);
+            state->NSRN++;
             return;
         }else{
-            NSRN = N_V_ARG_REG;
-            COPY_ARG_TO_STACK(arg)
+            state->NSRN = N_V_ARG_REG;
+            void *pointer = arg.pointer;
+            memcpy(ctx.stackMemeries + state->NSAA, pointer, arg.memerySize);
+            state->NSAA += (arg.memerySize + 7) / 8;
             return;
         }
     // Composite Types
@@ -263,33 +318,37 @@ NSAA += (argument.memerySize + 7) / 8;
         if (arg.isHFAStruct) {
             //FIXME: only in iOS ???
             if (arg.memerySize > 32) {
-                void *pointer = arg.pointer;
-                MFValue *copied = [MFValue valueWithPointer:pointer];
-                flatMapArgument(copied, generalValues, floatValues);
+                MFValue *copied = [MFValue valueWithPointer:arg.pointer];
+                flatMapArgument(copied, ctx);
                 return;
             }
             NSUInteger argCount = arg.structLayoutFieldCount;
-            if (NSRN + argCount <= 8) {
+            if (state->NSRN + argCount <= N_V_ARG_REG) {
                 //set args to float register
-                structStoeInRegister(YES, arg, generalValues, floatValues);
+                structStoeInRegister(YES, arg, ctx);
                 return;
             }else{
-                COPY_ARG_TO_STACK(arg)
+                state->NSRN = N_V_ARG_REG;
+                void *pointer = arg.pointer;
+                memcpy(ctx.stackMemeries + state->NSAA, pointer, arg.memerySize);
+                state->NSAA += (arg.memerySize + 7) / 8;
                 return;
             }
         }else if (arg.memerySize > 16){
-            void *pointer = arg.pointer;
-            MFValue *copied = [MFValue valueWithPointer:pointer];
-            flatMapArgument(copied, generalValues, floatValues);
+            MFValue *copied = [MFValue valueWithPointer:arg.pointer];
+            flatMapArgument(copied, ctx);
         }else{
             NSUInteger memsize = arg.memerySize;
             NSUInteger needGRN = (memsize + 7) / 8;
-            if (8 - NGRN >= needGRN) {
+            if (8 - state->NGRN >= needGRN) {
                 //set args to general register
-                structStoeInRegister(NO, arg, generalValues, floatValues);
+                structStoeInRegister(NO, arg, ctx);
                 return;
             }else{
-                COPY_ARG_TO_STACK(arg)
+                state->NGRN = N_V_ARG_REG;
+                void *pointer = arg.pointer;
+                memcpy(ctx.stackMemeries + state->NSAA, pointer, arg.memerySize);
+                state->NSAA += (arg.memerySize + 7) / 8;
                 return;
             }
         }
@@ -299,39 +358,50 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, void **
     if (funptr == NULL) {
         return;
     }
-    // Stag A:
+    void *CSP = NULL;
+    __asm__ volatile
+    (
+    "mov %[csp], sp\n"
+    : [csp]"=r"(CSP)
+    :
+    );
     NSMutableArray *args = [argValues mutableCopy];
-    void *generalArgs[8];
-    void *floatArgs[8];
-    void *stackMem[64];
-    memset(generalArgs, 0, sizeof(generalArgs));
-    memset(floatArgs, 0, sizeof(floatArgs));
-    memset(stackMem, 0, sizeof(stackMem));
-    
-    FUNC_ARGS_LAYOUT_BEGIN(stackMem)
-    // Stag C:
+    CallRegisterState prepareState = { 0 , 0 , 0};
     for (MFValue *arg in args) {
-        flatMapArgument(arg, generalArgs, floatArgs);
+        prepareForStackSize(arg, &prepareState);
     }
-    NSLog(@"%ld", USEED_STACK_SZIE(stackMem));
-    FUNC_ARGS_LAYOUT_END
+    NSUInteger stackSize = prepareState.NSAA;
+    NSUInteger floatRegistersSize = N_V_ARG_REG*V_REG_SIZE;
+    NSUInteger generalRegistersSize = N_G_ARG_REG*G_REG_SIZE;
+    char *stack = alloca(floatRegistersSize + generalRegistersSize + stackSize);
+    memset(stack, 0, floatRegistersSize + generalRegistersSize + stackSize);
+    CallRegisterState state = { 0 , 0 , 0};;
+    CallContext context;
+    context.state = &state;
+    context.floatRegister = (void *)stack;
+    context.generalRegister = stack + floatRegistersSize;
+    context.stackMemeries = stack + floatRegistersSize + generalRegistersSize;
+    for (MFValue *arg in args) {
+        flatMapArgument(arg, context);
+    }
     void *result = NULL;
     __asm__ volatile
     (
-     "ldp x0, x1, [%[iargs]]\n"
-     "ldp x2, x3, [%[iargs], 16]\n"
-     "ldp x4, x5, [%[iargs], 32]\n"
-     "ldp x6, x7, [%[iargs], 48]\n"
-     "ldp d0, d1, [%[fargs]]\n"
-     "ldp d2, d3, [%[fargs], 16]\n"
-     "ldp d4, d5, [%[fargs], 32]\n"
-     "ldp d6, d7, [%[fargs], 48]\n"
      "mov sp, %[stack]\n"
+     "ldp d0, d1, [sp]\n"
+     "ldp d2, d3, [sp, 16]\n"
+     "ldp d4, d5, [sp, 32]\n"
+     "ldp d6, d7, [sp, 48]\n"
+     "ldp x0, x1, [sp, 64 + 0]\n"  // 64: N_V_ARG_REG*V_REG_SIZE
+     "ldp x2, x3, [sp, 64 + 16]\n" // 64: N_V_ARG_REG*V_REG_SIZE
+     "ldp x4, x5, [sp, 64 + 32]\n" // 64: N_V_ARG_REG*V_REG_SIZE
+     "ldp x6, x7, [sp, 64 + 48]\n" // 64: N_V_ARG_REG*V_REG_SIZE
+     "add sp, sp, 128\n" // 128: ARGS_SIZE
      "blr %[func]\n"
      "mov %[result], x8\n"
      "mov sp, %[csp]\n"
      : [result]"=r"(result)
-     : [func]"r"(funptr),[iargs]"r"(generalArgs), [fargs]"r"(floatArgs), [stack]"r"(stackMem), [csp]"r"(CSP)
+     : [func]"r"(funptr), [stack]"r"(stack), [csp]"r"(CSP)
      );
     if (ret != NULL) {
         *ret = result;
