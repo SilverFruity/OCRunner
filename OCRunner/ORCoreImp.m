@@ -16,7 +16,7 @@
 #import "ORTypeVarPair+TypeEncode.h"
 #import "util.h"
 #import "ORStructDeclare.h"
-
+#import "ORCoreFunctionCall.h"
 void methodIMP(void){
     void *args[8];
     __asm__ volatile
@@ -200,7 +200,7 @@ MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValue
 //NOTE: https://developer.arm.com/documentation/100986/0000 #Procedure Call Standard for the ARM 64-bit Architecture
 //NOTE: https://juejin.im/post/5d14623ef265da1bb47d7635#heading-12
 #define G_REG_SIZE 8
-#define V_REG_SIZE 8
+#define V_REG_SIZE 16
 #define N_G_ARG_REG 8 // The Number Of General Register
 #define N_V_ARG_REG 8 // The Number Of Float-Point Register
 #define ARGS_SIZE N_V_ARG_REG*V_REG_SIZE+N_G_ARG_REG*G_REG_SIZE
@@ -214,7 +214,9 @@ typedef struct {
     CallRegisterState *state;
     void *generalRegister;
     void *floatRegister;
+    void *frame;
     char *stackMemeries;
+    void *retPointer;
 }CallContext;
 
 void prepareForStackSize(MFValue *arg, CallRegisterState *state){
@@ -276,7 +278,7 @@ void structStoeInRegister(BOOL isHFA, MFValue *aggregate, CallContext ctx){
         CallRegisterState *state = ctx.state;
         void *pointer = field.pointer;
         if (isHFA) {
-            memcpy(ctx.floatRegister+state->NSRN, pointer, field.memerySize);
+            memcpy((char *)ctx.floatRegister + state->NSRN * 16, pointer, field.memerySize);
             state->NSRN++;
         }else{
             memcpy(ctx.generalRegister+state->NGRN, pointer, field.memerySize);
@@ -302,7 +304,7 @@ void flatMapArgument(MFValue *arg, CallContext ctx){
     }else if (arg.isFloat) {
         if (state->NSRN < N_V_ARG_REG) {
             void *pointer = arg.pointer;
-            memcpy(ctx.floatRegister+state->NSRN, pointer, arg.memerySize);
+            memcpy((char *)ctx.floatRegister + state->NSRN * V_REG_SIZE, pointer, arg.memerySize);
             state->NSRN++;
             return;
         }else{
@@ -354,17 +356,10 @@ void flatMapArgument(MFValue *arg, CallContext ctx){
         }
     }
 }
-void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, void **ret){
+extern void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue){
     if (funptr == NULL) {
         return;
     }
-    void *CSP = NULL;
-    __asm__ volatile
-    (
-    "mov %[csp], sp\n"
-    : [csp]"=r"(CSP)
-    :
-    );
     NSMutableArray *args = [argValues mutableCopy];
     CallRegisterState prepareState = { 0 , 0 , 0};
     for (MFValue *arg in args) {
@@ -373,37 +368,22 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, void **
     NSUInteger stackSize = prepareState.NSAA;
     NSUInteger floatRegistersSize = N_V_ARG_REG*V_REG_SIZE;
     NSUInteger generalRegistersSize = N_G_ARG_REG*G_REG_SIZE;
-    char *stack = alloca(floatRegistersSize + generalRegistersSize + stackSize);
-    memset(stack, 0, floatRegistersSize + generalRegistersSize + stackSize);
+    NSUInteger retSize = returnValue.memerySize;
+    char *stack = malloc(floatRegistersSize + generalRegistersSize + stackSize + 24 + retSize);
+    memset(stack, 0, floatRegistersSize + generalRegistersSize + stackSize + 24 + retSize);
     CallRegisterState state = { 0 , 0 , 0};;
     CallContext context;
     context.state = &state;
     context.floatRegister = (void *)stack;
-    context.generalRegister = stack + floatRegistersSize;
-    context.stackMemeries = stack + floatRegistersSize + generalRegistersSize;
+    context.generalRegister = (char *)context.floatRegister + floatRegistersSize;
+    context.stackMemeries = (char *)context.generalRegister + generalRegistersSize;
+    context.frame = (char *)context.stackMemeries + + stackSize;
+    context.retPointer = (char *)context.frame + 24;
     for (MFValue *arg in args) {
         flatMapArgument(arg, context);
     }
-    void *result = NULL;
-    __asm__ volatile
-    (
-     "mov sp, %[stack]\n"
-     "ldp d0, d1, [sp]\n"
-     "ldp d2, d3, [sp, 16]\n"
-     "ldp d4, d5, [sp, 32]\n"
-     "ldp d6, d7, [sp, 48]\n"
-     "ldp x0, x1, [sp, 64 + 0]\n"  // 64: N_V_ARG_REG*V_REG_SIZE
-     "ldp x2, x3, [sp, 64 + 16]\n" // 64: N_V_ARG_REG*V_REG_SIZE
-     "ldp x4, x5, [sp, 64 + 32]\n" // 64: N_V_ARG_REG*V_REG_SIZE
-     "ldp x6, x7, [sp, 64 + 48]\n" // 64: N_V_ARG_REG*V_REG_SIZE
-     "add sp, sp, 128\n" // 128: ARGS_SIZE
-     "blr %[func]\n"
-     "mov %[result], x8\n"
-     "mov sp, %[csp]\n"
-     : [result]"=r"(result)
-     : [func]"r"(funptr), [stack]"r"(stack), [csp]"r"(CSP)
-     );
-    if (ret != NULL) {
-        *ret = result;
-    }
+    ORCoreFunctionCall(stack, context.frame, funptr, context.retPointer);
+    void *pointer = context.retPointer;
+    returnValue.pointer = pointer;
+    free(stack);
 }

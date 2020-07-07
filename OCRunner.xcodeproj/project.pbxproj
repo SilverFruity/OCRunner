@@ -28,6 +28,8 @@
 		04E665AB2474D723008DB08E /* ORGCDTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E665AA2474D723008DB08E /* ORGCDTests.m */; };
 		04E665B824763090008DB08E /* ORStructDeclare.h in Headers */ = {isa = PBXBuildFile; fileRef = 04E665B424763090008DB08E /* ORStructDeclare.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04E665B924763090008DB08E /* ORStructDeclare.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E665B724763090008DB08E /* ORStructDeclare.m */; };
+		04F0DA5824B47B49000B1996 /* ORCoreFunctionCall.s in Sources */ = {isa = PBXBuildFile; fileRef = 04F0DA5724B47B49000B1996 /* ORCoreFunctionCall.s */; };
+		04F0DA5A24B47D9B000B1996 /* ORCoreFunctionCall.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F0DA5924B47D9B000B1996 /* ORCoreFunctionCall.h */; };
 		EE197B852478DD190049CFDA /* ORInterpreter.h in Headers */ = {isa = PBXBuildFile; fileRef = EE197B832478DD190049CFDA /* ORInterpreter.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE197B862478DD190049CFDA /* ORInterpreter.m in Sources */ = {isa = PBXBuildFile; fileRef = EE197B842478DD190049CFDA /* ORInterpreter.m */; };
 		EE38F997246C3C2A00E7C37B /* RunnerClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98998724658DB700ACF2C1 /* RunnerClasses.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -142,6 +144,8 @@
 		04E665AA2474D723008DB08E /* ORGCDTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORGCDTests.m; sourceTree = "<group>"; };
 		04E665B424763090008DB08E /* ORStructDeclare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORStructDeclare.h; sourceTree = "<group>"; };
 		04E665B724763090008DB08E /* ORStructDeclare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORStructDeclare.m; sourceTree = "<group>"; };
+		04F0DA5724B47B49000B1996 /* ORCoreFunctionCall.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = ORCoreFunctionCall.s; sourceTree = "<group>"; };
+		04F0DA5924B47D9B000B1996 /* ORCoreFunctionCall.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORCoreFunctionCall.h; sourceTree = "<group>"; };
 		EE197B832478DD190049CFDA /* ORInterpreter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORInterpreter.h; sourceTree = "<group>"; };
 		EE197B842478DD190049CFDA /* ORInterpreter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORInterpreter.m; sourceTree = "<group>"; };
 		EE50144B24890BFE00B463BB /* ORMultiArgsMethodCall-arm64.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = "ORMultiArgsMethodCall-arm64.s"; sourceTree = "<group>"; };
@@ -211,6 +215,17 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		04F0DA5424B47B11000B1996 /* ORCoreImp */ = {
+			isa = PBXGroup;
+			children = (
+				EEBF3332248E674300DDE2E9 /* ORCoreImp.h */,
+				EEBF3333248E674300DDE2E9 /* ORCoreImp.m */,
+				04F0DA5924B47D9B000B1996 /* ORCoreFunctionCall.h */,
+				04F0DA5724B47B49000B1996 /* ORCoreFunctionCall.s */,
+			);
+			name = ORCoreImp;
+			sourceTree = "<group>";
+		};
 		EE38F9B7246C5E9500E7C37B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -263,8 +278,7 @@
 				EE98998724658DB700ACF2C1 /* RunnerClasses.h */,
 				EE98998824658DB800ACF2C1 /* RunnerClasses+Execute.h */,
 				EE98998624658DB700ACF2C1 /* RunnerClasses+Execute.m */,
-				EEBF3332248E674300DDE2E9 /* ORCoreImp.h */,
-				EEBF3333248E674300DDE2E9 /* ORCoreImp.m */,
+				04F0DA5424B47B11000B1996 /* ORCoreImp */,
 				EE197B832478DD190049CFDA /* ORInterpreter.h */,
 				EE197B842478DD190049CFDA /* ORInterpreter.m */,
 				048FAA3B247FA47C0036F5EE /* built-in.h */,
@@ -353,6 +367,7 @@
 			files = (
 				EE9899A924658F8900ACF2C1 /* MFVarDeclareChain.h in Headers */,
 				048FAA3E247FA4820036F5EE /* built-in.h in Headers */,
+				04F0DA5A24B47D9B000B1996 /* ORCoreFunctionCall.h in Headers */,
 				04A531B8248F8AD600D83A48 /* SymbolSearch.h in Headers */,
 				EE9899A624658F8900ACF2C1 /* MFWeakPropertyBox.h in Headers */,
 				EEBF3334248E674300DDE2E9 /* ORCoreImp.h in Headers */,
@@ -518,6 +533,7 @@
 				EE9899AF24658F8900ACF2C1 /* MFWeakPropertyBox.m in Sources */,
 				04E665A12474D284008DB08E /* built-in.m in Sources */,
 				042AC258246D453700070814 /* MFBlock.m in Sources */,
+				04F0DA5824B47B49000B1996 /* ORCoreFunctionCall.s in Sources */,
 				EE9899C42465923900ACF2C1 /* util.m in Sources */,
 				EE9899B824658F8900ACF2C1 /* MFValue.m in Sources */,
 				EE9899B124658F8900ACF2C1 /* MFPropertyMapTable.m in Sources */,
