@@ -261,13 +261,20 @@ typedef struct MyStruct2 {
 }
 
 - (void)testCallFunctionPointer{
+    MFValue *result1 = [[MFValue alloc] initTypeEncode:@encode(CGRect)];
+    invoke_functionPointer(&CGRectMake, @[[MFValue valueWithDouble:1],
+                                          [MFValue valueWithDouble:2],
+                                          [MFValue valueWithDouble:3],
+                                          [MFValue valueWithDouble:4]], result1);
+    CGRect rect1 = *(CGRect *)result1.pointer;
+    XCTAssert(CGRectEqualToRect(CGRectMake(1, 2, 3, 4), rect1));
     UIView *view = [UIView new];
     CGRect rect = CGRectMake(1, 2, 3, 4);
-    void *result = NULL;
+    MFValue *result = [MFValue voidValue];
     invoke_functionPointer(&objc_msgSend, @[[MFValue valueWithObject:view],
                                             [MFValue valueWithSEL:@selector(setFrame:)],
-                                            [[MFValue alloc] initTypeEncode:@encode(CGRect) pointer:&rect]], &result);
-    
+                                            [[MFValue alloc] initTypeEncode:@encode(CGRect) pointer:&rect]], result);
+
     XCTAssert(CGRectEqualToRect(view.frame, rect));
 }
 - (void)testPerformanceExample {

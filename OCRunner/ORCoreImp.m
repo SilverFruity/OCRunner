@@ -212,7 +212,7 @@ typedef struct{
 
 typedef struct {
     CallRegisterState *state;
-    void *generalRegister;
+    void **generalRegister;
     void *floatRegister;
     void *frame;
     char *stackMemeries;
@@ -273,7 +273,7 @@ void structStoeInRegister(BOOL isHFA, MFValue *aggregate, CallContext ctx){
     [aggregate enumerateStructFieldsUsingBlock:^(MFValue * _Nonnull field, NSUInteger idx, BOOL *stop) {
         if (field.isStruct) {
             structStoeInRegister(isHFA, field, ctx);
-            *stop = YES;
+            return;
         }
         CallRegisterState *state = ctx.state;
         void *pointer = field.pointer;
@@ -281,7 +281,7 @@ void structStoeInRegister(BOOL isHFA, MFValue *aggregate, CallContext ctx){
             memcpy((char *)ctx.floatRegister + state->NSRN * 16, pointer, field.memerySize);
             state->NSRN++;
         }else{
-            memcpy(ctx.generalRegister+state->NGRN, pointer, field.memerySize);
+            ctx.generalRegister[state->NGRN] = *(void **)pointer;
             state->NGRN++;
         }
     }];
@@ -291,7 +291,7 @@ void flatMapArgument(MFValue *arg, CallContext ctx){
     if (arg.isInteger || arg.isPointer || arg.isObject) {
         if (state->NGRN < N_G_ARG_REG) {
             void *pointer = arg.pointer;
-            memcpy(ctx.generalRegister + state->NGRN, pointer, arg.memerySize);
+            ctx.generalRegister[state->NGRN] = *(void **)pointer;
             state->NGRN++;
             return;
         }else{
