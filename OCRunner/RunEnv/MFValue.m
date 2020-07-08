@@ -70,6 +70,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 - (void)deallocPointer{
     if (_pointer != NULL && _isAlloced) {
         free(_pointer);
+        _pointer = NULL;
         _objectValue = nil;
         _weakObjectValue = nil;
     }
@@ -381,7 +382,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     const char *removedPointerTypeEncode = startRemovePointerOfTypeEncode(self.typeEncode).UTF8String;
     if (*removedPointerTypeEncode == '{') {
         NSString *encode = [NSString stringWithUTF8String:removedPointerTypeEncode];
-        NSString *structName = [encode substringWithRange:NSMakeRange(1, strlen(removedPointerTypeEncode) - 2)];
+        NSString *structName = startStructNameDetect(encode.UTF8String);
         ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
         field.typeEncode = declare.typeEncoding;
         field.type = TypeStruct;

@@ -528,12 +528,12 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 }
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     // C函数声明执行, 向全局作用域注册函数
-    if (scope == [MFScopeChain topScope] && self.declare && self.declare.funVar.ptCount == 0) {
+    if (scope == [MFScopeChain topScope] && [[MFStack argsStack] isEmpty] && self.declare && self.declare.funVar.ptCount == 0) {
         NSString *funcName = self.declare.funVar.varname;
         if ([scope getValueWithIdentifier:funcName] == nil) {
             [scope setValue:[MFValue valueWithObject:self] withIndentifier:funcName];
-            return [MFValue voidValue];
         }
+        return [MFValue normalEnd];
     }
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
     if (self.declare) {

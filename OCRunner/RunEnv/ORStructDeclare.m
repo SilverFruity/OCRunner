@@ -191,6 +191,7 @@ NSUInteger fieldCountInStructMemeryLayoutEncode(const char *typeEncode){
         NSUInteger lastOffset = keyOffsets[lastKey].unsignedIntValue;
         NSUInteger offset = lastOffset + lastSize;
         NSUInteger size = self.keySizes[self.keys[i]].unsignedIntegerValue;
+        size = MIN(size, 8); // 在参数对齐数和默认对齐数8取小
         if (offset % size != 0) {
             offset = ((offset + size - 1) / size) * size;
         }
