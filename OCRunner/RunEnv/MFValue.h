@@ -309,7 +309,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @property (assign,nonatomic)NSInteger pointerCount;
 @property (nonatomic,assign)const char* typeEncode;
 @property (nonatomic,assign, nullable)void *pointer;
-
+- (void)setPointerWithNoCopy:(void *)pointer;
 + (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding;
 + (instancetype)valueWithTypeKind:(TypeKind)TypeKind pointer:(nullable void *)pointer;
 + (instancetype)valueWithTypePair:(ORTypeVarPair *)typePair pointer:(nullable void *)pointer;
@@ -340,6 +340,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 - (NSUInteger)structLayoutFieldCount;
 - (void)setFieldWithValue:(MFValue *)value forKey:(NSString *)key;
 - (MFValue *)fieldForKey:(NSString *)key;
+- (MFValue *)fieldNoCopyForKey:(NSString *)key;
 - (MFValue *)getResutlInPointer;
 - (void)enumerateStructFieldsUsingBlock:(void (^)(MFValue *field, NSUInteger idx, BOOL *stop))block;
 @end

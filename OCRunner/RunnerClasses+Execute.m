@@ -399,6 +399,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @end
 @implementation ORMethodCall(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
+    if ([self.caller isKindOfClass:[ORMethodCall class]]) {
+        [(ORMethodCall *)self.caller setIsAssignedValue:self.isAssignedValue];
+    }
     MFValue *variable = [self.caller execute:scope];
     if (variable.type == TypeStruct) {
         if ([self.names.firstObject hasPrefix:@"set"]) {
@@ -411,8 +414,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             [variable setFieldWithValue:[valueExp execute:scope] forKey:fieldKey];
             return [MFValue voidValue];
         }else{
-            MFValue *value = [variable fieldForKey:self.names.firstObject];
-            return value;
+            if (self.isAssignedValue) {
+                return [variable fieldNoCopyForKey:self.names.firstObject];
+            }else{
+                return [variable fieldForKey:self.names.firstObject];
+            }
         }
     }
     id instance = variable.objectValue;
@@ -658,6 +664,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             setCaller.caller = [(ORMethodCall *)self.value caller];
             setCaller.names = [@[setterName] mutableCopy];
             setCaller.values = [@[resultExp] mutableCopy];
+            setCaller.isAssignedValue = YES;
             [setCaller execute:scope];
             break;
         }

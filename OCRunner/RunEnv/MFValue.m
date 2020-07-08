@@ -93,7 +93,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     _pointer = dst;
     _isAlloced = YES;
 }
-- (void)setPointerWithNoCopy:(void *)pointer{;
+- (void)setPointerWithNoCopy:(void *)pointer{
     [self deallocPointer];
     _pointer = pointer;
     _isAlloced = NO;
@@ -111,10 +111,15 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 
 - (void)dealloc{
     [self deallocPointer];
+    if(_typeEncode != NULL) free((void *)_typeEncode);
 }
 - (void)setTypeEncode:(const char *)typeEncode{
+#define copyTypeEncode(encode) if(_typeEncode != NULL) free((void *)_typeEncode);\
+const char *buffer = malloc(strlen(encode)+1);\
+strcpy((void *)buffer, encode);\
+_typeEncode = buffer;
     if (strcmp(typeEncode, "@?") == 0) {
-        _typeEncode = typeEncode;
+        copyTypeEncode(typeEncode)
         self.type = TypeBlock;
         return;
     }
@@ -127,7 +132,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     NSUInteger pointerCount = pair.var.ptCount;
     void *result = NULL;
     [self convertValueWithTypeEncode:&result typeEncode:typeEncode];
-    _typeEncode = typeEncode;
+    copyTypeEncode(typeEncode)
     if (result != NULL) {
         self.pointer = &result;
     }
@@ -393,16 +398,24 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     field.pointer = fieldPointer;
     return field;
 }
-- (MFValue *)fieldForKey:(NSString *)key{
+- (MFValue *)fieldForKey:(NSString *)key copied:(BOOL)copied{
     NSCAssert(self.type == TypeStruct, @"must be struct");
     NSString *structName = self.typeName;
     ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
     NSUInteger offset = declare.keyOffsets[key].unsignedIntegerValue;
     MFValue *result = [[MFValue alloc] initTypeEncode:declare.keyTypeEncodes[key].UTF8String];
-    // no copy
-//    [result setPointerWithNoCopy:self.pointer + offset];
-    result.pointer = self.pointer + offset;
+    if (copied) {
+        result.pointer = self.pointer + offset;
+    }else{
+        [result setPointerWithNoCopy:self.pointer + offset];
+    }
     return result;
+}
+- (MFValue *)fieldForKey:(NSString *)key{
+    return [self fieldForKey:key copied:YES];
+}
+- (MFValue *)fieldNoCopyForKey:(NSString *)key{
+    return [self fieldForKey:key copied:NO];
 }
 - (void)setFieldWithValue:(MFValue *)value forKey:(NSString *)key{
     NSCAssert(self.type == TypeStruct, @"must be struct");

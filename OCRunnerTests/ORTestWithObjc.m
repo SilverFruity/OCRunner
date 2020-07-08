@@ -138,28 +138,17 @@ Element2Struct *Element2StructMake(){
     NSArray *results1 = startStructDetect("d");
     XCTAssert(results1.count == 0);
 }
-- (void)testStructSetValue{
+- (void)testStructSetValueNoCopy{
     MFScopeChain *scope = [MFScopeChain topScope];
     or_add_build_in();
-    NSString * source =
-    @"CGSize size;"
-    "size.width = 100;"
-    "size.height = 100;";
-    [OCParser parseSource:source];
-    for (id <OCExecute> exp in OCParser.ast.globalStatements) {
-        [exp execute:scope];
-    }
-    MFValue *sizeValue = [scope getValueWithIdentifier:@"size"];
-    CGSize size = *(CGSize *) sizeValue.pointer;
-    XCTAssert(sizeValue.type == TypeStruct);
-    XCTAssert(size.width == 100);
-    XCTAssert(size.height == 100);
-    [OCParser clear];
-    [scope clear];
-}
-- (void)testStructSetValueMutilLevel{
-    MFScopeChain *scope = [MFScopeChain topScope];
-    or_add_build_in();
+    CGRect rect1 = CGRectZero;
+    MFValue *value = [MFValue defaultValueWithTypeEncoding:@encode(CGRect)];
+    [value setPointerWithNoCopy:&rect1];
+    [[value fieldNoCopyForKey:@"origin"] setFieldWithValue:[MFValue valueWithDouble:1] forKey:@"x"];
+    [[value fieldNoCopyForKey:@"origin"] setFieldWithValue:[MFValue valueWithDouble:2] forKey:@"y"];
+    XCTAssert(rect1.origin.x == 1, @"origin.x %f", rect1.origin.x);
+    XCTAssert(rect1.origin.y == 2, @"origin.y %f", rect1.origin.y);
+    
     NSString * source =
     @"CGRect rect;"
     "rect.origin.x = 10;"
@@ -177,6 +166,35 @@ Element2Struct *Element2StructMake(){
     XCTAssert(rect.origin.y == 10);
     XCTAssert(rect.size.width == 100);
     XCTAssert(rect.size.height == 100);
+    [OCParser clear];
+    [scope clear];
+}
+- (void)testStructSetValueNeedCopy{
+    MFScopeChain *scope = [MFScopeChain topScope];
+    or_add_build_in();
+    CGRect rect1 = CGRectZero;
+    MFValue *value = [MFValue defaultValueWithTypeEncoding:@encode(CGRect)];
+    [value setPointerWithNoCopy:&rect1];
+    [[value fieldForKey:@"origin"] setFieldWithValue:[MFValue valueWithDouble:1] forKey:@"x"];
+    [[value fieldForKey:@"origin"] setFieldWithValue:[MFValue valueWithDouble:2] forKey:@"y"];
+    XCTAssert(rect1.origin.x == 0, @"origin.x %f", rect1.origin.x);
+    XCTAssert(rect1.origin.y == 0, @"origin.y %f", rect1.origin.y);
+
+    or_add_build_in();
+    NSString * source =
+    @"CGRect frame = CGRectMake(0,1,2,3);"
+    "CGSize size = frame.size;"
+    "size.width = 100;"
+    "size.height = 100;";
+    [OCParser parseSource:source];
+    for (id <OCExecute> exp in OCParser.ast.globalStatements) {
+        [exp execute:scope];
+    }
+    MFValue *rectValue = [scope getValueWithIdentifier:@"frame"];
+    CGRect rect = *(CGRect *) rectValue.pointer;
+    XCTAssert(rectValue.type == TypeStruct);
+    XCTAssert(rect.size.width == 2);
+    XCTAssert(rect.size.height == 3);
     [OCParser clear];
     [scope clear];
 }
@@ -276,12 +294,6 @@ typedef struct MyStruct2 {
                                             [[MFValue alloc] initTypeEncode:@encode(CGRect) pointer:&rect]], result);
 
     XCTAssert(CGRectEqualToRect(view.frame, rect));
-}
-- (void)testPerformanceExample {
-    // This is an example of a performance test case.
-    [self measureBlock:^{
-        // Put the code you want to measure the time of here.
-    }];
 }
 
 @end
