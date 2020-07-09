@@ -1,0 +1,182 @@
+typedef id dispatch_source_t;
+typedef id dispatch_group_t;
+typedef id dispatch_queue_t;
+typedef id dispatch_queue_global_t;
+typedef id dispatch_time_t;
+typedef id dispatch_queue_main_t;
+typedef id dispatch_semaphore_t;
+typedef id dispatch_object_t;
+typedef intptr_t dispatch_once_t;
+
+typedef long intptr_t;
+typedef unsigned long uintptr_t;
+typdef  long long int64_t;
+typdef  unsigned long long uint64_t;
+
+typedef enum: unsigned long{
+    DISPATCH_BLOCK_BARRIER = 0x1,
+    DISPATCH_BLOCK_DETACHED = 0x2,
+    DISPATCH_BLOCK_ASSIGN_CURRENT = 0x4,
+    DISPATCH_BLOCK_NO_QOS_CLASS = 0x8,
+    DISPATCH_BLOCK_INHERIT_QOS_CLASS = 0x10,
+    DISPATCH_BLOCK_ENFORCE_QOS_CLASS = 0x20,
+}dispatch_block_flags;
+
+typedef enum:  unsigned int{
+    QOS_CLASS_USER_INTERACTIVE = 0x21,
+    QOS_CLASS_USER_INITIATED = 0x19,
+    QOS_CLASS_DEFAULT = 0x15,
+    QOS_CLASS_UTILITY = 0x11,
+    QOS_CLASS_BACKGROUND = 0x09,
+    QOS_CLASS_UNSPECIFIED = 0x00,
+)qos_class_t;
+
+typedef qos_class_t dispatch_qos_class_t;
+
+dispatch_queue_global_t
+dispatch_get_global_queue(long identifier, unsigned long flags);
+
+dispatch_queue_main_t
+dispatch_get_main_queue(void);
+
+dispatch_queue_t
+dispatch_queue_create(const char * label, dispatch_queue_attr_t attr);
+
+void
+dispatch_after(dispatch_time_t when, dispatch_queue_t queue,
+        dispatch_block_t block);
+        
+void
+dispatch_async(dispatch_queue_t queue, dispatch_block_t block);
+
+void
+dispatch_sync(dispatch_queue_t queue, dispatch_block_t block);
+
+void
+dispatch_barrier_async(dispatch_queue_t queue, dispatch_block_t block);
+
+void
+dispatch_barrier_sync(dispatch_queue_t queue, dispatch_block_t block);
+
+void
+dispatch_apply(size_t iterations,
+        dispatch_queue_t queue,
+        void (^block)(size_t));
+
+dispatch_group_t
+dispatch_group_create(void);
+
+void
+dispatch_group_async(dispatch_group_t group,
+    dispatch_queue_t queue,
+    dispatch_block_t block);
+
+long
+dispatch_group_wait(dispatch_group_t group, dispatch_time_t timeout);
+
+void
+dispatch_group_notify(dispatch_group_t group,
+    dispatch_queue_t queue,
+    dispatch_block_t block);
+
+void
+dispatch_group_enter(dispatch_group_t group);
+
+void
+dispatch_group_leave(dispatch_group_t group);
+
+dispatch_block_t
+dispatch_block_create(dispatch_block_flags_t flags, dispatch_block_t block);
+
+dispatch_block_t
+dispatch_block_create_with_qos_class(dispatch_block_flags_t flags,
+        dispatch_qos_class_t qos_class, int relative_priority,
+        dispatch_block_t block);
+
+void
+dispatch_block_perform(dispatch_block_flags_t flags, dispatch_block_t block);
+
+long
+dispatch_block_wait(dispatch_block_t block, dispatch_time_t timeout);
+
+void
+dispatch_block_notify(dispatch_block_t block, dispatch_queue_t queue,
+        dispatch_block_t notification_block);
+
+long
+dispatch_block_testcancel(dispatch_block_t block);
+
+void
+dispatch_block_cancel(dispatch_block_t block);
+        
+
+dispatch_semaphore_t
+dispatch_semaphore_create(long value);
+
+long
+dispatch_semaphore_wait(dispatch_semaphore_t dsema, dispatch_time_t timeout);
+
+long
+dispatch_semaphore_signal(dispatch_semaphore_t dsema);
+
+
+unsigned long long NSEC_PER_SEC = 1000000000;
+unsigned long long NSEC_PER_MSEC = 1000000;
+unsigned long long USEC_PER_SEC = 1000000;
+unsigned long long NSEC_PER_USEC = 1000;
+
+unsigned long long DISPATCH_TIME_NOW = 0
+unsigned long long DISPATCH_TIME_FOREVER = ~0;
+
+dispatch_time_t
+dispatch_time(dispatch_time_t when, int64_t delta);
+
+void
+dispatch_resume(dispatch_object_t object);
+
+void
+dispatch_suspend(dispatch_object_t object);
+
+dispatch_source_t
+dispatch_source_create(dispatch_source_type_t type,
+    uintptr_t handle,
+    unsigned long mask,
+    dispatch_queue_t _Nullable queue);
+    
+void
+dispatch_source_set_event_handler(dispatch_source_t source,
+    dispatch_block_t _Nullable handler);
+
+void
+dispatch_source_set_cancel_handler(dispatch_source_t source,
+    dispatch_block_t _Nullable handler);
+
+void
+dispatch_source_cancel(dispatch_source_t source);
+
+long
+dispatch_source_testcancel(dispatch_source_t source);
+
+uintptr_t
+dispatch_source_get_handle(dispatch_source_t source);
+
+unsigned long
+dispatch_source_get_mask(dispatch_source_t source);
+
+unsigned long
+dispatch_source_get_data(dispatch_source_t source);
+
+void
+dispatch_source_merge_data(dispatch_source_t source, unsigned long value);
+
+void
+dispatch_source_set_timer(dispatch_source_t source,
+    dispatch_time_t start,
+    uint64_t interval,
+    uint64_t leeway);
+    
+void
+dispatch_source_set_registration_handler(dispatch_source_t source,
+    dispatch_block_t _Nullable handler);
+    
+
