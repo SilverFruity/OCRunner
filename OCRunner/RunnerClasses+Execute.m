@@ -364,9 +364,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }
         case OCValueCString:{
             NSString *value = self.value;
-            char * cstring = malloc(value.length * sizeof(char));
-            memcpy(cstring, value.UTF8String, value.length * sizeof(char));
-            return [MFValue valueWithCString:cstring];
+            return [MFValue valueWithCString:(char *)value.UTF8String];
         }
         case OCValueInt:{
             NSString *value = self.value;

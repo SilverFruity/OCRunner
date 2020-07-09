@@ -34,6 +34,7 @@ class CRunnerTests: XCTestCase {
         unsigned long long j = 1;
         float k = 0.5;
         double l = 0.5;
+        char *str = "123";
         """
         ocparser.parseSource(source)
         let exps = ocparser.ast.globalStatements as! [ORExpression]
@@ -76,6 +77,9 @@ class CRunnerTests: XCTestCase {
         scopeValue = scope.getValueWithIdentifier("l")
         XCTAssert(scopeValue!.type == TypeDouble)
         XCTAssert(scopeValue!.doubleValue == 0.5)
+        scopeValue = scope.getValueWithIdentifier("str")
+        XCTAssert(scopeValue!.type == TypeChar)
+        XCTAssert(String(utf8String: scopeValue!.cStringValue!) == "123")
     }
     func testeDeclareBlock(){
         let source =

@@ -10,8 +10,8 @@
 
 @implementation ORTypeVarPair (TypeEncode)
 - (const char *)typeEncode{
-    char encoding[20];
-    memset(encoding, 0, 20);
+    char encoding[128];
+    memset(encoding, 0, 128);
 #define append(str) strcat(encoding,str)
     NSInteger pointCount = self.var.ptCount;
     TypeKind type = self.type.type;
@@ -64,9 +64,8 @@ append(code); break;
             break;
     }
     append("\0");
-    char * result = malloc(sizeof(char) * 20);
-    strcpy(result, encoding);
-    return result;
+    __autoreleasing NSString *resultValue = [NSString stringWithUTF8String:encoding];
+    return resultValue.UTF8String;
 }
 @end
 

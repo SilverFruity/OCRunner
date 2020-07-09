@@ -163,7 +163,7 @@ void flatMapArgument(MFValue *arg, CallContext ctx){
         }
     }
 }
-extern void ORCoreFunctionCall(void *stack, void *frame, void *fn, void *ret, unsigned int flag);;
+extern void ORCoreFunctionCall(void *stack, void *frame, void *fn, void *ret, NSUInteger flag);;
 void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue){
     if (funptr == NULL) {
         return;

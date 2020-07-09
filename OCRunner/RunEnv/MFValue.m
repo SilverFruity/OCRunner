@@ -69,6 +69,10 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 - (void)deallocPointer{
     if (_pointer != NULL && _isAlloced) {
+        if (*_typeEncode == '*') {
+            void *str = *(void **)_pointer;
+            free(str);
+        }
         free(_pointer);
         _pointer = NULL;
         _objectValue = nil;
@@ -82,8 +86,16 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
         return;
     }
     [self deallocPointer];
-    if (*self.typeEncode == '@') {
+    if (*_typeEncode == '@') {
         _objectValue = *(__strong id *)pointer;
+    }
+    if (*_typeEncode == '*') {
+        char *str = *(char **)pointer;
+        size_t len = strlen(str);
+        char * cstring = malloc(len * sizeof(char) + 1);
+        cstring[len] = '\0';
+        memcpy(cstring, str, len);
+        pointer = &cstring;
     }
     NSUInteger size;
     NSGetSizeAndAlignment(self.typeEncode, &size, NULL);
@@ -115,8 +127,10 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 - (void)setTypeEncode:(const char *)typeEncode{
 #define copyTypeEncode(encode) if(_typeEncode != NULL) free((void *)_typeEncode);\
-const char *buffer = malloc(strlen(encode)+1);\
-strcpy((void *)buffer, encode);\
+size_t strLen = strlen(encode);\
+char *buffer = malloc(strLen+1);\
+buffer[strLen] = '\0';\
+strncpy((void *)buffer, encode, strLen);\
 _typeEncode = buffer;
     if (strcmp(typeEncode, "@?") == 0) {
         copyTypeEncode(typeEncode)
@@ -526,6 +540,9 @@ _typeEncode = buffer;
 }
 - (SEL)selValue{
     return *(SEL *)self.pointer;
+}
+- (char *)cStringValue{
+    return *(char **)self.pointer;
 }
 + (instancetype)voidValue{
     return [MFValue valueWithTypeKind:TypeVoid pointer:NULL];;

@@ -698,7 +698,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = SH4YVD7HDL;
+				DEVELOPMENT_TEAM = 5B852MVZ4Z;
 				INFOPLIST_FILE = OCRunnerDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -717,7 +717,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = SH4YVD7HDL;
+				DEVELOPMENT_TEAM = 5B852MVZ4Z;
 				INFOPLIST_FILE = OCRunnerDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -738,7 +738,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = SH4YVD7HDL;
+				DEVELOPMENT_TEAM = 5B852MVZ4Z;
 				INFOPLIST_FILE = OCRunnerDemoTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -764,7 +764,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = SH4YVD7HDL;
+				DEVELOPMENT_TEAM = 5B852MVZ4Z;
 				INFOPLIST_FILE = OCRunnerDemoTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -786,7 +786,7 @@
 			baseConfigurationReference = 3489C29640E3FB1F05C6053D /* Pods-OCRunnerDemo-OCRunnerDemoUITests.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = SH4YVD7HDL;
+				DEVELOPMENT_TEAM = 5B852MVZ4Z;
 				INFOPLIST_FILE = OCRunnerDemoUITests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -806,7 +806,7 @@
 			baseConfigurationReference = 1C9D422B1CDEE6B7B4FBECF4 /* Pods-OCRunnerDemo-OCRunnerDemoUITests.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = SH4YVD7HDL;
+				DEVELOPMENT_TEAM = 5B852MVZ4Z;
 				INFOPLIST_FILE = OCRunnerDemoUITests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (

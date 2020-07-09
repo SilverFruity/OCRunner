@@ -376,6 +376,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @property (nonatomic, nullable, readonly) id objectValue;
 @property (nonatomic, nullable, readonly) Class classValue;
 @property (nonatomic, nullable, readonly) SEL selValue;
+@property (nonatomic, nullable, readonly) char *cStringValue;
 
 + (instancetype)voidValue;
 + (instancetype)valueWithBOOL:(BOOL)boolValue;
