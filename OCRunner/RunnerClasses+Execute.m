@@ -79,7 +79,6 @@ static void replace_method(Class clazz, ORMethodImplementation *methodImp, MFSco
             const char *beforeTypeEncoding = typeEncoding;
             typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
             free((void *)beforeTypeEncoding);
-            free((void *)paramTypeEncoding);
         }
     }
     Class c2 = methodImp.declare.isClassMethod ? objc_getMetaClass(class_getName(clazz)) : clazz;

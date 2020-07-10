@@ -10,6 +10,7 @@
 #import <Foundation/Foundation.h>
 #import "MFValue.h"
 #import "ORStructDeclare.h"
+#import "ptrauth.h"
 
 typedef struct{
     NSUInteger NGRN;
@@ -245,22 +246,20 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
         prepareForStackSize(arg, &prepareState);
     }
     NSUInteger stackSize = prepareState.NSAA;
-    NSUInteger floatRegistersSize = N_V_ARG_REG*V_REG_SIZE;
-    NSUInteger generalRegistersSize = N_G_ARG_REG*G_REG_SIZE;
     NSUInteger retSize = 0;
     if (flag & AARCH64_RET_NEED_COPY) {
         retSize = 16;
     }else{
         retSize = returnValue.memerySize;
     }
-    char *stack = malloc(floatRegistersSize + generalRegistersSize + stackSize + 40 + retSize);
-    memset(stack, 0, floatRegistersSize + generalRegistersSize + stackSize + 40 + retSize);
+    char *stack = alloca(CALL_CONTEXT_SIZE + stackSize + 40 + retSize);
+    memset(stack, 0, CALL_CONTEXT_SIZE + stackSize + 40 + retSize);
     CallRegisterState state = { 0 , 0 , 0};;
     CallContext context;
     context.state = &state;
     context.floatRegister = (void *)stack;
-    context.generalRegister = (char *)context.floatRegister + floatRegistersSize;
-    context.stackMemeries = (char *)context.generalRegister + generalRegistersSize;
+    context.generalRegister = (char *)context.floatRegister + V_REG_TOTAL_SIZE;
+    context.stackMemeries = (char *)context.generalRegister + G_REG_TOTAL_SIZE;
     context.frame = (char *)context.stackMemeries + + stackSize;
     context.retPointer = (char *)context.frame + 40;
     for (MFValue *arg in args) {
@@ -269,7 +268,6 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
     ORCoreFunctionCall(stack, context.frame, funptr, context.retPointer, flag);
     void *pointer = context.retPointer;
     returnValue.pointer = pointer;
-    free(stack);
 }
 
 

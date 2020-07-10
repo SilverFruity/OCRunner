@@ -56,4 +56,8 @@
 #define V_REG_SIZE 16
 #define N_G_ARG_REG 8 // The Number Of General Register
 #define N_V_ARG_REG 8 // The Number Of Float-Point Register
+#define V_REG_TOTAL_SIZE (N_V_ARG_REG * V_REG_SIZE)
+#define G_REG_TOTAL_SIZE (N_G_ARG_REG * G_REG_SIZE)
+#define CALL_CONTEXT_SIZE    (V_REG_TOTAL_SIZE + G_REG_TOTAL_SIZE)
+
 #define ARGS_SIZE N_V_ARG_REG*V_REG_SIZE+N_G_ARG_REG*G_REG_SIZE
