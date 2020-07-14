@@ -25,6 +25,10 @@
 		04A531BF248F972500D83A48 /* ORSearchedFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 04A531BD248F972500D83A48 /* ORSearchedFunction.m */; };
 		04C3B25624B70D9B00AA8574 /* ORCoreFunctionCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C3B25524B70D9B00AA8574 /* ORCoreFunctionCall.m */; };
 		04C3B25B24B729B900AA8574 /* GCDRefrences in Resources */ = {isa = PBXBuildFile; fileRef = 04C3B25A24B729B800AA8574 /* GCDRefrences */; };
+		04C3B28124BDB71200AA8574 /* ORCoreFunctionRegister.s in Sources */ = {isa = PBXBuildFile; fileRef = 04C3B27E24BDB71200AA8574 /* ORCoreFunctionRegister.s */; };
+		04C3B28224BDB71200AA8574 /* ORCoreFunctionRegister.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C3B27F24BDB71200AA8574 /* ORCoreFunctionRegister.m */; };
+		04C3B28324BDB71200AA8574 /* ORCoreFunctionRegister.h in Headers */ = {isa = PBXBuildFile; fileRef = 04C3B28024BDB71200AA8574 /* ORCoreFunctionRegister.h */; };
+		04C3B28524BDB71800AA8574 /* ORCoreFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 04C3B28424BDB71800AA8574 /* ORCoreFunction.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04E6659D2473C76D008DB08E /* ORTestWithObjc.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E6659C2473C76D008DB08E /* ORTestWithObjc.m */; };
 		04E665A12474D284008DB08E /* built-in.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E665A02474D284008DB08E /* built-in.m */; };
 		04E665AB2474D723008DB08E /* ORGCDTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E665AA2474D723008DB08E /* ORGCDTests.m */; };
@@ -142,6 +146,10 @@
 		04A531BD248F972500D83A48 /* ORSearchedFunction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORSearchedFunction.m; sourceTree = "<group>"; };
 		04C3B25524B70D9B00AA8574 /* ORCoreFunctionCall.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORCoreFunctionCall.m; sourceTree = "<group>"; };
 		04C3B25A24B729B800AA8574 /* GCDRefrences */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = GCDRefrences; sourceTree = "<group>"; };
+		04C3B27E24BDB71200AA8574 /* ORCoreFunctionRegister.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = ORCoreFunctionRegister.s; sourceTree = "<group>"; };
+		04C3B27F24BDB71200AA8574 /* ORCoreFunctionRegister.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORCoreFunctionRegister.m; sourceTree = "<group>"; };
+		04C3B28024BDB71200AA8574 /* ORCoreFunctionRegister.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORCoreFunctionRegister.h; sourceTree = "<group>"; };
+		04C3B28424BDB71800AA8574 /* ORCoreFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORCoreFunction.h; sourceTree = "<group>"; };
 		04E6659C2473C76D008DB08E /* ORTestWithObjc.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORTestWithObjc.m; sourceTree = "<group>"; };
 		04E665A02474D284008DB08E /* built-in.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "built-in.m"; sourceTree = "<group>"; };
 		04E665A92474D723008DB08E /* ORGCDTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORGCDTests.h; sourceTree = "<group>"; };
@@ -219,14 +227,26 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		04C3B27D24BDB70300AA8574 /* ORCoreFunction */ = {
+			isa = PBXGroup;
+			children = (
+				04C3B28424BDB71800AA8574 /* ORCoreFunction.h */,
+				04F0DA5924B47D9B000B1996 /* ORCoreFunctionCall.h */,
+				04C3B25524B70D9B00AA8574 /* ORCoreFunctionCall.m */,
+				04F0DA5724B47B49000B1996 /* ORCoreFunctionCall.s */,
+				04C3B28024BDB71200AA8574 /* ORCoreFunctionRegister.h */,
+				04C3B27F24BDB71200AA8574 /* ORCoreFunctionRegister.m */,
+				04C3B27E24BDB71200AA8574 /* ORCoreFunctionRegister.s */,
+			);
+			name = ORCoreFunction;
+			sourceTree = "<group>";
+		};
 		04F0DA5424B47B11000B1996 /* ORCoreImp */ = {
 			isa = PBXGroup;
 			children = (
 				EEBF3332248E674300DDE2E9 /* ORCoreImp.h */,
 				EEBF3333248E674300DDE2E9 /* ORCoreImp.m */,
-				04F0DA5924B47D9B000B1996 /* ORCoreFunctionCall.h */,
-				04C3B25524B70D9B00AA8574 /* ORCoreFunctionCall.m */,
-				04F0DA5724B47B49000B1996 /* ORCoreFunctionCall.s */,
+				04C3B27D24BDB70300AA8574 /* ORCoreFunction */,
 			);
 			name = ORCoreImp;
 			sourceTree = "<group>";
@@ -372,6 +392,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EE9899A924658F8900ACF2C1 /* MFVarDeclareChain.h in Headers */,
+				04C3B28524BDB71800AA8574 /* ORCoreFunction.h in Headers */,
 				048FAA3E247FA4820036F5EE /* built-in.h in Headers */,
 				04F0DA5A24B47D9B000B1996 /* ORCoreFunctionCall.h in Headers */,
 				04A531B8248F8AD600D83A48 /* SymbolSearch.h in Headers */,
@@ -382,6 +403,7 @@
 				EE9899B624658F8900ACF2C1 /* MFMethodMapTable.h in Headers */,
 				EE38F997246C3C2A00E7C37B /* RunnerClasses.h in Headers */,
 				042AC259246D453700070814 /* MFBlock.h in Headers */,
+				04C3B28324BDB71200AA8574 /* ORCoreFunctionRegister.h in Headers */,
 				EE9899AD24658F8900ACF2C1 /* MFScopeChain.h in Headers */,
 				EE197B852478DD190049CFDA /* ORInterpreter.h in Headers */,
 				EE9899C62465923900ACF2C1 /* util.h in Headers */,
@@ -530,6 +552,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04C3B28224BDB71200AA8574 /* ORCoreFunctionRegister.m in Sources */,
 				EE9899B024658F8900ACF2C1 /* MFStaticVarTable.m in Sources */,
 				04A531B7248F8AD600D83A48 /* SymbolSearch.c in Sources */,
 				EE50145224890BFE00B463BB /* ORMultiArgsCFunCall-arm64.s in Sources */,
@@ -551,6 +574,7 @@
 				EEA2AC82246855F100B08407 /* MFStack.m in Sources */,
 				0408F01C247D027B004F703D /* ORTypeVarPair+TypeEncode.m in Sources */,
 				EE9899B324658F8900ACF2C1 /* MFVarDeclareChain.m in Sources */,
+				04C3B28124BDB71200AA8574 /* ORCoreFunctionRegister.s in Sources */,
 				EE197B862478DD190049CFDA /* ORInterpreter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
