@@ -9,14 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "RunnerClasses+Execute.h"
 NS_ASSUME_NONNULL_BEGIN
-NSString *startRemovePointerOfTypeEncode(const char *typeEncode);
-NSUInteger startDetectPointerCount(const char *typeEncode);
-NSString *startStructNameDetect(const char *typeEncode);
-NSMutableArray * startStructDetect(const char *typeEncode);
-NSMutableArray * startDetectTypeEncodes(NSString *content);
-NSString * detectStructMemeryLayoutEncodeCode(const char *typeEncode);
-BOOL isHomogeneousFloatingPointAggregate(const char *typeEncode);
-NSUInteger fieldCountInStructMemeryLayoutEncode(const char *typeEncode);
+
 @interface ORStructDeclare : NSObject
 @property (copy, nonatomic) NSString *name;
 @property (assign, nonatomic)const char *typeEncoding;

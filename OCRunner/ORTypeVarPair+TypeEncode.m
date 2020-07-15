@@ -7,6 +7,7 @@
 //
 
 #import "ORTypeVarPair+TypeEncode.h"
+#import "ORHandleTypeEncode.h"
 
 @implementation ORTypeVarPair (TypeEncode)
 - (const char *)typeEncode{
@@ -92,7 +93,6 @@ append(code); break;
 }
 @end
 
-#import "ORStructDeclare.h"
 ORTypeVarPair * ORTypeVarPairForTypeEncode(const char *typeEncode){
     TypeKind type = TypeVoid;
     ORTypeVarPair *pair = [ORTypeVarPair new];

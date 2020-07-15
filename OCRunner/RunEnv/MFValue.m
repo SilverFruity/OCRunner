@@ -11,6 +11,8 @@
 #import "util.h"
 #import "ORStructDeclare.h"
 #import "ORTypeVarPair+TypeEncode.h"
+#import "ORHandleTypeEncode.h"
+
 #define MFValueBridge(target,resultType)\
 resultType result;\
 switch (target.type) {\
@@ -293,22 +295,13 @@ _typeEncode = buffer;
     return !result;
 }
 - (BOOL)isInteger{
-    if (self.isPointer) {
-        return NO;
-    }
-    return self.type <= TypeLongLong && self.type !=  TypeVoid;
+    return isIntegerWithTypeEncode(self.typeEncode);
 }
 - (BOOL)isFloat{
-    if (self.isPointer) {
-        return NO;
-    }
-    return self.type == TypeFloat || self.type == TypeDouble;
+    return isFloatWithTypeEncode(self.typeEncode);
 }
 - (BOOL)isObject{
-    if (self.isPointer) {
-        return NO;
-    }
-    return self.type == TypeObject || self.type == TypeClass || self.type == TypeId || self.type == TypeSEL;
+    return isObjectWithTypeEncode(self.typeEncode);
 }
 - (BOOL)isPointer{
     return *self.typeEncode == '^';
@@ -369,26 +362,19 @@ _typeEncode = buffer;
 
 @implementation MFValue (Struct)
 - (BOOL)isStruct{
-   return *self.typeEncode == '{';
+    return isStructWithTypeEncode(self.typeEncode);
 }
 - (BOOL)isStructPointer{
-    return [self isStructValueOrPointer] && (*self.typeEncode == '^');
+    return isStructPointerWithTypeEncode(self.typeEncode);
 }
 - (BOOL)isStructValueOrPointer{
-    NSString *encode = [NSString stringWithUTF8String:self.typeEncode];
-    NSString *ignorePointer = [encode stringByReplacingOccurrencesOfString:@"^" withString:@""];
-    return *ignorePointer.UTF8String == '{';
+    return isStructOrStructPointerWithTypeEncode(self.typeEncode);
 }
 - (BOOL)isHFAStruct{
-    if (!self.isStruct) {
-        return NO;
-    }
-    NSString *typeencode = detectStructMemeryLayoutEncodeCode(self.typeEncode);
-    return isHomogeneousFloatingPointAggregate(typeencode.UTF8String);
+    return isHFAStructWithTypeEncode(self.typeEncode);
 }
 - (NSUInteger)structLayoutFieldCount{
-    NSString *typeencode = detectStructMemeryLayoutEncodeCode(self.typeEncode);
-    return fieldCountInStructMemeryLayoutEncode(typeencode.UTF8String);
+    return structLayoutTotalFieldCountWithTypeEncode(self.typeEncode);
 }
 - (MFValue *)getResutlInPointer{
     MFValue *field = [MFValue new];

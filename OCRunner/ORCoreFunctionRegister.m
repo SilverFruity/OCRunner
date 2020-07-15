@@ -11,17 +11,35 @@
 #import "ORCoreFunction.h"
 #include <mach/mach.h>
 #include <pthread.h>
+# if __has_feature(ptrauth_calls)
+#  define HAVE_PTRAUTH 1
+# endif
+
 #ifdef HAVE_PTRAUTH
 #include <ptrauth.h>
 #endif
 
+typedef enum {
+    FFI_OK = 0,
+    FFI_BAD_TYPEDEF,
+    FFI_BAD_ABI
+} ffi_status;
+
+typedef struct {
+    unsigned nargs;
+    const char **arg_typeEncodes;
+    const char *r_typeEncode;
+    unsigned flags;
+} ffi_cif;
+
 typedef struct {
     void *trampoline_table;
     void *trampoline_table_entry;
-//    ORCoreFunctionArgsWrapper  *wrapper;
-//    void (*fun)(ORCoreFunctionArgsWrapper *, void*,void**,void*);
+    ffi_cif   *cif;
+    void     (*fun)(ffi_cif*,void*,void**,void*);
     void  *user_data;
 } ffi_closure;
+
 extern void *ffi_closure_trampoline_table_page;
 
 typedef struct ffi_trampoline_table ffi_trampoline_table;
@@ -218,35 +236,28 @@ void ffi_closure_free(void *ptr)
     /* Free the closure */
     free(closure);
 }
-typedef enum {
-  FFI_OK = 0,
-  FFI_BAD_TYPEDEF,
-  FFI_BAD_ABI
-} ffi_status;
 
-//ffi_status
-//ffi_prep_closure_loc (ffi_closure *closure,
-//                      ORCoreFunctionArgsWrapper* wrapper,
-//                      void (*fun)(ORCoreFunctionArgsWrapper*,void*,void**,void*),
-//                      void *user_data,
-//                      void *codeloc)
-//{
-//    void (*start)(void);
-////    if (cif->flags & AARCH64_FLAG_ARG_V)
-////        start = ffi_closure_SYSV_V;
-////    else
-////        start = ffi_closure_SYSV;
-//#ifdef __MACH__
-//#ifdef HAVE_PTRAUTH
-//    codeloc = ptrauth_strip (codeloc, ptrauth_key_asia);
-//#endif
-//    void **config = (void **)((uint8_t *)codeloc - PAGE_MAX_SIZE);
-//    config[0] = closure;
-//    config[1] = start;
-//#endif
-//    closure->wrapper = wrapper;
-//    closure->fun = fun;
-//    closure->user_data = user_data;
-//    
-//    return FFI_OK;
-//}
+ffi_status
+ffi_prep_closure_loc(ffi_closure *closure,
+                     ffi_cif* ffi,
+                     void (*fun)(ffi_cif*,void*,void**,void*),
+                     void *user_data,
+                     void *codeloc)
+{
+    void (*start)(void);
+    //    if (cif->flags & AARCH64_FLAG_ARG_V)
+    //        start = ffi_closure_SYSV_V;
+    //    else
+    //        start = ffi_closure_SYSV;
+#ifdef HAVE_PTRAUTH
+    codeloc = ptrauth_strip(codeloc, ptrauth_key_asia);
+#endif
+    void **config = (void **)((uint8_t *)codeloc - PAGE_MAX_SIZE);
+    config[0] = closure;
+    config[1] = start;
+    closure->cif = ffi;
+    closure->fun = fun;
+    closure->user_data = user_data;
+    
+    return FFI_OK;
+}

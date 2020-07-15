@@ -38,6 +38,8 @@
 		04F0DA5A24B47D9B000B1996 /* ORCoreFunctionCall.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F0DA5924B47D9B000B1996 /* ORCoreFunctionCall.h */; };
 		EE197B852478DD190049CFDA /* ORInterpreter.h in Headers */ = {isa = PBXBuildFile; fileRef = EE197B832478DD190049CFDA /* ORInterpreter.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE197B862478DD190049CFDA /* ORInterpreter.m in Sources */ = {isa = PBXBuildFile; fileRef = EE197B842478DD190049CFDA /* ORInterpreter.m */; };
+		EE1C6FA324BF364A00430A51 /* ORHandleTypeEncode.h in Headers */ = {isa = PBXBuildFile; fileRef = EE1C6FA124BF364A00430A51 /* ORHandleTypeEncode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EE1C6FA424BF364A00430A51 /* ORHandleTypeEncode.m in Sources */ = {isa = PBXBuildFile; fileRef = EE1C6FA224BF364A00430A51 /* ORHandleTypeEncode.m */; };
 		EE38F997246C3C2A00E7C37B /* RunnerClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98998724658DB700ACF2C1 /* RunnerClasses.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE50145024890BFE00B463BB /* ORMultiArgsMethodCall-arm64.s in Sources */ = {isa = PBXBuildFile; fileRef = EE50144B24890BFE00B463BB /* ORMultiArgsMethodCall-arm64.s */; };
 		EE50145124890BFE00B463BB /* ORMultiArgsCall.h in Headers */ = {isa = PBXBuildFile; fileRef = EE50144E24890BFE00B463BB /* ORMultiArgsCall.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -160,6 +162,8 @@
 		04F0DA5924B47D9B000B1996 /* ORCoreFunctionCall.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORCoreFunctionCall.h; sourceTree = "<group>"; };
 		EE197B832478DD190049CFDA /* ORInterpreter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORInterpreter.h; sourceTree = "<group>"; };
 		EE197B842478DD190049CFDA /* ORInterpreter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORInterpreter.m; sourceTree = "<group>"; };
+		EE1C6FA124BF364A00430A51 /* ORHandleTypeEncode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORHandleTypeEncode.h; sourceTree = "<group>"; };
+		EE1C6FA224BF364A00430A51 /* ORHandleTypeEncode.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORHandleTypeEncode.m; sourceTree = "<group>"; };
 		EE50144B24890BFE00B463BB /* ORMultiArgsMethodCall-arm64.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = "ORMultiArgsMethodCall-arm64.s"; sourceTree = "<group>"; };
 		EE50144E24890BFE00B463BB /* ORMultiArgsCall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORMultiArgsCall.h; sourceTree = "<group>"; };
 		EE50144F24890BFE00B463BB /* ORMultiArgsCFunCall-arm64.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = "ORMultiArgsCFunCall-arm64.s"; sourceTree = "<group>"; };
@@ -310,6 +314,8 @@
 				04E665A02474D284008DB08E /* built-in.m */,
 				0408F019247D027B004F703D /* ORTypeVarPair+TypeEncode.h */,
 				0408F01A247D027B004F703D /* ORTypeVarPair+TypeEncode.m */,
+				EE1C6FA124BF364A00430A51 /* ORHandleTypeEncode.h */,
+				EE1C6FA224BF364A00430A51 /* ORHandleTypeEncode.m */,
 				EE98998D24658F8900ACF2C1 /* RunEnv */,
 				EE9899BC2465923800ACF2C1 /* Util */,
 				EE98996E24658DA600ACF2C1 /* OCRunner.h */,
@@ -406,6 +412,7 @@
 				04C3B28324BDB71200AA8574 /* ORCoreFunctionRegister.h in Headers */,
 				EE9899AD24658F8900ACF2C1 /* MFScopeChain.h in Headers */,
 				EE197B852478DD190049CFDA /* ORInterpreter.h in Headers */,
+				EE1C6FA324BF364A00430A51 /* ORHandleTypeEncode.h in Headers */,
 				EE9899C62465923900ACF2C1 /* util.h in Headers */,
 				EE98997C24658DA600ACF2C1 /* OCRunner.h in Headers */,
 				EEA2AC83246855F100B08407 /* MFStack.h in Headers */,
@@ -576,6 +583,7 @@
 				EE9899B324658F8900ACF2C1 /* MFVarDeclareChain.m in Sources */,
 				04C3B28124BDB71200AA8574 /* ORCoreFunctionRegister.s in Sources */,
 				EE197B862478DD190049CFDA /* ORInterpreter.m in Sources */,
+				EE1C6FA424BF364A00430A51 /* ORHandleTypeEncode.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

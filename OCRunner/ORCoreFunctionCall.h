@@ -61,3 +61,7 @@
 #define CALL_CONTEXT_SIZE    (V_REG_TOTAL_SIZE + G_REG_TOTAL_SIZE)
 
 #define ARGS_SIZE N_V_ARG_REG*V_REG_SIZE+N_G_ARG_REG*G_REG_SIZE
+
+#define OR_ALIGNMENT 8
+// 字节对齐
+#define OR_ALIGN(v,a) (v + (a - 1)) / (a);

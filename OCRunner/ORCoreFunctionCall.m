@@ -10,6 +10,7 @@
 #import <Foundation/Foundation.h>
 #import "MFValue.h"
 #import "ORStructDeclare.h"
+#import "ORHandleTypeEncode.h"
 #import "ptrauth.h"
 
 typedef struct{
@@ -34,14 +35,14 @@ void prepareForStackSize(MFValue *arg, CallRegisterState *state){
             return;
         }
         state->NGRN = N_G_ARG_REG;
-        state->NSAA += (arg.memerySize + 7) / 8;
+        state->NSAA += (arg.memerySize + 7) / OR_ALIGNMENT;
     }else if (arg.isFloat) {
         if (state->NSRN < N_V_ARG_REG) {
             state->NSRN++;
             return;
         }
         state->NSRN = N_V_ARG_REG;
-        state->NSAA += (arg.memerySize + 7) / 8;
+        state->NSAA += (arg.memerySize + 7) / OR_ALIGNMENT;
         // Composite Types
         // aggregate: struct and array
     }else if (arg.isStruct) {
@@ -59,20 +60,20 @@ void prepareForStackSize(MFValue *arg, CallRegisterState *state){
                 return;
             }
             state->NSRN = N_V_ARG_REG;
-            state->NSAA += (arg.memerySize + 7) / 8;
+            state->NSAA += (arg.memerySize + 7) / OR_ALIGNMENT;
         }else if (arg.memerySize > 16){
             MFValue *copied = [MFValue valueWithPointer:arg.pointer];
             prepareForStackSize(copied, state);
         }else{
             NSUInteger memsize = arg.memerySize;
-            NSUInteger needGRN = (memsize + 7) / 8;
+            NSUInteger needGRN = (memsize + 7) / OR_ALIGNMENT;
             if (8 - state->NGRN >= needGRN) {
                 //set args to general register
                 state->NGRN += needGRN;
                 return;
             }
             state->NGRN = N_V_ARG_REG;
-            state->NSAA += (arg.memerySize + 7) / 8;
+            state->NSAA += (arg.memerySize + 7) / OR_ALIGNMENT;
         }
     }
 }
@@ -106,7 +107,7 @@ void flatMapArgument(MFValue *arg, CallContext ctx){
             state->NGRN = N_G_ARG_REG;
             void *pointer = arg.pointer;
             memcpy(ctx.stackMemeries + state->NSAA, pointer, arg.memerySize);
-            state->NSAA += (arg.memerySize + 7) / 8;
+            state->NSAA += (arg.memerySize + 7) / OR_ALIGNMENT;
             return;
         }
     }else if (arg.isFloat) {
@@ -119,7 +120,7 @@ void flatMapArgument(MFValue *arg, CallContext ctx){
             state->NSRN = N_V_ARG_REG;
             void *pointer = arg.pointer;
             memcpy(ctx.stackMemeries + state->NSAA, pointer, arg.memerySize);
-            state->NSAA += (arg.memerySize + 7) / 8;
+            state->NSAA += (arg.memerySize + 7) / OR_ALIGNMENT;
             return;
         }
         // Composite Types
@@ -141,7 +142,7 @@ void flatMapArgument(MFValue *arg, CallContext ctx){
                 state->NSRN = N_V_ARG_REG;
                 void *pointer = arg.pointer;
                 memcpy(ctx.stackMemeries + state->NSAA, pointer, arg.memerySize);
-                state->NSAA += (arg.memerySize + 7) / 8;
+                state->NSAA += (arg.memerySize + 7) / OR_ALIGNMENT;
                 return;
             }
         }else if (arg.memerySize > 16){
@@ -149,7 +150,7 @@ void flatMapArgument(MFValue *arg, CallContext ctx){
             flatMapArgument(copied, ctx);
         }else{
             NSUInteger memsize = arg.memerySize;
-            NSUInteger needGRN = (memsize + 7) / 8;
+            NSUInteger needGRN = (memsize + 7) / OR_ALIGNMENT;
             if (8 - state->NGRN >= needGRN) {
                 //set args to general register
                 structStoeInRegister(NO, arg, ctx);
@@ -158,7 +159,7 @@ void flatMapArgument(MFValue *arg, CallContext ctx){
                 state->NGRN = N_V_ARG_REG;
                 void *pointer = arg.pointer;
                 memcpy(ctx.stackMemeries + state->NSAA, pointer, arg.memerySize);
-                state->NSAA += (arg.memerySize + 7) / 8;
+                state->NSAA += (arg.memerySize + 7) / OR_ALIGNMENT;
                 return;
             }
         }

@@ -10,6 +10,7 @@
 #import <OCRunner/OCRunner.h>
 #import <OCRunner/ORCoreImp.h>
 #import <objc/message.h>
+#import <OCRunner/ORHandleTypeEncode.h>
 @interface ORTestWithObjc : XCTestCase
 
 @end
@@ -228,6 +229,9 @@ Element2Struct *Element2StructMake(){
     XCTAssert(isHomogeneousFloatingPointAggregate(result.UTF8String));
     XCTAssert(fieldCountInStructMemeryLayoutEncode(result.UTF8String) == 6);
     XCTAssert(fieldCountInStructMemeryLayoutEncode("^^f^fdd^^dd") == 6);
+    NSString *result1 = detectStructMemeryLayoutEncodeCode(@encode(ContainerStruct));
+    XCTAssert([result1 isEqualToString:@"^^i^id^{Element1Struct}ddd^^i^id^{Element2Struct}"]);
+    XCTAssert(fieldCountInStructMemeryLayoutEncode(result1.UTF8String) == 11);
 }
 
 typedef struct MyStruct
@@ -296,4 +300,15 @@ typedef struct MyStruct2 {
     XCTAssert(CGRectEqualToRect(view.frame, rect));
 }
 
+- (void)testPerformanceExample {
+    // This is an example of a performance test case.
+    [self measureBlock:^{
+        for (int i = 0; i < 100000; i++) {
+            NSUInteger size = 0;
+            NSUInteger align = 0;
+            NSGetSizeAndAlignment("{CGRect={CGPoint=ff{CGPoint=dd}}{CGSize=dd}}", &size, &align);
+            NSGetSizeAndAlignment("{ContainerStruct={Element1Struct=^^i^id}^{Element1Struct}{Element2Struct=ddd{Element1Struct=^^i^id}}^{Element2Struct}}", &size, &align);
+        }
+    }];
+}
 @end
