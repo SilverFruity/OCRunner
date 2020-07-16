@@ -13,10 +13,15 @@
 #import "ORHandleTypeEncode.h"
 #import "ptrauth.h"
 #import "ORCoreFunction.h"
-NSUInteger resultFlagsForHFATypeEncode(const char * typeEncode){
+NSUInteger floatPointFlagsWithTypeEncode(const char * typeEncode){
     NSUInteger fieldCount = structLayoutTotalFieldCountWithTypeEncode(typeEncode);
-    if (isHFAStructWithTypeEncode(typeEncode) && fieldCount <= 4) {
-        const char *fieldEncode = detectStructMemeryLayoutEncodeCode(typeEncode).UTF8String;
+    if (fieldCount <= 4) {
+        const char *fieldEncode;
+        if (isStructWithTypeEncode(typeEncode)) {
+             fieldEncode = detectStructMemeryLayoutEncodeCode(typeEncode).UTF8String;
+        }else{
+             fieldEncode = typeEncode;
+        }
         NSUInteger offset = 0;
         switch (*fieldEncode) {
             case 'f':
@@ -27,6 +32,9 @@ NSUInteger resultFlagsForHFATypeEncode(const char * typeEncode){
                 break;
             default:
                 break;
+        }
+        if (fieldEncode == typeEncode && offset == 0) {
+            return 0;
         }
         //iOS没有LONGDOUBLE
         //Note that FFI_TYPE_FLOAT == 2, _DOUBLE == 3, _LONGDOUBLE == 4
@@ -60,7 +68,7 @@ NSUInteger resultFlagsForTypeEncode(const char * retTypeEncode, char **argTypeEn
         case 'f':
         case 'd':
         case '{':{
-            flag = resultFlagsForHFATypeEncode(retTypeEncode);
+            flag = floatPointFlagsWithTypeEncode(retTypeEncode);
             NSUInteger s = sizeOfTypeEncode(retTypeEncode);
             if (flag == 0) {
                 if (s > 16)
@@ -78,7 +86,7 @@ NSUInteger resultFlagsForTypeEncode(const char * retTypeEncode, char **argTypeEn
             break;
     }
     for (int i = 0; i < narg; i++) {
-        if (isHFAStructWithTypeEncode(argTypeEncodes[i])) {
+        if (isHFAStructWithTypeEncode(argTypeEncodes[i]) || isFloatWithTypeEncode(argTypeEncodes[i])) {
             flag |= AARCH64_FLAG_ARG_V; break;
         }
     }
@@ -252,7 +260,7 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
             case TypeFloat:
             case TypeDouble:
             case TypeStruct:{
-                flag = resultFlagsForHFATypeEncode(returnValue.typeEncode);
+                flag = floatPointFlagsWithTypeEncode(returnValue.typeEncode);
                 NSUInteger s = returnValue.memerySize;
                 if (flag == 0) {
                     if (s > 16)
