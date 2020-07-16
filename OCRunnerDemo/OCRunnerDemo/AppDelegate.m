@@ -19,14 +19,7 @@
 
 @implementation AppDelegate
 
-void testRegister1(ffi_cif *types, void* ret, void **args, void *userdata){
-    *(int *)ret = 1;
-}
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    char *args[2] = {"i","d"};
-    int (*func)(int a, float b) = register_function(&testRegister1, 2, args, "i");
-    int res = func(100, 0.1);
-    printf("%d",res);
     NSString *path = [[NSBundle mainBundle] pathForResource:@"ViewController1" ofType:nil];
     NSString *data = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
     [ORInterpreter excute:data];

@@ -14,7 +14,7 @@
 #import "ptrauth.h"
 #import "ORCoreFunction.h"
 NSUInteger floatPointFlagsWithTypeEncode(const char * typeEncode){
-    NSUInteger fieldCount = structLayoutTotalFieldCountWithTypeEncode(typeEncode);
+    NSUInteger fieldCount = totalFieldCountWithTypeEncode(typeEncode);;
     if (fieldCount <= 4) {
         const char *fieldEncode;
         if (isStructWithTypeEncode(typeEncode)) {

@@ -180,9 +180,9 @@ BOOL isHFAStructWithTypeEncode(const char *typeEncode){
     NSString *typeencode = detectStructMemeryLayoutEncodeCode(typeEncode);
     return isHomogeneousFloatingPointAggregate(typeencode.UTF8String);
 }
-NSUInteger structLayoutTotalFieldCountWithTypeEncode(const char *typeEncode){
+NSUInteger totalFieldCountWithTypeEncode(const char *typeEncode){
     if (!isStructWithTypeEncode(typeEncode)) {
-        return 0;
+        return 1;
     }
     NSString *typeencode = detectStructMemeryLayoutEncodeCode(typeEncode);
     return fieldCountInStructMemeryLayoutEncode(typeencode.UTF8String);

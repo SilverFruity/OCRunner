@@ -374,7 +374,7 @@ _typeEncode = buffer;
     return isHFAStructWithTypeEncode(self.typeEncode);
 }
 - (NSUInteger)structLayoutFieldCount{
-    return structLayoutTotalFieldCountWithTypeEncode(self.typeEncode);
+    return totalFieldCountWithTypeEncode(self.typeEncode);
 }
 - (MFValue *)getResutlInPointer{
     MFValue *field = [MFValue new];
