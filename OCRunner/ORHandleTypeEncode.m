@@ -229,3 +229,8 @@ BOOL isPointerWithTypeEncode(const char *typeEncode){
     if (typeEncode == NULL) return NO;
     return *typeEncode == '^';
 }
+NSUInteger sizeOfTypeEncode(const char *typeEncode){
+    NSUInteger size;
+    NSGetSizeAndAlignment(typeEncode, &size, NULL);
+    return size;
+}

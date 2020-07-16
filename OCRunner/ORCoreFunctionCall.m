@@ -12,22 +12,78 @@
 #import "ORStructDeclare.h"
 #import "ORHandleTypeEncode.h"
 #import "ptrauth.h"
-
-typedef struct{
-    NSUInteger NGRN;
-    NSUInteger NSRN;
-    NSUInteger NSAA;
-}CallRegisterState;
-
-typedef struct {
-    CallRegisterState *state;
-    void **generalRegister;
-    void *floatRegister;
-    void *frame;
-    char *stackMemeries;
-    void *retPointer;
-}CallContext;
-
+#import "ORCoreFunction.h"
+NSUInteger resultFlagsForHFATypeEncode(const char * typeEncode){
+    NSUInteger fieldCount = structLayoutTotalFieldCountWithTypeEncode(typeEncode);
+    if (isHFAStructWithTypeEncode(typeEncode) && fieldCount <= 4) {
+        const char *fieldEncode = detectStructMemeryLayoutEncodeCode(typeEncode).UTF8String;
+        NSUInteger offset = 0;
+        switch (*fieldEncode) {
+            case 'f':
+                offset = 2;
+                break;
+            case 'd':
+                offset = 3;
+                break;
+            default:
+                break;
+        }
+        //iOS没有LONGDOUBLE
+        //Note that FFI_TYPE_FLOAT == 2, _DOUBLE == 3, _LONGDOUBLE == 4
+        //#define AARCH64_RET_S4        8
+        //#define AARCH64_RET_D4        12
+        return offset * 4 + (4 - fieldCount);
+    }
+    return 0;
+    
+}
+NSUInteger resultFlagsForTypeEncode(const char * retTypeEncode, char **argTypeEncodes, int narg){
+    NSUInteger flag = 0;
+    switch (*retTypeEncode) {
+        case ':':
+        case '*':
+        case '#':
+        case '^':
+        case '@': flag = AARCH64_RET_INT64; break;
+        case 'v': flag = AARCH64_RET_VOID; break;
+        case 'C': flag = AARCH64_RET_UINT8; break;
+        case 'S': flag = AARCH64_RET_UINT16; break;
+        case 'I': flag = AARCH64_RET_UINT32; break;
+        case 'L': flag = AARCH64_RET_INT64; break;
+        case 'Q': flag = AARCH64_RET_INT64; break;
+        case 'B': flag = AARCH64_RET_UINT8; break;
+        case 'c': flag = AARCH64_RET_SINT8; break;
+        case 's': flag = AARCH64_RET_SINT16; break;
+        case 'i': flag = AARCH64_RET_SINT32; break;
+        case 'l': flag = AARCH64_RET_SINT32; break;
+        case 'q': flag = AARCH64_RET_INT64; break;
+        case 'f':
+        case 'd':
+        case '{':{
+            flag = resultFlagsForHFATypeEncode(retTypeEncode);
+            NSUInteger s = sizeOfTypeEncode(retTypeEncode);
+            if (flag == 0) {
+                if (s > 16)
+                    flag = AARCH64_RET_VOID | AARCH64_RET_IN_MEM;
+                else if (s == 16)
+                    flag = AARCH64_RET_INT128;
+                else if (s == 8)
+                    flag = AARCH64_RET_INT64;
+                else
+                    flag = AARCH64_RET_INT128 | AARCH64_RET_NEED_COPY;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    for (int i = 0; i < narg; i++) {
+        if (isHFAStructWithTypeEncode(argTypeEncodes[i])) {
+            flag |= AARCH64_FLAG_ARG_V; break;
+        }
+    }
+    return flag;
+}
 void prepareForStackSize(MFValue *arg, CallRegisterState *state){
     if (arg.isInteger || arg.isPointer || arg.isObject) {
         if (state->NGRN < N_G_ARG_REG) {
@@ -47,8 +103,7 @@ void prepareForStackSize(MFValue *arg, CallRegisterState *state){
         // aggregate: struct and array
     }else if (arg.isStruct) {
         if (arg.isHFAStruct) {
-            //FIXME: only in iOS ???
-            if (arg.memerySize > 32) {
+            if (arg.structLayoutFieldCount > 4) {
                 MFValue *copied = [MFValue valueWithPointer:arg.pointer];
                 prepareForStackSize(copied, state);
                 return;
@@ -197,9 +252,9 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
             case TypeFloat:
             case TypeDouble:
             case TypeStruct:{
+                flag = resultFlagsForHFATypeEncode(returnValue.typeEncode);
                 NSUInteger s = returnValue.memerySize;
-                
-                if (!returnValue.isHFAStruct) {
+                if (flag == 0) {
                     if (s > 16)
                         flag = AARCH64_RET_VOID | AARCH64_RET_IN_MEM;
                     else if (s == 16)
@@ -208,27 +263,6 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
                         flag = AARCH64_RET_INT64;
                     else
                         flag = AARCH64_RET_INT128 | AARCH64_RET_NEED_COPY;
-                }else{
-                    NSUInteger fieldCount = returnValue.structLayoutFieldCount;
-                    if (fieldCount <= 4) {
-                        const char *fieldEncode = detectStructMemeryLayoutEncodeCode(returnValue.typeEncode).UTF8String;
-                        NSUInteger offset = 0;
-                        switch (*fieldEncode) {
-                            case 'f':
-                                offset = 2;
-                                break;
-                            case 'd':
-                                offset = 3;
-                                break;
-                            default:
-                                break;
-                        }
-                        //iOS没有LONGDOUBLE
-                        //Note that FFI_TYPE_FLOAT == 2, _DOUBLE == 3, _LONGDOUBLE == 4
-                        //#define AARCH64_RET_S4        8
-                        //#define AARCH64_RET_D4        12
-                        flag = offset * 4 + (4 - fieldCount);
-                    }
                 }
                 break;
             }

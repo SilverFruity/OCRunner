@@ -9,11 +9,10 @@
 #import "ORCoreFunctionRegister.h"
 #import <Foundation/Foundation.h>
 #import "ORCoreFunction.h"
+#import "ORCoreFunctionCall.h"
+#import "ORHandleTypeEncode.h"
 #include <mach/mach.h>
 #include <pthread.h>
-# if __has_feature(ptrauth_calls)
-#  define HAVE_PTRAUTH 1
-# endif
 
 #ifdef HAVE_PTRAUTH
 #include <ptrauth.h>
@@ -24,13 +23,6 @@ typedef enum {
     FFI_BAD_TYPEDEF,
     FFI_BAD_ABI
 } ffi_status;
-
-typedef struct {
-    unsigned nargs;
-    const char **arg_typeEncodes;
-    const char *r_typeEncode;
-    unsigned flags;
-} ffi_cif;
 
 typedef struct {
     void *trampoline_table;
@@ -237,27 +229,194 @@ void ffi_closure_free(void *ptr)
     free(closure);
 }
 
+extern void ffi_closure_SYSV(void);
+extern void ffi_closure_SYSV_V(void);
 ffi_status
 ffi_prep_closure_loc(ffi_closure *closure,
-                     ffi_cif* ffi,
+                     ffi_cif* cif,
                      void (*fun)(ffi_cif*,void*,void**,void*),
                      void *user_data,
                      void *codeloc)
 {
     void (*start)(void);
-    //    if (cif->flags & AARCH64_FLAG_ARG_V)
-    //        start = ffi_closure_SYSV_V;
-    //    else
-    //        start = ffi_closure_SYSV;
+    if (cif->flags & AARCH64_FLAG_ARG_V)
+        start = ffi_closure_SYSV_V;
+    else
+        start = ffi_closure_SYSV;
 #ifdef HAVE_PTRAUTH
     codeloc = ptrauth_strip(codeloc, ptrauth_key_asia);
 #endif
+    // use asm function:  ffi_closure_trampoline_table_page
+    // save `closure` in x17 and call `start`
     void **config = (void **)((uint8_t *)codeloc - PAGE_MAX_SIZE);
     config[0] = closure;
     config[1] = start;
-    closure->cif = ffi;
+    closure->cif = cif;
     closure->fun = fun;
     closure->user_data = user_data;
     
     return FFI_OK;
+}
+
+void *register_function(void (*imp)(ffi_cif *,void *,void **, void*),
+                        unsigned nargs,
+                        char **argTypeEncodes,
+                        char *retTypeEncode){
+    ffi_cif *cif = malloc(sizeof(ffi_cif));
+    cif->arg_typeEncodes = argTypeEncodes;
+    cif->nargs = nargs;
+    cif->r_typeEncode = retTypeEncode;
+    cif->flags = (unsigned) resultFlagsForTypeEncode(retTypeEncode, argTypeEncodes, nargs);
+    void *result = NULL;
+    ffi_closure *closure = ffi_closure_alloc(sizeof(ffi_closure), &result);
+    ffi_prep_closure_loc(closure, cif, imp, NULL, result);
+    return result;
+}
+
+void *allocate_to_stack(CallContext ctx, size_t size)
+{
+    CallRegisterState *state = ctx.state;
+    char *stack = ctx.stackMemeries;
+    size_t nsaa = state->NSAA;
+    nsaa = OR_ALIGN(nsaa, 8);
+    state->NSAA = nsaa + size;
+    return stack + nsaa;
+}
+void *allocate_int_to_reg_or_stack(CallContext ctx,size_t size)
+{
+    CallRegisterState *state = ctx.state;
+    if (state->NGRN < N_G_ARG_REG){
+        return &ctx.generalRegister[state->NGRN++];
+    }
+    state->NGRN = N_G_ARG_REG;
+    return allocate_to_stack(ctx, size);
+}
+static void * compress_hfa_type (void *dest, void *reg, int h)
+{
+    switch (h)
+    {
+        case AARCH64_RET_S1:
+            if (dest == reg)
+            {
+#ifdef __AARCH64EB__
+                dest += 12;
+#endif
+            }
+            else
+                *(float *)dest = *(float *)reg;
+            break;
+        case AARCH64_RET_S2:
+            asm ("ldp q16, q17, [%1]\n\t"
+                 "st2 { v16.s, v17.s }[0], [%0]"
+                 : : "r"(dest), "r"(reg) : "memory", "v16", "v17");
+            break;
+        case AARCH64_RET_S3:
+            asm ("ldp q16, q17, [%1]\n\t"
+                 "ldr q18, [%1, #32]\n\t"
+                 "st3 { v16.s, v17.s, v18.s }[0], [%0]"
+                 : : "r"(dest), "r"(reg) : "memory", "v16", "v17", "v18");
+            break;
+        case AARCH64_RET_S4:
+            asm ("ldp q16, q17, [%1]\n\t"
+                 "ldp q18, q19, [%1, #32]\n\t"
+                 "st4 { v16.s, v17.s, v18.s, v19.s }[0], [%0]"
+                 : : "r"(dest), "r"(reg) : "memory", "v16", "v17", "v18", "v19");
+            break;
+            
+        case AARCH64_RET_D1:
+            if (dest == reg)
+            {
+#ifdef __AARCH64EB__
+                dest += 8;
+#endif
+            }
+            else
+                *(double *)dest = *(double *)reg;
+            break;
+        case AARCH64_RET_D2:
+            asm ("ldp q16, q17, [%1]\n\t"
+                 "st2 { v16.d, v17.d }[0], [%0]"
+                 : : "r"(dest), "r"(reg) : "memory", "v16", "v17");
+            break;
+        case AARCH64_RET_D3:
+            asm ("ldp q16, q17, [%1]\n\t"
+                 "ldr q18, [%1, #32]\n\t"
+                 "st3 { v16.d, v17.d, v18.d }[0], [%0]"
+                 : : "r"(dest), "r"(reg) : "memory", "v16", "v17", "v18");
+            break;
+        case AARCH64_RET_D4:
+            asm ("ldp q16, q17, [%1]\n\t"
+                 "ldp q18, q19, [%1, #32]\n\t"
+                 "st4 { v16.d, v17.d, v18.d, v19.d }[0], [%0]"
+                 : : "r"(dest), "r"(reg) : "memory", "v16", "v17", "v18", "v19");
+            break;
+            
+        default:
+            if (dest != reg)
+                return memcpy (dest, reg, 16 * (4 - (h & 3)));
+            break;
+    }
+    return dest;
+}
+int
+ffi_closure_SYSV_inner(ffi_cif *cif,
+                       void (*fun)(ffi_cif*,void*,void**,void*),
+                       void *user_data,
+                       void *context,
+                       void *stack, void *rvalue, void *struct_rvalue)
+{
+    void **avalue = (void**)alloca(cif->nargs * sizeof (void*));
+    CallRegisterState state = {0, 0, 0};
+    CallContext ctx;
+    ctx.state = &state;
+    ctx.floatRegister = context;
+    ctx.generalRegister = context+V_REG_TOTAL_SIZE;
+    ctx.stackMemeries = stack;
+    for (int i = 0; i < cif->nargs; i++)
+    {
+        const char *typeencode = cif->arg_typeEncodes[i];
+        NSUInteger memerySize = sizeOfTypeEncode(typeencode);
+        
+        if (isIntegerWithTypeEncode(typeencode)
+            || isPointerWithTypeEncode(typeencode)
+            || isObjectWithTypeEncode(typeencode)) {
+            
+            avalue[i] = allocate_int_to_reg_or_stack(ctx, memerySize);
+            
+        }else if (isFloatWithTypeEncode(typeencode)
+                  || isStructWithTypeEncode(typeencode)){
+            
+            if (isHFAStructWithTypeEncode(typeencode)) {
+                NSUInteger argCount = structLayoutTotalFieldCountWithTypeEncode(typeencode);
+                if (argCount > 4) {
+                    avalue[i] = *(void **)allocate_int_to_reg_or_stack(ctx, memerySize);
+                }else if (state.NSRN + argCount <= N_V_ARG_REG) {
+                    //compress_hfa_type
+                    int flag = (int)resultFlagsForHFATypeEncode(typeencode);
+                    void *reg = ctx.floatRegister + state.NSRN * V_REG_SIZE;
+                    state.NSRN += argCount;
+                    avalue[i] = compress_hfa_type(reg, reg, flag);
+                }else{
+                    state.NSRN = N_V_ARG_REG;
+                    avalue[i] = allocate_to_stack(ctx, memerySize);
+                }
+            }else if (memerySize > 16){
+                avalue[i] = *(void **)allocate_int_to_reg_or_stack(ctx, memerySize);
+            }else{
+                NSUInteger needGRN = (memerySize + 7) / OR_ALIGNMENT;
+                if (8 - state.NGRN >= needGRN) {
+                    avalue[i] = &ctx.generalRegister[state.NGRN];
+                    state.NGRN += (unsigned int)needGRN;
+                }else{
+                    state.NGRN = N_V_ARG_REG;
+                    avalue[i] = allocate_to_stack(ctx, memerySize);
+                }
+            }
+        }
+    }
+    if (cif->flags & AARCH64_RET_IN_MEM)
+        rvalue = struct_rvalue;
+    fun(cif, rvalue, avalue, user_data);
+    return cif->flags;
+    
 }
