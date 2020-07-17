@@ -22,16 +22,18 @@ git submodule update --init --recursive
 OCRunner framework的单元测试，当前无法在模拟器上运行，并不支持x86_64。
 
 单元测试已经转移到OCRunnerDemo下。
+## 功能
+
+* 将Objective-C作为脚本执行
+
+* 声明系统函数，即可直接调用。针对某些系统函数，仍然需要手动引入函数指针。
+* 82%的单元测试覆盖
+* 结构体无缝衔接
+* 函数的调用和注册修改自libffi，目前只支持arm64
+* Objective-C语法几乎全部支持
+* 支持可变参数调用：[NSString stringWithFormat:]  NSLog 等等
 
 ## 与Objective-C当前存在的语法差异
-
-### 方法调用，参数个数的限制
-
-目前在arm64下，最多支持8个参数
-
-**void \*function (id target, SEL sel, void \*a1, void \*a2, void \*a3, void \*a4, void \*a5, void \*a6)**
-
-相对的，在方法调用时，最多支持6个参数。第一个和第二个被target和sel占用。
 
 ### 预编译指令
 
@@ -46,16 +48,6 @@ OCRunner framework的单元测试，当前无法在模拟器上运行，并不�
 @end
 NSArray <NSObject*>*array;
 ```
-### 多参数问题
-
-```objective-c
-// 可以直接使用
-[NSString stringWithFormat:@"%@",@"a"];
-// 函数，现在还在寻找一个最轻松的方案
-NSLog(@"%@",@"a")
-// 等等
-```
-
 
 ### 类修复问题
 
@@ -198,21 +190,56 @@ typedef IntegerType dispatch_once_t;
 
 #### 全局函数
 
-目前只能使用这种方式
+1. 预编译函数
 
 ```objective-c
-// 需要在App中添加
-// 全局函数
 [MFScopeChain.topScope setValue:[MFValue valueWithBlock:^void(dispatch_queue_t queue, void (^block)(void)) {
 		dispatch_async(queue, ^{
 			block();
 		});
-	}] withIndentifier:@"dispatch_async"];
+	}] withIndentifier:@"dispatch_async"]
 ```
 
+2. 可通过ORSearchedFunction找的函数
 
+```objective-c
+// 直接在脚本中添加函数声明即可
+void NSLog(NSString *format, ...);
+```
 
+3. 不可通过ORSearchedFunction找的函数
 
+   例如dispatch_get_main_queue
+
+   * 方式一
+
+   ```objective-c
+   	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^id() {
+   		return dispatch_get_main_queue();
+	}]withIndentifier:@"dispatch_get_main_queue"];
+   ```
+
+   * 方式二
+   
+   ```objective-c
+	 //脚本中添加声明: DEBUG模式下会自动在控制台打印App中需要添加的代码
+   dispatch_queue_main_t dispatch_get_main_queue(void);
+   //App中添加: 
+   [ORSystemFunctionTable reg:@"dispatch_get_main_queue" pointer:&dispatch_get_main_queue];
+   ```
+   
+4. OC中的inline函数、自定义函数
+
+```objective-c
+//脚本中直接添加
+CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
+{
+  CGRect rect;
+  rect.origin.x = x; rect.origin.y = y;
+  rect.size.width = width; rect.size.height = height;
+  return rect;
+}
+```
 
 ### 关于#import
 
@@ -257,4 +284,3 @@ typedef IntegerType dispatch_once_t;
 * NS_ASSUME_NONNULL_BEGIN
 
 强烈建议看看单元测试中支持的语法。
-
