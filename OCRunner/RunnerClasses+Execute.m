@@ -20,8 +20,8 @@
 #import <objc/message.h>
 #import "ORTypeVarPair+TypeEncode.h"
 #import "ORCoreImp.h"
-#import "ORMultiArgsCall.h"
 #import "ORSearchedFunction.h"
+#import "ORCoreFunction.h"
 
 static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
     const char *blockTypeEncoding = [MFBlock typeEncodingForBlock:blockValue.objectValue];
@@ -438,12 +438,13 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     NSUInteger argCount = [sig numberOfArguments];
     void *retValuePointer = alloca([sig methodReturnLength]);
     if (argValues.count + 2 > argCount) {
-        void *args[argValues.count];
-        for (int i = 0; i < argValues.count; i++) {
-            args[i] = argValues[i].pointer;
-        }
-        void *result = ORMultiArgsMethodCall(instance, sel, args, argValues.count, &objc_msgSend);
-        retValuePointer = &result;
+        NSMutableArray *methodArgs = [@[[MFValue valueWithObject:instance],
+                                       [MFValue valueWithSEL:sel]] mutableCopy];
+        [methodArgs addObjectsFromArray:argValues];
+        MFValue *result = [MFValue defaultValueWithTypeEncoding:[sig methodReturnType]];
+        void *msg_send = &objc_msgSend;
+        invoke_functionPointer(msg_send, methodArgs, result, argCount);
+        retValuePointer = result.pointer;
     }else{
         NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
         invocation.target = instance;

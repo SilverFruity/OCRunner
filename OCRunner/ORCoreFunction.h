@@ -40,7 +40,8 @@ NSUInteger resultFlagsForTypeEncode(const char *retTypeEncode, char **argTypeEnc
 
 @class NSArray;
 @class MFValue;
-
+__attribute__((overloadable))
+void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue, NSUInteger needArgs);
 void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue);
 
 void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),

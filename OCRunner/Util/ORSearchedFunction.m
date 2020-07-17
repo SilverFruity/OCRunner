@@ -11,7 +11,6 @@
 #import "RunnerClasses.h"
 #import "MFStack.h"
 #import "MFValue.h"
-#import "ORMultiArgsCall.h"
 #import "ORTypeVarPair+TypeEncode.h"
 #import "ORCoreImp.h"
 #import "ORStructDeclare.h"
@@ -51,18 +50,11 @@
         }
     }
     MFValue *returnValue = [MFValue defaultValueWithTypeEncoding:typeEncode];
-    void *result = NULL;
     if (!self.funVar.isMultiArgs) {
         invoke_functionPointer(self.pointer, args, returnValue);
-    }else{
         //多参数
-        void *multiArgs[args.count];
-        for (int i = 0; i < args.count; i++) {
-            void **pointer = [(MFValue *)args[i] pointer];
-            multiArgs[i] = *pointer;
-        }
-        result = ORMultiArgsCFunCall(multiArgs, args.count, self.pointer);
-        returnValue.pointer = &result;
+    }else{
+        invoke_functionPointer(self.pointer, args, returnValue, self.funVar.pairs.count);
     }
     return returnValue;
 }

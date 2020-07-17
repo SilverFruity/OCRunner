@@ -41,9 +41,6 @@
 		EE1C6FA324BF364A00430A51 /* ORHandleTypeEncode.h in Headers */ = {isa = PBXBuildFile; fileRef = EE1C6FA124BF364A00430A51 /* ORHandleTypeEncode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE1C6FA424BF364A00430A51 /* ORHandleTypeEncode.m in Sources */ = {isa = PBXBuildFile; fileRef = EE1C6FA224BF364A00430A51 /* ORHandleTypeEncode.m */; };
 		EE38F997246C3C2A00E7C37B /* RunnerClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98998724658DB700ACF2C1 /* RunnerClasses.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		EE50145024890BFE00B463BB /* ORMultiArgsMethodCall-arm64.s in Sources */ = {isa = PBXBuildFile; fileRef = EE50144B24890BFE00B463BB /* ORMultiArgsMethodCall-arm64.s */; };
-		EE50145124890BFE00B463BB /* ORMultiArgsCall.h in Headers */ = {isa = PBXBuildFile; fileRef = EE50144E24890BFE00B463BB /* ORMultiArgsCall.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		EE50145224890BFE00B463BB /* ORMultiArgsCFunCall-arm64.s in Sources */ = {isa = PBXBuildFile; fileRef = EE50144F24890BFE00B463BB /* ORMultiArgsCFunCall-arm64.s */; };
 		EE79FF6B246D917100ABE06F /* ORTestReplaceClass.m in Sources */ = {isa = PBXBuildFile; fileRef = EE79FF6A246D917100ABE06F /* ORTestReplaceClass.m */; };
 		EE98997524658DA600ACF2C1 /* OCRunner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE98996B24658DA600ACF2C1 /* OCRunner.framework */; };
 		EE98997C24658DA600ACF2C1 /* OCRunner.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98996E24658DA600ACF2C1 /* OCRunner.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -164,9 +161,6 @@
 		EE197B842478DD190049CFDA /* ORInterpreter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORInterpreter.m; sourceTree = "<group>"; };
 		EE1C6FA124BF364A00430A51 /* ORHandleTypeEncode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORHandleTypeEncode.h; sourceTree = "<group>"; };
 		EE1C6FA224BF364A00430A51 /* ORHandleTypeEncode.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORHandleTypeEncode.m; sourceTree = "<group>"; };
-		EE50144B24890BFE00B463BB /* ORMultiArgsMethodCall-arm64.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = "ORMultiArgsMethodCall-arm64.s"; sourceTree = "<group>"; };
-		EE50144E24890BFE00B463BB /* ORMultiArgsCall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORMultiArgsCall.h; sourceTree = "<group>"; };
-		EE50144F24890BFE00B463BB /* ORMultiArgsCFunCall-arm64.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = "ORMultiArgsCFunCall-arm64.s"; sourceTree = "<group>"; };
 		EE79FF69246D917100ABE06F /* ORTestReplaceClass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORTestReplaceClass.h; sourceTree = "<group>"; };
 		EE79FF6A246D917100ABE06F /* ORTestReplaceClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORTestReplaceClass.m; sourceTree = "<group>"; };
 		EE98996B24658DA600ACF2C1 /* OCRunner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OCRunner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -372,9 +366,6 @@
 				04A531BD248F972500D83A48 /* ORSearchedFunction.m */,
 				04A531B5248F8AD600D83A48 /* SymbolSearch.c */,
 				04A531B6248F8AD600D83A48 /* SymbolSearch.h */,
-				EE50144E24890BFE00B463BB /* ORMultiArgsCall.h */,
-				EE50144F24890BFE00B463BB /* ORMultiArgsCFunCall-arm64.s */,
-				EE50144B24890BFE00B463BB /* ORMultiArgsMethodCall-arm64.s */,
 				EE9899C02465923800ACF2C1 /* util.h */,
 				EE9899BE2465923800ACF2C1 /* util.m */,
 			);
@@ -404,7 +395,6 @@
 				04A531B8248F8AD600D83A48 /* SymbolSearch.h in Headers */,
 				EE9899A624658F8900ACF2C1 /* MFWeakPropertyBox.h in Headers */,
 				EEBF3334248E674300DDE2E9 /* ORCoreImp.h in Headers */,
-				EE50145124890BFE00B463BB /* ORMultiArgsCall.h in Headers */,
 				EE9899A424658F8900ACF2C1 /* MFPropertyMapTable.h in Headers */,
 				EE9899B624658F8900ACF2C1 /* MFMethodMapTable.h in Headers */,
 				EE38F997246C3C2A00E7C37B /* RunnerClasses.h in Headers */,
@@ -562,7 +552,6 @@
 				04C3B28224BDB71200AA8574 /* ORCoreFunctionRegister.m in Sources */,
 				EE9899B024658F8900ACF2C1 /* MFStaticVarTable.m in Sources */,
 				04A531B7248F8AD600D83A48 /* SymbolSearch.c in Sources */,
-				EE50145224890BFE00B463BB /* ORMultiArgsCFunCall-arm64.s in Sources */,
 				EE9899B724658F8900ACF2C1 /* MFScopeChain.m in Sources */,
 				EEBF3335248E674300DDE2E9 /* ORCoreImp.m in Sources */,
 				04C3B25624B70D9B00AA8574 /* ORCoreFunctionCall.m in Sources */,
@@ -577,7 +566,6 @@
 				EE9899B124658F8900ACF2C1 /* MFPropertyMapTable.m in Sources */,
 				04A531BF248F972500D83A48 /* ORSearchedFunction.m in Sources */,
 				EE9899AE24658F8900ACF2C1 /* MFMethodMapTable.m in Sources */,
-				EE50145024890BFE00B463BB /* ORMultiArgsMethodCall-arm64.s in Sources */,
 				EEA2AC82246855F100B08407 /* MFStack.m in Sources */,
 				0408F01C247D027B004F703D /* ORTypeVarPair+TypeEncode.m in Sources */,
 				EE9899B324658F8900ACF2C1 /* MFVarDeclareChain.m in Sources */,

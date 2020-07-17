@@ -222,6 +222,9 @@ void flatMapArgument(MFValue *arg, CallContext ctx){
 }
 extern void ORCoreFunctionCall(void *stack, void *frame, void *fn, void *ret, NSUInteger flag);;
 void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue){
+    invoke_functionPointer(funptr, argValues, returnValue, argValues.count);
+}
+__attribute__((overloadable)) void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue, NSUInteger needArgs){
     if (funptr == NULL) {
         return;
     }
@@ -277,8 +280,13 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
     
     NSMutableArray *args = [argValues mutableCopy];
     CallRegisterState prepareState = { 0 , 0 , 0};
-    for (MFValue *arg in args) {
+    for (int i = 0; i < args.count; i++) {
+        MFValue *arg = args[i];
         prepareForStackSize(arg, &prepareState);
+        if (i >= needArgs) {
+            prepareState.NGRN = N_G_ARG_REG;
+            prepareState.NSRN = N_V_ARG_REG;
+        }
     }
     NSUInteger stackSize = prepareState.NSAA;
     NSUInteger retSize = 0;
@@ -297,12 +305,15 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
     context.stackMemeries = (char *)context.generalRegister + G_REG_TOTAL_SIZE;
     context.frame = (char *)context.stackMemeries + + stackSize;
     context.retPointer = (char *)context.frame + 40;
-    for (MFValue *arg in args) {
+    for (int i = 0; i < args.count; i++) {
+        MFValue *arg = args[i];
         flatMapArgument(arg, context);
+        if (i >= needArgs) {
+            context.state->NGRN = N_G_ARG_REG;
+            context.state->NSRN = N_V_ARG_REG;
+        }
     }
     ORCoreFunctionCall(stack, context.frame, funptr, context.retPointer, flag);
     void *pointer = context.retPointer;
     returnValue.pointer = pointer;
 }
-
-
