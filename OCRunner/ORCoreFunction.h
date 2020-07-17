@@ -35,7 +35,7 @@ typedef struct {
     unsigned nfixedargs; //可变参数需要的个数
 } ffi_cif;
 
-NSUInteger resultFlagsForHFATypeEncode(const char *typeEncode);
+NSUInteger floatPointFlagsWithTypeEncode(const char *typeEncode);
 NSUInteger resultFlagsForTypeEncode(const char *retTypeEncode, char **argTypeEncodes, int narg);
 
 @class NSArray;

@@ -19,7 +19,7 @@ BOOL isStructWithTypeEncode(const char *typeEncode);
 BOOL isStructPointerWithTypeEncode(const char *typeEncode);
 BOOL isStructOrStructPointerWithTypeEncode(const char *typeEncode);
 BOOL isHFAStructWithTypeEncode(const char *typeEncode);
-NSUInteger structLayoutTotalFieldCountWithTypeEncode(const char *typeEncode);
+NSUInteger totalFieldCountWithTypeEncode(const char *typeEncode);
 BOOL isIntegerWithTypeEncode(const char *typeEncode);
 BOOL isFloatWithTypeEncode(const char *typeEncode);
 BOOL isObjectWithTypeEncode(const char *typeEncode);

@@ -32,7 +32,6 @@
     .global _ffi_closure_SYSV_V
 _ffi_closure_SYSV_V:
     stp     x29, x30, [sp, #-ffi_closure_SYSV_FS]!
-    sub     sp, sp, #-ffi_closure_SYSV_FS
     /* Save the argument passing vector registers.  */
     stp     q0, q1, [sp, #16 + 0]
     stp     q2, q3, [sp, #16 + 32]
@@ -44,7 +43,6 @@ _ffi_closure_SYSV_V:
     .global _ffi_closure_SYSV
 _ffi_closure_SYSV:
     stp     x29, x30, [sp, #-ffi_closure_SYSV_FS]!
-    sub     sp, sp, #ffi_closure_SYSV_FS
 0:
     mov     x29, sp
 
@@ -140,7 +138,6 @@ _ffi_closure_SYSV:
     nop
 31:                    /* reserved */
 99:    ldp     x29, x30, [sp], #ffi_closure_SYSV_FS
-    add sp, sp, #ffi_closure_SYSV_FS
     ret
 
 
@@ -152,6 +149,6 @@ _ffi_closure_trampoline_table_page:
 .rept PAGE_MAX_SIZE / FFI_TRAMPOLINE_SIZE
 adr x16, -PAGE_MAX_SIZE
 ldp x17, x16, [x16]
-blr x16
+br x16
 nop        /* each entry in the trampoline config page is 2*sizeof(void*) so the trampoline itself cannot be smaller that 16 bytes */
 .endr

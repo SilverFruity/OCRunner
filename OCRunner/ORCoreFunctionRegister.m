@@ -386,13 +386,13 @@ ffi_closure_SYSV_inner(ffi_cif *cif,
         }else if (isFloatWithTypeEncode(typeencode)
                   || isStructWithTypeEncode(typeencode)){
             
-            if (isHFAStructWithTypeEncode(typeencode)) {
-                NSUInteger argCount = structLayoutTotalFieldCountWithTypeEncode(typeencode);
+            if (floatPointFlagsWithTypeEncode(typeencode)) {
+                NSUInteger argCount = totalFieldCountWithTypeEncode(typeencode);
                 if (argCount > 4) {
                     avalue[i] = *(void **)allocate_int_to_reg_or_stack(ctx, memerySize);
                 }else if (state.NSRN + argCount <= N_V_ARG_REG) {
                     //compress_hfa_type
-                    int flag = (int)resultFlagsForHFATypeEncode(typeencode);
+                    int flag = (int)floatPointFlagsWithTypeEncode(typeencode);
                     void *reg = ctx.floatRegister + state.NSRN * V_REG_SIZE;
                     state.NSRN += argCount;
                     avalue[i] = compress_hfa_type(reg, reg, flag);
