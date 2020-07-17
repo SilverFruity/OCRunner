@@ -92,55 +92,54 @@ NSUInteger resultFlagsForTypeEncode(const char * retTypeEncode, char **argTypeEn
     }
     return flag;
 }
-void prepareForStackSize(MFValue *arg, CallRegisterState *state){
-    if (arg.isInteger || arg.isPointer || arg.isObject) {
+void prepareForStackSize(const char *typeencode, CallRegisterState *state){
+    NSUInteger memerySize = sizeOfTypeEncode(typeencode);
+    if (isIntegerWithTypeEncode(typeencode)
+        || isPointerWithTypeEncode(typeencode)
+        || isObjectWithTypeEncode(typeencode)) {
         if (state->NGRN < N_G_ARG_REG) {
             state->NGRN++;
             return;
         }
         state->NGRN = N_G_ARG_REG;
-        state->NSAA += (arg.memerySize + 7) / OR_ALIGNMENT;
-    }else if (arg.isFloat) {
+        state->NSAA += memerySize;
+    }else if (isFloatWithTypeEncode(typeencode)) {
         if (state->NSRN < N_V_ARG_REG) {
             state->NSRN++;
             return;
         }
         state->NSRN = N_V_ARG_REG;
-        state->NSAA += (arg.memerySize + 7) / OR_ALIGNMENT;
-        // Composite Types
-        // aggregate: struct and array
-    }else if (arg.isStruct) {
-        if (arg.isHFAStruct) {
-            if (arg.structLayoutFieldCount > 4) {
-                MFValue *copied = [MFValue valueWithPointer:arg.pointer];
-                prepareForStackSize(copied, state);
+        state->NSAA += memerySize;
+    }else if (isStructWithTypeEncode(typeencode)) {
+        if (isHFAStructWithTypeEncode(typeencode)) {
+            NSUInteger argCount = totalFieldCountWithTypeEncode(typeencode);
+            if (argCount > 4) {
+                // 转为指针
+                prepareForStackSize("^", state);
                 return;
             }
-            NSUInteger argCount = arg.structLayoutFieldCount;
             if (state->NSRN + argCount <= N_V_ARG_REG) {
-                //set args to float register
                 state->NSRN += argCount;
                 return;
             }
             state->NSRN = N_V_ARG_REG;
-            state->NSAA += (arg.memerySize + 7) / OR_ALIGNMENT;
-        }else if (arg.memerySize > 16){
-            MFValue *copied = [MFValue valueWithPointer:arg.pointer];
-            prepareForStackSize(copied, state);
+            state->NSAA += memerySize;
+        }else if (memerySize > 16){
+            // 转为指针
+            prepareForStackSize("^", state);
         }else{
-            NSUInteger memsize = arg.memerySize;
-            NSUInteger needGRN = (memsize + 7) / OR_ALIGNMENT;
+            //如果不是HFA，存储到通用寄存器
+            NSUInteger needGRN = (memerySize + 7) / OR_ALIGNMENT;
             if (8 - state->NGRN >= needGRN) {
-                //set args to general register
                 state->NGRN += needGRN;
                 return;
             }
             state->NGRN = N_V_ARG_REG;
-            state->NSAA += (arg.memerySize + 7) / OR_ALIGNMENT;
+            state->NSAA += memerySize;
         }
     }
 }
-
+//涉及struct内存布局问题，内存布局信息存储在 ORStructDeclare中
 void structStoeInRegister(BOOL isHFA, MFValue *aggregate, CallContext ctx){
     [aggregate enumerateStructFieldsUsingBlock:^(MFValue * _Nonnull field, NSUInteger idx, BOOL *stop) {
         if (field.isStruct) {
@@ -158,151 +157,83 @@ void structStoeInRegister(BOOL isHFA, MFValue *aggregate, CallContext ctx){
         }
     }];
 }
-void flatMapArgument(MFValue *arg, CallContext ctx){
+void flatMapArgument(const char *typeencode, void *arg, CallContext ctx){
     CallRegisterState *state = ctx.state;
-    if (arg.isInteger || arg.isPointer || arg.isObject) {
+    NSUInteger memerySize = sizeOfTypeEncode(typeencode);
+    if (isIntegerWithTypeEncode(typeencode)
+        || isPointerWithTypeEncode(typeencode)
+        || isObjectWithTypeEncode(typeencode)){
         if (state->NGRN < N_G_ARG_REG) {
-            void *pointer = arg.pointer;
-            ctx.generalRegister[state->NGRN] = *(void **)pointer;
+            ctx.generalRegister[state->NGRN] = *(void **)arg;
             state->NGRN++;
             return;
         }else{
             state->NGRN = N_G_ARG_REG;
-            void *pointer = arg.pointer;
-            memcpy(ctx.stackMemeries + state->NSAA, pointer, arg.memerySize);
-            state->NSAA += (arg.memerySize + 7) / OR_ALIGNMENT;
+            memcpy(ctx.stackMemeries + state->NSAA, arg, memerySize);
+            state->NSAA += memerySize;
             return;
         }
-    }else if (arg.isFloat) {
+    }else if (isFloatWithTypeEncode(typeencode)) {
         if (state->NSRN < N_V_ARG_REG) {
-            void *pointer = arg.pointer;
-            memcpy((char *)ctx.floatRegister + state->NSRN * V_REG_SIZE, pointer, arg.memerySize);
+            memcpy((char *)ctx.floatRegister + state->NSRN * V_REG_SIZE, arg, memerySize);
             state->NSRN++;
             return;
         }else{
             state->NSRN = N_V_ARG_REG;
-            void *pointer = arg.pointer;
-            memcpy(ctx.stackMemeries + state->NSAA, pointer, arg.memerySize);
-            state->NSAA += (arg.memerySize + 7) / OR_ALIGNMENT;
+            memcpy(ctx.stackMemeries + state->NSAA, arg, memerySize);
+            state->NSAA += memerySize;
             return;
         }
         // Composite Types
         // aggregate: struct and array
-    }else if (arg.isStruct) {
-        if (arg.isHFAStruct) {
-            //FIXME: only in iOS ???
-            if (arg.structLayoutFieldCount > 4) {
-                MFValue *copied = [MFValue valueWithPointer:arg.pointer];
-                flatMapArgument(copied, ctx);
+    }else if (isStructWithTypeEncode(typeencode)) {
+        if (isHFAStructWithTypeEncode(typeencode)) {
+            NSUInteger argCount = totalFieldCountWithTypeEncode(typeencode);
+            if (argCount > 4) {
+                flatMapArgument("^", &arg, ctx);
                 return;
             }
-            NSUInteger argCount = arg.structLayoutFieldCount;
             if (state->NSRN + argCount <= N_V_ARG_REG) {
                 //set args to float register
-                structStoeInRegister(YES, arg, ctx);
+                MFValue *aggregate = [[MFValue alloc] initTypeEncode:typeencode pointer:arg];
+                structStoeInRegister(YES, aggregate, ctx);
                 return;
             }else{
                 state->NSRN = N_V_ARG_REG;
-                void *pointer = arg.pointer;
-                memcpy(ctx.stackMemeries + state->NSAA, pointer, arg.memerySize);
-                state->NSAA += (arg.memerySize + 7) / OR_ALIGNMENT;
+                memcpy(ctx.stackMemeries + state->NSAA, arg, memerySize);
+                state->NSAA += memerySize;
                 return;
             }
-        }else if (arg.memerySize > 16){
-            MFValue *copied = [MFValue valueWithPointer:arg.pointer];
-            flatMapArgument(copied, ctx);
+        }else if (memerySize > 16){
+            flatMapArgument("^", &arg, ctx);
         }else{
-            NSUInteger memsize = arg.memerySize;
-            NSUInteger needGRN = (memsize + 7) / OR_ALIGNMENT;
+            NSUInteger needGRN = (memerySize + 7) / OR_ALIGNMENT;
             if (8 - state->NGRN >= needGRN) {
                 //set args to general register
-                structStoeInRegister(NO, arg, ctx);
+                MFValue *aggregate = [[MFValue alloc] initTypeEncode:typeencode pointer:arg];
+                structStoeInRegister(NO, aggregate, ctx);
                 return;
             }else{
                 state->NGRN = N_V_ARG_REG;
-                void *pointer = arg.pointer;
-                memcpy(ctx.stackMemeries + state->NSAA, pointer, arg.memerySize);
-                state->NSAA += (arg.memerySize + 7) / OR_ALIGNMENT;
+                memcpy(ctx.stackMemeries + state->NSAA, arg, memerySize);
+                state->NSAA += memerySize;
                 return;
             }
         }
     }
 }
 extern void ORCoreFunctionCall(void *stack, void *frame, void *fn, void *ret, NSUInteger flag);;
-void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue){
-    invoke_functionPointer(funptr, argValues, returnValue, argValues.count);
-}
-__attribute__((overloadable)) void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue, NSUInteger needArgs){
-    if (funptr == NULL) {
-        return;
-    }
-    NSUInteger flag = 0;
-    do {
-        if (returnValue.pointerCount > 0) {
-            flag = AARCH64_RET_INT64; break;
-        }
-        switch (returnValue.type) {
-            case TypeSEL:
-            case TypeClass:
-            case TypeObject:
-            case TypeBlock:
-            case TypeId:
-            case TypeUnKnown: flag = AARCH64_RET_INT64; break;
-            case TypeVoid:   flag = AARCH64_RET_VOID; break;
-            case TypeUChar:  flag = AARCH64_RET_UINT8; break;
-            case TypeUShort: flag = AARCH64_RET_UINT16; break;
-            case TypeUInt:   flag = AARCH64_RET_UINT32; break;
-            case TypeULong:  flag = AARCH64_RET_INT64; break;
-            case TypeULongLong: flag = AARCH64_RET_INT64; break;
-            case TypeBOOL:   flag = AARCH64_RET_UINT8; break;
-            case TypeChar:   flag = AARCH64_RET_SINT8; break;
-            case TypeShort:  flag = AARCH64_RET_SINT16; break;
-            case TypeInt:    flag = AARCH64_RET_SINT32; break;
-            case TypeLong:   flag = AARCH64_RET_SINT32; break;
-            case TypeLongLong: flag = AARCH64_RET_INT64; break;
-            case TypeFloat:
-            case TypeDouble:
-            case TypeStruct:{
-                flag = floatPointFlagsWithTypeEncode(returnValue.typeEncode);
-                NSUInteger s = returnValue.memerySize;
-                if (flag == 0) {
-                    if (s > 16)
-                        flag = AARCH64_RET_VOID | AARCH64_RET_IN_MEM;
-                    else if (s == 16)
-                        flag = AARCH64_RET_INT128;
-                    else if (s == 8)
-                        flag = AARCH64_RET_INT64;
-                    else
-                        flag = AARCH64_RET_INT128 | AARCH64_RET_NEED_COPY;
-                }
-                break;
-            }
-            default:
-                break;
-        }
-        for (NSUInteger i = 0 ; i < argValues.count; i++)
-            if (argValues[i].isHFAStruct)
-                flag |= AARCH64_FLAG_ARG_V; break;
-        break;
-    }while (0);
-    
-    NSMutableArray *args = [argValues mutableCopy];
+void core_invoke_function_pointer(ffi_cif *cif, void *funcptr, void **args, void *ret){
     CallRegisterState prepareState = { 0 , 0 , 0};
-    for (int i = 0; i < args.count; i++) {
-        MFValue *arg = args[i];
-        prepareForStackSize(arg, &prepareState);
-        if (i >= needArgs) {
+    for (int i = 0; i < cif->nargs; i++) {
+        prepareForStackSize(cif->arg_typeEncodes[i], &prepareState);
+        if (i + 1 >= cif->nfixedargs) {
             prepareState.NGRN = N_G_ARG_REG;
             prepareState.NSRN = N_V_ARG_REG;
         }
     }
     NSUInteger stackSize = prepareState.NSAA;
-    NSUInteger retSize = 0;
-    if (flag & AARCH64_RET_NEED_COPY) {
-        retSize = 16;
-    }else{
-        retSize = returnValue.memerySize;
-    }
+    NSUInteger retSize = sizeOfTypeEncode(cif->r_typeEncode);
     char *stack = alloca(CALL_CONTEXT_SIZE + stackSize + 40 + retSize);
     memset(stack, 0, CALL_CONTEXT_SIZE + stackSize + 40 + retSize);
     CallRegisterState state = { 0 , 0 , 0};;
@@ -311,17 +242,40 @@ __attribute__((overloadable)) void invoke_functionPointer(void *funptr, NSArray<
     context.floatRegister = (void *)stack;
     context.generalRegister = (char *)context.floatRegister + V_REG_TOTAL_SIZE;
     context.stackMemeries = (char *)context.generalRegister + G_REG_TOTAL_SIZE;
-    context.frame = (char *)context.stackMemeries + + stackSize;
+    context.frame = (char *)context.stackMemeries + stackSize;
     context.retPointer = (char *)context.frame + 40;
-    for (int i = 0; i < args.count; i++) {
-        MFValue *arg = args[i];
-        flatMapArgument(arg, context);
-        if (i >= needArgs) {
+    for (int i = 0; i < cif->nargs; i++) {
+        flatMapArgument(cif->arg_typeEncodes[i], args[i], context);
+        if (i + 1 >= cif->nfixedargs) {
             context.state->NGRN = N_G_ARG_REG;
             context.state->NSRN = N_V_ARG_REG;
         }
     }
-    ORCoreFunctionCall(stack, context.frame, funptr, context.retPointer, flag);
+    ORCoreFunctionCall(stack, context.frame, funcptr, context.retPointer, cif->flags);
     void *pointer = context.retPointer;
-    returnValue.pointer = pointer;
+    if (pointer != NULL) {
+        memcpy(ret, pointer, sizeOfTypeEncode(cif->r_typeEncode));
+    }
+}
+void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue){
+    invoke_functionPointer(funptr, argValues, returnValue, argValues.count);
+}
+__attribute__((overloadable))
+void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue, NSUInteger needArgs){
+    ffi_cif cif;
+    const char *types[argValues.count];
+    void *argvs[argValues.count];
+    for (int i = 0; i < argValues.count; i++) {
+        types[i] = argValues[i].typeEncode;
+        argvs[i] = argValues[i].pointer;
+    }
+    cif.arg_typeEncodes = (char **)types;
+    cif.r_typeEncode = (char *)returnValue.typeEncode;
+    cif.nargs = (unsigned)argValues.count;
+    cif.nfixedargs = (unsigned)needArgs;
+    cif.flags =  (unsigned)resultFlagsForTypeEncode(cif.r_typeEncode, cif.arg_typeEncodes, cif.nargs);
+    void *ret = malloc(sizeOfTypeEncode(cif.r_typeEncode));
+    core_invoke_function_pointer(&cif, funptr, argvs, ret);
+    returnValue.pointer = ret;
+    free(ret);
 }

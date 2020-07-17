@@ -22,13 +22,6 @@
     NSString *path = [[NSBundle mainBundle] pathForResource:@"ViewController1" ofType:nil];
     NSString *data = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
     [ORInterpreter excute:data];
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        NSDictionary <NSString *, ORSearchedFunction *>*table = [ORSearchedFunction functionTableForNames:@[@"NSLog"]];
-        void (*testLog)(NSString *format,...);
-        testLog = table[@"NSLog"].pointer;
-        testLog(@"%@",@"hahah");
-    });
-
     
 #if __x86_64__  &&  TARGET_OS_SIMULATOR  &&  !TARGET_OS_IOSMAC
     NSLog(@"SIMULATOR");

@@ -258,10 +258,10 @@ ffi_prep_closure_loc(ffi_closure *closure,
     return FFI_OK;
 }
 
-void *register_function(void (*imp)(ffi_cif *,void *,void **, void*),
-                        unsigned nargs,
-                        char **argTypeEncodes,
-                        char *retTypeEncode){
+void *core_register_function(void (*imp)(ffi_cif *,void *,void **, void*),
+                             unsigned nargs,
+                             char **argTypeEncodes,
+                             char *retTypeEncode){
     ffi_cif *cif = malloc(sizeof(ffi_cif));
     cif->arg_typeEncodes = argTypeEncodes;
     cif->nargs = nargs;
@@ -385,17 +385,16 @@ ffi_closure_SYSV_inner(ffi_cif *cif,
             
         }else if (isFloatWithTypeEncode(typeencode)
                   || isStructWithTypeEncode(typeencode)){
-            
-            if (floatPointFlagsWithTypeEncode(typeencode)) {
+            NSUInteger flags = floatPointFlagsWithTypeEncode(typeencode);
+            if (flags) {
                 NSUInteger argCount = totalFieldCountWithTypeEncode(typeencode);
                 if (argCount > 4) {
                     avalue[i] = *(void **)allocate_int_to_reg_or_stack(ctx, memerySize);
                 }else if (state.NSRN + argCount <= N_V_ARG_REG) {
                     //compress_hfa_type
-                    int flag = (int)floatPointFlagsWithTypeEncode(typeencode);
                     void *reg = ctx.floatRegister + state.NSRN * V_REG_SIZE;
                     state.NSRN += argCount;
-                    avalue[i] = compress_hfa_type(reg, reg, flag);
+                    avalue[i] = compress_hfa_type(reg, reg, (int)flags);
                 }else{
                     state.NSRN = N_V_ARG_REG;
                     avalue[i] = allocate_to_stack(ctx, memerySize);
@@ -420,3 +419,23 @@ ffi_closure_SYSV_inner(ffi_cif *cif,
     return cif->flags;
     
 }
+#import "ORTypeVarPair+TypeEncode.h"
+char *mallocCopyStr(const char *source){
+    NSUInteger sLen = strlen(source);
+    char *result = malloc(sLen + 1);
+    memcpy(result, source, sLen);
+    result[sLen] = '\0';
+    return result;
+}
+void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
+                        NSArray <ORTypeVarPair *>*args,
+                        ORTypeVarPair *ret)
+{
+    char **argTypes = malloc(args.count * sizeof(char *));
+    for (int i = 0; i < args.count; i++) {
+        argTypes[i] = mallocCopyStr(args[i].typeEncode);
+    }
+    char *retTyep = mallocCopyStr(ret.typeEncode);
+    return core_register_function(fun, (int)args.count, argTypes, retTyep);
+}
+

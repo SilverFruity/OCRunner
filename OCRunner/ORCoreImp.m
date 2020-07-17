@@ -17,24 +17,15 @@
 #import "util.h"
 #import "ORStructDeclare.h"
 #import "ORCoreFunctionCall.h"
-void methodIMP(void){
-    void *args[8];
-    __asm__ volatile
-    (
-     "str x0, [%[args]]\n"
-     "str x1, [%[args], #0x8]\n"
-     "str x2, [%[args], #0x10]\n"
-     "str x3, [%[args], #0x18]\n"
-     "str x4, [%[args], #0x20]\n"
-     "str x5, [%[args], #0x28]\n"
-     "str x6, [%[args], #0x30]\n"
-     "str x7, [%[args], #0x38]\n"
-     :
-     : [args]"r"(args)
-     );
+void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
+    NSMutableArray<MFValue *> *argValues = [NSMutableArray array];
+    for (NSUInteger i = 0; i < cfi->nargs; i++) {
+        MFValue *argValue = [[MFValue alloc] initTypeEncode:cfi->arg_typeEncodes[i] pointer:args[i]];
+        [argValues addObject:argValue];
+    }
     MFScopeChain *scope = [MFScopeChain topScope];
-    id target = (__bridge id) args[0];
-    SEL sel = (SEL)args[1];
+    id target = argValues[0].objectValue;
+    SEL sel = argValues[1].selValue;
     BOOL classMethod = object_isClass(target);
     Class class;
     if (classMethod) {
@@ -44,78 +35,31 @@ void methodIMP(void){
         [scope setValue:[MFValue valueWithObject:target] withIndentifier:@"self"];
         class = [target class];
     }
-    MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:class classMethod:classMethod sel:sel];
-    NSMethodSignature *methodSignature = [target methodSignatureForSelector:sel];
-    NSMutableArray<MFValue *> *argValues = [NSMutableArray array];
-    NSUInteger numberOfArguments = [methodSignature numberOfArguments];
-    // 在OC中，传入值都为原数值并非MFValue，需要转换
-    for (NSUInteger i = 2; i < numberOfArguments; i++) {
-        void *arg = args[i];
-        MFValue *argValue = [[MFValue alloc] initTypeEncode:[methodSignature getArgumentTypeAtIndex:i] pointer:&arg];
-        [argValues addObject:argValue];
-    }
     [[MFStack argsStack] push:argValues];
+    MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:class classMethod:classMethod sel:sel];
     MFValue *value = [map.methodImp execute:scope];
-    __autoreleasing MFValue *retValue = [MFValue defaultValueWithTypeEncoding:[methodSignature methodReturnType]];
-    for (MFValue *value in argValues) {
-        [value release];
+    MFValue *retValue = [MFValue defaultValueWithTypeEncoding:cfi->r_typeEncode];
+    if (retValue.type != TypeVoid){
+        retValue.pointer = value.pointer;
+        *(void **)ret = *(void **)retValue.pointer;
     }
-    if (retValue.type == TypeVoid){
-        return;
-    }
-    retValue.pointer = value.pointer;
-    void *result = *(void **)retValue.pointer;
-    __asm__ volatile
-    (
-     "mov x0, %[ret]\n"
-     :
-     : [ret]"r"(result)
-     );
 }
 
-void blockInter(struct MFSimulateBlock *block){
-    void *intArgs[8];
-    void *floatArgs[8];
-    __asm__ volatile
-    (
-     "stp x0, x1, [%[iargs]]\n"
-     "stp x2, x3, [%[iargs], 16]\n"
-     "stp x4, x5, [%[iargs], 32]\n"
-     "stp x6, x7, [%[iargs], 48]\n"
-     "stp d0, d1, [%[fargs]]\n"
-     "stp d2, d3, [%[fargs], 16]\n"
-     "stp d4, d5, [%[fargs], 32]\n"
-     "stp d6, d7, [%[fargs], 48]\n"
-     :
-     : [iargs]"r"(intArgs), [fargs]"r"(floatArgs)
-     );
-    NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:block->descriptor->signature];
-    NSUInteger numberOfArguments = [sig numberOfArguments];
+void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
+    struct MFSimulateBlock *block = args[0];
     MFBlock *mangoBlock =  (__bridge MFBlock *)(block->wrapper);
-    // 在OC中，传入值都为原数值并非MFValue，需要转换
-    NSMutableArray *argValues = [NSMutableArray array];
-    for (NSUInteger i = 1; i < numberOfArguments ; i++) {
-        void *arg = intArgs[i];
-        MFValue *argValue = [[MFValue alloc] initTypeEncode:[sig getArgumentTypeAtIndex:i] pointer:&arg];
+    NSMutableArray<MFValue *> *argValues = [NSMutableArray array];
+    for (NSUInteger i = 1; i < cfi->nargs; i++) {
+        MFValue *argValue = [[MFValue alloc] initTypeEncode:cfi->arg_typeEncodes[i] pointer:args[i]];
         [argValues addObject:argValue];
     }
     [[MFStack argsStack] push:argValues];
     MFValue *value = [mangoBlock.func execute:mangoBlock.outScope];
-    __autoreleasing MFValue *retValue = [MFValue defaultValueWithTypeEncoding:[sig methodReturnType]];
-    for (MFValue *value in argValues) {
-        [value release];
+    MFValue *retValue = [MFValue defaultValueWithTypeEncoding:cfi->r_typeEncode];
+    if (retValue.type != TypeVoid){
+        retValue.pointer = value.pointer;
+        *(void **)ret = *(void **)retValue.pointer;
     }
-    if (retValue.type == TypeVoid){
-        return;
-    }
-    retValue.pointer = value.pointer;
-    void *result = *(void **)retValue.pointer;
-    __asm__ volatile
-    (
-     "mov x0, %[ret]\n"
-     :
-     : [ret]"r"(result)
-     );
 }
 
 
@@ -167,33 +111,11 @@ MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValue
         superClass = class_getSuperclass([instance class]);
     }
     struct objc_super *superPtr = &(struct objc_super){instance,superClass};
-    void *args[8] = { superPtr, sel, 0, 0, 0, 0, 0, 0};
-    for (int i = 0 ; i < argValues.count; i++) {
-        args[i + 2] = *(void **)argValues[i].pointer;
-    }
+    NSMutableArray *args = [@[[MFValue valueWithPointer:(void *)superPtr],[MFValue valueWithSEL:sel]] mutableCopy];
+    [args addObjectsFromArray:argValues];
     NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
-    __autoreleasing MFValue *retValue = [MFValue defaultValueWithTypeEncoding:sig.methodReturnType];
-    void *result = NULL;
-    __asm__ volatile
-    (
-     "ldr x0, [%[args]]\n"
-     "ldr x1, [%[args], #0x8]\n"
-     "ldr x2, [%[args], #0x10]\n"
-     "ldr x3, [%[args], #0x18]\n"
-     "ldr x4, [%[args], #0x20]\n"
-     "ldr x5, [%[args], #0x28]\n"
-     "ldr x6, [%[args], #0x30]\n"
-     "ldr x7, [%[args], #0x38]\n"
-     :
-     : [args]"r"(args)
-     );
-    objc_msgSendSuper();
-    __asm__ volatile
-    (
-     "mov %[result], x0\n"
-     : [result]"=r"(result)
-     :
-     );
-    retValue.pointer = &result;
+    MFValue *retValue = [MFValue defaultValueWithTypeEncoding:sig.methodReturnType];
+    void *funcptr = &objc_msgSendSuper;
+    invoke_functionPointer(funcptr, args, retValue);
     return retValue;
 }

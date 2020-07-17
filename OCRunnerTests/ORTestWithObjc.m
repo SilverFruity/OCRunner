@@ -282,44 +282,6 @@ typedef struct MyStruct2 {
     XCTAssert([declare2.keyOffsets[@"d"] isEqualToNumber:@(16)]);
 }
 
-- (void)testCallFunctionPointer{
-    MFValue *result1 = [[MFValue alloc] initTypeEncode:@encode(CGRect)];
-    invoke_functionPointer(&CGRectMake, @[[MFValue valueWithDouble:1],
-                                          [MFValue valueWithDouble:2],
-                                          [MFValue valueWithDouble:3],
-                                          [MFValue valueWithDouble:4]], result1);
-    CGRect rect1 = *(CGRect *)result1.pointer;
-    XCTAssert(CGRectEqualToRect(CGRectMake(1, 2, 3, 4), rect1));
-    UIView *view = [UIView new];
-    CGRect rect = CGRectMake(1, 2, 3, 4);
-    MFValue *result = [MFValue voidValue];
-    invoke_functionPointer(&objc_msgSend, @[[MFValue valueWithObject:view],
-                                            [MFValue valueWithSEL:@selector(setFrame:)],
-                                            [[MFValue alloc] initTypeEncode:@encode(CGRect) pointer:&rect]], result);
-
-    XCTAssert(CGRectEqualToRect(view.frame, rect));
-}
-
-void testRegister1(ffi_cif *cif, void* ret, void **args, void *userdata){
-    for (int i = 0; i < cif->nargs; i++) {
-        void *pvalue = args[i];
-        MFValue *value = [[MFValue alloc] initTypeEncode:cif->arg_typeEncodes[i] pointer:pvalue];
-        if (i == 0) {
-            assert(value.intValue == 100);
-        }else{
-            float fvalue = 0.1;
-            assert(value.floatValue == fvalue);
-        }
-    }
-    *(int *)ret = 100;
-}
-- (void)testRegisterFunctionCall{
-    char *args[2] = {"i","f"};
-    int (*func)(int a, float b) = register_function(&testRegister1, 2, args, "i");
-    int res = func(100, 0.1);
-    XCTAssert(res == 100);
-}
-
 - (void)testPerformanceExample {
     // This is an example of a performance test case.
     [self measureBlock:^{

@@ -13,6 +13,7 @@
 #import "MFValue.h"
 #import "ORTypeVarPair+TypeEncode.h"
 #import "ORCoreImp.h"
+#import "ORHandleTypeEncode.h"
 #import "ORStructDeclare.h"
 @implementation ORSearchedFunction
 - (ORFuncVariable *)funVar{
@@ -37,7 +38,7 @@
     return table;
 }
 - (nullable MFValue *)execute:(nonnull MFScopeChain *)scope {
-    NSArray *args = [[MFStack argsStack] pop];
+    NSArray <MFValue *>*args = [[MFStack argsStack] pop];
     NSString *typeName = self.funPair.type.name;
     ORTypeVarPair *registerPair = [[ORTypeSymbolTable shareInstance] typePairForTypeName:typeName];
     const char *typeEncode = self.funPair.typeEncode;

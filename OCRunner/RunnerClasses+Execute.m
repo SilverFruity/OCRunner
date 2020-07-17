@@ -21,7 +21,6 @@
 #import "ORTypeVarPair+TypeEncode.h"
 #import "ORCoreImp.h"
 #import "ORSearchedFunction.h"
-#import "ORCoreFunction.h"
 
 static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
     const char *blockTypeEncoding = [MFBlock typeEncodingForBlock:blockValue.objectValue];
@@ -438,13 +437,14 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     NSUInteger argCount = [sig numberOfArguments];
     void *retValuePointer = alloca([sig methodReturnLength]);
     if (argValues.count + 2 > argCount) {
+        //多参数调用问题
         NSMutableArray *methodArgs = [@[[MFValue valueWithObject:instance],
                                        [MFValue valueWithSEL:sel]] mutableCopy];
         [methodArgs addObjectsFromArray:argValues];
         MFValue *result = [MFValue defaultValueWithTypeEncoding:[sig methodReturnType]];
         void *msg_send = &objc_msgSend;
         invoke_functionPointer(msg_send, methodArgs, result, argCount);
-        retValuePointer = result.pointer;
+        return result;
     }else{
         NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
         invocation.target = instance;

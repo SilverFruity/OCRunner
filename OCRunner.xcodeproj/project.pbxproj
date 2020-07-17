@@ -66,7 +66,7 @@
 		EEA2AC82246855F100B08407 /* MFStack.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA2AC80246855F100B08407 /* MFStack.m */; };
 		EEA2AC83246855F100B08407 /* MFStack.h in Headers */ = {isa = PBXBuildFile; fileRef = EEA2AC81246855F100B08407 /* MFStack.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EEBF3334248E674300DDE2E9 /* ORCoreImp.h in Headers */ = {isa = PBXBuildFile; fileRef = EEBF3332248E674300DDE2E9 /* ORCoreImp.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		EEBF3335248E674300DDE2E9 /* ORCoreImp.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3333248E674300DDE2E9 /* ORCoreImp.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		EEBF3335248E674300DDE2E9 /* ORCoreImp.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3333248E674300DDE2E9 /* ORCoreImp.m */; };
 		EEBF336D248FBB9D00DDE2E9 /* UIKitRefrences in Resources */ = {isa = PBXBuildFile; fileRef = EEBF336C248FBB9D00DDE2E9 /* UIKitRefrences */; };
 /* End PBXBuildFile section */
 
