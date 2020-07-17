@@ -52,12 +52,13 @@ struct MFGOSimulateBlockDescriptor {
 	};
 };
 
-
+@class ORTypeVarPair;
 @interface MFBlock : NSObject
 
 @property (strong, nonatomic) MFScopeChain *outScope;
 @property (strong, nonatomic) ORBlockImp *func;
-@property (assign, nonatomic) const char *typeEncoding;
+@property (strong, nonatomic) NSMutableArray <ORTypeVarPair *>*paramTypes;
+@property (strong, nonatomic) ORTypeVarPair *retType;
 
 - (id)ocBlock;
 + (const char *)typeEncodingForBlock:(id)block;

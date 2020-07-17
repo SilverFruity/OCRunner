@@ -19,13 +19,13 @@
 #import "ORCoreFunctionCall.h"
 void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     NSMutableArray<MFValue *> *argValues = [NSMutableArray array];
-    for (NSUInteger i = 0; i < cfi->nargs; i++) {
+    for (NSUInteger i = 2; i < cfi->nargs; i++) {
         MFValue *argValue = [[MFValue alloc] initTypeEncode:cfi->arg_typeEncodes[i] pointer:args[i]];
         [argValues addObject:argValue];
     }
     MFScopeChain *scope = [MFScopeChain topScope];
-    id target = argValues[0].objectValue;
-    SEL sel = argValues[1].selValue;
+    id target = *(__strong id *)args[0];
+    SEL sel = *(SEL *)args[1];
     BOOL classMethod = object_isClass(target);
     Class class;
     if (classMethod) {
@@ -38,15 +38,16 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     [[MFStack argsStack] push:argValues];
     MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:class classMethod:classMethod sel:sel];
     MFValue *value = [map.methodImp execute:scope];
-    MFValue *retValue = [MFValue defaultValueWithTypeEncoding:cfi->r_typeEncode];
+    __autoreleasing MFValue *retValue = [MFValue defaultValueWithTypeEncoding:cfi->r_typeEncode];
     if (retValue.type != TypeVoid){
+        // 类型转换
         retValue.pointer = value.pointer;
-        *(void **)ret = *(void **)retValue.pointer;
+        [retValue writePointer:ret typeEncode:cfi->r_typeEncode];
     }
 }
 
 void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
-    struct MFSimulateBlock *block = args[0];
+    struct MFSimulateBlock *block = *(void **)args[0];
     MFBlock *mangoBlock =  (__bridge MFBlock *)(block->wrapper);
     NSMutableArray<MFValue *> *argValues = [NSMutableArray array];
     for (NSUInteger i = 1; i < cfi->nargs; i++) {
@@ -55,15 +56,18 @@ void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
     }
     [[MFStack argsStack] push:argValues];
     MFValue *value = [mangoBlock.func execute:mangoBlock.outScope];
-    MFValue *retValue = [MFValue defaultValueWithTypeEncoding:cfi->r_typeEncode];
+    __autoreleasing MFValue *retValue = [MFValue defaultValueWithTypeEncoding:cfi->r_typeEncode];
     if (retValue.type != TypeVoid){
+        // 类型转换
         retValue.pointer = value.pointer;
-        *(void **)ret = *(void **)retValue.pointer;
+        [retValue writePointer:ret typeEncode:cfi->r_typeEncode];
     }
 }
 
 
-void getterImp(id target, SEL sel){
+void getterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
+    id target = *(__strong id *)args[0];
+    SEL sel = *(SEL *)args[1];
     NSString *propName = NSStringFromSelector(sel);
     ORPropertyDeclare *propDef = [[MFPropertyMapTable shareInstance] getPropertyMapTableItemWith:[target class] name:propName].property;
     const char *type = propDef.var.typeEncode;
@@ -71,16 +75,9 @@ void getterImp(id target, SEL sel){
     if (!propValue) {
         propValue = [MFValue defaultValueWithTypeEncoding:type];
     }
-    if (propValue.type == TypeVoid){
-        return;
+    if (propValue.type != TypeVoid){
+        [propValue writePointer:ret typeEncode:cfi->r_typeEncode];
     }
-    void *result = *(void **)propValue.pointer;
-    __asm__ volatile
-    (
-     "mov x0, %[ret]\n"
-     :
-     : [ret]"r"(result)
-     );
 }
 
 void setterImp(id target, SEL sel, void *newValue){

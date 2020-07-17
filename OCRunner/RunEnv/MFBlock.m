@@ -11,6 +11,7 @@
 #import "RunnerClasses+Execute.h"
 #import "MFValue.h"
 #import "ORCoreImp.h"
+#import "ORTypeVarPair+TypeEncode.h"
 
 void copy_helper(struct MFSimulateBlock *dst, struct MFSimulateBlock *src)
 {
@@ -54,14 +55,21 @@ void dispose_helper(struct MFSimulateBlock *src)
 - (id)ocBlock{
     return [self blockPtr];
 }
-
+- (void)setParamTypes:(NSMutableArray<ORTypeVarPair *> *)paramTypes{
+    NSMutableArray *types = [@[[ORTypeVarPair typePairWithTypeKind:TypeBlock]] mutableCopy];
+    [types addObjectsFromArray:paramTypes];
+    _paramTypes = types;
+}
 - (void *)blockPtr{
-    
     if (_generatedPtr) {
         return _blockPtr;
     }
+    const char *typeEncoding = self.retType.typeEncode;
+    for (ORTypeVarPair *param in self.paramTypes) {
+        const char *paramTypeEncoding = param.typeEncode;
+        typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
+    }
     _generatedPtr = YES;
-    const char *typeEncoding = self.typeEncoding;
     struct MFGOSimulateBlockDescriptor descriptor = {
         0,
         sizeof(struct MFSimulateBlock),
@@ -69,13 +77,14 @@ void dispose_helper(struct MFSimulateBlock *src)
         (void (*)(const void *src))dispose_helper,
         typeEncoding
     };
+    void *blockImp = register_function(&blockInter, self.paramTypes, self.retType);
     _descriptor = malloc(sizeof(struct MFGOSimulateBlockDescriptor));
     memcpy(_descriptor, &descriptor, sizeof(struct MFGOSimulateBlockDescriptor));
     struct MFSimulateBlock simulateBlock = {
         &_NSConcreteStackBlock,
         (BLOCK_HAS_COPY_DISPOSE | BLOCK_HAS_SIGNATURE | BLOCK_CREATED_FROM_MFGO),
         0,
-        &blockInter,
+        blockImp,
         _descriptor,
         (__bridge void*)self
     };

@@ -56,5 +56,7 @@ void *core_register_function(void (*fun)(ffi_cif *,void *,void **, void*),
 void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
                         NSArray <ORTypeVarPair *>*args,
                         ORTypeVarPair *ret);
-
+void *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
+                      NSArray <ORTypeVarPair *>*args,
+                      ORTypeVarPair *ret);
 #endif /* ORCoreFunction_h */

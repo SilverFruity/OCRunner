@@ -88,7 +88,8 @@ static void replace_method(Class clazz, ORMethodImplementation *methodImp, MFSco
             class_addMethod(c2, orgSel, method_getImplementation(ocMethod), typeEncoding);
         }
     }
-    class_replaceMethod(c2, sel, &methodIMP, typeEncoding);
+    void *imp = register_method(&methodIMP, declare.parameterTypes, declare.returnType);
+    class_replaceMethod(c2, sel, imp, typeEncoding);
     if (needFreeTypeEncoding) {
         free((void *)typeEncoding);
     }
@@ -98,7 +99,8 @@ static void replace_getter_method(Class clazz, ORPropertyDeclare *prop){
     SEL getterSEL = NSSelectorFromString(prop.var.var.varname);
     const char *retTypeEncoding  = prop.var.typeEncode;
     const char * typeEncoding = mf_str_append(retTypeEncoding, "@:");
-    class_replaceMethod(clazz, getterSEL, &getterImp, typeEncoding);
+    void *imp = register_method(&getterImp, @[], prop.var);
+    class_replaceMethod(clazz, getterSEL, imp, typeEncoding);
     free((void *)typeEncoding);
 }
 
@@ -548,13 +550,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             MFScopeChain *blockScope = [MFScopeChain scopeChainWithNext:[MFScopeChain topScope]];
             copy_undef_var(self, [MFVarDeclareChain new], scope, blockScope);
             manBlock.outScope = blockScope;
-            const char *typeEncoding = manBlock.func.declare.returnType.typeEncode;
-            typeEncoding = mf_str_append(typeEncoding, "@?");
-            for (ORTypeVarPair *param in manBlock.func.declare.funVar.pairs) {
-                const char *paramTypeEncoding = param.typeEncode;
-                typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
-            }
-            manBlock.typeEncoding = typeEncoding;
+            manBlock.retType = manBlock.func.declare.returnType;
+            manBlock.paramTypes = manBlock.func.declare.funVar.pairs;
             __autoreleasing id ocBlock = [manBlock ocBlock];
             MFValue *value = [MFValue valueWithBlock:ocBlock];
             CFRelease((__bridge void *)ocBlock);
