@@ -39,7 +39,7 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:class classMethod:classMethod sel:sel];
     MFValue *value = [map.methodImp execute:scope];
     __autoreleasing MFValue *retValue = [MFValue defaultValueWithTypeEncoding:cfi->r_typeEncode];
-    if (retValue.type != TypeVoid){
+    if (retValue.type != TypeVoid && value.pointer != NULL){
         // 类型转换
         retValue.pointer = value.pointer;
         [retValue writePointer:ret typeEncode:cfi->r_typeEncode];
@@ -57,7 +57,7 @@ void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
     [[MFStack argsStack] push:argValues];
     MFValue *value = [mangoBlock.func execute:mangoBlock.outScope];
     __autoreleasing MFValue *retValue = [MFValue defaultValueWithTypeEncoding:cfi->r_typeEncode];
-    if (retValue.type != TypeVoid){
+    if (retValue.type != TypeVoid && value.pointer != NULL){
         // 类型转换
         retValue.pointer = value.pointer;
         [retValue writePointer:ret typeEncode:cfi->r_typeEncode];
@@ -75,7 +75,7 @@ void getterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
     if (!propValue) {
         propValue = [MFValue defaultValueWithTypeEncoding:type];
     }
-    if (propValue.type != TypeVoid){
+    if (propValue.type != TypeVoid && propValue.pointer != NULL){
         [propValue writePointer:ret typeEncode:cfi->r_typeEncode];
     }
 }

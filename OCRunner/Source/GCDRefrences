@@ -2,16 +2,14 @@ typedef id dispatch_source_t;
 typedef id dispatch_group_t;
 typedef id dispatch_queue_t;
 typedef id dispatch_queue_global_t;
-typedef id dispatch_time_t;
 typedef id dispatch_queue_main_t;
 typedef id dispatch_semaphore_t;
 typedef id dispatch_object_t;
-typedef intptr_t dispatch_once_t;
-
 typedef long intptr_t;
+typedef long long dispatch_once_t;
+typedef uint64_t dispatch_time_t;
+
 typedef unsigned long uintptr_t;
-typdef  long long int64_t;
-typdef  unsigned long long uint64_t;
 
 typedef enum: unsigned long{
     DISPATCH_BLOCK_BARRIER = 0x1,
@@ -19,7 +17,7 @@ typedef enum: unsigned long{
     DISPATCH_BLOCK_ASSIGN_CURRENT = 0x4,
     DISPATCH_BLOCK_NO_QOS_CLASS = 0x8,
     DISPATCH_BLOCK_INHERIT_QOS_CLASS = 0x10,
-    DISPATCH_BLOCK_ENFORCE_QOS_CLASS = 0x20,
+    DISPATCH_BLOCK_ENFORCE_QOS_CLASS = 0x20
 }dispatch_block_flags;
 
 typedef enum:  unsigned int{
@@ -28,8 +26,8 @@ typedef enum:  unsigned int{
     QOS_CLASS_DEFAULT = 0x15,
     QOS_CLASS_UTILITY = 0x11,
     QOS_CLASS_BACKGROUND = 0x09,
-    QOS_CLASS_UNSPECIFIED = 0x00,
-)qos_class_t;
+    QOS_CLASS_UNSPECIFIED = 0x00
+}qos_class_t;
 
 typedef qos_class_t dispatch_qos_class_t;
 
@@ -125,7 +123,7 @@ unsigned long long NSEC_PER_MSEC = 1000000;
 unsigned long long USEC_PER_SEC = 1000000;
 unsigned long long NSEC_PER_USEC = 1000;
 
-unsigned long long DISPATCH_TIME_NOW = 0
+unsigned long long DISPATCH_TIME_NOW = 0;
 unsigned long long DISPATCH_TIME_FOREVER = ~0;
 
 dispatch_time_t

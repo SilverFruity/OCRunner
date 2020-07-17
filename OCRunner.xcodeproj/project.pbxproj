@@ -41,6 +41,8 @@
 		EE1C6FA324BF364A00430A51 /* ORHandleTypeEncode.h in Headers */ = {isa = PBXBuildFile; fileRef = EE1C6FA124BF364A00430A51 /* ORHandleTypeEncode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE1C6FA424BF364A00430A51 /* ORHandleTypeEncode.m in Sources */ = {isa = PBXBuildFile; fileRef = EE1C6FA224BF364A00430A51 /* ORHandleTypeEncode.m */; };
 		EE38F997246C3C2A00E7C37B /* RunnerClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98998724658DB700ACF2C1 /* RunnerClasses.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EE680BA424C1D511005BA3F5 /* ORSystemFunctionTable.h in Headers */ = {isa = PBXBuildFile; fileRef = EE680BA224C1D511005BA3F5 /* ORSystemFunctionTable.h */; };
+		EE680BA524C1D511005BA3F5 /* ORSystemFunctionTable.m in Sources */ = {isa = PBXBuildFile; fileRef = EE680BA324C1D511005BA3F5 /* ORSystemFunctionTable.m */; };
 		EE79FF6B246D917100ABE06F /* ORTestReplaceClass.m in Sources */ = {isa = PBXBuildFile; fileRef = EE79FF6A246D917100ABE06F /* ORTestReplaceClass.m */; };
 		EE98997524658DA600ACF2C1 /* OCRunner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EE98996B24658DA600ACF2C1 /* OCRunner.framework */; };
 		EE98997C24658DA600ACF2C1 /* OCRunner.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98996E24658DA600ACF2C1 /* OCRunner.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -161,6 +163,8 @@
 		EE197B842478DD190049CFDA /* ORInterpreter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORInterpreter.m; sourceTree = "<group>"; };
 		EE1C6FA124BF364A00430A51 /* ORHandleTypeEncode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORHandleTypeEncode.h; sourceTree = "<group>"; };
 		EE1C6FA224BF364A00430A51 /* ORHandleTypeEncode.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORHandleTypeEncode.m; sourceTree = "<group>"; };
+		EE680BA224C1D511005BA3F5 /* ORSystemFunctionTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORSystemFunctionTable.h; sourceTree = "<group>"; };
+		EE680BA324C1D511005BA3F5 /* ORSystemFunctionTable.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORSystemFunctionTable.m; sourceTree = "<group>"; };
 		EE79FF69246D917100ABE06F /* ORTestReplaceClass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORTestReplaceClass.h; sourceTree = "<group>"; };
 		EE79FF6A246D917100ABE06F /* ORTestReplaceClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORTestReplaceClass.m; sourceTree = "<group>"; };
 		EE98996B24658DA600ACF2C1 /* OCRunner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OCRunner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -364,6 +368,8 @@
 			children = (
 				04A531BC248F972500D83A48 /* ORSearchedFunction.h */,
 				04A531BD248F972500D83A48 /* ORSearchedFunction.m */,
+				EE680BA224C1D511005BA3F5 /* ORSystemFunctionTable.h */,
+				EE680BA324C1D511005BA3F5 /* ORSystemFunctionTable.m */,
 				04A531B5248F8AD600D83A48 /* SymbolSearch.c */,
 				04A531B6248F8AD600D83A48 /* SymbolSearch.h */,
 				EE9899C02465923800ACF2C1 /* util.h */,
@@ -393,6 +399,7 @@
 				048FAA3E247FA4820036F5EE /* built-in.h in Headers */,
 				04F0DA5A24B47D9B000B1996 /* ORCoreFunctionCall.h in Headers */,
 				04A531B8248F8AD600D83A48 /* SymbolSearch.h in Headers */,
+				EE680BA424C1D511005BA3F5 /* ORSystemFunctionTable.h in Headers */,
 				EE9899A624658F8900ACF2C1 /* MFWeakPropertyBox.h in Headers */,
 				EEBF3334248E674300DDE2E9 /* ORCoreImp.h in Headers */,
 				EE9899A424658F8900ACF2C1 /* MFPropertyMapTable.h in Headers */,
@@ -563,6 +570,7 @@
 				04F0DA5824B47B49000B1996 /* ORCoreFunctionCall.s in Sources */,
 				EE9899C42465923900ACF2C1 /* util.m in Sources */,
 				EE9899B824658F8900ACF2C1 /* MFValue.m in Sources */,
+				EE680BA524C1D511005BA3F5 /* ORSystemFunctionTable.m in Sources */,
 				EE9899B124658F8900ACF2C1 /* MFPropertyMapTable.m in Sources */,
 				04A531BF248F972500D83A48 /* ORSearchedFunction.m in Sources */,
 				EE9899AE24658F8900ACF2C1 /* MFMethodMapTable.m in Sources */,

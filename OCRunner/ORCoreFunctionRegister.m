@@ -446,8 +446,8 @@ void *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
     char **argTypes = malloc((args.count + 2) * sizeof(char *));
     argTypes[0] = mallocCopyStr("@");
     argTypes[1] = mallocCopyStr(":");
-    for (int i = 2; i < args.count; i++) {
-        argTypes[i] = mallocCopyStr(args[i].typeEncode);
+    for (int i = 2; i < args.count + 2; i++) {
+        argTypes[i] = mallocCopyStr(args[i - 2].typeEncode);
     }
     char *retTyep = mallocCopyStr(ret.typeEncode);
     return core_register_function(fun, (int)args.count + 2, argTypes, retTyep);

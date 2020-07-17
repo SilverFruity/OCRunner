@@ -25,7 +25,7 @@
 - (instancetype)init
 {
     self = [super init];
-    self.cache = @{@"1":@"1",@"2":@"2"};
+    self.cache = @{@"1":@"0",@"2":@"2"};
     return self;
 }
 - (NSString *)cacheForKey:(NSString *)key{

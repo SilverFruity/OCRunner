@@ -51,6 +51,15 @@
         function.funPair = pair;
         [scope setValue:[MFValue valueWithObject:function] withIndentifier:function.name];
     }
+    #if DEBUG
+    NSMutableString *build_ins = [@"\n" mutableCopy];
+    for (ORTypeVarPair *pair in funcVars){
+        NSString *name = pair.var.varname;
+        NSString *build_in_declare = [NSString stringWithFormat:@"[ORSystemFunctionTable reg:@\"%@\" pointer:&%@];\n",name,name];
+        [build_ins appendString:build_in_declare];
+    }
+    NSLog(@"%@", build_ins);
+    #endif
     [OCParser clear];
 }
 @end

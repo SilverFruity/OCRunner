@@ -15,6 +15,7 @@
 #import "ORCoreImp.h"
 #import "ORHandleTypeEncode.h"
 #import "ORStructDeclare.h"
+#import "ORSystemFunctionTable.h"
 @implementation ORSearchedFunction
 - (ORFuncVariable *)funVar{
     return (ORFuncVariable *)self.funPair.var;
@@ -51,11 +52,16 @@
         }
     }
     MFValue *returnValue = [MFValue defaultValueWithTypeEncoding:typeEncode];
+    void *funcptr = self.pointer;
+    if (funcptr == NULL) {
+        funcptr = [ORSystemFunctionTable pointerForFunctionName:self.name];
+    }
+    NSAssert(funcptr != NULL, @"not found function %@", self.name);
     if (!self.funVar.isMultiArgs) {
-        invoke_functionPointer(self.pointer, args, returnValue);
+        invoke_functionPointer(funcptr, args, returnValue);
         //多参数
     }else{
-        invoke_functionPointer(self.pointer, args, returnValue, self.funVar.pairs.count);
+        invoke_functionPointer(funcptr, args, returnValue, self.funVar.pairs.count);
     }
     return returnValue;
 }

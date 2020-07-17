@@ -334,11 +334,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             NSMutableDictionary *dict = [NSMutableDictionary dictionary];
             for (NSMutableArray <ORExpression *>*kv in exps) {
                 ORExpression *keyExp = kv.firstObject;
-                ORExpression *valueExp = kv.firstObject;
+                ORExpression *valueExp = kv.lastObject;
                 id key = [keyExp execute:scope].objectValue;
                 id value = [valueExp execute:scope].objectValue;
-                NSAssert(key == nil, @"the key of NSDictionary can't be nil");
-                NSAssert(value == nil, @"the vale of NSDictionary can't be nil");
+                NSAssert(key != nil, @"the key of NSDictionary can't be nil");
+                NSAssert(value != nil, @"the vale of NSDictionary can't be nil");
                 dict[key] = value;
             }
             return [MFValue valueWithObject:[dict copy]];
@@ -491,13 +491,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         // TODO: 调用block
         // make.left.equalTo(xxxx);
         MFValue *value = [(ORMethodCall *)self.caller execute:scope];
-        //FIXME: see initWithCValuePointer 'FIXME' note
         return invoke_MFBlockValue(value, args);
-//        if (value.typePair.type.type == TypeBlock) {
-//            return invoke_MFBlockValue(value, args);
-//        }else{
-//            NSCAssert(0, @"must be a block value");
-//        }
     }
     MFValue *blockValue = [scope getValueWithIdentifier:self.caller.value];
     if (self.caller.value_type == OCValueVariable && blockValue != nil) {
