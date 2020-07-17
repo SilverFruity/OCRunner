@@ -490,7 +490,7 @@ class CRunnerTests: XCTestCase {
         + (BOOL)testClassMethodReplaceTest{
             return YES;
         }
-        - (NSString *)testOriginalMethod{
+        - (NSInteger)testOriginalMethod{
             return 1 + [self ORGtestOriginalMethod];
         }
         - (NSInteger)testAddGlobalVar{

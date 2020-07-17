@@ -11,6 +11,10 @@
 
 @implementation ORTypeVarPair (TypeEncode)
 - (const char *)typeEncode{
+    if ([self.var isKindOfClass:[ORFuncVariable class]]) {
+        __autoreleasing NSString *string = self.var.isBlock ? @"@?" : @"^";
+        return string.UTF8String;
+    }
     char encoding[128];
     memset(encoding, 0, 128);
 #define append(str) strcat(encoding,str)

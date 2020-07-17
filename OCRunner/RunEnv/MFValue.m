@@ -147,7 +147,7 @@ _typeEncode = buffer;
     NSString *typeName = pair.type.name;
     NSUInteger pointerCount = pair.var.ptCount;
     void *result = NULL;
-    [self convertValueWithTypeEncode:&result typeEncode:typeEncode];
+    [self convertValueWithTypeEncode:typeEncode result:&result];
     copyTypeEncode(typeEncode)
     if (result != NULL) {
         self.pointer = &result;
@@ -158,7 +158,7 @@ _typeEncode = buffer;
         self.typeName = typeName;
     }
 }
-- (void)convertValueWithTypeEncode:(void **)resultValue typeEncode:(const char *)typeEncode{
+- (void)convertValueWithTypeEncode:(const char *)typeEncode result:(void **)resultValue{
     ORTypeVarPair *pair = ORTypeVarPairForTypeEncode(typeEncode);
     TypeKind type = pair.type.type;
     NSUInteger pointerCount = pair.var.ptCount;
@@ -279,7 +279,7 @@ _typeEncode = buffer;
     NSGetSizeAndAlignment(self.typeEncode, &currentSize, NULL);
     void *copySource = self.pointer;
     void *convertResult = NULL;
-    [self convertValueWithTypeEncode:&convertResult typeEncode:typeEncode];
+    [self convertValueWithTypeEncode:typeEncode result:&convertResult];
     if (convertResult != NULL) {
         copySource = &convertResult;
     }
