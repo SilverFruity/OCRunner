@@ -31,8 +31,7 @@
     for (int i = 0; i < names.count; i++) {
         NSString *name = names[i];
         ORSearchedFunction *result = [ORSearchedFunction functionWithName:name];
-        searches[i].name = result.name.UTF8String;
-        searches[i].pointer = &result->_pointer;
+        searches[i] = makeFunctionSearch(name.UTF8String, &result->_pointer);
         table[name] = result;
     }
     search_symbols(searches, names.count);

@@ -41,6 +41,7 @@ struct FunctionSearch {
   const char *name;
   void **pointer;
 };
+struct FunctionSearch makeFunctionSearch(const char *name, void *pointer);
 
 FISHHOOK_VISIBILITY
 int search_symbols(struct FunctionSearch rebindings[], size_t rebindings_nel);

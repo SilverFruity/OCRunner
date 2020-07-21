@@ -311,6 +311,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @property (nonatomic,assign, nullable)void *pointer;
 - (void)setPointerWithNoCopy:(void *)pointer;
 + (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding;
+- (void)setDefaultValue;
 + (instancetype)valueWithTypeKind:(TypeKind)TypeKind pointer:(nullable void *)pointer;
 + (instancetype)valueWithTypePair:(ORTypeVarPair *)typePair pointer:(nullable void *)pointer;
 - (instancetype)initTypeEncode:(const char *)typeEncoding;

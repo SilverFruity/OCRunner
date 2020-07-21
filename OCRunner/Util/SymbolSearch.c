@@ -59,7 +59,16 @@ struct rebindings_entry {
   size_t rebindings_nel;
   struct rebindings_entry *next;
 };
-
+struct FunctionSearch makeFunctionSearch(const char *name, void *pointer){
+    size_t len = strlen(name);
+    char *str = malloc(len + 1);
+    strncpy(str, name, len);
+    str[len] = '\0';
+    struct FunctionSearch search;
+    search.name = str;
+    search.pointer = pointer;
+    return search;
+}
 static struct rebindings_entry *_rebindings_head;
 
 static int prepend_search(struct rebindings_entry **rebindings_head,

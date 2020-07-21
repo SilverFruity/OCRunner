@@ -36,7 +36,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return type & MFStatementResultTypeReturnMask;
 }
 @interface MFValue()
-@property (nonatomic,strong)id objectValue;
+@property (nonatomic,strong)id strongObjectValue;
 @property (nonatomic,weak)id weakObjectValue;
 @end
 
@@ -47,8 +47,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 + (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding{
     typeEncoding = removeTypeEncodingPrefix((char *)typeEncoding);
     MFValue *value = [[MFValue alloc] initTypeEncode:typeEncoding pointer:NULL];
-    NSUInteger a = 0;
-    value.pointer = &a;
+    value.pointer = NULL;
     return value;
 }
 + (instancetype)valueWithTypeKind:(TypeKind)TypeKind pointer:(void *)pointer{
@@ -77,19 +76,23 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
         }
         free(_pointer);
         _pointer = NULL;
-        _objectValue = nil;
+        _strongObjectValue = nil;
         _weakObjectValue = nil;
     }
 }
 - (void)setPointer:(void *)pointer{
     NSCAssert(self.typeEncode != NULL, @"TypeEncode must exist");
+    [self deallocPointer];
+    NSUInteger size = self.memerySize;
+    void *dst = malloc(size);
+    memset(dst, 0, size);
+    _pointer = dst;
+    _isAlloced = YES;
     if (pointer == NULL) {
-        _pointer = pointer;
         return;
     }
-    [self deallocPointer];
     if (*_typeEncode == '@') {
-        _objectValue = *(__strong id *)pointer;
+        self.strongObjectValue = *(__strong id *)pointer;
     }
     if (*_typeEncode == '*') {
         char *str = *(char **)pointer;
@@ -99,13 +102,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
         memcpy(cstring, str, len);
         pointer = &cstring;
     }
-    NSUInteger size;
-    NSGetSizeAndAlignment(self.typeEncode, &size, NULL);
-    void *dst = malloc(size);
-    memset(dst, 0, size);
     memcpy(dst, pointer, size);
-    _pointer = dst;
-    _isAlloced = YES;
 }
 - (void)setPointerWithNoCopy:(void *)pointer{
     [self deallocPointer];
@@ -114,15 +111,11 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 - (void)setModifier:(ORDeclarationModifier)modifier{
     if (modifier & ORDeclarationModifierWeak && (self.type == TypeObject || self.type == TypeBlock)) {
-        self.weakObjectValue = self.objectValue;
-        self.objectValue = nil;
+        self.weakObjectValue = self.strongObjectValue;
+        self.strongObjectValue = nil;
     }
     _modifier = modifier;
 }
-- (id)objectValue{
-    return *(__strong id *)self.pointer;
-}
-
 - (void)dealloc{
     [self deallocPointer];
     if(_typeEncode != NULL) free((void *)_typeEncode);
@@ -251,7 +244,9 @@ _typeEncode = buffer;
     [self setTypeInfoWithValue:src];
     self.pointer = src.pointer;
 }
-
+- (void)setDefaultValue{
+    self.pointer = NULL;
+}
 - (void)setTypeBySearchInTypeSymbolTable{
     do {
          if (!self.typeName) break;
@@ -261,7 +256,6 @@ _typeEncode = buffer;
              ORStructDeclare *structDecl = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:pair.type.name];
              if (!structDecl) break;
              self.typeEncode = structDecl.typeEncoding;
-             NSLog(@"%s",structDecl.typeEncoding);
          }else{
              [self setTypeInfoWithTypePair:pair];
          }

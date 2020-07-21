@@ -111,7 +111,7 @@ static void replace_setter_method(Class clazz, ORPropertyDeclare *prop){
     SEL setterSEL = NSSelectorFromString([NSString stringWithFormat:@"set%@%@:",str1,str2]);
     const char *prtTypeEncoding  = prop.var.typeEncode;
     const char * typeEncoding = mf_str_append("v@:", prtTypeEncoding);
-    class_replaceMethod(clazz, setterSEL, &setterImp, typeEncoding);
+    class_replaceMethod(clazz, setterSEL, (void *)&setterImp, typeEncoding);
     free((void *)typeEncoding);
 }
 
@@ -289,6 +289,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     ORFuncVariable *var = [ORFuncVariable copyFromVar:self];
     var.pairs = self.pairs;
     return var;
+}
+- (MFValue *)execute:(MFScopeChain *)scope{
+    return [MFValue voidValue];
 }
 @end
 @implementation ORFuncDeclare(Execute)
@@ -696,6 +699,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             value.modifier = self.modifier;
             [value setTypeInfoWithTypePair:self.pair];
             [value setTypeBySearchInTypeSymbolTable];
+            [value setDefaultValue];
             if (value.type == TypeObject
                 && NSClassFromString(value.typeName) == nil
                 && ![value.typeName isEqualToString:@"id"]) {

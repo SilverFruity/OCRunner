@@ -9,8 +9,6 @@
 #import "AppDelegate.h"
 #import <OCRunner/OCRunner.h>
 #import <objc/message.h>
-#import <OCRunner/ORSearchedFunction.h>
-#import <OCRunner/ORCoreFunction.h>
 
 @interface AppDelegate ()
 
