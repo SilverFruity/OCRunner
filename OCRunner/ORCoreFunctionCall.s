@@ -14,6 +14,7 @@
  *  x3 void *ret
  *  x4 uint  retFlag
  */
+#ifndef __libffi__
 #ifdef __arm64__
 .text
 .global _ORCoreFunctionCall
@@ -117,4 +118,4 @@ _ORCoreFunctionCall:
 	nop
 ret
 #endif
-
+#endif

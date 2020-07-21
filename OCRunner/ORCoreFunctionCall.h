@@ -5,6 +5,8 @@
 //  Created by Jiang on 2020/7/7.
 //  Copyright © 2020 SilverFruity. All rights reserved.
 //
+#ifndef __libffi__
+#ifdef __arm64__
 
 #define AARCH64_RET_VOID    0
 #define AARCH64_RET_INT64    1
@@ -65,3 +67,6 @@
 #define OR_ALIGNMENT 8
 // 字节对齐
 #define OR_ALIGN(v,a) (v + (a - 1)) / (a);
+
+#endif
+#endif

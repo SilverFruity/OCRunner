@@ -8,7 +8,8 @@
 #import <mach/machine/vm_param.h>
 #import "ORCoreFunctionCall.h"
 #import "ORCoreFunctionRegister.h"
-
+#ifndef __libffi__
+#ifdef __arm64__
 #ifdef __AARCH64EB__
 # define BE(X)    X
 #else
@@ -152,3 +153,5 @@ ldp x17, x16, [x16]
 br x16
 nop        /* each entry in the trampoline config page is 2*sizeof(void*) so the trampoline itself cannot be smaller that 16 bytes */
 .endr
+#endif
+#endif

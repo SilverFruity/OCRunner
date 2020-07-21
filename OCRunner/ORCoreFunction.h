@@ -8,6 +8,12 @@
 
 #ifndef ORCoreFunction_h
 #define ORCoreFunction_h
+
+#if __has_include("ffi.h")
+#define __libffi__
+#import "ffi.h"
+#else
+#ifdef __arm64__
 # if __has_feature(ptrauth_calls)
 #  define HAVE_PTRAUTH 1
 # endif
@@ -37,6 +43,14 @@ typedef struct {
 
 NSUInteger floatPointFlagsWithTypeEncode(const char *typeEncode);
 NSUInteger resultFlagsForTypeEncode(const char *retTypeEncode, char **argTypeEncodes, int narg);
+void *core_register_function(void (*fun)(ffi_cif *,void *,void **, void*),
+                             unsigned nargs,
+                             char **argTypeEncodes,
+                             char *retTypeEncode);
+
+#endif /* __arm64__ */
+#endif /* __has_include  */
+
 
 @class NSArray;
 @class MFValue;
@@ -48,10 +62,7 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
 void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue);
 
 
-void *core_register_function(void (*fun)(ffi_cif *,void *,void **, void*),
-                             unsigned nargs,
-                             char **argTypeEncodes,
-                             char *retTypeEncode);
+
 
 void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
                         NSArray <ORTypeVarPair *>*args,
@@ -59,4 +70,5 @@ void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
 void *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
                       NSArray <ORTypeVarPair *>*args,
                       ORTypeVarPair *ret);
+
 #endif /* ORCoreFunction_h */

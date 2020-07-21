@@ -13,6 +13,8 @@
 #import "ORHandleTypeEncode.h"
 #import "ptrauth.h"
 #import "ORCoreFunction.h"
+#ifndef __libffi__
+#ifdef __arm64__
 NSUInteger floatPointFlagsWithTypeEncode(const char * typeEncode){
     NSUInteger fieldCount = totalFieldCountWithTypeEncode(typeEncode);;
     if (fieldCount <= 4) {
@@ -279,3 +281,31 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
     returnValue.pointer = ret;
     free(ret);
 }
+#endif /* __arm64__ */
+#else
+#import "ORTypeVarPair+libffi.h"
+#import "ORTypeVarPair+TypeEncode.h"
+void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue){
+    invoke_functionPointer(funptr, argValues, returnValue, argValues.count);
+}
+__attribute__((overloadable))
+void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue, NSUInteger needArgs){
+    ffi_cif cif;
+    ffi_type *types[argValues.count];
+    void *argvs[argValues.count];
+    for (int i = 0; i < argValues.count; i++) {
+        types[i] = ORTypeVarPairForTypeEncode(argValues[i].typeEncode).libffi_type;
+        argvs[i] = argValues[i].pointer;
+    }
+    ffi_type *retType = ORTypeVarPairForTypeEncode(returnValue.typeEncode).libffi_type;
+    ffi_status ffi_status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, (unsigned int)argValues.count, retType, types);
+    #ifdef __arm64
+        cif.aarch64_nfixedargs = (unsigned)needArgs;
+    #endif
+    void *ret = returnValue.pointer;
+    if (ffi_status == FFI_OK) {
+        ffi_call(&cif, funptr, ret, argvs);
+    }
+}
+
+#endif/* __libffi__ */
