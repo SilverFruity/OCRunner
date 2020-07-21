@@ -19,7 +19,7 @@ switch (target.type) {\
     case TypeUChar: result = (resultType)*(unsigned char *)target.pointer; break;\
     case TypeUInt: result = (resultType)*(unsigned int *)target.pointer; break;\
     case TypeUShort: result = (resultType)*(unsigned short *)target.pointer; break;\
-    case TypeULong: result = (resultType)*(unsigned long *)target.pointer; break;\
+    case TypeULong: result = (resultType)*(unsigned int *)target.pointer; break;\
     case TypeULongLong: result = (resultType)*(unsigned long long *)target.pointer; break;\
     case TypeBOOL: result = (resultType)*(BOOL *)target.pointer; break;\
     case TypeChar: result = (resultType)*(char *)target.pointer; break;\
@@ -100,7 +100,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
         char * cstring = malloc(len * sizeof(char) + 1);
         cstring[len] = '\0';
         memcpy(cstring, str, len);
-        pointer = &cstring;
+        *(void **)dst = cstring;
+        return;
     }
     memcpy(dst, pointer, size);
 }
