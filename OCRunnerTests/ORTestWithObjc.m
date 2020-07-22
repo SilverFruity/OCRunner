@@ -172,7 +172,7 @@ Element2Struct *Element2StructMake(){
 }
 - (void)testStructSetValueNeedCopy{
     MFScopeChain *scope = [MFScopeChain topScope];
-    or_add_build_in();
+
     CGRect rect1 = CGRectZero;
     MFValue *value = [MFValue defaultValueWithTypeEncoding:@encode(CGRect)];
     [value setPointerWithNoCopy:&rect1];
@@ -181,7 +181,6 @@ Element2Struct *Element2StructMake(){
     XCTAssert(rect1.origin.x == 0, @"origin.x %f", rect1.origin.x);
     XCTAssert(rect1.origin.y == 0, @"origin.y %f", rect1.origin.y);
 
-    or_add_build_in();
     NSString * source =
     @"CGRect frame = CGRectMake(0,1,2,3);"
     "CGSize size = frame.size;"
