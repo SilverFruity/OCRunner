@@ -4,9 +4,17 @@ OCRunner is a DSL using Objective-C syntax，OCRunner is also an iOS App hotfix 
 
 目标：你能在Xcode中正常运行的纯代码，在OCRunner中也能正常运行。
 
-## 1. Demo运行
+目前规划：oc2mangoLib库打包语法树，OCRunner将打包的数据执行。
 
-目前无法在模拟上运行，只支持真机。
+目的：
+
+1.不再明文传输。
+
+2.补丁的版本控制等。
+
+3.分离oc2mangoLib和OCRunner，届时使用Cocopods导入OCRunner即可。
+
+## 1. Demo运行
 
 直接下载zip，是无法正常运行的。必须通过git clone
 
