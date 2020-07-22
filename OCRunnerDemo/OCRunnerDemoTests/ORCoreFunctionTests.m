@@ -56,6 +56,7 @@ int functionCall1(){
     [[ORStructDeclareTable shareInstance] addStructDeclare:rectDecl];
     [[ORStructDeclareTable shareInstance] addStructDeclare:pointDecl];
     [[ORStructDeclareTable shareInstance] addStructDeclare:sizeDecl];
+    
     MFValue *result1 = [[MFValue alloc] initTypeEncode:@encode(CGRect)];
     void *funcptr = &CGRectMake;
     invoke_functionPointer(funcptr, @[[MFValue valueWithDouble:1],
@@ -64,15 +65,18 @@ int functionCall1(){
                                       [MFValue valueWithDouble:4]], result1);
     CGRect rect1 = *(CGRect *)result1.pointer;
     XCTAssert(CGRectEqualToRect(CGRectMake(1, 2, 3, 4), rect1));
+    
+#ifdef __arm64__
     UIView *view = [UIView new];
     CGRect rect = CGRectMake(1, 2, 3, 4);
     MFValue *result = [MFValue voidValue];
-    funcptr = &objc_msgSend;
-    invoke_functionPointer(funcptr, @[[MFValue valueWithObject:view],
-                                      [MFValue valueWithSEL:@selector(setFrame:)],
-                                      [[MFValue alloc] initTypeEncode:@encode(CGRect) pointer:&rect]], result);
+    void *funcptr1 = &objc_msgSend;
+    invoke_functionPointer(funcptr1, @[[MFValue valueWithObject:view],
+                                       [MFValue valueWithSEL:@selector(setFrame:)],
+                                       [[MFValue alloc] initTypeEncode:@encode(CGRect) pointer:&rect]], result);
     
     XCTAssert(CGRectEqualToRect(view.frame, rect));
+#endif 
 }
 
 //void testRegister1(ffi_cif *cif, void* ret, void **args, void *userdata){

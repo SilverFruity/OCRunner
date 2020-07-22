@@ -10,15 +10,15 @@ import XCTest
 import OCRunner
 
 class CRunnerTests: XCTestCase {
-    let scope = MFScopeChain.topScope()
+    var scope: MFScopeChain!
     let ocparser = Parser.shared()
     var source = ""
     override func setUp() {
-        
+        mf_add_built_in()
+        scope = MFScopeChain.init(next: MFScopeChain.topScope())
     }
     override func tearDown() {
         ocparser.clear()
-        scope.clear()
     }
     func testDeclareExpression(){
         let source = """
@@ -510,6 +510,7 @@ class CRunnerTests: XCTestCase {
         }
         @end
         """
+        scope = MFScopeChain.topScope()
         ocparser.parseSource(source)
         let exps = ocparser.ast.globalStatements as! [ORExpression]
         for exp in exps {
@@ -702,7 +703,6 @@ class CRunnerTests: XCTestCase {
         XCTAssert(test.testCallSuperNoArgTestSupser())
     }
     func testGCD(){
-        or_add_build_in()
         let source =
         """
         @implementation ORGCDTests

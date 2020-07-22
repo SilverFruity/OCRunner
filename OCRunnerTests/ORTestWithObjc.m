@@ -12,17 +12,20 @@
 #import <objc/message.h>
 #import <OCRunner/ORHandleTypeEncode.h>
 @interface ORTestWithObjc : XCTestCase
-
+@property (nonatomic, strong)MFScopeChain *currentScope;
+@property (nonatomic, strong)MFScopeChain *topScope;
 @end
 
 @implementation ORTestWithObjc
-
 - (void)setUp {
-    // Put setup code here. This method is called before the invocation of each test method in the class.
+    mf_add_built_in();
+    self.topScope = [MFScopeChain topScope];
+    XCTAssert(self.topScope.vars.count != 0);
+    self.currentScope = [MFScopeChain scopeChainWithNext:self.topScope];
 }
 
 - (void)tearDown {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
+    [OCParser clear];
 }
 
 - (void)testExample {
@@ -140,8 +143,7 @@ Element2Struct *Element2StructMake(){
     XCTAssert(results1.count == 0);
 }
 - (void)testStructSetValueNoCopy{
-    MFScopeChain *scope = [MFScopeChain topScope];
-    or_add_build_in();
+    MFScopeChain *scope = self.currentScope;
     CGRect rect1 = CGRectZero;
     MFValue *value = [MFValue defaultValueWithTypeEncoding:@encode(CGRect)];
     [value setPointerWithNoCopy:&rect1];
@@ -167,12 +169,10 @@ Element2Struct *Element2StructMake(){
     XCTAssert(rect.origin.y == 10);
     XCTAssert(rect.size.width == 100);
     XCTAssert(rect.size.height == 100);
-    [OCParser clear];
-    [scope clear];
 }
 - (void)testStructSetValueNeedCopy{
-    MFScopeChain *scope = [MFScopeChain topScope];
-
+    
+    MFScopeChain *scope = self.currentScope;
     CGRect rect1 = CGRectZero;
     MFValue *value = [MFValue defaultValueWithTypeEncoding:@encode(CGRect)];
     [value setPointerWithNoCopy:&rect1];
@@ -195,14 +195,9 @@ Element2Struct *Element2StructMake(){
     XCTAssert(rectValue.type == TypeStruct);
     XCTAssert(rect.size.width == 2);
     XCTAssert(rect.size.height == 3);
-    [OCParser clear];
-    [scope clear];
 }
 - (void)testStructGetValue{
-    MFScopeChain *scope = [MFScopeChain topScope];
-    [scope clear];
-    [OCParser clear];
-    or_add_build_in();
+    MFScopeChain *scope = self.currentScope;
     NSString * source =
     @"UIView *view = [UIView new];"
     "view.frame = CGRectMake(1,2,3,4);"
@@ -219,8 +214,6 @@ Element2Struct *Element2StructMake(){
     MFValue * aValue = [scope getValueWithIdentifier:@"a"];
     XCTAssert(aValue.type == TypeDouble);
     XCTAssert(aValue.doubleValue == 4);
-    [OCParser clear];
-    [scope clear];
 }
 - (void)testDetectStructMemeryLayoutCode{
     NSString *result = detectStructMemeryLayoutEncodeCode("{CGRect={CGPoint=ff{CGPoint=dd}}{CGSize=dd}}");

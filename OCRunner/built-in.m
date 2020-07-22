@@ -124,19 +124,4 @@ void mf_add_built_in(void){
     });
 }
 
-// for unit test
-void or_add_build_in(void){
-    NSBundle *frameworkBundle = [NSBundle bundleForClass:[MFValue class]];
-    NSString *UIKitPath = [frameworkBundle pathForResource:@"UIKitRefrences" ofType:nil];
-    NSString *UIKitData = [NSString stringWithContentsOfFile:UIKitPath encoding:NSUTF8StringEncoding error:nil];
-    [ORInterpreter excuteGlobalDeclare:UIKitData];
-    
-    NSString *GCDPath = [frameworkBundle pathForResource:@"GCDRefrences" ofType:nil];
-    NSString *CCDData = [NSString stringWithContentsOfFile:GCDPath encoding:NSUTF8StringEncoding error:nil];
-    [ORInterpreter excuteGlobalDeclare:CCDData];
-    
-    add_build_in_function();
-    add_build_in_var();
-    add_gcd_build_in();
-}
 

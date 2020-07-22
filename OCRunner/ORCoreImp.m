@@ -25,7 +25,7 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
         MFValue *argValue = [[MFValue alloc] initTypeEncode:cfi->arg_typeEncodes[i] pointer:args[i]];
         [argValues addObject:argValue];
     }
-    MFScopeChain *scope = [MFScopeChain topScope];
+    MFScopeChain *scope = [MFScopeChain scopeChainWithNext:[MFScopeChain topScope]];
     id target = *(__strong id *)args[0];
     SEL sel = *(SEL *)args[1];
     BOOL classMethod = object_isClass(target);
@@ -117,7 +117,7 @@ MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValue
 #endif
 #else
 void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
-    MFScopeChain *scope = [MFScopeChain topScope];
+    MFScopeChain *scope = [MFScopeChain scopeChainWithNext:[MFScopeChain topScope]];
     id target = *(__strong id *)args[0];
     SEL sel = *(SEL *)args[1];
     BOOL classMethod = object_isClass(target);

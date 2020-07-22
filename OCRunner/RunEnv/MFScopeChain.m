@@ -30,7 +30,6 @@ static MFScopeChain *instance = nil;
 + (instancetype)scopeChainWithNext:(MFScopeChain *)next{
 	MFScopeChain *scope = [MFScopeChain new];
 	scope.next = next;
-    scope.vars = [NSMutableDictionary dictionaryWithDictionary:next.vars];
 	return scope;
 }
 
@@ -43,11 +42,7 @@ static MFScopeChain *instance = nil;
 }
 
 - (id)instance{
-    MFScopeChain *scope = self;
-    while (scope && ![scope getValueWithIdentifier:@"self"]) {
-        scope = scope.next;
-    }
-    return [scope getValueWithIdentifier:@"self"].objectValue;
+    return [self getValueWithIdentifier:@"self"].objectValue;
 }
 - (void)setValue:(MFValue *)value withIndentifier:(NSString *)identier{
     [self.lock lock];
@@ -57,7 +52,11 @@ static MFScopeChain *instance = nil;
 
 - (MFValue *)getValueWithIdentifier:(NSString *)identifer{
     [self.lock lock];
-	MFValue *value = self.vars[identifer];
+    MFScopeChain *scope = self;
+    while (scope && !scope.vars[identifer]) {
+        scope = scope.next;
+    }
+    MFValue *value = scope.vars[identifer];
     [self.lock unlock];
 	return value;
 }
