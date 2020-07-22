@@ -1,6 +1,9 @@
 # OCRunner
 
 OCRunner is a DSL using Objective-C syntax，OCRunner is also an iOS App hotfix SDK. You can use OCRunner method replace any Objective-C method.
+
+目标：你能在Xcode中正常运行的纯代码，在OCRunner中也能正常运行。
+
 ## 1. Demo运行
 
 目前无法在模拟上运行，只支持真机。
