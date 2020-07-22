@@ -42,7 +42,7 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     __autoreleasing MFValue *value = [map.methodImp execute:scope];
     if (value.type != TypeVoid && value.pointer != NULL){
         // 类型转换
-        [value writePointer:ret typeEncode:[sig methodReturnType]];
+        [value writePointer:ret typeEncode:cfi->r_typeEncode];
     }
 }
 
@@ -58,7 +58,7 @@ void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
     __autoreleasing MFValue *value = [mangoBlock.func execute:mangoBlock.outScope];
     if (value.type != TypeVoid && value.pointer != NULL){
         // 类型转换
-        [value writePointer:ret typeEncode:[sig methodReturnType]];
+        [value writePointer:ret typeEncode:cfi->r_typeEncode];
     }
 }
 
