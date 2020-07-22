@@ -57,13 +57,11 @@
         case TypeStruct:
         {
             ffi_type *type = malloc(sizeof(ffi_type));
-            type->size = 0;
-            type->alignment = 0;
             type->type = FFI_TYPE_STRUCT;
             NSString *structName = self.type.name;
             assert(structName != nil);
             ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
-            type->elements = malloc(sizeof(void *) * declare.keys.count);
+            type->elements = malloc(sizeof(void *) * (declare.keys.count + 1));
             type->size = sizeOfTypeEncode(declare.typeEncoding);
             for (int i = 0; i < declare.keys.count; i++) {
                 NSString *key = declare.keys[i];
@@ -71,6 +69,7 @@
                 ORTypeVarPair *element = ORTypeVarPairForTypeEncode(typeEncode);
                 type->elements[i] = element.libffi_type;
             }
+            type->elements[declare.keys.count] = NULL;
             return type;
         }
         default:
