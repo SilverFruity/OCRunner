@@ -18,16 +18,13 @@ cd OCRunner
 git submodule update --init --recursive
 ```
 
-关于单元测试，必须在arm64下运行。
+OCRunner framework的单元测试已经转移到OCRunnerDemo下。
 
-OCRunner framework的单元测试，当前无法在模拟器上运行，并不支持x86_64。
-
-单元测试已经转移到OCRunnerDemo下。
 ## 2. 功能
 
 * 将Objective-C作为脚本执行
 
-* 82%的单元测试覆盖
+* 86%的单元测试覆盖
 
 * 函数: C声明方式, 即可使用。针对某些系统函数，需要手动引入函数指针。
 
@@ -43,6 +40,11 @@ OCRunner framework的单元测试，当前无法在模拟器上运行，并不�
 * Objective-C语法几乎全部支持
 
 * 支持可变参数调用：[NSString stringWithFormat:]  NSLog 等等
+
+单元测试情况:
+
+1. 真机，无论是使用libffi.a或者是自定义的libffi，都是全通过的。
+2. 模拟器，单个测试运行是没有问题的，如果是Command+U运行，会出现测试不通过或者崩溃的情况。testCallFunctionPointer测试，在模拟器下，libffi调用偶尔会崩溃。
 
 ## 3. 与Objective-C当前存在的语法差异
 
