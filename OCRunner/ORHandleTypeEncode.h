@@ -13,6 +13,8 @@ NSUInteger startDetectPointerCount(const char *typeEncode);
 NSString *startStructNameDetect(const char *typeEncode);
 NSMutableArray * startStructDetect(const char *typeEncode);
 NSString * detectStructMemeryLayoutEncodeCode(const char *typeEncode);
+NSMutableArray *detectStructFieldTypeEncodes(const char *typeEncode);
+NSMutableArray *detectFieldTypeEncodes(const char *structMemeryLayoutEncodeCode);
 BOOL isHomogeneousFloatingPointAggregate(const char *typeEncode);
 NSUInteger fieldCountInStructMemeryLayoutEncode(const char *typeEncode);
 BOOL isStructWithTypeEncode(const char *typeEncode);

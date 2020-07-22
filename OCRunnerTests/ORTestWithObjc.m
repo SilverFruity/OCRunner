@@ -233,7 +233,13 @@ Element2Struct *Element2StructMake(){
     XCTAssert([result1 isEqualToString:@"^^i^id^{Element1Struct}ddd^^i^id^{Element2Struct}"]);
     XCTAssert(fieldCountInStructMemeryLayoutEncode(result1.UTF8String) == 11);
 }
-
+- (void)testDetectFieldTypeEncodes{
+    NSMutableArray *results = detectFieldTypeEncodes("^^i^id^{Element1Struct}");
+    XCTAssert([results[0] isEqualToString:@"^^i"]);
+    XCTAssert([results[1] isEqualToString:@"^i"]);
+    XCTAssert([results[2] isEqualToString:@"d"]);
+    XCTAssert([results[3] isEqualToString:@"^{Element1Struct}"]);
+}
 typedef struct MyStruct
 {
     char a;         // 1 byte

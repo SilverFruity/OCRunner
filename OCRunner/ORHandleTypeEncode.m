@@ -128,6 +128,43 @@ NSString * detectStructMemeryLayoutEncodeCode(const char *typeEncode){
     }
     return [result copy];
 }
+NSMutableArray *detectStructFieldTypeEncodes(const char *typeEncode){
+    NSString *layout = detectStructMemeryLayoutEncodeCode(typeEncode);
+    return detectFieldTypeEncodes(layout.UTF8String);
+}
+/*
+ typeEncode: ^^i^id^{Element1Struct}
+ result: ["^^i","^i","d","^{Element1Struct}"]
+*/
+NSMutableArray *detectFieldTypeEncodes(const char *structMemeryLayoutEncodeCode){
+    const char *typeEncode = structMemeryLayoutEncodeCode;
+    BOOL isStructPointer = NO;
+    NSMutableArray *results = [NSMutableArray array];
+    NSMutableString *buffer = [NSMutableString string];
+    while (typeEncode != NULL && *typeEncode != '\0') {
+        [buffer appendFormat:@"%c",*typeEncode];
+        if (*typeEncode != '^' && isStructPointer == NO) {
+            [results addObject:buffer];
+            buffer = [NSMutableString string];
+            typeEncode++;
+            continue;
+        }
+        if (*(typeEncode + 1) == '{'){
+            isStructPointer = YES;
+        }
+        if (isStructPointer) {
+            if (*typeEncode == '}'){
+                isStructPointer = NO;
+                [results addObject:buffer];
+                buffer = [NSMutableString string];
+            }
+            typeEncode++;
+            continue;
+        }
+        typeEncode++;
+    }
+    return results;
+}
 BOOL isHomogeneousFloatingPointAggregate(const char *typeEncode){
     while (typeEncode != NULL && *typeEncode != '\0') {
         if (*typeEncode != 'f' && *typeEncode != 'd') {

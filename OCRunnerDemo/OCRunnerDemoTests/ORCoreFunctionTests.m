@@ -49,12 +49,19 @@ int functionCall1(){
 }
 
 - (void)testCallFunctionPointer{
+    ORStructDeclare *rectDecl = [ORStructDeclare structDecalre:@encode(CGRect) keys:@[@"origin",@"size"]];
+    ORStructDeclare *pointDecl = [ORStructDeclare structDecalre:@encode(CGPoint) keys:@[@"x",@"y"]];
+    ORStructDeclare *sizeDecl = [ORStructDeclare structDecalre:@encode(CGSize) keys:@[@"width",@"height"]];
+    
+    [[ORStructDeclareTable shareInstance] addStructDeclare:rectDecl];
+    [[ORStructDeclareTable shareInstance] addStructDeclare:pointDecl];
+    [[ORStructDeclareTable shareInstance] addStructDeclare:sizeDecl];
     MFValue *result1 = [[MFValue alloc] initTypeEncode:@encode(CGRect)];
     void *funcptr = &CGRectMake;
     invoke_functionPointer(funcptr, @[[MFValue valueWithDouble:1],
-                                          [MFValue valueWithDouble:2],
-                                          [MFValue valueWithDouble:3],
-                                          [MFValue valueWithDouble:4]], result1);
+                                      [MFValue valueWithDouble:2],
+                                      [MFValue valueWithDouble:3],
+                                      [MFValue valueWithDouble:4]], result1);
     CGRect rect1 = *(CGRect *)result1.pointer;
     XCTAssert(CGRectEqualToRect(CGRectMake(1, 2, 3, 4), rect1));
     UIView *view = [UIView new];
@@ -62,9 +69,9 @@ int functionCall1(){
     MFValue *result = [MFValue voidValue];
     funcptr = &objc_msgSend;
     invoke_functionPointer(funcptr, @[[MFValue valueWithObject:view],
-                                            [MFValue valueWithSEL:@selector(setFrame:)],
-                                            [[MFValue alloc] initTypeEncode:@encode(CGRect) pointer:&rect]], result);
-
+                                      [MFValue valueWithSEL:@selector(setFrame:)],
+                                      [[MFValue alloc] initTypeEncode:@encode(CGRect) pointer:&rect]], result);
+    
     XCTAssert(CGRectEqualToRect(view.frame, rect));
 }
 
