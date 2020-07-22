@@ -1,6 +1,7 @@
 # OCRunner
+
 OCRunner is a DSL using Objective-C syntax，OCRunner is also an iOS App hotfix SDK. You can use OCRunner method replace any Objective-C method.
-## Demo运行: 
+## 1. Demo运行
 
 目前无法在模拟上运行，只支持真机。
 
@@ -22,24 +23,34 @@ git submodule update --init --recursive
 OCRunner framework的单元测试，当前无法在模拟器上运行，并不支持x86_64。
 
 单元测试已经转移到OCRunnerDemo下。
-## 功能
+## 2. 功能
 
 * 将Objective-C作为脚本执行
 
-* 声明系统函数，即可直接调用。针对某些系统函数，仍然需要手动引入函数指针。
 * 82%的单元测试覆盖
-* 结构体无缝衔接
-* 函数的调用和注册修改自libffi，目前只支持arm64
+
+* 函数: C声明方式, 即可使用。针对某些系统函数，需要手动引入函数指针。
+
+* 结构体：C声明方式，即可使用。
+
+* 可选libffi.a和自定义arm64 libffi
+
+  默认使用libffi.a实现
+
+  * 不使用libffi.a:  项目中移除的libffi文件夹的引用，则使用自定义arm64 libffi实现。
+  * 使用libffi.a:  导入libffi文件夹即可。
+
 * Objective-C语法几乎全部支持
+
 * 支持可变参数调用：[NSString stringWithFormat:]  NSLog 等等
 
-## 与Objective-C当前存在的语法差异
+## 3. 与Objective-C当前存在的语法差异
 
-### 预编译指令
+### 3.1 预编译指令
 
 不支持预编译指令 #define #if等
 
-### Protcol协议
+### 3.2 Protcol协议
 当前不支持协议，不支持@protocol，但支持语法如下:
 ```objective-c
 //这里实际创建的Classxxx并不遵循协议protocol1和protocol2
@@ -49,11 +60,11 @@ OCRunner framework的单元测试，当前无法在模拟器上运行，并不�
 NSArray <NSObject*>*array;
 ```
 
-### 类修复问题
+### 3.3 类修复问题
 
 * 问题1: 我有个类有abcde5个方法以及若干属性，如果我只想对其中的A方法进行重写，我要把其他几个都带上吗？ 答: 只需要重写A方法
 
-#### 已经存在的类
+#### 3.3.1 已经存在的类
 
 可以这么写，不用声明 `@interface ORTestReplaceClass:  SuperClass @end`
 
@@ -68,7 +79,7 @@ NSArray <NSObject*>*array;
 @end
 ```
 
-#### 新建类
+#### 3.3.2 新建类
 
 这里新建的ORTestReplaceClass类默认会继承自NSObject，如果你想添加property或者父类，就必须使用@interface
 
@@ -83,7 +94,7 @@ NSArray <NSObject*>*array;
 @end
 ```
 
-#### 支持分类写法
+#### 3.3.3 支持分类写法
 
 ```objective-c
 @implementation Demo
@@ -95,7 +106,7 @@ NSArray <NSObject*>*array;
 @end
 ```
 
-### 关于枚举的一点问题
+### 3.4 关于枚举的一点问题
 
 不支持**NS_ENUM**和**NS_OPTION**，转换为对应的C声明方式即可.
 
@@ -110,7 +121,7 @@ typedef enum: NSUInteger {
 }UIControlEvents;
 ```
 
-### 关于结构体一点问题
+### 3.5 关于结构体一点问题
 
 被引用结构，必须提前声明
 
@@ -132,9 +143,9 @@ struct CGSize {
 ```
 
 
-### UIKit中的常量、类型、结构体、枚举、全局函数的应对方法
+### 3.6 UIKit中的常量、类型、结构体、枚举、全局函数的应对方法
 
-#### 常量、结构体、枚举
+#### 3.6.1 常量、结构体、枚举
 
 第一种:
 
@@ -172,7 +183,7 @@ typedef enum: NSUInteger{
 id GlobalValue = [NSObject new]; //在OCRunner中是可以作为全局变量的
 ```
 
-#### 新增类型
+#### 3.6.2 新增类型
 
 typedef，目前还有typedef嵌套问题。
 
@@ -188,7 +199,7 @@ typedef long long IntegerType;
 typedef IntegerType dispatch_once_t;
 ```
 
-#### 全局函数
+#### 3.6.3 全局函数
 
 1. 预编译函数
 
@@ -241,11 +252,11 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 }
 ```
 
-### 关于#import
+### 4. 关于#import
 
 **#import** 是可以省略的。支持这个语法，仅仅是为了复制粘贴....
 
-### 不支持的关键词
+### 5. 不支持的关键词
 
 * typeof
 
@@ -262,25 +273,5 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 * IBOutlet
 * IBAction
 * IBInspectable
-
-### 自动忽略的关键词:
-
-* const
-* _Nullable
-* nullable
-* @required
-* @public
-* @private
-* @protected
-* __unused
-* __bridge_retained
-* __bridge_transfer
-* __bridge
-* __block
-* __autoreleasing
-* IBInspectable
-* UI_APPEARANCE_SELECTOR
-* NS_ASSUME_NONNULL_BEGIN
-* NS_ASSUME_NONNULL_BEGIN
 
 强烈建议看看单元测试中支持的语法。
