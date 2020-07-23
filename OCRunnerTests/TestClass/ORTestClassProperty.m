@@ -9,11 +9,22 @@
 #import "ORTestClassProperty.h"
 
 @implementation ORTestClassProperty
+{
+    NSMutableString *_flag;
+}
+- (instancetype)initDeallocFlag:(NSMutableString *)flag{
+    self = [super init];
+    _flag = flag;
+    return self;
+}
 - (NSString *)testObjectPropertyTest{
     return nil;
 }
 
 - (id)testWeakObjectProperty{
+    return nil;
+}
+- (id)testStrongObjectProperty{
     return nil;
 }
 - (NSString *)testIvarx{
@@ -27,5 +38,9 @@
 }
 - (NSInteger)testPropertyIvar{
     return 0;
+}
+- (void)dealloc
+{
+    [_flag appendString:@"has_dealloc"];
 }
 @end

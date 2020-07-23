@@ -573,8 +573,9 @@ class CRunnerTests: XCTestCase {
         let source =
         """
         @interface ORTestClassProperty:NSObject
-        @property(nonatomic,copy)NSString *strTypeProperty;
-        @property(nonatomic,weak)id weakObjectProperty;
+        @property (nonatomic,copy)NSString *strTypeProperty;
+        @property (nonatomic,weak)id weakObjectProperty;
+        @property (nonatomic,strong)id strongObjectProperty;
         @property (assign, nonatomic) NSInteger count;
         @end
         @implementation ORTestClassProperty
@@ -588,10 +589,13 @@ class CRunnerTests: XCTestCase {
         }
 
         - (id)testWeakObjectProperty{
-            self.weakObjectProperty = [NSObject new];//下一个运行时释放
+            self.weakObjectProperty = self;//制造循环引用,下一个运行时释放
             return self.weakObjectProperty;
         }
-
+        - (id)testStrongObjectProperty{
+            self.strongObjectProperty = self;//制造循环引用
+            return self.strongObjectProperty;
+        }
         - (id)testIvarx{
             _strTypeProperty = @"Mango-testIvar";
             return _strTypeProperty;
@@ -621,6 +625,22 @@ class CRunnerTests: XCTestCase {
         XCTAssert(test.testIvarx() == "Mango-testIvar")
         XCTAssert(test.testBasePropertyTest() == 100000)
         XCTAssert(test.testIvar() == 100001)
+        let weakResult = autoreleasepool{ () -> NSMutableString in
+            let flag = NSMutableString.init()
+            let weakTest = ORTestClassProperty.init(deallocFlag: flag)
+            XCTAssert(weakTest.testWeakObjectProperty() is ORTestClassProperty)
+            return flag
+        }
+        XCTAssert(weakResult == "has_dealloc")
+        
+        let strongResult = autoreleasepool{ () -> NSMutableString in
+            let flag = NSMutableString.init()
+            let strongTest = ORTestClassProperty.init(deallocFlag: flag)
+            XCTAssert(strongTest.testStrongObjectProperty() is ORTestClassProperty)
+            return flag
+        }
+        XCTAssert(strongResult == "")
+
     }
     func testClassIvar(){
         let source =

@@ -13,8 +13,10 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ORTestClassProperty : NSObject
 @property(nonatomic,copy)NSString *strTypeProperty;
 @property (assign, nonatomic) NSInteger num;
+- (instancetype)initDeallocFlag:(NSMutableString *)flag;
 - (NSString *)testObjectPropertyTest;
 - (id)testWeakObjectProperty;
+- (id)testStrongObjectProperty;
 - (NSString *)testIvarx;
 - (NSInteger)testProMathAdd;
 
