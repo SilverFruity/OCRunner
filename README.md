@@ -271,8 +271,8 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 
 **#import** 是可以省略的。支持这个语法，仅仅是为了复制粘贴....
 
-### 5. 不支持的关键词
-
+### 5. 不支持的语法
+* C数组声明：int a\[x\]等;
 * typeof
 
 * @optional
