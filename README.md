@@ -21,26 +21,26 @@ OCRunner framework的单元测试已经转移到OCRunnerDemo下。
 
 ## 2. 功能
 
-* 将Objective-C作为脚本执行
+* 将Objective-C作为脚本执行。
 
-* 86%的单元测试覆盖
+* 86%的单元测试覆盖。
 
-* 函数: C声明方式, 直接使用。针对某些系统函数，需要手动引入函数指针，运行的时候，控制台会有相应的提示信息。
+* 支持全局C函数声明，直接获取函数指针。
 
-* 结构体：C声明方式，直接使用。
+* 支持结构体。内置结构体内存布局，结构体取值与赋值等。
 
-* 枚举：C声明方式，直接使用。
+* 支持枚举声明。
 
-* 可选libffi.a和自定义arm64 libffi
+* 可选libffi或者内置自定义实现的arm64 libff(基于TypeEncode不再是ffi_type)。
 
   默认使用libffi.a实现
 
-  * 不使用libffi.a:  项目中移除的libffi文件夹的引用，则使用自定义arm64 libffi实现。
+  * 不使用libffi.a:  项目中移除的libffi文件夹的引用即可。
   * 使用libffi.a:  导入libffi文件夹即可。
 
-* Objective-C语法几乎全部支持
+* 除去预编译、C数组声明、Protocol，其他语法皆已支持。
 
-* 支持可变参数调用：[NSString stringWithFormat:]  NSLog 等等
+* 支持可变参数函数和方法调用。
 
 单元测试情况:
 
