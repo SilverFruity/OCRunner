@@ -45,7 +45,7 @@ OCRunner framework的单元测试已经转移到OCRunnerDemo下。
 单元测试情况:
 
 1. iOS真机，无论是使用libffi.a或者是自定义的libffi，都是全通过的。
-2. iOS模拟器，单个测试运行是没有问题的，如果是Command+U运行，会出现测试不通过或者崩溃的情况。testCallFunctionPointer测试，在模拟器下，libffi调用偶尔会崩溃。
+2. iOS模拟器，testCallFunctionPointer测试，libffi调用偶尔会崩溃。
 
 ## 3. 与Objective-C当前存在的语法差异
 
