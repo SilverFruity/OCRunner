@@ -36,7 +36,7 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
         [scope setValue:[MFValue valueWithObject:target] withIndentifier:@"self"];
         class = [target class];
     }
-    [[MFStack argsStack] push:argValues];
+    [ORArgsStack push:argValues];
     MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:class classMethod:classMethod sel:sel];
     __autoreleasing MFValue *value = [map.methodImp execute:scope];
     if (value.type != TypeVoid && value.pointer != NULL){
@@ -54,7 +54,7 @@ void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
         MFValue *argValue = [[MFValue alloc] initTypeEncode:[sig getArgumentTypeAtIndex:i] pointer:args[i]];
         [argValues addObject:argValue];
     }
-    [[MFStack argsStack] push:argValues];
+    [ORArgsStack push:argValues];
     __autoreleasing MFValue *value = [mangoBlock.func execute:mangoBlock.outScope];
     if (value.type != TypeVoid && value.pointer != NULL){
         // 类型转换

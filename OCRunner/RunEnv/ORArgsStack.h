@@ -12,12 +12,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class MFValue;
 
-@interface MFStack : NSObject
-+ (instancetype)argsStack;
-- (void)push:(NSMutableArray <MFValue *> *)value;
-- (NSMutableArray <MFValue *> *)pop;
-- (BOOL)isEmpty;
-- (NSUInteger)size;
+@interface ORArgsStack : NSObject
++ (void)push:(NSMutableArray <MFValue *> *)value;
++ (NSMutableArray <MFValue *> *)pop;
++ (BOOL)isEmpty;
++ (NSUInteger)size;
 
 @end
 

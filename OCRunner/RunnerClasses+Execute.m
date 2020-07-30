@@ -302,7 +302,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     return declare;
 }
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
-    NSMutableArray * parameters = [[MFStack argsStack] pop];
+    NSMutableArray * parameters = [ORArgsStack  pop];
     [parameters enumerateObjectsUsingBlock:^(MFValue * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [scope setValue:obj withIndentifier:self.funVar.pairs[idx].var.varname];
     }];
@@ -441,7 +441,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
     NSUInteger argCount = [sig numberOfArguments];
     void *retValuePointer = alloca([sig methodReturnLength]);
-    if (argValues.count + 2 > argCount) {
+    if (argValues.count + 2 > argCount && sig != nil) {
         //多参数调用问题
         NSMutableArray *methodArgs = [@[[MFValue valueWithObject:instance],
                                        [MFValue valueWithSEL:sel]] mutableCopy];
@@ -503,13 +503,13 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }else{
             if ([blockValue.objectValue isKindOfClass:[ORBlockImp class]]) {
                 // global function calll
-                [[MFStack argsStack] push:args];
+                [ORArgsStack push:args];
                 ORBlockImp *imp = blockValue.objectValue;
                 MFValue *result = [imp execute:scope];
                 return result;
             }else if ([blockValue.objectValue isKindOfClass:[ORSearchedFunction class]]) {
                 ORSearchedFunction *function = blockValue.objectValue;
-                [[MFStack argsStack] push:args];
+                [ORArgsStack push:args];
                 MFValue *result = [function execute:scope];
                 return result;
             }
@@ -531,7 +531,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 }
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     // C函数声明执行, 向全局作用域注册函数
-    if ([[MFStack argsStack] isEmpty]
+    if ([ORArgsStack isEmpty]
         && self.declare.funVar.varname
         && self.declare.funVar.ptCount == 0) {
         NSString *funcName = self.declare.funVar.varname;
@@ -727,7 +727,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @implementation ORUnaryExpression (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *currentValue = [self.value execute:scope];
-    MFValue *resultValue = [[MFValue alloc] initTypeEncode:currentValue.typeEncode];
+    MFValue *resultValue = [MFValue defaultValueWithTypeEncoding:currentValue.typeEncode];
     switch (self.operatorType) {
         case UnaryOperatorIncrementSuffix:{
             startBox(resultValue);
@@ -797,7 +797,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *rightValue = [self.right execute:scope];
     MFValue *leftValue = [self.left execute:scope];
-    MFValue *resultValue = [[MFValue alloc] initTypeEncode:leftValue.typeEncode];
+    MFValue *resultValue = [MFValue defaultValueWithTypeEncoding:leftValue.typeEncode];
     switch (self.operatorType) {
         case BinaryOperatorAdd:{
             startBox(leftValue);
@@ -1163,7 +1163,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @end
 @implementation ORMethodDeclare(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
-    NSMutableArray * parameters = [[MFStack argsStack] pop];
+    NSMutableArray * parameters = [ORArgsStack pop];
     [parameters enumerateObjectsUsingBlock:^(MFValue * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [scope setValue:obj withIndentifier:self.parameterNames[idx]];
     }];

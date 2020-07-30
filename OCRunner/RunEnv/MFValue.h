@@ -310,11 +310,10 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @property (nonatomic,assign)const char* typeEncode;
 @property (nonatomic,assign, nullable)void *pointer;
 - (void)setPointerWithNoCopy:(void *)pointer;
-+ (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding;
 - (void)setDefaultValue;
-+ (instancetype)valueWithTypeKind:(TypeKind)TypeKind pointer:(nullable void *)pointer;
-+ (instancetype)valueWithTypePair:(ORTypeVarPair *)typePair pointer:(nullable void *)pointer;
-- (instancetype)initTypeEncode:(const char *)typeEncoding;
+
++ (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding;
++ (instancetype)valueWithTypeEncode:(const char *)typeEncode pointer:(nullable void *)pointer;
 - (instancetype)initTypeEncode:(const char *)tyepEncode pointer:(nullable void *)pointer;
 
 - (void)writePointer:(void *)pointer typeEncode:(const char *)typeEncode;

@@ -228,17 +228,17 @@ NSUInteger totalFieldCountWithTypeEncode(const char *typeEncode){
 BOOL isIntegerWithTypeEncode(const char *typeEncode){
     if (typeEncode == NULL) return NO;
     switch (*typeEncode) {
-        case 'c':
-        case 'i':
-        case 's':
-        case 'l':
-        case 'q':
-        case 'C':
-        case 'I':
-        case 'S':
-        case 'L':
-        case 'Q':
-        case 'B':
+        case OCTypeEncodeChar:
+        case OCTypeEncodeShort:
+        case OCTypeEncodeInt:
+        case OCTypeEncodeLong:
+        case OCTypeEncodeLongLong:
+        case OCTypeEncodeUChar:
+        case OCTypeEncodeUShort:
+        case OCTypeEncodeUInt:
+        case OCTypeEncodeULong:
+        case OCTypeEncodeULongLong:
+        case OCTypeEncodeBOOL:
             return YES;
         default:
             return NO;
@@ -253,10 +253,10 @@ BOOL isFloatWithTypeEncode(const char *typeEncode){
 BOOL isObjectWithTypeEncode(const char *typeEncode){
     if (typeEncode == NULL) return NO;
     switch (*typeEncode){
-        case ':':
-        case '*':
-        case '#':
-        case '@':
+        case OCTypeEncodeSEL:
+        case OCTypeEncodeCString:
+        case OCTypeEncodeClass:
+        case OCTypeEncodeObject:
             return YES;
         default:
             return NO;
@@ -264,7 +264,7 @@ BOOL isObjectWithTypeEncode(const char *typeEncode){
 }
 BOOL isPointerWithTypeEncode(const char *typeEncode){
     if (typeEncode == NULL) return NO;
-    return *typeEncode == '^';
+    return *typeEncode == OCTypeEncodePointer;
 }
 NSUInteger sizeOfTypeEncode(const char *typeEncode){
     NSUInteger size;

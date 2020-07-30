@@ -36,7 +36,7 @@ int functionCall1(){
     XCTAssert(intValue == 100);
 }
 - (void)testCallStructPointer{
-    MFValue *result = [[MFValue alloc] initTypeEncode:@encode(CGAffineTransform)];
+    MFValue *result = [MFValue defaultValueWithTypeEncoding:@encode(CGAffineTransform)];
     void *funcptr = &CGAffineTransformScale;
     invoke_functionPointer(funcptr, @[[[MFValue alloc] initTypeEncode:@encode(CGAffineTransform) pointer:&CGAffineTransformIdentity],
                                       [MFValue valueWithDouble:0.5],
@@ -57,7 +57,7 @@ int functionCall1(){
     [[ORStructDeclareTable shareInstance] addStructDeclare:pointDecl];
     [[ORStructDeclareTable shareInstance] addStructDeclare:sizeDecl];
     
-    MFValue *result1 = [[MFValue alloc] initTypeEncode:@encode(CGRect)];
+    MFValue *result1 = [MFValue defaultValueWithTypeEncoding:@encode(CGRect)];
     void *funcptr = &CGRectMake;
     invoke_functionPointer(funcptr, @[[MFValue valueWithDouble:1],
                                       [MFValue valueWithDouble:2],

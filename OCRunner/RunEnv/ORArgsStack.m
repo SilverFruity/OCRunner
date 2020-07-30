@@ -8,10 +8,11 @@
 
 #import "ORArgsStack.h"
 #import <MFValue.h>
-@implementation ORArgsStack{
-	NSMutableArray<NSMutableArray *> *_arr;
-}
-+ (instancetype)argsStack{
+@interface ORArgsStack()
+@property(nonatomic, strong) NSMutableArray<NSMutableArray *> *array;
+@end
+@implementation ORArgsStack
++ (instancetype)threadStack{
     //每一个线程拥有一个独立的参数栈
     NSMutableDictionary *threadInfo = [[NSThread currentThread] threadDictionary];
     ORArgsStack *stack = threadInfo[@"argsStack"];
@@ -23,27 +24,27 @@
 }
 - (instancetype)init{
 	if (self = [super init]) {
-		_arr = [NSMutableArray array];
+		_array = [NSMutableArray array];
 	}
 	return self;
 }
 
-- (void)push:(NSMutableArray <MFValue *> *)value{
++ (void)push:(NSMutableArray <MFValue *> *)value{
     NSAssert(value, @"value can not be nil");
-	[_arr addObject:value];
+	[[ORArgsStack threadStack].array addObject:value];
 }
 
-- (NSMutableArray <MFValue *> *)pop{
-	NSMutableArray *value = [_arr  lastObject];
++ (NSMutableArray <MFValue *> *)pop{
+	NSMutableArray *value = [[ORArgsStack threadStack].array  lastObject];
     NSAssert(value, @"stack is empty");
-	[_arr removeLastObject];
+	[[ORArgsStack threadStack].array removeLastObject];
 	return value;
 }
-- (BOOL)isEmpty{
-    return [_arr count] == 0;
++ (BOOL)isEmpty{
+    return [[ORArgsStack threadStack].array count] == 0;
 }
-- (NSUInteger)size{
-	return _arr.count;
++ (NSUInteger)size{
+    return [ORArgsStack threadStack].array.count;
 }
 @end
 

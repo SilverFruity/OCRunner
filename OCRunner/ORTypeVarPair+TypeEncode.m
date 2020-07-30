@@ -42,29 +42,29 @@ append(code); break;
         case TypeChar:
         {
             if (self.var.ptCount > 0)
-                append("*");
+                append(OCTypeEncodeStringCString);
             else
-                append("c");
+                append(OCTypeEncodeStringChar);
             break;
         }
-            CaseTypeEncoding(TypeInt, "i")
-            CaseTypeEncoding(TypeShort, "s")
-            CaseTypeEncoding(TypeLong, "l")
-            CaseTypeEncoding(TypeLongLong, "q")
-            CaseTypeEncoding(TypeUChar, "C")
-            CaseTypeEncoding(TypeUInt, "I")
-            CaseTypeEncoding(TypeUShort, "S")
-            CaseTypeEncoding(TypeULong, "L")
-            CaseTypeEncoding(TypeULongLong, "Q")
-            CaseTypeEncoding(TypeFloat, "f")
-            CaseTypeEncoding(TypeDouble, "d")
-            CaseTypeEncoding(TypeBOOL, "B")
-            CaseTypeEncoding(TypeVoid, "v")
-            CaseTypeEncoding(TypeObject, "@")
-            CaseTypeEncoding(TypeId, "@")
-            CaseTypeEncoding(TypeClass, "#")
-            CaseTypeEncoding(TypeSEL, ":")
-            CaseTypeEncoding(TypeBlock, "@?")
+            CaseTypeEncoding(TypeInt, OCTypeEncodeStringInt)
+            CaseTypeEncoding(TypeShort, OCTypeEncodeStringShort)
+            CaseTypeEncoding(TypeLong, OCTypeEncodeStringLong)
+            CaseTypeEncoding(TypeLongLong, OCTypeEncodeStringLongLong)
+            CaseTypeEncoding(TypeUChar, OCTypeEncodeStringUChar)
+            CaseTypeEncoding(TypeUInt, OCTypeEncodeStringUInt)
+            CaseTypeEncoding(TypeUShort, OCTypeEncodeStringUShort)
+            CaseTypeEncoding(TypeULong, OCTypeEncodeStringULong)
+            CaseTypeEncoding(TypeULongLong, OCTypeEncodeStringULongLong)
+            CaseTypeEncoding(TypeFloat, OCTypeEncodeStringFloat)
+            CaseTypeEncoding(TypeDouble, OCTypeEncodeStringDouble)
+            CaseTypeEncoding(TypeBOOL, OCTypeEncodeStringBOOL)
+            CaseTypeEncoding(TypeVoid, OCTypeEncodeStringVoid)
+            CaseTypeEncoding(TypeObject, OCTypeEncodeStringObject)
+            CaseTypeEncoding(TypeId, OCTypeEncodeStringObject)
+            CaseTypeEncoding(TypeClass, OCTypeEncodeStringClass)
+            CaseTypeEncoding(TypeSEL, OCTypeEncodeStringSEL)
+            CaseTypeEncoding(TypeBlock, OCTypeEncodeBlock)
         default:
             break;
     }
@@ -107,34 +107,35 @@ ORTypeVarPair * ORTypeVarPairForTypeEncode(const char *typeEncode){
     NSString *typename = nil;
     const char *removedPointerEncode = startRemovePointerOfTypeEncode(typeEncode).UTF8String;
     switch (*removedPointerEncode) {
-        case 'c': type =TypeChar; break;
-        case 'i': type =TypeInt; break;
-        case 's': type =TypeShort; break;
-        case 'l': type =TypeLong; break;
-        case 'q': type =TypeLongLong; break;
-        case 'C': type =TypeUChar; break;
-        case 'I': type =TypeUInt; break;
-        case 'S': type =TypeUShort; break;
-        case 'L': type =TypeULong; break;
-        case 'Q': type =TypeULongLong; break;
-        case 'B': type =TypeBOOL; break;
-        case 'f': type =TypeFloat; break;
-        case 'd': type =TypeDouble; break;
-        case ':': type =TypeSEL; break;
-        case '*':{
+        case OCTypeEncodeChar: type =TypeChar; break;
+        case OCTypeEncodeInt: type =TypeInt; break;
+        case OCTypeEncodeShort: type =TypeShort; break;
+        case OCTypeEncodeLong: type =TypeLong; break;
+        case OCTypeEncodeLongLong: type =TypeLongLong; break;
+        case OCTypeEncodeUChar: type =TypeUChar; break;
+        case OCTypeEncodeUInt: type =TypeUInt; break;
+        case OCTypeEncodeUShort: type =TypeUShort; break;
+        case OCTypeEncodeULong: type =TypeULong; break;
+        case OCTypeEncodeULongLong: type =TypeULongLong; break;
+        case OCTypeEncodeBOOL: type =TypeBOOL; break;
+        case OCTypeEncodeFloat: type =TypeFloat; break;
+        case OCTypeEncodeDouble: type =TypeDouble; break;
+        case OCTypeEncodeSEL: type =TypeSEL; break;
+        case OCTypeEncodeCString:{
             type =TypeChar;
             pointerCount += 1;
             break;
         }
-        case '#':{
+        case OCTypeEncodeClass:{
             type =TypeClass;
             typename = @"Class";
+            break;
         }
-        case '@':{
+        case OCTypeEncodeObject:{
             type =TypeObject;
             break;
         }
-        case '{':{
+        case OCTypeEncodeStruct:{
             type =TypeStruct;
             typename = startStructNameDetect(typeEncode);
         }

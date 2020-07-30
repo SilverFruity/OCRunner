@@ -77,8 +77,8 @@
 		EE9899B824658F8900ACF2C1 /* MFValue.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899A224658F8900ACF2C1 /* MFValue.m */; };
 		EE9899C42465923900ACF2C1 /* util.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899BE2465923800ACF2C1 /* util.m */; };
 		EE9899C62465923900ACF2C1 /* util.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899C02465923800ACF2C1 /* util.h */; };
-		EEA2AC82246855F100B08407 /* MFStack.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA2AC80246855F100B08407 /* MFStack.m */; };
-		EEA2AC83246855F100B08407 /* MFStack.h in Headers */ = {isa = PBXBuildFile; fileRef = EEA2AC81246855F100B08407 /* MFStack.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EEA2AC82246855F100B08407 /* ORArgsStack.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA2AC80246855F100B08407 /* ORArgsStack.m */; };
+		EEA2AC83246855F100B08407 /* ORArgsStack.h in Headers */ = {isa = PBXBuildFile; fileRef = EEA2AC81246855F100B08407 /* ORArgsStack.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EEBF3335248E674300DDE2E9 /* ORCoreImp.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3333248E674300DDE2E9 /* ORCoreImp.m */; };
 		EEBF336D248FBB9D00DDE2E9 /* UIKitRefrences in Resources */ = {isa = PBXBuildFile; fileRef = EEBF336C248FBB9D00DDE2E9 /* UIKitRefrences */; };
 		EECD504F24C7471B0052A842 /* ORTypeVarPair+libffi.h in Headers */ = {isa = PBXBuildFile; fileRef = EECD504D24C7471B0052A842 /* ORTypeVarPair+libffi.h */; };
@@ -216,8 +216,8 @@
 		EE9899A224658F8900ACF2C1 /* MFValue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFValue.m; sourceTree = "<group>"; };
 		EE9899BE2465923800ACF2C1 /* util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = util.m; sourceTree = "<group>"; };
 		EE9899C02465923800ACF2C1 /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
-		EEA2AC80246855F100B08407 /* MFStack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFStack.m; sourceTree = "<group>"; };
-		EEA2AC81246855F100B08407 /* MFStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFStack.h; sourceTree = "<group>"; };
+		EEA2AC80246855F100B08407 /* ORArgsStack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORArgsStack.m; sourceTree = "<group>"; };
+		EEA2AC81246855F100B08407 /* ORArgsStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORArgsStack.h; sourceTree = "<group>"; };
 		EEBF3332248E674300DDE2E9 /* ORCoreImp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORCoreImp.h; sourceTree = "<group>"; };
 		EEBF3333248E674300DDE2E9 /* ORCoreImp.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORCoreImp.m; sourceTree = "<group>"; };
 		EEBF336C248FBB9D00DDE2E9 /* UIKitRefrences */ = {isa = PBXFileReference; lastKnownFileType = text; path = UIKitRefrences; sourceTree = "<group>"; };
@@ -396,8 +396,8 @@
 				EE98999B24658F8900ACF2C1 /* MFPropertyMapTable.m */,
 				EE98999724658F8900ACF2C1 /* MFScopeChain.h */,
 				EE9899A124658F8900ACF2C1 /* MFScopeChain.m */,
-				EEA2AC81246855F100B08407 /* MFStack.h */,
-				EEA2AC80246855F100B08407 /* MFStack.m */,
+				EEA2AC81246855F100B08407 /* ORArgsStack.h */,
+				EEA2AC80246855F100B08407 /* ORArgsStack.m */,
 				EE98998F24658F8900ACF2C1 /* MFStaticVarTable.h */,
 				EE98999A24658F8900ACF2C1 /* MFStaticVarTable.m */,
 				EE98999624658F8900ACF2C1 /* MFValue.h */,
@@ -468,7 +468,7 @@
 				EE0BC36D24C7508700EA1702 /* ffitarget_i386.h in Headers */,
 				EE9899C62465923900ACF2C1 /* util.h in Headers */,
 				EE98997C24658DA600ACF2C1 /* OCRunner.h in Headers */,
-				EEA2AC83246855F100B08407 /* MFStack.h in Headers */,
+				EEA2AC83246855F100B08407 /* ORArgsStack.h in Headers */,
 				EE0BC36A24C7508700EA1702 /* ffitarget_x86_64.h in Headers */,
 				EE9899AC24658F8900ACF2C1 /* MFValue.h in Headers */,
 				EE0BC37124C7531C00EA1702 /* ORCoreImp.h in Headers */,
@@ -634,7 +634,7 @@
 				04A531BF248F972500D83A48 /* ORSearchedFunction.m in Sources */,
 				EE9899AE24658F8900ACF2C1 /* MFMethodMapTable.m in Sources */,
 				EECD505024C7471B0052A842 /* ORTypeVarPair+libffi.m in Sources */,
-				EEA2AC82246855F100B08407 /* MFStack.m in Sources */,
+				EEA2AC82246855F100B08407 /* ORArgsStack.m in Sources */,
 				0408F01C247D027B004F703D /* ORTypeVarPair+TypeEncode.m in Sources */,
 				EE9899B324658F8900ACF2C1 /* MFVarDeclareChain.m in Sources */,
 				04C3B28124BDB71200AA8574 /* ORCoreFunctionRegister.s in Sources */,

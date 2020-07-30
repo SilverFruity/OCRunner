@@ -15,20 +15,21 @@
 
 #define MFValueBridge(target,resultType)\
 resultType result;\
-switch (target.type) {\
-    case TypeUChar: result = (resultType)*(unsigned char *)target.pointer; break;\
-    case TypeUInt: result = (resultType)*(unsigned int *)target.pointer; break;\
-    case TypeUShort: result = (resultType)*(unsigned short *)target.pointer; break;\
-    case TypeULong: result = (resultType)*(unsigned int *)target.pointer; break;\
-    case TypeULongLong: result = (resultType)*(unsigned long long *)target.pointer; break;\
-    case TypeBOOL: result = (resultType)*(BOOL *)target.pointer; break;\
-    case TypeChar: result = (resultType)*(char *)target.pointer; break;\
-    case TypeShort: result = (resultType)*(short *)target.pointer; break;\
-    case TypeInt: result = (resultType)*(int *)target.pointer; break;\
-    case TypeLong: result = (resultType)*(int *)target.pointer; break;\
-    case TypeLongLong: result = (resultType)*(long long *)target.pointer; break;\
-    case TypeFloat: result = (resultType)*(float *)target.pointer; break;\
-    case TypeDouble: result = (resultType)*(double *)target.pointer; break;\
+const char *typeEncode = target.typeEncode;\
+switch (*typeEncode) {\
+    case OCTypeEncodeUChar: result = (resultType)*(unsigned char *)target.pointer; break;\
+    case OCTypeEncodeUInt: result = (resultType)*(unsigned int *)target.pointer; break;\
+    case OCTypeEncodeUShort: result = (resultType)*(unsigned short *)target.pointer; break;\
+    case OCTypeEncodeULong: result = (resultType)*(unsigned int *)target.pointer; break;\
+    case OCTypeEncodeULongLong: result = (resultType)*(unsigned long long *)target.pointer; break;\
+    case OCTypeEncodeBOOL: result = (resultType)*(BOOL *)target.pointer; break;\
+    case OCTypeEncodeChar: result = (resultType)*(char *)target.pointer; break;\
+    case OCTypeEncodeShort: result = (resultType)*(short *)target.pointer; break;\
+    case OCTypeEncodeInt: result = (resultType)*(int *)target.pointer; break;\
+    case OCTypeEncodeLong: result = (resultType)*(int *)target.pointer; break;\
+    case OCTypeEncodeLongLong: result = (resultType)*(long long *)target.pointer; break;\
+    case OCTypeEncodeFloat: result = (resultType)*(float *)target.pointer; break;\
+    case OCTypeEncodeDouble: result = (resultType)*(double *)target.pointer; break;\
     default: result = 0;\
 }
 
@@ -44,23 +45,11 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 {
     BOOL _isAlloced;
 }
-+ (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding{
-    typeEncoding = removeTypeEncodingPrefix((char *)typeEncoding);
-    MFValue *value = [[MFValue alloc] initTypeEncode:typeEncoding pointer:NULL];
-    value.pointer = NULL;
-    return value;
++ (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncode{
+    return [MFValue valueWithTypeEncode:typeEncode pointer:NULL];;
 }
-+ (instancetype)valueWithTypeKind:(TypeKind)TypeKind pointer:(void *)pointer{
-    return [MFValue valueWithTypePair:[ORTypeVarPair typePairWithTypeKind:TypeKind] pointer:pointer];
-}
-+ (instancetype)valueWithTypePair:(ORTypeVarPair *)typePair pointer:(void *)pointer{
-    return [[[self class] alloc] initTypeEncode:typePair.typeEncode pointer:pointer];
-}
-- (instancetype)initTypeEncode:(const char *)typeEncoding{
-    self = [super init];
-    self.typeEncode = typeEncoding;
-    self.pointer = NULL;
-    return self;
++ (instancetype)valueWithTypeEncode:(const char *)typeEncode pointer:(void *)pointer{
+    return [[MFValue alloc]initTypeEncode:typeEncode pointer:pointer];;;
 }
 - (instancetype)initTypeEncode:(const char *)typeEncoding pointer:(void *)pointer{
     self = [super init];
@@ -128,7 +117,7 @@ char *buffer = malloc(strLen+1);\
 buffer[strLen] = '\0';\
 strncpy((void *)buffer, encode, strLen);\
 _typeEncode = buffer;
-    if (strcmp(typeEncode, "@?") == 0) {
+    if (strcmp(typeEncode, OCTypeEncodeBlock) == 0) {
         copyTypeEncode(typeEncode)
         self.type = TypeBlock;
         return;
@@ -162,68 +151,68 @@ _typeEncode = buffer;
         if (pointerCount != 0) break;
         if (self.pointer == NULL) break;
         //基础类型转换
-        switch (type) {
-            case TypeUChar:{
+        switch (*typeEncode) {
+            case OCTypeEncodeUChar:{
                 MFValueBridge(self, unsigned char)
                 memcpy(resultValue, &result, sizeof(unsigned char));
                 break;
             }
-            case TypeUInt:{
+            case OCTypeEncodeUInt:{
                 MFValueBridge(self, unsigned int)
                 memcpy(resultValue, &result, sizeof(unsigned int));
                 break;
             }
-            case TypeUShort:{
+            case OCTypeEncodeUShort:{
                 MFValueBridge(self, unsigned short)
                 memcpy(resultValue, &result, sizeof(unsigned short));
                 break;
             }
-            case TypeULong:{
+            case OCTypeEncodeULong:{
                 MFValueBridge(self, unsigned long)
                 memcpy(resultValue, &result, sizeof(unsigned long));
                 break;
             }
-            case TypeULongLong:{
+            case OCTypeEncodeULongLong:{
                 MFValueBridge(self, unsigned long long)
                 memcpy(resultValue, &result, sizeof(unsigned long long));
                 break;
             }
-            case TypeBOOL:{
+            case OCTypeEncodeBOOL:{
                 MFValueBridge(self, BOOL)
                 memcpy(resultValue, &result, sizeof(BOOL));
                 break;
             }
-            case TypeChar:{
+            case OCTypeEncodeChar:{
                 MFValueBridge(self, char)
                 memcpy(resultValue, &result, sizeof(char));
                 break;
             }
-            case TypeShort:{
+            case OCTypeEncodeShort:{
                 MFValueBridge(self, short)
                 memcpy(resultValue, &result, sizeof(short));
                 break;
             }
-            case TypeInt:{
+            case OCTypeEncodeInt:{
                 MFValueBridge(self, int)
                 memcpy(resultValue, &result, sizeof(int));
                 break;
             }
-            case TypeLong:{
+            case OCTypeEncodeLong:{
                 MFValueBridge(self, long)
                 memcpy(resultValue, &result, sizeof(long));
                 break;
             }
-            case TypeLongLong:{
+            case OCTypeEncodeLongLong:{
                 MFValueBridge(self, long long)
                 memcpy(resultValue, &result, sizeof(long long));
                 break;
             }
-            case TypeFloat:{
+            case OCTypeEncodeFloat:{
                 MFValueBridge(self, float)
                 memcpy(resultValue, &result, sizeof(float));
                 break;
             }
-            case TypeDouble:{
+            case OCTypeEncodeDouble:{
                 MFValueBridge(self, double)
                 memcpy(resultValue, &result, sizeof(double));
                 break;
@@ -398,7 +387,7 @@ _typeEncode = buffer;
     NSString *structName = self.typeName;
     ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
     NSUInteger offset = declare.keyOffsets[key].unsignedIntegerValue;
-    MFValue *result = [[MFValue alloc] initTypeEncode:declare.keyTypeEncodes[key].UTF8String];
+    MFValue *result = [MFValue defaultValueWithTypeEncoding:declare.keyTypeEncodes[key].UTF8String];
     if (copied) {
         result.pointer = self.pointer + offset;
     }else{
@@ -526,65 +515,65 @@ _typeEncode = buffer;
     return *(char **)self.pointer;
 }
 + (instancetype)voidValue{
-    return [MFValue valueWithTypeKind:TypeVoid pointer:NULL];;
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringVoid pointer:NULL];
 }
 
 + (instancetype)valueWithBOOL:(BOOL)boolValue{
-    return [MFValue valueWithTypeKind:TypeBOOL pointer:&boolValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringBOOL pointer:&boolValue];
 }
 + (instancetype)valueWithUChar:(unsigned char)uCharValue{
-    return [MFValue valueWithTypeKind:TypeUChar pointer:&uCharValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringUChar pointer:&uCharValue];
 }
 + (instancetype)valueWithUShort:(unsigned short)uShortValue{
-    return [MFValue valueWithTypeKind:TypeUShort pointer:&uShortValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringUShort pointer:&uShortValue];
 }
 + (instancetype)valueWithUInt:(unsigned int)uIntValue{
-    return [MFValue valueWithTypeKind:TypeUInt pointer:&uIntValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringUInt pointer:&uIntValue];
 }
 + (instancetype)valueWithULong:(unsigned long)uLongValue{
-    return [MFValue valueWithTypeKind:TypeULong pointer:&uLongValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringULong pointer:&uLongValue];
 }
 + (instancetype)valueWithULongLong:(unsigned long long)uLongLongValue{
-    return [MFValue valueWithTypeKind:TypeULongLong pointer:&uLongLongValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringULongLong pointer:&uLongLongValue];
 }
 + (instancetype)valueWithChar:(char)charValue{
-    return [MFValue valueWithTypeKind:TypeChar pointer:&charValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringChar pointer:&charValue];
 }
 + (instancetype)valueWithShort:(short)shortValue{
-    return [MFValue valueWithTypeKind:TypeShort pointer:&shortValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringShort pointer:&shortValue];
 }
 + (instancetype)valueWithInt:(int)intValue{
-    return [MFValue valueWithTypeKind:TypeInt pointer:&intValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringInt pointer:&intValue];
 }
 + (instancetype)valueWithLong:(long)longValue{
-    return [MFValue valueWithTypeKind:TypeLong pointer:&longValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringLong pointer:&longValue];
 }
 + (instancetype)valueWithLongLong:(long long)longLongValue{
-    return [MFValue valueWithTypeKind:TypeLongLong pointer:&longLongValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringLongLong pointer:&longLongValue];
 }
 + (instancetype)valueWithFloat:(float)floatValue{
-    return [MFValue valueWithTypeKind:TypeFloat pointer:&floatValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringFloat pointer:&floatValue];
 }
 + (instancetype)valueWithDouble:(double)doubleValue{
-    return [MFValue valueWithTypeKind:TypeDouble pointer:&doubleValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringDouble pointer:&doubleValue];
 }
 + (instancetype)valueWithObject:(id)objValue{
-    return [MFValue valueWithTypeKind:TypeObject pointer:&objValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringObject pointer:&objValue];
 }
 + (instancetype)valueWithBlock:(id)blockValue{
-    return [MFValue valueWithTypeKind:TypeBlock pointer:&blockValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeBlock pointer:&blockValue];
 }
 + (instancetype)valueWithClass:(Class)clazzValue{
-    return [MFValue valueWithTypeKind:TypeClass pointer:&clazzValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringClass pointer:&clazzValue];
 }
 + (instancetype)valueWithSEL:(SEL)selValue{
-    return [MFValue valueWithTypeKind:TypeSEL pointer:&selValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringSEL pointer:&selValue];
 }
 + (instancetype)valueWithCString:(char *)pointerValue{
-    return [[MFValue alloc] initTypeEncode:"*" pointer:&pointerValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringCString pointer:&pointerValue];
 }
 + (instancetype)valueWithPointer:(void *)pointerValue{
-    return [[MFValue alloc] initTypeEncode:"^" pointer:&pointerValue];
+    return [MFValue valueWithTypeEncode:OCTypeEncodeStringPointer pointer:&pointerValue];
 }
 
 @end

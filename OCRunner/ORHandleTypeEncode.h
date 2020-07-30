@@ -7,6 +7,74 @@
 //
 
 #import <Foundation/Foundation.h>
+static const char OCTypeEncodeChar = 'c';
+static const char OCTypeEncodeShort = 's';
+static const char OCTypeEncodeInt = 'i';
+static const char OCTypeEncodeLong = 'l';
+static const char OCTypeEncodeLongLong = 'q';
+
+static const char OCTypeEncodeUChar = 'C';
+static const char OCTypeEncodeUShort = 'S';
+static const char OCTypeEncodeUInt = 'I';
+static const char OCTypeEncodeULong = 'L';
+static const char OCTypeEncodeULongLong = 'Q';
+static const char OCTypeEncodeBOOL = 'B';
+
+static const char OCTypeEncodeFloat = 'f';
+static const char OCTypeEncodeDouble = 'd';
+
+static const char OCTypeEncodeVoid = 'v';
+static const char OCTypeEncodeCString = '*';
+static const char OCTypeEncodeObject = '@';
+static const char OCTypeEncodeClass = '#';
+static const char OCTypeEncodeSEL = ':';
+
+static const char OCTypeEncodeArray = '[';
+static const char OCTypeEncodeStruct = '{';
+static const char OCTypeEncodeUnion = '(';
+static const char OCTypeEncodeBit = 'b';
+
+static const char OCTypeEncodePointer = '^';
+static const char OCTypeEncodeUnknown = '?';
+
+#define ExternTypeEncodeString(Type) static const char OCTypeEncodeString##Type[2] = {OCTypeEncode##Type, '\0'};
+ExternTypeEncodeString(Char)
+ExternTypeEncodeString(Short)
+ExternTypeEncodeString(Int)
+ExternTypeEncodeString(Long)
+ExternTypeEncodeString(LongLong)
+
+ExternTypeEncodeString(UChar)
+ExternTypeEncodeString(UShort)
+ExternTypeEncodeString(UInt)
+ExternTypeEncodeString(ULong)
+ExternTypeEncodeString(ULongLong)
+ExternTypeEncodeString(BOOL)
+
+ExternTypeEncodeString(Float)
+ExternTypeEncodeString(Double)
+ExternTypeEncodeString(Void)
+ExternTypeEncodeString(CString)
+ExternTypeEncodeString(Object)
+ExternTypeEncodeString(Class)
+ExternTypeEncodeString(SEL)
+
+ExternTypeEncodeString(Array)
+ExternTypeEncodeString(Struct)
+ExternTypeEncodeString(Union)
+ExternTypeEncodeString(Bit)
+
+ExternTypeEncodeString(Pointer)
+ExternTypeEncodeString(Unknown)
+
+
+
+
+//NOTE: ignore bit 'b'
+#define OCTypeEncodeIsBaseType(code) (('a'<= code && code <= 'z') || ('A'<= code && code <= 'Z'))
+
+static const char *OCTypeEncodeBlock = "@?";
+
 
 NSString *startRemovePointerOfTypeEncode(const char *typeEncode);
 NSUInteger startDetectPointerCount(const char *typeEncode);
