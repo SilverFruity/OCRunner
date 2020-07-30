@@ -14,7 +14,7 @@
  *  x3 void *ret
  *  x4 uint  retFlag
  */
-#ifndef __libffi__
+#if !__has_include("ffi.h")
 #ifdef __arm64__
 .text
 .global _ORCoreFunctionCall

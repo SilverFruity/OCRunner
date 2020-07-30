@@ -404,7 +404,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         [(ORMethodCall *)self.caller setIsAssignedValue:self.isAssignedValue];
     }
     MFValue *variable = [self.caller execute:scope];
-    if (variable.type == TypeStruct) {
+    if (variable.type == OCTypeStruct) {
         if ([self.names.firstObject hasPrefix:@"set"]) {
             NSString *setterName = self.names.firstObject;
             ORExpression *valueExp = self.values.firstObject;
@@ -424,7 +424,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }
     id instance = variable.objectValue;
     if (!instance) {
-        if (variable.type == TypeClass) {
+        if (variable.type == OCTypeClass) {
             instance = *(Class *)variable.pointer;
         }else{
             NSCAssert(0, @"objectValue or classValue must has one");
@@ -498,7 +498,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }
     MFValue *blockValue = [scope getValueWithIdentifier:self.caller.value];
     if (self.caller.value_type == OCValueVariable && blockValue != nil) {
-        if (blockValue.type == TypeBlock) {
+        if (blockValue.isBlockValue) {
             return invoke_MFBlockValue(blockValue, args);
         }else{
             if ([blockValue.objectValue isKindOfClass:[ORBlockImp class]]) {
@@ -682,13 +682,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         if (self.expression) {
             MFValue *value = [self.expression execute:scope];
             value.modifier = self.modifier;
-            [value setTypeInfoWithTypePair:self.pair];
-            ORStructDeclare *structDecl = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:self.pair.type.name];
-            if (structDecl) {
-                value.typeEncode = structDecl.typeEncoding;
-            }
+            value.typeName = self.pair.type.name;
+            value.typeEncode = self.pair.typeEncode;
+            
             [value setTypeBySearchInTypeSymbolTable];
-            if (value.type == TypeObject && [value.objectValue isMemberOfClass:[NSObject class]]) {
+            if (value.type == OCTypeObject && [value.objectValue isMemberOfClass:[NSObject class]]) {
                 NSString *reason = [NSString stringWithFormat:@"Unknown Class: %@",value.typeName];
                 @throw [NSException exceptionWithName:@"OCRunner" reason:reason userInfo:nil];
             }
@@ -697,10 +695,12 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }else{
             MFValue *value = [MFValue defaultValueWithTypeEncoding:self.pair.typeEncode];
             value.modifier = self.modifier;
-            [value setTypeInfoWithTypePair:self.pair];
+            value.typeName = self.pair.type.name;
+            value.typeEncode = self.pair.typeEncode;
+            
             [value setTypeBySearchInTypeSymbolTable];
             [value setDefaultValue];
-            if (value.type == TypeObject
+            if (value.type == OCTypeObject
                 && NSClassFromString(value.typeName) == nil
                 && ![value.typeName isEqualToString:@"id"]) {
                 NSString *reason = [NSString stringWithFormat:@"Unknown Type Identifier: %@",value.typeName];
@@ -1215,14 +1215,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     [typeEncode appendString:@"="];
     for (ORDeclareExpression *exp in self.fields) {
         NSString *typeName = exp.pair.type.name;
-        ORTypeVarPair *registerPair = [[ORTypeSymbolTable shareInstance] typePairForTypeName:typeName];
-        if (registerPair) {
-            if (registerPair.type.type == TypeStruct) {
-                ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:typeName];
-                [typeEncode appendFormat:@"%s",declare.typeEncoding];
-            }else{
-                [typeEncode appendFormat:@"%s",registerPair.typeEncode];
-            }
+        ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:typeName];
+        if (item) {
+            [typeEncode appendFormat:@"%s",item.typeEncode.UTF8String];
         }else{
             [typeEncode appendFormat:@"%s",exp.pair.typeEncode];
         }
@@ -1238,7 +1233,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     ORTypeVarPair *pair = [[ORTypeVarPair alloc] init];
     pair.type = special;
     // 类型表注册全局类型
-    [[ORTypeSymbolTable shareInstance] addTypePair:pair forName:self.sturctName];
+    [[ORTypeSymbolTable shareInstance] addTypePair:pair forAlias:self.sturctName];
     
     return [MFValue voidValue];
 }
@@ -1273,7 +1268,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }
     // 类型表注册全局类型
     if (self.enumName) {
-        [[ORTypeSymbolTable shareInstance] addTypePair:pair forName:self.enumName];
+        [[ORTypeSymbolTable shareInstance] addTypePair:pair forAlias:self.enumName];
     }
     return [MFValue voidValue];
 }
@@ -1282,19 +1277,19 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @implementation ORTypedefExpressoin (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope{
     if ([self.expression isKindOfClass:[ORTypeVarPair class]]) {
-        [[ORTypeSymbolTable shareInstance] addTypePair:self.expression forName:self.typeNewName];
+        [[ORTypeSymbolTable shareInstance] addTypePair:self.expression forAlias:self.typeNewName];
     }else if ([self.expression isKindOfClass:[ORStructExpressoin class]]){
         ORStructExpressoin *structExp = self.expression;
         [structExp execute:scope];
-        ORTypeVarPair *pair = [[ORTypeSymbolTable shareInstance] typePairForTypeName:structExp.sturctName];
-        [[ORTypeSymbolTable shareInstance] addTypePair:pair forName:self.typeNewName];
+        ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:structExp.sturctName];
+        [[ORTypeSymbolTable shareInstance] addSybolItem:item forAlias:self.typeNewName];
     }else if ([self.expression isKindOfClass:[OREnumExpressoin class]]){
         OREnumExpressoin *enumExp = self.expression;
         [enumExp execute:scope];
         ORTypeSpecial *special = [ORTypeSpecial specialWithType:enumExp.valueType name:self.typeNewName];
         ORTypeVarPair *pair = [[ORTypeVarPair alloc] init];
         pair.type = special;
-        [[ORTypeSymbolTable shareInstance] addTypePair:pair forName:self.typeNewName];
+        [[ORTypeSymbolTable shareInstance] addTypePair:pair forAlias:self.typeNewName];
     }else{
         NSCAssert(NO, @"must be ORTypeVarPair, ORStructExpressoin,  OREnumExpressoin");
     }

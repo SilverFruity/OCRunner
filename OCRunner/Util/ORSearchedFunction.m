@@ -40,17 +40,12 @@
 - (nullable MFValue *)execute:(nonnull MFScopeChain *)scope {
     NSArray <MFValue *>*args = [ORArgsStack pop];
     NSString *typeName = self.funPair.type.name;
-    ORTypeVarPair *registerPair = [[ORTypeSymbolTable shareInstance] typePairForTypeName:typeName];
-    const char *typeEncode = self.funPair.typeEncode;
-    if (registerPair) {
-        if (registerPair.type.type == TypeStruct) {
-            ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:typeName];
-            typeEncode = declare.typeEncoding;
-        }else{
-            typeEncode = registerPair.typeEncode;
-        }
+    const char *reg_typeencode = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:typeName].typeEncode.UTF8String;
+    const char *org_typeencode = self.funPair.typeEncode;
+    if (reg_typeencode) {
+        org_typeencode = reg_typeencode;
     }
-    MFValue *returnValue = [MFValue defaultValueWithTypeEncoding:typeEncode];
+    MFValue *returnValue = [MFValue defaultValueWithTypeEncoding:org_typeencode];
     void *funcptr = self.pointer;
     if (funcptr == NULL) {
         funcptr = [ORSystemFunctionTable pointerForFunctionName:self.name];

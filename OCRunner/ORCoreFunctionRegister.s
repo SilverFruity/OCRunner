@@ -8,7 +8,7 @@
 #import <mach/machine/vm_param.h>
 #import "ORCoreFunctionCall.h"
 #import "ORCoreFunctionRegister.h"
-#ifndef __libffi__
+#if !__has_include("ffi.h")
 #ifdef __arm64__
 #ifdef __AARCH64EB__
 # define BE(X)    X

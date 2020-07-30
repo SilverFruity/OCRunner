@@ -33,10 +33,17 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ORTypeVarPair (Struct)
 - (ORStructDeclare *)strcutDeclare;
 @end
+
+@interface ORSymbolItem: NSObject
+@property (copy, nonatomic)NSString *typeEncode;
+@property (copy, nonatomic)NSString *typeName;
+@end
+
 @interface ORTypeSymbolTable: NSObject
 + (instancetype)shareInstance;
 - (void)addTypePair:(ORTypeVarPair *)typePair;
-- (void)addTypePair:(ORTypeVarPair *)typePair forName:(NSString *)typeName;
-- (ORTypeVarPair *)typePairForTypeName:(NSString *)typeName;
+- (void)addTypePair:(ORTypeVarPair *)item forAlias:(NSString *)alias;
+- (void)addSybolItem:(ORSymbolItem *)item forAlias:(NSString *)alias;
+- (ORSymbolItem *)symbolItemForTypeName:(NSString *)typeName;
 @end
 NS_ASSUME_NONNULL_END

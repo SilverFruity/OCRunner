@@ -122,8 +122,15 @@
     return [[ORStructDeclareTable shareInstance] getStructDeclareWithName:self.type.name];
 }
 @end
+
+#import "ORTypeVarPair+TypeEncode.h"
+@implementation ORSymbolItem
+- (NSString *)description{
+    return [NSString stringWithFormat:@"ORSymbolItem:{ encode:%@ type: %@ }",self.typeEncode,self.typeName];
+}
+@end
 @implementation ORTypeSymbolTable{
-    NSMutableDictionary<NSString *, ORTypeVarPair *> *_table;
+    NSMutableDictionary<NSString *, ORSymbolItem *> *_table;
     NSLock *_lock;
 }
 
@@ -144,17 +151,27 @@
 }
 - (void)addTypePair:(ORTypeVarPair *)typePair{
     NSCAssert(typePair.var.varname != nil, @"");
-    [self addTypePair:typePair forName:typePair.var.varname];
+    [self addTypePair:typePair forAlias:typePair.var.varname];
 }
-- (void)addTypePair:(ORTypeVarPair *)typePair forName:(NSString *)typeName{
+- (void)addTypePair:(ORTypeVarPair *)typePair forAlias:(NSString *)alias{
+    ORSymbolItem *item = [[ORSymbolItem alloc] init];
+    item.typeEncode = [NSString stringWithUTF8String:typePair.typeEncode];
+    item.typeName = typePair.type.name;
+    [self addSybolItem:item forAlias:alias];
+}
+- (void)addSybolItem:(ORSymbolItem *)item forAlias:(NSString *)alias{
+    NSAssert(alias != nil, @"");
+    if (alias.length == 0) {
+        return;
+    }
     [_lock lock];
-    _table[typeName] = typePair;
+    _table[alias] = item;
     [_lock unlock];
 }
-- (ORTypeVarPair *)typePairForTypeName:(NSString *)typeName{
+- (ORSymbolItem *)symbolItemForTypeName:(NSString *)typeName{
     [_lock lock];
-    ORTypeVarPair *typePair = _table[typeName];
+    ORSymbolItem *item = _table[typeName];
     [_lock unlock];
-    return typePair;
+    return item;
 }
 @end

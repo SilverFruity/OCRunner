@@ -10,26 +10,25 @@
 #import "RunnerClasses.h"
 #import "util.h"
 #import "ORStructDeclare.h"
-#import "ORTypeVarPair+TypeEncode.h"
 #import "ORHandleTypeEncode.h"
 
 #define MFValueBridge(target,resultType)\
 resultType result;\
 const char *typeEncode = target.typeEncode;\
 switch (*typeEncode) {\
-    case OCTypeEncodeUChar: result = (resultType)*(unsigned char *)target.pointer; break;\
-    case OCTypeEncodeUInt: result = (resultType)*(unsigned int *)target.pointer; break;\
-    case OCTypeEncodeUShort: result = (resultType)*(unsigned short *)target.pointer; break;\
-    case OCTypeEncodeULong: result = (resultType)*(unsigned int *)target.pointer; break;\
-    case OCTypeEncodeULongLong: result = (resultType)*(unsigned long long *)target.pointer; break;\
-    case OCTypeEncodeBOOL: result = (resultType)*(BOOL *)target.pointer; break;\
-    case OCTypeEncodeChar: result = (resultType)*(char *)target.pointer; break;\
-    case OCTypeEncodeShort: result = (resultType)*(short *)target.pointer; break;\
-    case OCTypeEncodeInt: result = (resultType)*(int *)target.pointer; break;\
-    case OCTypeEncodeLong: result = (resultType)*(int *)target.pointer; break;\
-    case OCTypeEncodeLongLong: result = (resultType)*(long long *)target.pointer; break;\
-    case OCTypeEncodeFloat: result = (resultType)*(float *)target.pointer; break;\
-    case OCTypeEncodeDouble: result = (resultType)*(double *)target.pointer; break;\
+    case OCTypeUChar: result = (resultType)*(unsigned char *)target.pointer; break;\
+    case OCTypeUInt: result = (resultType)*(unsigned int *)target.pointer; break;\
+    case OCTypeUShort: result = (resultType)*(unsigned short *)target.pointer; break;\
+    case OCTypeULong: result = (resultType)*(unsigned int *)target.pointer; break;\
+    case OCTypeULongLong: result = (resultType)*(unsigned long long *)target.pointer; break;\
+    case OCTypeBOOL: result = (resultType)*(BOOL *)target.pointer; break;\
+    case OCTypeChar: result = (resultType)*(char *)target.pointer; break;\
+    case OCTypeShort: result = (resultType)*(short *)target.pointer; break;\
+    case OCTypeInt: result = (resultType)*(int *)target.pointer; break;\
+    case OCTypeLong: result = (resultType)*(int *)target.pointer; break;\
+    case OCTypeLongLong: result = (resultType)*(long long *)target.pointer; break;\
+    case OCTypeFloat: result = (resultType)*(float *)target.pointer; break;\
+    case OCTypeDouble: result = (resultType)*(double *)target.pointer; break;\
     default: result = 0;\
 }
 
@@ -53,6 +52,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 - (instancetype)initTypeEncode:(const char *)typeEncoding pointer:(void *)pointer{
     self = [super init];
+    typeEncoding = removeTypeEncodingPrefix((char *)typeEncoding);
     self.typeEncode = typeEncoding;
     self.pointer = pointer;
     return self;
@@ -99,120 +99,125 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     _pointer = pointer;
     _isAlloced = NO;
 }
+- (BOOL)isBlockValue{
+    if (self.typeEncode == NULL) {
+        return NO;
+    }
+    return strcmp(self.typeEncode, OCTypeStringBlock) == 0;
+}
 - (void)setModifier:(ORDeclarationModifier)modifier{
-    if (modifier & ORDeclarationModifierWeak && (self.type == TypeObject || self.type == TypeBlock)) {
+    if (modifier & ORDeclarationModifierWeak && (self.type == OCTypeObject || self.isBlockValue)) {
         self.weakObjectValue = self.strongObjectValue;
         self.strongObjectValue = nil;
     }
     _modifier = modifier;
+}
+- (OCType)type{
+    if (self.typeEncode == NULL) {
+        return OCTypeLongLong;
+    }
+    return *self.typeEncode;
 }
 - (void)dealloc{
     [self deallocPointer];
     if(_typeEncode != NULL) free((void *)_typeEncode);
 }
 - (void)setTypeEncode:(const char *)typeEncode{
-#define copyTypeEncode(encode) if(_typeEncode != NULL) free((void *)_typeEncode);\
-size_t strLen = strlen(encode);\
-char *buffer = malloc(strLen+1);\
-buffer[strLen] = '\0';\
-strncpy((void *)buffer, encode, strLen);\
-_typeEncode = buffer;
-    if (strcmp(typeEncode, OCTypeEncodeBlock) == 0) {
-        copyTypeEncode(typeEncode)
-        self.type = TypeBlock;
-        return;
-    }
-    if (self.type == TypeBlock) {
-        return;
-    }
-    ORTypeVarPair *pair = ORTypeVarPairForTypeEncode(typeEncode);
-    TypeKind type = pair.type.type;
-    NSString *typeName = pair.type.name;
-    NSUInteger pointerCount = pair.var.ptCount;
+    
     void *result = NULL;
     [self convertValueWithTypeEncode:typeEncode result:&result];
-    copyTypeEncode(typeEncode)
+    
+    if(_typeEncode != NULL)
+        free((void *)_typeEncode);
+    
+    size_t strLen = strlen(typeEncode);
+    char *buffer = malloc(strLen+1);
+    buffer[strLen] = '\0';
+    strncpy((void *)buffer, typeEncode, strLen);
+    _typeEncode = buffer;
+
     if (result != NULL) {
         self.pointer = &result;
     }
-    self.type = type;
-    self.pointerCount = pointerCount;
-    if (typeName != nil) {
-        self.typeName = typeName;
+    
+    self.pointerCount = startDetectPointerCount(typeEncode);
+    if (*typeEncode == OCTypeClass) {
+        self.typeName = @"Class";
+    }else if(*typeEncode == OCTypeStruct){
+        self.typeName = startStructNameDetect(typeEncode);
     }
 }
 - (void)convertValueWithTypeEncode:(const char *)typeEncode result:(void **)resultValue{
-    ORTypeVarPair *pair = ORTypeVarPairForTypeEncode(typeEncode);
-    TypeKind type = pair.type.type;
-    NSUInteger pointerCount = pair.var.ptCount;
+    if (self.typeEncode == NULL) {
+        return;
+    }
     do {
-        if ((self.type & TypeBaseMask) == 0) break;
-        if (self.type == type) break;
-        if (pointerCount != 0) break;
+        if ((TypeEncodeIsBaseType(typeEncode)) == 0) break;
+        if (*self.typeEncode == *typeEncode) break;
         if (self.pointer == NULL) break;
         //基础类型转换
         switch (*typeEncode) {
-            case OCTypeEncodeUChar:{
+            case OCTypeUChar:{
                 MFValueBridge(self, unsigned char)
                 memcpy(resultValue, &result, sizeof(unsigned char));
                 break;
             }
-            case OCTypeEncodeUInt:{
+            case OCTypeUInt:{
                 MFValueBridge(self, unsigned int)
                 memcpy(resultValue, &result, sizeof(unsigned int));
                 break;
             }
-            case OCTypeEncodeUShort:{
+            case OCTypeUShort:{
                 MFValueBridge(self, unsigned short)
                 memcpy(resultValue, &result, sizeof(unsigned short));
                 break;
             }
-            case OCTypeEncodeULong:{
+            case OCTypeULong:{
                 MFValueBridge(self, unsigned long)
                 memcpy(resultValue, &result, sizeof(unsigned long));
                 break;
             }
-            case OCTypeEncodeULongLong:{
+            case OCTypeULongLong:{
                 MFValueBridge(self, unsigned long long)
                 memcpy(resultValue, &result, sizeof(unsigned long long));
                 break;
             }
-            case OCTypeEncodeBOOL:{
+            case OCTypeBOOL:{
                 MFValueBridge(self, BOOL)
                 memcpy(resultValue, &result, sizeof(BOOL));
                 break;
             }
-            case OCTypeEncodeChar:{
+            case OCTypeChar:{
                 MFValueBridge(self, char)
                 memcpy(resultValue, &result, sizeof(char));
                 break;
             }
-            case OCTypeEncodeShort:{
+            case OCTypeShort:{
                 MFValueBridge(self, short)
                 memcpy(resultValue, &result, sizeof(short));
                 break;
             }
-            case OCTypeEncodeInt:{
+            case OCTypeInt:{
                 MFValueBridge(self, int)
                 memcpy(resultValue, &result, sizeof(int));
                 break;
             }
-            case OCTypeEncodeLong:{
+            case OCTypeLong:{
                 MFValueBridge(self, long)
                 memcpy(resultValue, &result, sizeof(long));
                 break;
             }
-            case OCTypeEncodeLongLong:{
+            case OCTypeLongLong:{
                 MFValueBridge(self, long long)
                 memcpy(resultValue, &result, sizeof(long long));
                 break;
             }
-            case OCTypeEncodeFloat:{
+            case OCTypeFloat:{
                 MFValueBridge(self, float)
                 memcpy(resultValue, &result, sizeof(float));
                 break;
             }
-            case OCTypeEncodeDouble:{
+            case OCTypeDouble:{
                 MFValueBridge(self, double)
                 memcpy(resultValue, &result, sizeof(double));
                 break;
@@ -225,10 +230,7 @@ _typeEncode = buffer;
     self.typeEncode = value.typeEncode;
     self.typeName = value.typeName;
 }
-- (void)setTypeInfoWithTypePair:(ORTypeVarPair *)typePair{
-    self.typeName = typePair.type.name;
-    self.typeEncode = typePair.typeEncode;
-}
+
 
 - (void)assignFrom:(MFValue *)src{
     [self setTypeInfoWithValue:src];
@@ -239,16 +241,11 @@ _typeEncode = buffer;
 }
 - (void)setTypeBySearchInTypeSymbolTable{
     do {
-         if (!self.typeName) break;
-         ORTypeVarPair *pair = [[ORTypeSymbolTable shareInstance] typePairForTypeName:self.typeName];
-         if (!pair) break;
-         if (pair.type.type == TypeStruct) {
-             ORStructDeclare *structDecl = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:pair.type.name];
-             if (!structDecl) break;
-             self.typeEncode = structDecl.typeEncoding;
-         }else{
-             [self setTypeInfoWithTypePair:pair];
-         }
+        if (!self.typeName) break;
+        ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:self.typeName];
+        if (!item) break;
+        self.typeName = item.typeName;
+        self.typeEncode = item.typeEncode.UTF8String;
      } while (0);
 }
 
@@ -303,11 +300,10 @@ _typeEncode = buffer;
         return [MFValue valueWithObject:self.objectValue[*(long long *)index.pointer]];
     }
     switch (index.type) {
-        case TypeBlock:
-        case TypeObject:
+        case OCTypeObject:
             return [MFValue valueWithObject:self.objectValue[index.objectValue]];
             break;
-        case TypeClass:
+        case OCTypeClass:
             return [MFValue valueWithObject:self.objectValue[*(Class *)index.pointer]];
             break;
         default:
@@ -321,11 +317,10 @@ _typeEncode = buffer;
         self.objectValue[*(long long *)index.pointer] = value.objectValue;
     }
     switch (index.type) {
-        case TypeBlock:
-        case TypeObject:
+        case OCTypeObject:
             self.objectValue[index.objectValue] = value.objectValue;
             break;
-        case TypeClass:
+        case OCTypeClass:
             self.objectValue[(id <NSCopying>)*(Class *)index.pointer] = value.objectValue;
             break;
         default:
@@ -374,7 +369,6 @@ _typeEncode = buffer;
         NSString *structName = startStructNameDetect(encode.UTF8String);
         ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
         field.typeEncode = declare.typeEncoding;
-        field.type = TypeStruct;
         field.typeName = structName;
     }else{
         field.typeEncode = removedPointerTypeEncode;
@@ -383,7 +377,7 @@ _typeEncode = buffer;
     return field;
 }
 - (MFValue *)fieldForKey:(NSString *)key copied:(BOOL)copied{
-    NSCAssert(self.type == TypeStruct, @"must be struct");
+    NSCAssert(self.type == OCTypeStruct, @"must be struct");
     NSString *structName = self.typeName;
     ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
     NSUInteger offset = declare.keyOffsets[key].unsignedIntegerValue;
@@ -402,7 +396,7 @@ _typeEncode = buffer;
     return [self fieldForKey:key copied:NO];
 }
 - (void)setFieldWithValue:(MFValue *)value forKey:(NSString *)key{
-    NSCAssert(self.type == TypeStruct, @"must be struct");
+    NSCAssert(self.type == OCTypeStruct, @"must be struct");
     NSString *structName = self.typeName;
     ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
     NSUInteger offset = declare.keyOffsets[key].unsignedIntegerValue;
@@ -515,65 +509,65 @@ _typeEncode = buffer;
     return *(char **)self.pointer;
 }
 + (instancetype)voidValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringVoid pointer:NULL];
+    return [MFValue valueWithTypeEncode:OCTypeStringVoid pointer:NULL];
 }
 
 + (instancetype)valueWithBOOL:(BOOL)boolValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringBOOL pointer:&boolValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringBOOL pointer:&boolValue];
 }
 + (instancetype)valueWithUChar:(unsigned char)uCharValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringUChar pointer:&uCharValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringUChar pointer:&uCharValue];
 }
 + (instancetype)valueWithUShort:(unsigned short)uShortValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringUShort pointer:&uShortValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringUShort pointer:&uShortValue];
 }
 + (instancetype)valueWithUInt:(unsigned int)uIntValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringUInt pointer:&uIntValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringUInt pointer:&uIntValue];
 }
 + (instancetype)valueWithULong:(unsigned long)uLongValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringULong pointer:&uLongValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringULong pointer:&uLongValue];
 }
 + (instancetype)valueWithULongLong:(unsigned long long)uLongLongValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringULongLong pointer:&uLongLongValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringULongLong pointer:&uLongLongValue];
 }
 + (instancetype)valueWithChar:(char)charValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringChar pointer:&charValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringChar pointer:&charValue];
 }
 + (instancetype)valueWithShort:(short)shortValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringShort pointer:&shortValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringShort pointer:&shortValue];
 }
 + (instancetype)valueWithInt:(int)intValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringInt pointer:&intValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringInt pointer:&intValue];
 }
 + (instancetype)valueWithLong:(long)longValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringLong pointer:&longValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringLong pointer:&longValue];
 }
 + (instancetype)valueWithLongLong:(long long)longLongValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringLongLong pointer:&longLongValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringLongLong pointer:&longLongValue];
 }
 + (instancetype)valueWithFloat:(float)floatValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringFloat pointer:&floatValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringFloat pointer:&floatValue];
 }
 + (instancetype)valueWithDouble:(double)doubleValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringDouble pointer:&doubleValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringDouble pointer:&doubleValue];
 }
 + (instancetype)valueWithObject:(id)objValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringObject pointer:&objValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringObject pointer:&objValue];
 }
 + (instancetype)valueWithBlock:(id)blockValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeBlock pointer:&blockValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringBlock pointer:&blockValue];
 }
 + (instancetype)valueWithClass:(Class)clazzValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringClass pointer:&clazzValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringClass pointer:&clazzValue];
 }
 + (instancetype)valueWithSEL:(SEL)selValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringSEL pointer:&selValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringSEL pointer:&selValue];
 }
 + (instancetype)valueWithCString:(char *)pointerValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringCString pointer:&pointerValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringCString pointer:&pointerValue];
 }
 + (instancetype)valueWithPointer:(void *)pointerValue{
-    return [MFValue valueWithTypeEncode:OCTypeEncodeStringPointer pointer:&pointerValue];
+    return [MFValue valueWithTypeEncode:OCTypeStringPointer pointer:&pointerValue];
 }
 
 @end

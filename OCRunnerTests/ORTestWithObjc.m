@@ -164,7 +164,7 @@ Element2Struct *Element2StructMake(){
     }
     MFValue *rectValue = [scope getValueWithIdentifier:@"rect"];
     CGRect rect = *(CGRect *) rectValue.pointer;
-    XCTAssert(rectValue.type == TypeStruct);
+    XCTAssert(rectValue.type == OCTypeStruct);
     XCTAssert(rect.origin.x == 10);
     XCTAssert(rect.origin.y == 10);
     XCTAssert(rect.size.width == 100);
@@ -192,7 +192,7 @@ Element2Struct *Element2StructMake(){
     }
     MFValue *rectValue = [scope getValueWithIdentifier:@"frame"];
     CGRect rect = *(CGRect *) rectValue.pointer;
-    XCTAssert(rectValue.type == TypeStruct);
+    XCTAssert(rectValue.type == OCTypeStruct);
     XCTAssert(rect.size.width == 2);
     XCTAssert(rect.size.height == 3);
 }
@@ -210,9 +210,9 @@ Element2Struct *Element2StructMake(){
     MFValue *frameValue = [scope getValueWithIdentifier:@"frame"];
     CGRect rect = *(CGRect *) frameValue.pointer;
     NSLog(@"%@",[NSValue valueWithCGRect:rect]);
-    XCTAssert(frameValue.type == TypeStruct);
+    XCTAssert(frameValue.type == OCTypeStruct);
     MFValue * aValue = [scope getValueWithIdentifier:@"a"];
-    XCTAssert(aValue.type == TypeDouble);
+    XCTAssert(aValue.type == OCTypeDouble);
     XCTAssert(aValue.doubleValue == 4);
 }
 - (void)testDetectStructMemeryLayoutCode{
