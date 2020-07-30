@@ -323,7 +323,7 @@ typedef struct MyStruct2 {
     for (id <OCExecute> exp in OCParser.ast.globalStatements) {
         [exp execute:scope];
     }
-    MFValue *d = [scope getValueWithIdentifier:@"a"];
+    MFValue *d = [scope getValueWithIdentifier:@"d"];
     XCTAssert(strcmp(d.typeEncode, "i") == 0);
     XCTAssert(*(int *)d.pointer == 1);
 }
