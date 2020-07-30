@@ -779,20 +779,22 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }
         case UnaryOperatorAdressPoint:{
             void *pointer = currentValue.pointer;
-            resultValue.pointer = &pointer;
             resultValue.pointerCount += 1;
+            resultValue.pointer = &pointer;
             return resultValue;
         }
         case UnaryOperatorAdressValue:{
-            resultValue.pointer = *(void **)currentValue.pointer;
             resultValue.pointerCount -= 1;
+            resultValue.pointer = *(void **)currentValue.pointer;
             return resultValue;
         }
         default:
             break;
     }
     return resultValue;
-}@end
+}
+@end
+
 @implementation ORBinaryExpression(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *rightValue = [self.right execute:scope];

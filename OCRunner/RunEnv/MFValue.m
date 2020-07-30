@@ -94,6 +94,22 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     }
     memcpy(dst, pointer, size);
 }
+- (void)setPointerCount:(NSInteger)pointerCount{
+    if (pointerCount > _pointerCount) {
+        //取地址，增加一个 '^'
+        char *typeencode = alloca(strlen(self.typeEncode) + 2);
+        memset(typeencode, 0, strlen(self.typeEncode) + 2);
+        typeencode[0] = OCTypePointer;
+        memcpy(typeencode + 1, self.typeEncode, strlen(self.typeEncode));
+        self.typeEncode = typeencode;
+    }else if (*_typeEncode == OCTypePointer){
+        //取值, 减少一个 '^'
+        char *typeencode = alloca(strlen(self.typeEncode));
+        memset(typeencode, 0, strlen(self.typeEncode));
+        memcpy(typeencode, self.typeEncode + 1, strlen(self.typeEncode) - 1);
+        self.typeEncode = typeencode;
+    }
+}
 - (void)setPointerWithNoCopy:(void *)pointer{
     [self deallocPointer];
     _pointer = pointer;
@@ -139,8 +155,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     if (result != NULL) {
         self.pointer = &result;
     }
-    
-    self.pointerCount = startDetectPointerCount(typeEncode);
+    _pointerCount = startDetectPointerCount(typeEncode);
     if (*typeEncode == OCTypeClass) {
         self.typeName = @"Class";
     }else if(*typeEncode == OCTypeStruct){

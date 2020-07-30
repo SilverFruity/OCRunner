@@ -291,4 +291,41 @@ typedef struct MyStruct2 {
         }
     }];
 }
+- (void)testGetPointerAddress{
+    MFScopeChain *scope = self.currentScope;
+    NSString * source =
+    @"int a = 1;"
+    @"int *b = &a;"
+    @"int **c = &b;";
+    [OCParser parseSource:source];
+    for (id <OCExecute> exp in OCParser.ast.globalStatements) {
+        [exp execute:scope];
+    }
+    MFValue *a = [scope getValueWithIdentifier:@"a"];
+    XCTAssert(strcmp(a.typeEncode, "i") == 0);
+    XCTAssert(*(int *)a.pointer == 1);
+    MFValue *b = [scope getValueWithIdentifier:@"b"];
+    XCTAssert(strcmp(b.typeEncode, "^i") == 0);
+    XCTAssert(**(int **)b.pointer == 1);
+    MFValue *c = [scope getValueWithIdentifier:@"c"];
+    XCTAssert(strcmp(c.typeEncode, "^^i") == 0);
+    NSLog(@"%s",c.typeEncode);
+    XCTAssert(***(int ***)c.pointer == 1);
+}
+- (void)testGetPointerValue{
+    MFScopeChain *scope = self.currentScope;
+    NSString * source =
+    @"int a = 1;"
+    @"int *b = &a;"
+    @"int **c = &b;"
+    @"int d = **c;";
+    [OCParser parseSource:source];
+    for (id <OCExecute> exp in OCParser.ast.globalStatements) {
+        [exp execute:scope];
+    }
+    MFValue *d = [scope getValueWithIdentifier:@"a"];
+    XCTAssert(strcmp(d.typeEncode, "i") == 0);
+    XCTAssert(*(int *)d.pointer == 1);
+}
+
 @end
