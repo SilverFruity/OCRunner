@@ -42,10 +42,6 @@ OCRunner framework的单元测试已经转移到OCRunnerDemo下。
 
 * 支持可变参数函数和方法调用。
 
-单元测试情况:
-
-1. iOS真机，无论是使用libffi.a或者是自定义的libffi，都是全通过的。
-2. iOS模拟器，testCallFunctionPointer测试，libffi调用偶尔会崩溃。
 
 ## 3. 与Objective-C当前存在的语法差异
 
