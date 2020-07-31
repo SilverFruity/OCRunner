@@ -111,7 +111,8 @@ static void replace_setter_method(Class clazz, ORPropertyDeclare *prop){
     SEL setterSEL = NSSelectorFromString([NSString stringWithFormat:@"set%@%@:",str1,str2]);
     const char *prtTypeEncoding  = prop.var.typeEncode;
     const char * typeEncoding = mf_str_append("v@:", prtTypeEncoding);
-    class_replaceMethod(clazz, setterSEL, (void *)&setterImp, typeEncoding);
+    void *imp = register_method(&setterImp, @[prop.var], [ORTypeVarPair typePairWithTypeKind:TypeVoid]);
+    class_replaceMethod(clazz, setterSEL, imp, typeEncoding);
     free((void *)typeEncoding);
 }
 

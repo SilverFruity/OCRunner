@@ -58,6 +58,7 @@
         {
             ffi_type *type = malloc(sizeof(ffi_type));
             type->type = FFI_TYPE_STRUCT;
+            type->alignment = 0;
             NSString *structName = self.type.name;
             assert(structName != nil);
             ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];

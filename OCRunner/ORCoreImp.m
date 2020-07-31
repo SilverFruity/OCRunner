@@ -79,11 +79,11 @@ void getterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
     }
 }
 
-void setterImp(id target, SEL sel, void *newValue){
-    NSMethodSignature *sign = [target methodSignatureForSelector:sel];
-    const char *type = [sign getArgumentTypeAtIndex:2];
-    MFValue *value = [MFValue defaultValueWithTypeEncoding:type];
-    value.pointer = &newValue;
+void setterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
+    id target = *(__strong id *)args[0];
+    SEL sel = *(SEL *)args[1];
+    const char *argTypeEncode = [[target methodSignatureForSelector:sel] getArgumentTypeAtIndex:2];
+    MFValue *value = [MFValue valueWithTypeEncode:argTypeEncode pointer:args[2]];
     NSString *setter = NSStringFromSelector(sel);
     NSString *name = [setter substringWithRange:NSMakeRange(3, setter.length - 4)];
     NSString *first = [name substringWithRange:NSMakeRange(0, 1)].lowercaseString;

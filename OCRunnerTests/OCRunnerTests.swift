@@ -166,10 +166,6 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scope.getValueWithIdentifier("h")!.intValue == 8)
         XCTAssert(scope.getValueWithIdentifier("i")!.intValue == -3)
         XCTAssert(scope.getValueWithIdentifier("j")!.intValue == -2)
-//        let k = scope.getValueWithIdentifier("k")!
-//        let pointer = k.pointerValue!
-//        let intPointer = pointer.assumingMemoryBound(to: Int.self)
-//        print(intPointer.pointee)
         XCTAssert(scope.getValueWithIdentifier("l")!.intValue == 2)
     }
     func testBinaryExpresssion() {

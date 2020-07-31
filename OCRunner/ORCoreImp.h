@@ -13,5 +13,5 @@
 extern void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata);
 extern void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata);
 extern void getterImp(ffi_cif *cfi,void *ret,void **args, void*userdata);
-extern void setterImp(id target, SEL sel, void *newValue);
+extern void setterImp(ffi_cif *cfi,void *ret,void **args, void*userdata);
 extern MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValues);
