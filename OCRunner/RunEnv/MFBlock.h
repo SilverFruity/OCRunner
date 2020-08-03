@@ -56,7 +56,7 @@ struct MFGOSimulateBlockDescriptor {
 @interface MFBlock : NSObject
 
 @property (strong, nonatomic) MFScopeChain *outScope;
-@property (strong, nonatomic) ORBlockImp *func;
+@property (strong, nonatomic) ORFunctionImp *func;
 @property (strong, nonatomic) NSMutableArray <ORTypeVarPair *>*paramTypes;
 @property (strong, nonatomic) ORTypeVarPair *retType;
 

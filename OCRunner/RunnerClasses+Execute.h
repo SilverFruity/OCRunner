@@ -41,7 +41,10 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ORCFuncCall (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORBlockImp (Execute) <OCExecute>
+@interface ORScopeImp (Execute) <OCExecute>
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
+@end
+@interface ORFunctionImp (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORSubscriptExpression (Execute) <OCExecute>
