@@ -1,4 +1,7 @@
 # OCRunner
+
+[中文介绍](https://github.com/SilverFruity/OCRunner/blob/master/README-CN.md)
+
 Execute the Objective-C code Dynamically.
 
 ## 1. Run Demo
@@ -252,7 +255,6 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 ### 5. Not Support 
 * int a\[x\]
 * typeof
-
 * @optional
 * @encode
 * @synchronized
@@ -266,3 +268,12 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 * IBOutlet
 * IBAction
 * IBInspectable
+
+
+
+### 6. Thanks for
+
+* [Mango](https://github.com/YPLiang19/Mango)
+* [libffi](https://github.com/libffi/libffi)
+* Procedure Call Standard for the ARM 64-bit Architecture. 
+

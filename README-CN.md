@@ -274,3 +274,11 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 * IBInspectable
 
 强烈建议看看单元测试中支持的语法。
+
+
+
+### 6. Thanks for
+
+* [Mango](https://github.com/YPLiang19/Mango)
+* [libffi](https://github.com/libffi/libffi)
+* Procedure Call Standard for the ARM 64-bit Architecture. 
