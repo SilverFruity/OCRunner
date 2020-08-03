@@ -68,9 +68,25 @@ NSArray <NSObject*>*array;
 
 #### 3.3.1 Fix Existed Class
 
-You can only use @implementation in scripts.
+The shortest way:
 
 ```objective-c
+@implementation ORTestReplaceClass
+- (int)otherMethod{
+    return 10;
+}
+- (int)test{
+    return [self otherMethod];
+}
+@end
+```
+
+If want to add properties (not support add ivars), you should:
+
+```objective-c
+@interface ORTestReplaceClass : NSObject
+@property (assign, nonatomic) NSInteger num;
+@end
 @implementation ORTestReplaceClass
 - (int)otherMethod{
     return 10;
@@ -83,7 +99,7 @@ You can only use @implementation in scripts.
 
 #### 3.3.2 Create new Class
 
-In this situation, ORTestReplaceClass inherit NSObjece. if you want to add property or customized superClass，you should imp @interface.
+In this situation, ORTestReplaceClass inherit NSObjece. 
 
 ```objective-c
 @implementation ORTestReplaceClass
@@ -95,6 +111,33 @@ In this situation, ORTestReplaceClass inherit NSObjece. if you want to add prope
 }
 @end
 ```
+
+if you want to add ivar, property or customized superClass，you should imp @interface.
+
+Notice: ivar must be used in new Class.
+
+```objective-c
+@interface ORTestReplaceClass : NSObject
+{
+  int _testValue;
+  id _testObject;
+}
+@property (assign, nonatomic) NSInteger num;
+@end
+@implementation ORTestReplaceClass
+{
+  int _impivar;
+}
+- (int)otherMethod{
+    return 10;
+}
+- (int)test{
+    return [self otherMethod];
+}
+@end
+```
+
+
 
 #### 3.3.3 Support Category Syntax
 

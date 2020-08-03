@@ -65,7 +65,7 @@ NSArray <NSObject*>*array;
 
 #### 3.3.1 已经存在的类
 
-可以这么写，不用声明 `@interface ORTestReplaceClass:  SuperClass @end`
+支持的最简方式：
 
 ```objective-c
 @implementation ORTestReplaceClass
@@ -78,12 +78,55 @@ NSArray <NSObject*>*array;
 @end
 ```
 
+如果需要添加properties:
+
+```objective-c
+@interface ORTestReplaceClass : NSObject
+@property (assign, nonatomic) NSInteger num;
+@end
+@implementation ORTestReplaceClass
+- (int)otherMethod{
+    return 10;
+}
+- (int)test{
+    return [self otherMethod];
+}
+@end
+```
+
+
+
 #### 3.3.2 新建类
 
-这里新建的ORTestReplaceClass类默认会继承自NSObject，如果你想添加property或者父类，就必须使用@interface
+这里新建的ORTestReplaceClass类默认会继承自NSObject.
 
 ```objective-c
 @implementation ORTestReplaceClass
+- (int)otherMethod{
+    return 10;
+}
+- (int)test{
+    return [self otherMethod];
+}
+@end
+```
+
+如果你想添加 ivar, property或者父类，就必须使用@interface。
+
+提示：只有在新建类的时候，才能添加成员变量。
+
+```objective-c
+@interface ORTestReplaceClass : NSObject
+{
+  int _testValue;
+  id _testObject;
+}
+@property (assign, nonatomic) NSInteger num;
+@end
+@implementation ORTestReplaceClass
+{
+  int _impivar;
+}
 - (int)otherMethod{
     return 10;
 }
