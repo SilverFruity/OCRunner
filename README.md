@@ -1,86 +1,71 @@
 # OCRunner
+Execute the Objective-C code Dynamically.
 
-OCRunner is a DSL using Objective-C syntax，OCRunner is also an iOS App hotfix SDK. You can use OCRunner method replace any Objective-C method.
-
-## 1. Demo运行
-
-直接下载zip，是无法正常运行的。必须通过git clone
-
+## 1. Run Demo
+If you want to run the demo, you must use 'git clone'.
 ```shell
 git clone --recursive https://github.com/SilverFruity/OCRunner.git
 ```
-或者
-
+or
 ```shell
 git clone https://github.com/SilverFruity/OCRunner.git
 cd OCRunner
 git submodule update --init --recursive
 ```
 
-OCRunner framework的单元测试已经转移到OCRunnerDemo下。
+The unit tests of OCRunner.framework has move to OCRunnerDemo。
 
-## 2. 功能
+## 2. Feature
 
-* 将Objective-C作为脚本执行。
+* Execute the Objective-C code Dynamically。
 
-* 86%的单元测试覆盖。
+* Unit test coverage is 86%。
 
-* 支持全局C函数声明，直接获取函数指针。
+* Support link system Non-inline C function by using Global C function declaration syntax in script。
 
-* 支持结构体。内置结构体内存布局，结构体取值与赋值等。
+* Support structure declaration syntax in script. You can freely use structures in scripts。
 
-* 支持枚举声明。
+* Support enum declaration syntax.
 
-* 可选libffi或者内置自定义实现的arm64 libff(基于TypeEncode不再是ffi_type)。
+* Support typedef.
 
-  默认使用libffi.a实现
+* Support multiple function and method call.
 
-  * 不使用libffi.a:  项目中移除的libffi文件夹的引用即可。
-  * 使用libffi.a:  导入libffi文件夹即可。
+* Optinal libffi.a or build-in customized arm64 abi (modified from libffi)
 
-* 除去预编译、C数组声明、Protocol，其他语法皆已支持。
+	Default using libffi.a.
 
-* 支持可变参数函数和方法调用。
+  * Do not use libffi.a:  you should remove the reference of 'libffi' folder from project.
+  * Use libffi.a:  add the libffi folder to project.
+
+* Not support  pre-compile, C array declaration syntax,  Objective-C Protocl declaration.
+
+Recommend:  start eating from the unit test.
 
 
-## 3. 与Objective-C当前存在的语法差异
+## 3. What's the difference of Objective-C
 
-### 3.1 预编译指令
+### 3.1 Not support pre-compile
 
-不支持预编译指令 #define #if等
+Such as #define, #if etc.
 
-### 3.2 Protcol协议
-当前不支持协议，不支持@protocol，但支持语法如下:
+### 3.2 Not support Protcol
+Not support @protocol，but support those syntaxes:
 ```objective-c
-//这里实际创建的Classxxx并不遵循协议protocol1和protocol2
-// [[Classxxx new] conformsToProtocol:@protocol(protocol1)] 必定为NO
+// in fact, the object of Classxxx don't confirm protocol1 and protocol2
+// and [[Classxxx new] conformsToProtocol:@protocol(protocol1)] must be NO
 @interface Classxxx: NSObject <protocol1, protocol2> 
 @end
 NSArray <NSObject*>*array;
 ```
 
-### 3.3 类修复问题
+### 3.3 The problems of hot fix Class
 
-* 问题1: 我有个类有abcde5个方法以及若干属性，如果我只想对其中的A方法进行重写，我要把其他几个都带上吗？ 答: 只需要重写A方法
+* Problem 1:if Class1 have five method (a,b,c,d,e) and several properties, if i only want to hot fix 'a' method, how can i do it ?  anwser: you only need to imp the 'a' method in scripts.  
 
-#### 3.3.1 已经存在的类
+#### 3.3.1 Fix Existed Class
 
-可以这么写，不用声明 `@interface ORTestReplaceClass:  SuperClass @end`
-
-```objective-c
-@implementation ORTestReplaceClass
-- (int)otherMethod{
-    return 10;
-}
-- (int)test{
-    return [self otherMethod];
-}
-@end
-```
-
-#### 3.3.2 新建类
-
-这里新建的ORTestReplaceClass类默认会继承自NSObject，如果你想添加property或者父类，就必须使用@interface
+You can only use @implementation in scripts.
 
 ```objective-c
 @implementation ORTestReplaceClass
@@ -93,7 +78,22 @@ NSArray <NSObject*>*array;
 @end
 ```
 
-#### 3.3.3 支持分类写法
+#### 3.3.2 Create new Class
+
+In this situation, ORTestReplaceClass inherit NSObjece. if you want to add property or customized superClass，you should imp @interface.
+
+```objective-c
+@implementation ORTestReplaceClass
+- (int)otherMethod{
+    return 10;
+}
+- (int)test{
+    return [self otherMethod];
+}
+@end
+```
+
+#### 3.3.3 Support Category Syntax
 
 ```objective-c
 @implementation Demo
@@ -105,32 +105,31 @@ NSArray <NSObject*>*array;
 @end
 ```
 
-### 3.4 关于枚举的一点问题
+### 3.4 About Enum Syntax
 
-不支持**NS_ENUM**和**NS_OPTION**，转换为对应的C声明方式即可.
+Not surpport **NS_ENUM**和**NS_OPTION**.
 
-例如：
+You should use C syntax.
 
 ```objective-c
-typedef NS_OPTIONS(NSUInteger, UIControlEvents) {}
-typedef NS_ENUM(NSUInteger, UIControlEvents) {}
-// 需要转换为以下语法
+//typedef NS_OPTIONS(NSUInteger, UIControlEvents) {}
+//convert to this
 typedef enum: NSUInteger {
 
 }UIControlEvents;
 ```
 
-### 3.5 关于结构体一点问题
+### 3.5 About Struct Syntax
 
-被引用结构，必须提前声明
+The referenced structure must be declared in advance.
 
 ```objective-c
-// CGPoint必须在CGRect之前声明
+// CGPoint must be in front of CGRect
 struct CGPoint { 
     CGFloat x;
     CGFloat y;
 };
-// CGSize必须在CGRect之前声明
+// CGSize must be in front of CGRect
 struct CGSize { 
     CGFloat width;
     CGFloat height;
@@ -142,65 +141,58 @@ struct CGSize {
 ```
 
 
-### 3.6 UIKit中的常量、类型、结构体、枚举、全局函数的应对方法
+### 3.6 constant, type, struct, enum, global function.
 
-#### 3.6.1 常量、结构体、枚举
+#### 3.6.1 constant、struct、enum
 
-第一种:
+Way 1:
 
 ```objective-c
-// 需要在App中添加
-// 结构体
+// Need write those code in Application files
+// Struct
 ORStructDeclareTable *table = [ORStructDeclareTable shareInstance];
 [table addStructDeclare:[ORStructDeclare structDecalre:@encode(CGPoint) keys:@[@"x",@"y"]]];
-// 常量
+// Constant
 [MFScopeChain.topScope setValue:[MFValue valueWithLongLong:DISPATCH_QUEUE_PRIORITY_HIGH] withIndentifier:@"DISPATCH_QUEUE_PRIORITY_HIGH"];
 
-// 枚举值和常量相同
+// Enum is similar to Constant
 [MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventTouchDragInside] withIndentifier:@"UIControlEventTouchDragInside"];
 ```
 
-第二种:
+Way 2:
 
 ```objective-c
-// 以下代码在脚本中直接添加即可
-// 作用等同于上述的方式
+// Need write those code in Scripts
 typedef struct CGPoint { 
     CGFloat x;
     CGFloat y;
 } CGPointss;
-// 直接把UIControlEvents的定义复制过来,修改NS_OPTIONS即可
 typedef enum: NSUInteger{
     UIControlEventTouchDown = 1 <<  0,
     UIControlEventTouchDownRepeat = 1 <<  1,
     UIControlEventTouchDragInside = 1 <<  2,
     UIControlEventAllTouchEvents = 0x00000FFF,
 }UIControlEvents;
-// 上述代码会新增了四个类型, dispatch_once_t, CGPoint, CGPointss, UIControlEvents
-// 新增四个常量 UIControlEventTouchDown UIControlEventTouchDownRepeat UIControlEventTouchDragInside UIControlEventAllTouchEvents
-
-id GlobalValue = [NSObject new]; //在OCRunner中是可以作为全局变量的
+// it will add four types: CGPoint, CGPointss, UIControlEvents
+// add four constants: UIControlEventTouchDown UIControlEventTouchDownRepeat UIControlEventTouchDragInside UIControlEventAllTouchEvents
 ```
 
-#### 3.6.2 新增类型
-
-typedef，目前还有typedef嵌套问题。
+#### 3.6.2 Add new type
 
 ```objective-c
-// 脚本中使用
+// use it in Scripts
 typedef NSInteger dispatch_once_t;
 ```
 
 ```objective-c
-// 脚本中使用
-// 问题代码
+// problem code:
 typedef long long IntegerType;
 typedef IntegerType dispatch_once_t;
 ```
 
-#### 3.6.3 全局函数
+#### 3.6.3 Global Function
 
-1. 预编译函数
+1. Pre-compile function:
 
 ```objective-c
 [MFScopeChain.topScope setValue:[MFValue valueWithBlock:^void(dispatch_queue_t queue, void (^block)(void)) {
@@ -210,38 +202,40 @@ typedef IntegerType dispatch_once_t;
 	}] withIndentifier:@"dispatch_async"]
 ```
 
-2. 可通过ORSearchedFunction找的函数
+2. Non-inline function:
 
 ```objective-c
-// 直接在脚本中添加函数声明即可
+// add this in Scripts
 void NSLog(NSString *format, ...);
 ```
 
-3. 不可通过ORSearchedFunction找的函数
+3. Inline function
 
-   例如dispatch_get_main_queue
+   For example:  dispatch_get_main_queue
 
-   * 方式一
+   * Way 1
 
    ```objective-c
-   	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^id() {
-   		return dispatch_get_main_queue();
-	}]withIndentifier:@"dispatch_get_main_queue"];
+   // the code in Application files
+   [MFScopeChain.topScope setValue:[MFValue valueWithBlock:^id() {
+			return dispatch_get_main_queue();
+   }]withIndentifier:@"dispatch_get_main_queue"];
    ```
-
-   * 方式二
+```
    
-   ```objective-c
-	 //脚本中添加声明: DEBUG模式下会自动在控制台打印App中需要添加的代码
+   * Way 2
+   
+	```objective-c
+   // write in script. OCRunner will auto print it in console on the debug mode.
    dispatch_queue_main_t dispatch_get_main_queue(void);
-   //App中添加: 
+   // the code in Application files
    [ORSystemFunctionTable reg:@"dispatch_get_main_queue" pointer:&dispatch_get_main_queue];
-   ```
-   
-4. OC中的inline函数、自定义函数
+```
+
+4. (CGRectMake etc.) Inline function、Custom function
 
 ```objective-c
-//脚本中直接添加
+// write in script
 CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 {
   CGRect rect;
@@ -251,11 +245,11 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 }
 ```
 
-### 4. 关于#import
+### 4. About #import
 
-**#import** 是可以省略的。支持这个语法，仅仅是为了复制粘贴....
+**#import** can be omitted.
 
-### 5. 不支持的语法
+### 5. Not Support 
 * C数组声明：int a\[x\]等;
 * typeof
 
