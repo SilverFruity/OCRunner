@@ -250,7 +250,7 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 **#import** can be omitted.
 
 ### 5. Not Support 
-* C数组声明：int a\[x\]等;
+* int a\[x\]
 * typeof
 
 * @optional
@@ -266,5 +266,3 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 * IBOutlet
 * IBAction
 * IBInspectable
-
-强烈建议看看单元测试中支持的语法。
