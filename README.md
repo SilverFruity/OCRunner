@@ -221,16 +221,16 @@ void NSLog(NSString *format, ...);
 			return dispatch_get_main_queue();
    }]withIndentifier:@"dispatch_get_main_queue"];
    ```
-```
+
    
    * Way 2
    
-	```objective-c
+   ```objective-c
    // write in script. OCRunner will auto print it in console on the debug mode.
    dispatch_queue_main_t dispatch_get_main_queue(void);
    // the code in Application files
    [ORSystemFunctionTable reg:@"dispatch_get_main_queue" pointer:&dispatch_get_main_queue];
-```
+   ```
 
 4. (CGRectMake etc.) Inline function、Custom function
 
