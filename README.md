@@ -2,7 +2,7 @@
 
 [中文介绍](https://github.com/SilverFruity/OCRunner/blob/master/README-CN.md)
 
-Execute the Objective-C code Dynamically.
+Execute Objective-C code Dynamically.
 
 ## 1. Run Demo
 If you want to run the demo, you must use 'git clone'.
@@ -20,7 +20,7 @@ The unit tests of OCRunner.framework has move to OCRunnerDemo。
 
 ## 2. Feature
 
-* Execute the Objective-C code Dynamically。
+* Execute Objective-C code Dynamically。
 
 * Unit test coverage is 86%。
 
