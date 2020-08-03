@@ -71,8 +71,7 @@ static void replace_method(Class clazz, ORMethodImplementation *methodImp, MFSco
     }else{
         typeEncoding = methodImp.declare.returnType.typeEncode;
         needFreeTypeEncoding = YES;
-        typeEncoding = mf_str_append(typeEncoding, "@"); //self
-        typeEncoding = mf_str_append(typeEncoding, ":"); //_cmd
+        typeEncoding = mf_str_append(typeEncoding, "@:"); //add self and _cmd
         for (ORTypeVarPair *pair in methodImp.declare.parameterTypes) {
             const char *paramTypeEncoding = pair.typeEncode;
             const char *beforeTypeEncoding = typeEncoding;
