@@ -11,6 +11,8 @@
 #import "ffi.h"
 NS_ASSUME_NONNULL_BEGIN
 
+ ffi_type *_Nullable typeEncode2ffi_type(const char *typeencode);
+
 @interface ORTypeVarPair (libffi)
 - (ffi_type *)libffi_type;
 @end

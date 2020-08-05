@@ -10,73 +10,74 @@
 #import "ORTypeVarPair+TypeEncode.h"
 #import "ORHandleTypeEncode.h"
 #import "ORStructDeclare.h"
-
-@implementation ORTypeVarPair (libffi)
-- (ffi_type *)libffi_type{
-    if (self.var.ptCount > 0) {
-        return &ffi_type_pointer;
-    }
-    if ([self.var isKindOfClass:[ORFuncVariable class]]) {
-        return &ffi_type_pointer;;
-    }
-    switch (self.type.type) {
-        case TypeChar:
+ffi_type *typeEncode2ffi_type(const char *typeencode){
+    //TypeEncode不能为空
+    assert(typeencode != nil);
+    switch (*typeencode) {
+        case OCTypeChar:
             return &ffi_type_sint8;
-        case TypeShort:
+        case OCTypeShort:
             return &ffi_type_sint16;
-        case TypeInt:
+        case OCTypeInt:
             return &ffi_type_sint32;
-        case TypeLong:
+        case OCTypeLong:
             return &ffi_type_sint32;
-        case TypeLongLong:
+        case OCTypeLongLong:
             return &ffi_type_sint64;
-        case TypeUChar:
+            
+        case OCTypeUChar:
             return &ffi_type_uint8;
-        case TypeUShort:
+        case OCTypeUShort:
             return &ffi_type_uint16;
-        case TypeUInt:
+        case OCTypeUInt:
             return &ffi_type_uint32;
-        case TypeULong:
+        case OCTypeULong:
             return &ffi_type_uint32;
-        case TypeULongLong:
+        case OCTypeULongLong:
             return &ffi_type_uint64;
-        case TypeFloat:
+            
+        case OCTypeFloat:
             return &ffi_type_float;
-        case TypeDouble:
+        case OCTypeDouble:
             return &ffi_type_double;
-        case TypeBOOL:
+            
+        case OCTypeBOOL:
             return &ffi_type_uint8;
-        case TypeVoid:
+            
+        case OCTypeVoid:
             return &ffi_type_void;
-        case TypeObject:
-        case TypeId:
-        case TypeClass:
-        case TypeSEL:
-        case TypeBlock:
+            
+        case OCTypeObject:
+        case OCTypeClass:
+        case OCTypeSEL:
+        case OCTypePointer:
+        case OCTypeCString:
             return &ffi_type_pointer;
-        case TypeStruct:
+            
+        case OCTypeStruct:
         {
             ffi_type *type = malloc(sizeof(ffi_type));
             type->type = FFI_TYPE_STRUCT;
             type->alignment = 0;
-            NSString *structName = self.type.name;
+            NSString *structName = startStructNameDetect(typeencode);
             assert(structName != nil);
             ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
             type->elements = malloc(sizeof(void *) * (declare.keys.count + 1));
             type->size = sizeOfTypeEncode(declare.typeEncoding);
             for (int i = 0; i < declare.keys.count; i++) {
-                NSString *key = declare.keys[i];
-                const char *typeEncode = declare.keyTypeEncodes[key].UTF8String;
-                ORTypeVarPair *element = ORTypeVarPairForTypeEncode(typeEncode);
-                type->elements[i] = element.libffi_type;
+                type->elements[i] = typeEncode2ffi_type(declare.keyTypeEncodes[declare.keys[i]].UTF8String);
             }
             type->elements[declare.keys.count] = NULL;
             return type;
         }
-        default:
-            break;
     }
+    //不支持的类型
+    assert(false);
     return NULL;
+}
+@implementation ORTypeVarPair (libffi)
+- (ffi_type *)libffi_type{
+    return typeEncode2ffi_type(self.typeEncode);
 }
 @end
 

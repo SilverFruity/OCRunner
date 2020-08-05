@@ -292,10 +292,10 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
     ffi_type *types[argValues.count];
     void *argvs[argValues.count];
     for (int i = 0; i < argValues.count; i++) {
-        types[i] = ORTypeVarPairForTypeEncode(argValues[i].typeEncode).libffi_type;
+        types[i] = typeEncode2ffi_type(argValues[i].typeEncode);
         argvs[i] = argValues[i].pointer;
     }
-    ffi_type *retType = ORTypeVarPairForTypeEncode(returnValue.typeEncode).libffi_type;
+    ffi_type *retType = typeEncode2ffi_type(returnValue.typeEncode);
     ffi_status ffi_status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, (unsigned int)argValues.count, retType, types);
     #ifdef __arm64
         cif.aarch64_nfixedargs = (unsigned)needArgs;
