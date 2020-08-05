@@ -32,7 +32,7 @@ The unit tests of OCRunner.framework has move to OCRunnerDemo。
 
 * Support typedef.
 
-* Support multiple function and method call.
+* Support call multiple arguments function and method.
 
 * Support pointer operators :  '&' and '*'.
 
