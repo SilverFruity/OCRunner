@@ -31,6 +31,10 @@ OCRunner framework的单元测试已经转移到OCRunnerDemo下。
 
 * 支持枚举声明。
 
+* 支持可变参数函数和方法调用。
+
+* 支持指针操作: '&'、'*'。
+
 * 可选libffi或者内置自定义实现的arm64 libff(基于TypeEncode不再是ffi_type)。
 
   默认使用libffi.a实现
@@ -39,8 +43,6 @@ OCRunner framework的单元测试已经转移到OCRunnerDemo下。
   * 使用libffi.a:  导入libffi文件夹即可。
 
 * 除去预编译、C数组声明、Protocol，其他语法皆已支持。
-
-* 支持可变参数函数和方法调用。
 
 
 ## 3. 与Objective-C当前存在的语法差异

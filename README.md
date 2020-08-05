@@ -5,7 +5,7 @@
 Execute Objective-C code Dynamically.
 
 ## 1. Run Demo
-If you want to run the demo, you must use 'git clone'.
+You should use 'git clone --recursive'.
 ```shell
 git clone --recursive https://github.com/SilverFruity/OCRunner.git
 ```
@@ -33,6 +33,8 @@ The unit tests of OCRunner.framework has move to OCRunnerDemo。
 * Support typedef.
 
 * Support multiple function and method call.
+
+* Support pointer operators :  '&' and '*'.
 
 * Optinal libffi.a or build-in customized arm64 abi (modified from libffi)
 

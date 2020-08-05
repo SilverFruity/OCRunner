@@ -79,25 +79,20 @@ int functionCall1(){
 #endif 
 }
 
-//void testRegister1(ffi_cif *cif, void* ret, void **args, void *userdata){
-//    for (int i = 0; i < cif->nargs; i++) {
-//        void *pvalue = args[i];
-//        MFValue *value = [[MFValue alloc] initTypeEncode:cif->arg_typeEncodes[i] pointer:pvalue];
-//        if (i == 0) {
-//            assert(value.intValue == 100);
-//        }else{
-//            float fvalue = 0.1;
-//            assert(value.floatValue == fvalue);
-//        }
-//    }
-//    *(int *)ret = 100;
-//}
-//- (void)testRegisterFunctionCall{
-//    int (*func)(int a, float b) = register_function(&testRegister1, @[[ORTypeVarPair typePairWithTypeKind:TypeInt]
-//                                                                      ,[ORTypeVarPair typePairWithTypeKind:TypeFloat]],
-//                                                    [ORTypeVarPair typePairWithTypeKind:TypeInt]);
-//    int res = func(100, 0.1);
-//    XCTAssert(res == 100);
-//}
+void testRegister1(ffi_cif *cif, void* ret, void **args, void *userdata){
+    MFValue *ivalue = [MFValue valueWithTypeEncode:OCTypeStringInt pointer:args[0]];
+    MFValue *fvalue = [MFValue valueWithTypeEncode:OCTypeStringFloat pointer:args[1]];
+    assert(ivalue.intValue == 100);
+    float temp = 0.1;
+    assert(fvalue.floatValue == temp);
+    *(int *)ret = 100;
+}
+- (void)testRegisterFunctionCall{
+    int (*func)(int a, float b) = register_function(&testRegister1, @[[ORTypeVarPair typePairWithTypeKind:TypeInt]
+                                                                      ,[ORTypeVarPair typePairWithTypeKind:TypeFloat]],
+                                                    [ORTypeVarPair typePairWithTypeKind:TypeInt]);
+    int res = func(100, 0.1);
+    XCTAssert(res == 100);
+}
 
 @end
