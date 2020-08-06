@@ -329,9 +329,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             NSString *selector = [value substringWithRange:NSMakeRange(10, value.length - 11)];
             return [MFValue valueWithSEL:NSSelectorFromString(selector)];
         }
-//        case OCValueProtocol:{
-//            return [MFValue valueInstanceWithObject:NSProtocolFromString(self.value)];
-//        }
+        case OCValueProtocol:{
+            return [MFValue valueWithObject:NSProtocolFromString(self.value)];
+        }
         case OCValueDictionary:{
             NSMutableArray *exps = self.value;
             NSMutableDictionary *dict = [NSMutableDictionary dictionary];

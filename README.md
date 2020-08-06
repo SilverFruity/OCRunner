@@ -36,6 +36,8 @@ The unit tests of OCRunner.framework has move to OCRunnerDemo。
 
 * Support pointer operators :  '&' and '*'.
 
+* Support Protocol.
+
 * Optinal libffi.a or build-in customized arm64 abi (modified from libffi)
 
 	Default using libffi.a.
@@ -43,7 +45,7 @@ The unit tests of OCRunner.framework has move to OCRunnerDemo。
   * Do not use libffi.a:  you should remove the reference of 'libffi' folder from project.
   * Use libffi.a:  add the libffi folder to project.
 
-* Not support  pre-compile, C array declaration syntax,  Objective-C Protocl declaration.
+* Not support  pre-compile, C array declaration syntax.
 
 Recommend:  start eating from the unit test.
 
@@ -54,21 +56,11 @@ Recommend:  start eating from the unit test.
 
 Such as #define, #if etc.
 
-### 3.2 Not support Protcol
-Not support @protocol，but support those syntaxes:
-```objective-c
-// in fact, the object of Classxxx don't confirm protocol1 and protocol2
-// and [[Classxxx new] conformsToProtocol:@protocol(protocol1)] must be NO
-@interface Classxxx: NSObject <protocol1, protocol2> 
-@end
-NSArray <NSObject*>*array;
-```
-
-### 3.3 The problems of hot fix Class
+### 3.2 The problems of hot fix Class
 
 * Problem 1:if Class1 have five method (a,b,c,d,e) and several properties, if i only want to hot fix 'a' method, how can i do it ?  anwser: you only need to imp the 'a' method in scripts.  
 
-#### 3.3.1 Fix Existed Class
+#### 3.2.1 Fix Existed Class
 
 The shortest way:
 
@@ -99,7 +91,7 @@ If want to add properties (not support add ivars), you should:
 @end
 ```
 
-#### 3.3.2 Create new Class
+#### 3.2.2 Create new Class
 
 In this situation, ORTestReplaceClass inherit NSObjece. 
 
@@ -141,7 +133,7 @@ Notice: ivar must be used in new Class.
 
 
 
-#### 3.3.3 Support Category Syntax
+#### 3.2.3 Support Category Syntax
 
 ```objective-c
 @implementation Demo
@@ -153,7 +145,7 @@ Notice: ivar must be used in new Class.
 @end
 ```
 
-### 3.4 About Enum Syntax
+### 3.3 About Enum Syntax
 
 Not surpport **NS_ENUM**和**NS_OPTION**.
 
@@ -167,7 +159,7 @@ typedef enum: NSUInteger {
 }UIControlEvents;
 ```
 
-### 3.5 About Struct Syntax
+### 3.4 About Struct Syntax
 
 The referenced structure must be declared in advance.
 
@@ -189,9 +181,9 @@ struct CGSize {
 ```
 
 
-### 3.6 constant, type, struct, enum, global function.
+### 3.5 constant, type, struct, enum, global function.
 
-#### 3.6.1 constant、struct、enum
+#### 3.5.1 constant、struct、enum
 
 Way 1:
 
@@ -225,7 +217,7 @@ typedef enum: NSUInteger{
 // add four constants: UIControlEventTouchDown UIControlEventTouchDownRepeat UIControlEventTouchDragInside UIControlEventAllTouchEvents
 ```
 
-#### 3.6.2 Add new type
+#### 3.5.2 Add new type
 
 ```objective-c
 // use it in Scripts
@@ -238,7 +230,7 @@ typedef long long IntegerType;
 typedef IntegerType dispatch_once_t;
 ```
 
-#### 3.6.3 Global Function
+#### 3.5.3 Global Function
 
 1. Pre-compile function:
 

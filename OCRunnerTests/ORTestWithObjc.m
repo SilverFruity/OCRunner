@@ -369,5 +369,17 @@ typedef struct MyStruct2 {
     XCTAssert([object respondsToSelector:@selector(setAge:)]);
     XCTAssert([object respondsToSelector:@selector(sleep)]);
 }
+- (void)testAtProtcol{
+    MFScopeChain *scope = self.currentScope;
+    NSString * source =
+    @"id object = @protocol(NSObject);";
+    [OCParser parseSource:source];
+    for (id <OCExecute> exp in OCParser.ast.globalStatements) {
+        [exp execute:scope];
+    }
+    MFValue *d = [scope getValueWithIdentifier:@"object"];
+    Protocol *protocol = d.objectValue;
+    XCTAssert([NSStringFromProtocol(protocol) isEqualToString:@"NSObject"]);
+}
 
 @end

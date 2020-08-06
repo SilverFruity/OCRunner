@@ -35,6 +35,8 @@ OCRunner framework的单元测试已经转移到OCRunnerDemo下。
 
 * 支持指针操作: '&'、'*'。
 
+* 支持Protocol。
+
 * 可选libffi或者内置自定义实现的arm64 libff(基于TypeEncode不再是ffi_type)。
 
   默认使用libffi.a实现
@@ -42,7 +44,7 @@ OCRunner framework的单元测试已经转移到OCRunnerDemo下。
   * 不使用libffi.a:  项目中移除的libffi文件夹的引用即可。
   * 使用libffi.a:  导入libffi文件夹即可。
 
-* 除去预编译、C数组声明、Protocol，其他语法皆已支持。
+* 除去预编译、C数组声明其他语法皆已支持。
 
 
 ## 3. 与Objective-C当前存在的语法差异
@@ -51,21 +53,11 @@ OCRunner framework的单元测试已经转移到OCRunnerDemo下。
 
 不支持预编译指令 #define #if等
 
-### 3.2 Protcol协议
-当前不支持协议，不支持@protocol，但支持语法如下:
-```objective-c
-//这里实际创建的Classxxx并不遵循协议protocol1和protocol2
-// [[Classxxx new] conformsToProtocol:@protocol(protocol1)] 必定为NO
-@interface Classxxx: NSObject <protocol1, protocol2> 
-@end
-NSArray <NSObject*>*array;
-```
-
-### 3.3 类修复问题
+### 3.2 类修复问题
 
 * 问题1: 我有个类有abcde5个方法以及若干属性，如果我只想对其中的A方法进行重写，我要把其他几个都带上吗？ 答: 只需要重写A方法
 
-#### 3.3.1 已经存在的类
+#### 3.2.1 已经存在的类
 
 支持的最简方式：
 
@@ -98,7 +90,7 @@ NSArray <NSObject*>*array;
 
 
 
-#### 3.3.2 新建类
+#### 3.2.2 新建类
 
 这里新建的ORTestReplaceClass类默认会继承自NSObject.
 
@@ -138,7 +130,7 @@ NSArray <NSObject*>*array;
 @end
 ```
 
-#### 3.3.3 支持分类写法
+#### 3.2.3 支持分类写法
 
 ```objective-c
 @implementation Demo
@@ -150,7 +142,7 @@ NSArray <NSObject*>*array;
 @end
 ```
 
-### 3.4 关于枚举的一点问题
+### 3.3 关于枚举
 
 不支持**NS_ENUM**和**NS_OPTION**，转换为对应的C声明方式即可.
 
@@ -165,7 +157,7 @@ typedef enum: NSUInteger {
 }UIControlEvents;
 ```
 
-### 3.5 关于结构体一点问题
+### 3.4 关于结构体
 
 被引用结构，必须提前声明
 
@@ -187,9 +179,9 @@ struct CGSize {
 ```
 
 
-### 3.6 UIKit中的常量、类型、结构体、枚举、全局函数的应对方法
+### 3.5 UIKit中的常量、类型、结构体、枚举、全局函数的应对方法
 
-#### 3.6.1 常量、结构体、枚举
+#### 3.5.1 常量、结构体、枚举
 
 第一种:
 
@@ -227,7 +219,7 @@ typedef enum: NSUInteger{
 id GlobalValue = [NSObject new]; //在OCRunner中是可以作为全局变量的
 ```
 
-#### 3.6.2 新增类型
+#### 3.5.2 新增类型
 
 typedef，目前还有typedef嵌套问题。
 
@@ -243,7 +235,7 @@ typedef long long IntegerType;
 typedef IntegerType dispatch_once_t;
 ```
 
-#### 3.6.3 全局函数
+#### 3.5.3 全局函数
 
 1. 预编译函数
 
@@ -310,7 +302,6 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 * @try
 * @catch
 * @available
-* @protocol
 * @autoreleasepool
 * @dynamic
 * @synthesize
