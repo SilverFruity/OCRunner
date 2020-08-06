@@ -20,6 +20,10 @@
     mf_add_built_in();
     MFScopeChain *scope = [MFScopeChain topScope];
     [OCParser parseSource:string];
+    //注册Protcol
+    for (id <OCExecute> protcol in OCParser.ast.protcolCache.allValues){
+        [protcol execute:scope];
+    }
     //注册Class
     for (id <OCExecute> clazz in OCParser.ast.sortClasses){
         [clazz execute:scope];

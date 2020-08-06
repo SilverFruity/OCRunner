@@ -1191,6 +1191,13 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             // 针对仅实现 @implementation xxxx @end 的类, 默认继承NSObjectt
             superClass = [NSObject class];
         }
+        //添加协议
+        for (NSString *name in self.protocols) {
+            Protocol *protcol = NSProtocolFromString(name);
+            if (protcol) {
+                class_addProtocol(superClass, protcol);
+            }
+        }
         clazz = objc_allocateClassPair(superClass, self.className.UTF8String, 0);
         objc_registerClassPair(clazz);
     }
@@ -1297,3 +1304,29 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 }
 @end
 
+
+@implementation ORProtocol (Execute)
+- (nullable MFValue *)execute:(MFScopeChain *)scope{
+    Protocol *protocol = objc_allocateProtocol(self.protcolName.UTF8String);
+    for (NSString *name in self.protocols) {
+        Protocol *superP = NSProtocolFromString(name);
+        protocol_addProtocol(protocol, superP);
+    }
+    for (ORPropertyDeclare *prop in self.properties) {
+        protocol_addProperty(protocol, prop.var.var.varname.UTF8String, prop.propertyAttributes, 3, NO, YES);
+    }
+    for (ORMethodDeclare *declare in self.methods) {
+        const char *typeEncoding = declare.returnType.typeEncode;
+        typeEncoding = mf_str_append(typeEncoding, "@:"); //add self and _cmd
+        for (ORTypeVarPair *pair in declare.parameterTypes) {
+            const char *paramTypeEncoding = pair.typeEncode;
+            const char *beforeTypeEncoding = typeEncoding;
+            typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
+            free((void *)beforeTypeEncoding);
+        }
+        protocol_addMethodDescription(protocol, NSSelectorFromString(declare.selectorName), typeEncoding, NO, !declare.isClassMethod);
+    }
+    objc_registerProtocol(protocol);
+    return [MFValue voidValue];
+}
+@end

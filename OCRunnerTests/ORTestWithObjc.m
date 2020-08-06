@@ -327,5 +327,47 @@ typedef struct MyStruct2 {
     XCTAssert(strcmp(d.typeEncode, "i") == 0);
     XCTAssert(*(int *)d.pointer == 1);
 }
+- (void)testProtcolConfirm{
+    MFScopeChain *scope = self.currentScope;
+    NSString * source =
+    @"@protocol Protocol1 <NSObject>"
+    @"@property (nonatomic,copy)NSString *name;"
+    @"-(NSUInteger)getAge;"
+    @"-(void)setAge:(NSUInteger)age;"
+    @"@end"
+    @"@protocol Protocol2 <Protocol1>"
+    @"- (void)sleep;"
+    @"@end"
+    @"@interface TestObject : NSObject <Protocol2>"
+    @"@property (nonatomic,copy)NSString *name;"
+    @"@end"
+    @"@implementation TestObject"
+    @"- (NSUInteger)getAge{"
+    @"    return 100;"
+    @"}"
+    @"-(void)setAge:(NSUInteger)age{"
+    @"}"
+    @"- (void)sleep{"
+    @"}"
+    @"@end";
+    [OCParser parseSource:source];
+    for (ORProtocol *protocol in OCParser.ast.protcolCache.allValues) {
+        [protocol execute:scope];
+    }
+    for (ORClass *clas in OCParser.ast.classCache.allValues) {
+        [clas execute:scope];
+    }
+    Class testClass = NSClassFromString(@"TestObject");
+    XCTAssert([testClass conformsToProtocol:NSProtocolFromString(@"Protocol1")]);
+    XCTAssert([testClass conformsToProtocol:NSProtocolFromString(@"Protocol2")]);
+    id object = [[testClass alloc] init];
+    XCTAssert([object conformsToProtocol:NSProtocolFromString(@"Protocol1")]);
+    XCTAssert([object conformsToProtocol:NSProtocolFromString(@"Protocol2")]);
+    XCTAssert([object respondsToSelector:@selector(name)]);
+    XCTAssert([object respondsToSelector:@selector(setName:)]);
+    XCTAssert([object respondsToSelector:@selector(getAge)]);
+    XCTAssert([object respondsToSelector:@selector(setAge:)]);
+    XCTAssert([object respondsToSelector:@selector(sleep)]);
+}
 
 @end
