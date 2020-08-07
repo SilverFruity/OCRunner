@@ -9,8 +9,13 @@
 #import <XCTest/XCTest.h>
 #import <OCRunner/OCRunner.h>
 #import <OCRunner/ORCoreImp.h>
-#import <objc/message.h>
 #import <OCRunner/ORHandleTypeEncode.h>
+
+//#import <OCRunnerArm64/OCRunner.h>
+//#import <OCRunnerArm64/ORCoreImp.h>
+//#import <OCRunnerArm64/ORHandleTypeEncode.h>
+
+#import <objc/message.h>
 @interface ORTestWithObjc : XCTestCase
 @property (nonatomic, strong)MFScopeChain *currentScope;
 @property (nonatomic, strong)MFScopeChain *topScope;

@@ -46,18 +46,23 @@ OCRunner framework的单元测试已经转移到OCRunnerDemo下。
 
 * 除去预编译、C数组声明其他语法皆已支持。
 
+## 3. Cocoapods
+```ruby
+pod 'OCRunner'      #支持所有架构，包含libffi.a
+pod 'OCRunnerArm64' #仅支持 arm64和arm64e，没有libffi.a
+```
 
-## 3. 与Objective-C当前存在的语法差异
+## 4. 与Objective-C当前存在的语法差异
 
-### 3.1 预编译指令
+### 4.1 预编译指令
 
 不支持预编译指令 #define #if等
 
-### 3.2 类修复问题
+### 4.2 类修复问题
 
 * 问题1: 我有个类有abcde5个方法以及若干属性，如果我只想对其中的A方法进行重写，我要把其他几个都带上吗？ 答: 只需要重写A方法
 
-#### 3.2.1 已经存在的类
+#### 4.2.1 已经存在的类
 
 支持的最简方式：
 
@@ -90,7 +95,7 @@ OCRunner framework的单元测试已经转移到OCRunnerDemo下。
 
 
 
-#### 3.2.2 新建类
+#### 4.2.2 新建类
 
 这里新建的ORTestReplaceClass类默认会继承自NSObject.
 
@@ -130,7 +135,7 @@ OCRunner framework的单元测试已经转移到OCRunnerDemo下。
 @end
 ```
 
-#### 3.2.3 支持分类写法
+#### 4.2.3 支持分类写法
 
 ```objective-c
 @implementation Demo
@@ -142,7 +147,7 @@ OCRunner framework的单元测试已经转移到OCRunnerDemo下。
 @end
 ```
 
-### 3.3 关于枚举
+### 4.3 关于枚举
 
 不支持**NS_ENUM**和**NS_OPTION**，转换为对应的C声明方式即可.
 
@@ -179,9 +184,9 @@ struct CGSize {
 ```
 
 
-### 3.5 UIKit中的常量、类型、结构体、枚举、全局函数的应对方法
+### 4.5 UIKit中的常量、类型、结构体、枚举、全局函数的应对方法
 
-#### 3.5.1 常量、结构体、枚举
+#### 4.5.1 常量、结构体、枚举
 
 第一种:
 
@@ -219,7 +224,7 @@ typedef enum: NSUInteger{
 id GlobalValue = [NSObject new]; //在OCRunner中是可以作为全局变量的
 ```
 
-#### 3.5.2 新增类型
+#### 4.5.2 新增类型
 
 typedef，目前还有typedef嵌套问题。
 
@@ -235,7 +240,7 @@ typedef long long IntegerType;
 typedef IntegerType dispatch_once_t;
 ```
 
-#### 3.5.3 全局函数
+#### 4.5.3 全局函数
 
 1. 预编译函数
 
@@ -288,11 +293,11 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 }
 ```
 
-### 4. 关于#import
+### 5. 关于#import
 
 **#import** 是可以省略的。支持这个语法，仅仅是为了复制粘贴....
 
-### 5. 不支持的语法
+### 6. 不支持的语法
 * C数组声明：int a\[x\]等;
 * typeof
 
@@ -313,7 +318,7 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 
 
 
-### 6. Thanks for
+### 7. Thanks for
 
 * [Mango](https://github.com/YPLiang19/Mango)
 * [libffi](https://github.com/libffi/libffi)

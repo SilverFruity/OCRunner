@@ -49,18 +49,24 @@ The unit tests of OCRunner.framework has move to OCRunnerDemo。
 
 Recommend:  start eating from the unit test.
 
+## 3. Cocoapods
+```ruby
+pod 'OCRunner'      #for all architectures, inclue libffi.a
+pod 'OCRunnerAmr64' #only for arm64 or amr64e, no libffi.a
+```
 
-## 3. What's the difference of Objective-C
 
-### 3.1 Not support pre-compile
+## 4. What's the difference of Objective-C
+
+### 4.1 Not support pre-compile
 
 Such as #define, #if etc.
 
-### 3.2 The problems of hot fix Class
+### 4.2 The problems of hot fix Class
 
 * Problem 1:if Class1 have five method (a,b,c,d,e) and several properties, if i only want to hot fix 'a' method, how can i do it ?  anwser: you only need to imp the 'a' method in scripts.  
 
-#### 3.2.1 Fix Existed Class
+#### 4.2.1 Fix Existed Class
 
 The shortest way:
 
@@ -91,7 +97,7 @@ If want to add properties (not support add ivars), you should:
 @end
 ```
 
-#### 3.2.2 Create new Class
+#### 4.2.2 Create new Class
 
 In this situation, ORTestReplaceClass inherit NSObjece. 
 
@@ -133,7 +139,7 @@ Notice: ivar must be used in new Class.
 
 
 
-#### 3.2.3 Support Category Syntax
+#### 4.2.3 Support Category Syntax
 
 ```objective-c
 @implementation Demo
@@ -145,7 +151,7 @@ Notice: ivar must be used in new Class.
 @end
 ```
 
-### 3.3 About Enum Syntax
+### 4.3 About Enum Syntax
 
 Not surpport **NS_ENUM**和**NS_OPTION**.
 
@@ -159,7 +165,7 @@ typedef enum: NSUInteger {
 }UIControlEvents;
 ```
 
-### 3.4 About Struct Syntax
+### 4.4 About Struct Syntax
 
 The referenced structure must be declared in advance.
 
@@ -181,9 +187,9 @@ struct CGSize {
 ```
 
 
-### 3.5 constant, type, struct, enum, global function.
+### 4.5 constant, type, struct, enum, global function.
 
-#### 3.5.1 constant、struct、enum
+#### 4.5.1 constant、struct、enum
 
 Way 1:
 
@@ -217,7 +223,7 @@ typedef enum: NSUInteger{
 // add four constants: UIControlEventTouchDown UIControlEventTouchDownRepeat UIControlEventTouchDragInside UIControlEventAllTouchEvents
 ```
 
-#### 3.5.2 Add new type
+#### 4.5.2 Add new type
 
 ```objective-c
 // use it in Scripts
@@ -230,7 +236,7 @@ typedef long long IntegerType;
 typedef IntegerType dispatch_once_t;
 ```
 
-#### 3.5.3 Global Function
+#### 4.5.3 Global Function
 
 1. Pre-compile function:
 
@@ -285,11 +291,11 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 }
 ```
 
-### 4. About #import
+### 5. About #import
 
 **#import** can be omitted.
 
-### 5. Not Support 
+### 6. Not Support 
 * int a\[x\]
 * typeof
 * @optional
