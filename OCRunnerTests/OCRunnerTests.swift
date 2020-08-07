@@ -8,7 +8,7 @@
 
 import XCTest
 import OCRunner
-
+//import OCRunnerArm64
 class CRunnerTests: XCTestCase {
     var scope: MFScopeChain!
     let ocparser = Parser.shared()

@@ -110,7 +110,9 @@ static void add_build_in_var(){
 void mf_add_built_in(void){
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        NSBundle *frameworkBundle = [NSBundle bundleForClass:[MFValue class]];
+        NSBundle *currentBundle = [NSBundle bundleForClass:[MFValue class]];
+        NSString *bundlePath = [currentBundle pathForResource:@"Scripts" ofType:@"bundle"];
+        NSBundle *frameworkBundle = [NSBundle bundleWithPath:bundlePath];
         NSString *UIKitPath = [frameworkBundle pathForResource:@"UIKitRefrences" ofType:nil];
         NSString *UIKitData = [NSString stringWithContentsOfFile:UIKitPath encoding:NSUTF8StringEncoding error:nil];
         [ORInterpreter excuteGlobalDeclare:UIKitData];

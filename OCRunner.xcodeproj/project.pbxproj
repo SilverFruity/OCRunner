@@ -15,6 +15,7 @@
 		042AC264246E48ED00070814 /* ORTestClassProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC263246E48ED00070814 /* ORTestClassProperty.m */; };
 		042AC267246E49B200070814 /* ORCallOCPropertyBlockTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC266246E49B200070814 /* ORCallOCPropertyBlockTest.m */; };
 		042AC26A246E557200070814 /* ORCallSuperNoArgTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC269246E557200070814 /* ORCallSuperNoArgTest.m */; };
+		0449190B24DD487800DC9951 /* OCRunner.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 0449190A24DD487800DC9951 /* OCRunner.bundle */; };
 		047EF859246BF68D0071F9D3 /* OCRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */; };
 		048FAA3E247FA4820036F5EE /* built-in.h in Headers */ = {isa = PBXBuildFile; fileRef = 048FAA3B247FA47C0036F5EE /* built-in.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		048FAA85247FB6CA0036F5EE /* oc2mangoLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 048FAA79247FB6180036F5EE /* oc2mangoLib.framework */; };
@@ -23,31 +24,33 @@
 		04A531B8248F8AD600D83A48 /* SymbolSearch.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A531B6248F8AD600D83A48 /* SymbolSearch.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04A531BE248F972500D83A48 /* ORSearchedFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A531BC248F972500D83A48 /* ORSearchedFunction.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04A531BF248F972500D83A48 /* ORSearchedFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 04A531BD248F972500D83A48 /* ORSearchedFunction.m */; };
-		04C3B25624B70D9B00AA8574 /* ORCoreFunctionCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C3B25524B70D9B00AA8574 /* ORCoreFunctionCall.m */; };
-		04C3B25B24B729B900AA8574 /* GCDRefrences in Resources */ = {isa = PBXBuildFile; fileRef = 04C3B25A24B729B800AA8574 /* GCDRefrences */; };
-		04C3B28124BDB71200AA8574 /* ORCoreFunctionRegister.s in Sources */ = {isa = PBXBuildFile; fileRef = 04C3B27E24BDB71200AA8574 /* ORCoreFunctionRegister.s */; };
-		04C3B28224BDB71200AA8574 /* ORCoreFunctionRegister.m in Sources */ = {isa = PBXBuildFile; fileRef = 04C3B27F24BDB71200AA8574 /* ORCoreFunctionRegister.m */; };
-		04C3B28324BDB71200AA8574 /* ORCoreFunctionRegister.h in Headers */ = {isa = PBXBuildFile; fileRef = 04C3B28024BDB71200AA8574 /* ORCoreFunctionRegister.h */; };
-		04C3B28524BDB71800AA8574 /* ORCoreFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 04C3B28424BDB71800AA8574 /* ORCoreFunction.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		04AEF94C24DD4FF1008EB64F /* ORCoreImp.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF93524DD4FF1008EB64F /* ORCoreImp.h */; };
+		04AEF94D24DD4FF1008EB64F /* ORCoreImp.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AEF93624DD4FF1008EB64F /* ORCoreImp.m */; };
+		04AEF94E24DD4FF1008EB64F /* ORCoreFunctionCall.s in Sources */ = {isa = PBXBuildFile; fileRef = 04AEF93824DD4FF1008EB64F /* ORCoreFunctionCall.s */; };
+		04AEF94F24DD4FF1008EB64F /* ORCoreFunctionRegister.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AEF93924DD4FF1008EB64F /* ORCoreFunctionRegister.m */; };
+		04AEF95024DD4FF1008EB64F /* ORCoreFunctionCall.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF93A24DD4FF1008EB64F /* ORCoreFunctionCall.h */; };
+		04AEF95124DD4FF1008EB64F /* ORTypeVarPair+libffi.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF93B24DD4FF1008EB64F /* ORTypeVarPair+libffi.h */; };
+		04AEF95224DD4FF1008EB64F /* ORCoreFunctionCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AEF93C24DD4FF1008EB64F /* ORCoreFunctionCall.m */; };
+		04AEF95324DD4FF1008EB64F /* ORCoreFunctionRegister.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF93D24DD4FF1008EB64F /* ORCoreFunctionRegister.h */; };
+		04AEF95424DD4FF1008EB64F /* ORCoreFunctionRegister.s in Sources */ = {isa = PBXBuildFile; fileRef = 04AEF93E24DD4FF1008EB64F /* ORCoreFunctionRegister.s */; };
+		04AEF95524DD4FF1008EB64F /* ORTypeVarPair+libffi.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AEF93F24DD4FF1008EB64F /* ORTypeVarPair+libffi.m */; };
+		04AEF97C24DD5091008EB64F /* ORCoreFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF97B24DD5091008EB64F /* ORCoreFunction.h */; };
+		04AEF9A624DD5414008EB64F /* ffitarget_arm64.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF99B24DD5414008EB64F /* ffitarget_arm64.h */; };
+		04AEF9A724DD5414008EB64F /* ffitarget.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF99C24DD5414008EB64F /* ffitarget.h */; };
+		04AEF9A824DD5414008EB64F /* ffi_arm.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF99D24DD5414008EB64F /* ffi_arm.h */; };
+		04AEF9A924DD5414008EB64F /* ffi_i386.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF99E24DD5414008EB64F /* ffi_i386.h */; };
+		04AEF9AA24DD5414008EB64F /* ffitarget_x86_64.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF99F24DD5414008EB64F /* ffitarget_x86_64.h */; };
+		04AEF9AB24DD5414008EB64F /* ffi_x86_64.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF9A024DD5414008EB64F /* ffi_x86_64.h */; };
+		04AEF9AC24DD5414008EB64F /* ffitarget_arm.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF9A124DD5414008EB64F /* ffitarget_arm.h */; };
+		04AEF9AD24DD5414008EB64F /* ffitarget_i386.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF9A224DD5414008EB64F /* ffitarget_i386.h */; };
+		04AEF9AE24DD5414008EB64F /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04AEF9A324DD5414008EB64F /* libffi.a */; };
+		04AEF9AF24DD5414008EB64F /* ffi.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF9A424DD5414008EB64F /* ffi.h */; };
+		04AEF9B024DD5414008EB64F /* ffi_arm64.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF9A524DD5414008EB64F /* ffi_arm64.h */; };
 		04E6659D2473C76D008DB08E /* ORTestWithObjc.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E6659C2473C76D008DB08E /* ORTestWithObjc.m */; };
 		04E665A12474D284008DB08E /* built-in.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E665A02474D284008DB08E /* built-in.m */; };
 		04E665AB2474D723008DB08E /* ORGCDTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E665AA2474D723008DB08E /* ORGCDTests.m */; };
 		04E665B824763090008DB08E /* ORStructDeclare.h in Headers */ = {isa = PBXBuildFile; fileRef = 04E665B424763090008DB08E /* ORStructDeclare.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04E665B924763090008DB08E /* ORStructDeclare.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E665B724763090008DB08E /* ORStructDeclare.m */; };
-		04F0DA5824B47B49000B1996 /* ORCoreFunctionCall.s in Sources */ = {isa = PBXBuildFile; fileRef = 04F0DA5724B47B49000B1996 /* ORCoreFunctionCall.s */; };
-		04F0DA5A24B47D9B000B1996 /* ORCoreFunctionCall.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F0DA5924B47D9B000B1996 /* ORCoreFunctionCall.h */; };
-		EE0BC36624C7508700EA1702 /* ffitarget_arm64.h in Headers */ = {isa = PBXBuildFile; fileRef = EE0BC35B24C7508700EA1702 /* ffitarget_arm64.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		EE0BC36724C7508700EA1702 /* ffitarget.h in Headers */ = {isa = PBXBuildFile; fileRef = EE0BC35C24C7508700EA1702 /* ffitarget.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		EE0BC36824C7508700EA1702 /* ffi_arm.h in Headers */ = {isa = PBXBuildFile; fileRef = EE0BC35D24C7508700EA1702 /* ffi_arm.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		EE0BC36924C7508700EA1702 /* ffi_i386.h in Headers */ = {isa = PBXBuildFile; fileRef = EE0BC35E24C7508700EA1702 /* ffi_i386.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		EE0BC36A24C7508700EA1702 /* ffitarget_x86_64.h in Headers */ = {isa = PBXBuildFile; fileRef = EE0BC35F24C7508700EA1702 /* ffitarget_x86_64.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		EE0BC36B24C7508700EA1702 /* ffi_x86_64.h in Headers */ = {isa = PBXBuildFile; fileRef = EE0BC36024C7508700EA1702 /* ffi_x86_64.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		EE0BC36C24C7508700EA1702 /* ffitarget_arm.h in Headers */ = {isa = PBXBuildFile; fileRef = EE0BC36124C7508700EA1702 /* ffitarget_arm.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		EE0BC36D24C7508700EA1702 /* ffitarget_i386.h in Headers */ = {isa = PBXBuildFile; fileRef = EE0BC36224C7508700EA1702 /* ffitarget_i386.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		EE0BC36E24C7508700EA1702 /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EE0BC36324C7508700EA1702 /* libffi.a */; };
-		EE0BC36F24C7508700EA1702 /* ffi.h in Headers */ = {isa = PBXBuildFile; fileRef = EE0BC36424C7508700EA1702 /* ffi.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		EE0BC37024C7508700EA1702 /* ffi_arm64.h in Headers */ = {isa = PBXBuildFile; fileRef = EE0BC36524C7508700EA1702 /* ffi_arm64.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		EE0BC37124C7531C00EA1702 /* ORCoreImp.h in Headers */ = {isa = PBXBuildFile; fileRef = EEBF3332248E674300DDE2E9 /* ORCoreImp.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE197B852478DD190049CFDA /* ORInterpreter.h in Headers */ = {isa = PBXBuildFile; fileRef = EE197B832478DD190049CFDA /* ORInterpreter.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE197B862478DD190049CFDA /* ORInterpreter.m in Sources */ = {isa = PBXBuildFile; fileRef = EE197B842478DD190049CFDA /* ORInterpreter.m */; };
 		EE1C6FA324BF364A00430A51 /* ORHandleTypeEncode.h in Headers */ = {isa = PBXBuildFile; fileRef = EE1C6FA124BF364A00430A51 /* ORHandleTypeEncode.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -79,10 +82,6 @@
 		EE9899C62465923900ACF2C1 /* util.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899C02465923800ACF2C1 /* util.h */; };
 		EEA2AC82246855F100B08407 /* ORArgsStack.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA2AC80246855F100B08407 /* ORArgsStack.m */; };
 		EEA2AC83246855F100B08407 /* ORArgsStack.h in Headers */ = {isa = PBXBuildFile; fileRef = EEA2AC81246855F100B08407 /* ORArgsStack.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		EEBF3335248E674300DDE2E9 /* ORCoreImp.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3333248E674300DDE2E9 /* ORCoreImp.m */; };
-		EEBF336D248FBB9D00DDE2E9 /* UIKitRefrences in Resources */ = {isa = PBXBuildFile; fileRef = EEBF336C248FBB9D00DDE2E9 /* UIKitRefrences */; };
-		EECD504F24C7471B0052A842 /* ORTypeVarPair+libffi.h in Headers */ = {isa = PBXBuildFile; fileRef = EECD504D24C7471B0052A842 /* ORTypeVarPair+libffi.h */; };
-		EECD505024C7471B0052A842 /* ORTypeVarPair+libffi.m in Sources */ = {isa = PBXBuildFile; fileRef = EECD504E24C7471B0052A842 /* ORTypeVarPair+libffi.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -150,6 +149,7 @@
 		042AC266246E49B200070814 /* ORCallOCPropertyBlockTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORCallOCPropertyBlockTest.m; sourceTree = "<group>"; };
 		042AC268246E557200070814 /* ORCallSuperNoArgTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORCallSuperNoArgTest.h; sourceTree = "<group>"; };
 		042AC269246E557200070814 /* ORCallSuperNoArgTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORCallSuperNoArgTest.m; sourceTree = "<group>"; };
+		0449190A24DD487800DC9951 /* OCRunner.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = OCRunner.bundle; sourceTree = "<group>"; };
 		047EF857246BF68D0071F9D3 /* OCRunnerTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OCRunnerTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRunnerTests.swift; sourceTree = "<group>"; };
 		048FAA3B247FA47C0036F5EE /* built-in.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "built-in.h"; sourceTree = "<group>"; };
@@ -158,31 +158,34 @@
 		04A531B6248F8AD600D83A48 /* SymbolSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SymbolSearch.h; sourceTree = "<group>"; };
 		04A531BC248F972500D83A48 /* ORSearchedFunction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORSearchedFunction.h; sourceTree = "<group>"; };
 		04A531BD248F972500D83A48 /* ORSearchedFunction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORSearchedFunction.m; sourceTree = "<group>"; };
-		04C3B25524B70D9B00AA8574 /* ORCoreFunctionCall.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORCoreFunctionCall.m; sourceTree = "<group>"; };
-		04C3B25A24B729B800AA8574 /* GCDRefrences */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = GCDRefrences; sourceTree = "<group>"; };
-		04C3B27E24BDB71200AA8574 /* ORCoreFunctionRegister.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = ORCoreFunctionRegister.s; sourceTree = "<group>"; };
-		04C3B27F24BDB71200AA8574 /* ORCoreFunctionRegister.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORCoreFunctionRegister.m; sourceTree = "<group>"; };
-		04C3B28024BDB71200AA8574 /* ORCoreFunctionRegister.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORCoreFunctionRegister.h; sourceTree = "<group>"; };
-		04C3B28424BDB71800AA8574 /* ORCoreFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORCoreFunction.h; sourceTree = "<group>"; };
+		04AEF93524DD4FF1008EB64F /* ORCoreImp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORCoreImp.h; sourceTree = "<group>"; };
+		04AEF93624DD4FF1008EB64F /* ORCoreImp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORCoreImp.m; sourceTree = "<group>"; };
+		04AEF93824DD4FF1008EB64F /* ORCoreFunctionCall.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = ORCoreFunctionCall.s; sourceTree = "<group>"; };
+		04AEF93924DD4FF1008EB64F /* ORCoreFunctionRegister.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORCoreFunctionRegister.m; sourceTree = "<group>"; };
+		04AEF93A24DD4FF1008EB64F /* ORCoreFunctionCall.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORCoreFunctionCall.h; sourceTree = "<group>"; };
+		04AEF93B24DD4FF1008EB64F /* ORTypeVarPair+libffi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ORTypeVarPair+libffi.h"; sourceTree = "<group>"; };
+		04AEF93C24DD4FF1008EB64F /* ORCoreFunctionCall.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORCoreFunctionCall.m; sourceTree = "<group>"; };
+		04AEF93D24DD4FF1008EB64F /* ORCoreFunctionRegister.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORCoreFunctionRegister.h; sourceTree = "<group>"; };
+		04AEF93E24DD4FF1008EB64F /* ORCoreFunctionRegister.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = ORCoreFunctionRegister.s; sourceTree = "<group>"; };
+		04AEF93F24DD4FF1008EB64F /* ORTypeVarPair+libffi.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "ORTypeVarPair+libffi.m"; sourceTree = "<group>"; };
+		04AEF97B24DD5091008EB64F /* ORCoreFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORCoreFunction.h; sourceTree = "<group>"; };
+		04AEF99B24DD5414008EB64F /* ffitarget_arm64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffitarget_arm64.h; sourceTree = "<group>"; };
+		04AEF99C24DD5414008EB64F /* ffitarget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffitarget.h; sourceTree = "<group>"; };
+		04AEF99D24DD5414008EB64F /* ffi_arm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffi_arm.h; sourceTree = "<group>"; };
+		04AEF99E24DD5414008EB64F /* ffi_i386.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffi_i386.h; sourceTree = "<group>"; };
+		04AEF99F24DD5414008EB64F /* ffitarget_x86_64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffitarget_x86_64.h; sourceTree = "<group>"; };
+		04AEF9A024DD5414008EB64F /* ffi_x86_64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffi_x86_64.h; sourceTree = "<group>"; };
+		04AEF9A124DD5414008EB64F /* ffitarget_arm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffitarget_arm.h; sourceTree = "<group>"; };
+		04AEF9A224DD5414008EB64F /* ffitarget_i386.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffitarget_i386.h; sourceTree = "<group>"; };
+		04AEF9A324DD5414008EB64F /* libffi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libffi.a; sourceTree = "<group>"; };
+		04AEF9A424DD5414008EB64F /* ffi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffi.h; sourceTree = "<group>"; };
+		04AEF9A524DD5414008EB64F /* ffi_arm64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffi_arm64.h; sourceTree = "<group>"; };
 		04E6659C2473C76D008DB08E /* ORTestWithObjc.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORTestWithObjc.m; sourceTree = "<group>"; };
 		04E665A02474D284008DB08E /* built-in.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "built-in.m"; sourceTree = "<group>"; };
 		04E665A92474D723008DB08E /* ORGCDTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORGCDTests.h; sourceTree = "<group>"; };
 		04E665AA2474D723008DB08E /* ORGCDTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORGCDTests.m; sourceTree = "<group>"; };
 		04E665B424763090008DB08E /* ORStructDeclare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORStructDeclare.h; sourceTree = "<group>"; };
 		04E665B724763090008DB08E /* ORStructDeclare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORStructDeclare.m; sourceTree = "<group>"; };
-		04F0DA5724B47B49000B1996 /* ORCoreFunctionCall.s */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm; path = ORCoreFunctionCall.s; sourceTree = "<group>"; };
-		04F0DA5924B47D9B000B1996 /* ORCoreFunctionCall.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORCoreFunctionCall.h; sourceTree = "<group>"; };
-		EE0BC35B24C7508700EA1702 /* ffitarget_arm64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffitarget_arm64.h; sourceTree = "<group>"; };
-		EE0BC35C24C7508700EA1702 /* ffitarget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffitarget.h; sourceTree = "<group>"; };
-		EE0BC35D24C7508700EA1702 /* ffi_arm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffi_arm.h; sourceTree = "<group>"; };
-		EE0BC35E24C7508700EA1702 /* ffi_i386.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffi_i386.h; sourceTree = "<group>"; };
-		EE0BC35F24C7508700EA1702 /* ffitarget_x86_64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffitarget_x86_64.h; sourceTree = "<group>"; };
-		EE0BC36024C7508700EA1702 /* ffi_x86_64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffi_x86_64.h; sourceTree = "<group>"; };
-		EE0BC36124C7508700EA1702 /* ffitarget_arm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffitarget_arm.h; sourceTree = "<group>"; };
-		EE0BC36224C7508700EA1702 /* ffitarget_i386.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffitarget_i386.h; sourceTree = "<group>"; };
-		EE0BC36324C7508700EA1702 /* libffi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libffi.a; sourceTree = "<group>"; };
-		EE0BC36424C7508700EA1702 /* ffi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffi.h; sourceTree = "<group>"; };
-		EE0BC36524C7508700EA1702 /* ffi_arm64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffi_arm64.h; sourceTree = "<group>"; };
 		EE197B832478DD190049CFDA /* ORInterpreter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORInterpreter.h; sourceTree = "<group>"; };
 		EE197B842478DD190049CFDA /* ORInterpreter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORInterpreter.m; sourceTree = "<group>"; };
 		EE1C6FA124BF364A00430A51 /* ORHandleTypeEncode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORHandleTypeEncode.h; sourceTree = "<group>"; };
@@ -218,11 +221,6 @@
 		EE9899C02465923800ACF2C1 /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
 		EEA2AC80246855F100B08407 /* ORArgsStack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORArgsStack.m; sourceTree = "<group>"; };
 		EEA2AC81246855F100B08407 /* ORArgsStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORArgsStack.h; sourceTree = "<group>"; };
-		EEBF3332248E674300DDE2E9 /* ORCoreImp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORCoreImp.h; sourceTree = "<group>"; };
-		EEBF3333248E674300DDE2E9 /* ORCoreImp.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORCoreImp.m; sourceTree = "<group>"; };
-		EEBF336C248FBB9D00DDE2E9 /* UIKitRefrences */ = {isa = PBXFileReference; lastKnownFileType = text; path = UIKitRefrences; sourceTree = "<group>"; };
-		EECD504D24C7471B0052A842 /* ORTypeVarPair+libffi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ORTypeVarPair+libffi.h"; sourceTree = "<group>"; };
-		EECD504E24C7471B0052A842 /* ORTypeVarPair+libffi.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "ORTypeVarPair+libffi.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -231,7 +229,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				048FAA85247FB6CA0036F5EE /* oc2mangoLib.framework in Frameworks */,
-				EE0BC36E24C7508700EA1702 /* libffi.a in Frameworks */,
+				04AEF9AE24DD5414008EB64F /* libffi.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -256,47 +254,46 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		04C3B27D24BDB70300AA8574 /* ORCoreFunction */ = {
+		04AEF93424DD4FF1008EB64F /* ORCoreImp */ = {
 			isa = PBXGroup;
 			children = (
-				EE0BC35A24C7508700EA1702 /* libffi */,
-				EECD504D24C7471B0052A842 /* ORTypeVarPair+libffi.h */,
-				EECD504E24C7471B0052A842 /* ORTypeVarPair+libffi.m */,
-				04C3B28424BDB71800AA8574 /* ORCoreFunction.h */,
-				04F0DA5924B47D9B000B1996 /* ORCoreFunctionCall.h */,
-				04C3B25524B70D9B00AA8574 /* ORCoreFunctionCall.m */,
-				04F0DA5724B47B49000B1996 /* ORCoreFunctionCall.s */,
-				04C3B28024BDB71200AA8574 /* ORCoreFunctionRegister.h */,
-				04C3B27F24BDB71200AA8574 /* ORCoreFunctionRegister.m */,
-				04C3B27E24BDB71200AA8574 /* ORCoreFunctionRegister.s */,
+				04AEF93524DD4FF1008EB64F /* ORCoreImp.h */,
+				04AEF93624DD4FF1008EB64F /* ORCoreImp.m */,
+				04AEF93724DD4FF1008EB64F /* ORCoreFunction */,
 			);
-			name = ORCoreFunction;
+			path = ORCoreImp;
 			sourceTree = "<group>";
 		};
-		04F0DA5424B47B11000B1996 /* ORCoreImp */ = {
+		04AEF93724DD4FF1008EB64F /* ORCoreFunction */ = {
 			isa = PBXGroup;
 			children = (
-				EEBF3332248E674300DDE2E9 /* ORCoreImp.h */,
-				EEBF3333248E674300DDE2E9 /* ORCoreImp.m */,
-				04C3B27D24BDB70300AA8574 /* ORCoreFunction */,
+				04AEF97B24DD5091008EB64F /* ORCoreFunction.h */,
+				04AEF93A24DD4FF1008EB64F /* ORCoreFunctionCall.h */,
+				04AEF93C24DD4FF1008EB64F /* ORCoreFunctionCall.m */,
+				04AEF93824DD4FF1008EB64F /* ORCoreFunctionCall.s */,
+				04AEF93D24DD4FF1008EB64F /* ORCoreFunctionRegister.h */,
+				04AEF93924DD4FF1008EB64F /* ORCoreFunctionRegister.m */,
+				04AEF93E24DD4FF1008EB64F /* ORCoreFunctionRegister.s */,
+				04AEF93B24DD4FF1008EB64F /* ORTypeVarPair+libffi.h */,
+				04AEF93F24DD4FF1008EB64F /* ORTypeVarPair+libffi.m */,
 			);
-			name = ORCoreImp;
+			path = ORCoreFunction;
 			sourceTree = "<group>";
 		};
-		EE0BC35A24C7508700EA1702 /* libffi */ = {
+		04AEF99A24DD5414008EB64F /* libffi */ = {
 			isa = PBXGroup;
 			children = (
-				EE0BC35B24C7508700EA1702 /* ffitarget_arm64.h */,
-				EE0BC35C24C7508700EA1702 /* ffitarget.h */,
-				EE0BC35D24C7508700EA1702 /* ffi_arm.h */,
-				EE0BC35E24C7508700EA1702 /* ffi_i386.h */,
-				EE0BC35F24C7508700EA1702 /* ffitarget_x86_64.h */,
-				EE0BC36024C7508700EA1702 /* ffi_x86_64.h */,
-				EE0BC36124C7508700EA1702 /* ffitarget_arm.h */,
-				EE0BC36224C7508700EA1702 /* ffitarget_i386.h */,
-				EE0BC36324C7508700EA1702 /* libffi.a */,
-				EE0BC36424C7508700EA1702 /* ffi.h */,
-				EE0BC36524C7508700EA1702 /* ffi_arm64.h */,
+				04AEF99B24DD5414008EB64F /* ffitarget_arm64.h */,
+				04AEF99C24DD5414008EB64F /* ffitarget.h */,
+				04AEF99D24DD5414008EB64F /* ffi_arm.h */,
+				04AEF99E24DD5414008EB64F /* ffi_i386.h */,
+				04AEF99F24DD5414008EB64F /* ffitarget_x86_64.h */,
+				04AEF9A024DD5414008EB64F /* ffi_x86_64.h */,
+				04AEF9A124DD5414008EB64F /* ffitarget_arm.h */,
+				04AEF9A224DD5414008EB64F /* ffitarget_i386.h */,
+				04AEF9A324DD5414008EB64F /* libffi.a */,
+				04AEF9A424DD5414008EB64F /* ffi.h */,
+				04AEF9A524DD5414008EB64F /* ffi_arm64.h */,
 			);
 			path = libffi;
 			sourceTree = "<group>";
@@ -353,9 +350,10 @@
 				EE98998724658DB700ACF2C1 /* RunnerClasses.h */,
 				EE98998824658DB800ACF2C1 /* RunnerClasses+Execute.h */,
 				EE98998624658DB700ACF2C1 /* RunnerClasses+Execute.m */,
-				04F0DA5424B47B11000B1996 /* ORCoreImp */,
 				EE197B832478DD190049CFDA /* ORInterpreter.h */,
 				EE197B842478DD190049CFDA /* ORInterpreter.m */,
+				04AEF99A24DD5414008EB64F /* libffi */,
+				04AEF93424DD4FF1008EB64F /* ORCoreImp */,
 				048FAA3B247FA47C0036F5EE /* built-in.h */,
 				04E665A02474D284008DB08E /* built-in.m */,
 				0408F019247D027B004F703D /* ORTypeVarPair+TypeEncode.h */,
@@ -365,7 +363,7 @@
 				EE98998D24658F8900ACF2C1 /* RunEnv */,
 				EE9899BC2465923800ACF2C1 /* Util */,
 				EE98996E24658DA600ACF2C1 /* OCRunner.h */,
-				EEBF3369248FBB4100DDE2E9 /* Source */,
+				0449190A24DD487800DC9951 /* OCRunner.bundle */,
 				EE98996F24658DA600ACF2C1 /* Info.plist */,
 			);
 			path = OCRunner;
@@ -426,15 +424,6 @@
 			path = Util;
 			sourceTree = "<group>";
 		};
-		EEBF3369248FBB4100DDE2E9 /* Source */ = {
-			isa = PBXGroup;
-			children = (
-				04C3B25A24B729B800AA8574 /* GCDRefrences */,
-				EEBF336C248FBB9D00DDE2E9 /* UIKitRefrences */,
-			);
-			path = Source;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -443,42 +432,42 @@
 			buildActionMask = 2147483647;
 			files = (
 				EE9899A924658F8900ACF2C1 /* MFVarDeclareChain.h in Headers */,
-				EE0BC36724C7508700EA1702 /* ffitarget.h in Headers */,
-				04C3B28524BDB71800AA8574 /* ORCoreFunction.h in Headers */,
 				048FAA3E247FA4820036F5EE /* built-in.h in Headers */,
-				04F0DA5A24B47D9B000B1996 /* ORCoreFunctionCall.h in Headers */,
-				EE0BC36B24C7508700EA1702 /* ffi_x86_64.h in Headers */,
+				04AEF9A724DD5414008EB64F /* ffitarget.h in Headers */,
 				04A531B8248F8AD600D83A48 /* SymbolSearch.h in Headers */,
-				EE0BC37024C7508700EA1702 /* ffi_arm64.h in Headers */,
-				EE0BC36924C7508700EA1702 /* ffi_i386.h in Headers */,
 				EE680BA424C1D511005BA3F5 /* ORSystemFunctionTable.h in Headers */,
 				EE9899A624658F8900ACF2C1 /* MFWeakPropertyBox.h in Headers */,
 				EE9899A424658F8900ACF2C1 /* MFPropertyMapTable.h in Headers */,
 				EE9899B624658F8900ACF2C1 /* MFMethodMapTable.h in Headers */,
-				EE0BC36F24C7508700EA1702 /* ffi.h in Headers */,
+				04AEF95324DD4FF1008EB64F /* ORCoreFunctionRegister.h in Headers */,
 				EE38F997246C3C2A00E7C37B /* RunnerClasses.h in Headers */,
 				042AC259246D453700070814 /* MFBlock.h in Headers */,
-				04C3B28324BDB71200AA8574 /* ORCoreFunctionRegister.h in Headers */,
 				EE9899AD24658F8900ACF2C1 /* MFScopeChain.h in Headers */,
-				EE0BC36824C7508700EA1702 /* ffi_arm.h in Headers */,
-				EE0BC36C24C7508700EA1702 /* ffitarget_arm.h in Headers */,
 				EE197B852478DD190049CFDA /* ORInterpreter.h in Headers */,
-				EECD504F24C7471B0052A842 /* ORTypeVarPair+libffi.h in Headers */,
+				04AEF9A624DD5414008EB64F /* ffitarget_arm64.h in Headers */,
 				EE1C6FA324BF364A00430A51 /* ORHandleTypeEncode.h in Headers */,
-				EE0BC36D24C7508700EA1702 /* ffitarget_i386.h in Headers */,
+				04AEF9A924DD5414008EB64F /* ffi_i386.h in Headers */,
 				EE9899C62465923900ACF2C1 /* util.h in Headers */,
 				EE98997C24658DA600ACF2C1 /* OCRunner.h in Headers */,
+				04AEF9AA24DD5414008EB64F /* ffitarget_x86_64.h in Headers */,
+				04AEF9B024DD5414008EB64F /* ffi_arm64.h in Headers */,
+				04AEF95024DD4FF1008EB64F /* ORCoreFunctionCall.h in Headers */,
+				04AEF9AC24DD5414008EB64F /* ffitarget_arm.h in Headers */,
 				EEA2AC83246855F100B08407 /* ORArgsStack.h in Headers */,
-				EE0BC36A24C7508700EA1702 /* ffitarget_x86_64.h in Headers */,
+				04AEF9AD24DD5414008EB64F /* ffitarget_i386.h in Headers */,
 				EE9899AC24658F8900ACF2C1 /* MFValue.h in Headers */,
-				EE0BC37124C7531C00EA1702 /* ORCoreImp.h in Headers */,
+				04AEF9AF24DD5414008EB64F /* ffi.h in Headers */,
+				04AEF9AB24DD5414008EB64F /* ffi_x86_64.h in Headers */,
+				04AEF97C24DD5091008EB64F /* ORCoreFunction.h in Headers */,
+				04AEF94C24DD4FF1008EB64F /* ORCoreImp.h in Headers */,
 				0408F01B247D027B004F703D /* ORTypeVarPair+TypeEncode.h in Headers */,
 				EE98998C24658DB800ACF2C1 /* RunnerClasses+Execute.h in Headers */,
 				04A531BE248F972500D83A48 /* ORSearchedFunction.h in Headers */,
+				04AEF95124DD4FF1008EB64F /* ORTypeVarPair+libffi.h in Headers */,
 				EE9899A724658F8900ACF2C1 /* runenv.h in Headers */,
+				04AEF9A824DD5414008EB64F /* ffi_arm.h in Headers */,
 				04E665B824763090008DB08E /* ORStructDeclare.h in Headers */,
 				EE9899A524658F8900ACF2C1 /* MFStaticVarTable.h in Headers */,
-				EE0BC36624C7508700EA1702 /* ffitarget_arm64.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -596,8 +585,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EEBF336D248FBB9D00DDE2E9 /* UIKitRefrences in Resources */,
-				04C3B25B24B729B900AA8574 /* GCDRefrences in Resources */,
+				0449190B24DD487800DC9951 /* OCRunner.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -615,29 +603,29 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				04C3B28224BDB71200AA8574 /* ORCoreFunctionRegister.m in Sources */,
 				EE9899B024658F8900ACF2C1 /* MFStaticVarTable.m in Sources */,
 				04A531B7248F8AD600D83A48 /* SymbolSearch.c in Sources */,
 				EE9899B724658F8900ACF2C1 /* MFScopeChain.m in Sources */,
-				EEBF3335248E674300DDE2E9 /* ORCoreImp.m in Sources */,
-				04C3B25624B70D9B00AA8574 /* ORCoreFunctionCall.m in Sources */,
 				EE98998A24658DB800ACF2C1 /* RunnerClasses+Execute.m in Sources */,
 				04E665B924763090008DB08E /* ORStructDeclare.m in Sources */,
 				EE9899AF24658F8900ACF2C1 /* MFWeakPropertyBox.m in Sources */,
+				04AEF95424DD4FF1008EB64F /* ORCoreFunctionRegister.s in Sources */,
 				04E665A12474D284008DB08E /* built-in.m in Sources */,
 				042AC258246D453700070814 /* MFBlock.m in Sources */,
-				04F0DA5824B47B49000B1996 /* ORCoreFunctionCall.s in Sources */,
 				EE9899C42465923900ACF2C1 /* util.m in Sources */,
 				EE9899B824658F8900ACF2C1 /* MFValue.m in Sources */,
 				EE680BA524C1D511005BA3F5 /* ORSystemFunctionTable.m in Sources */,
 				EE9899B124658F8900ACF2C1 /* MFPropertyMapTable.m in Sources */,
+				04AEF94F24DD4FF1008EB64F /* ORCoreFunctionRegister.m in Sources */,
 				04A531BF248F972500D83A48 /* ORSearchedFunction.m in Sources */,
+				04AEF95224DD4FF1008EB64F /* ORCoreFunctionCall.m in Sources */,
 				EE9899AE24658F8900ACF2C1 /* MFMethodMapTable.m in Sources */,
-				EECD505024C7471B0052A842 /* ORTypeVarPair+libffi.m in Sources */,
+				04AEF94D24DD4FF1008EB64F /* ORCoreImp.m in Sources */,
 				EEA2AC82246855F100B08407 /* ORArgsStack.m in Sources */,
 				0408F01C247D027B004F703D /* ORTypeVarPair+TypeEncode.m in Sources */,
 				EE9899B324658F8900ACF2C1 /* MFVarDeclareChain.m in Sources */,
-				04C3B28124BDB71200AA8574 /* ORCoreFunctionRegister.s in Sources */,
+				04AEF95524DD4FF1008EB64F /* ORTypeVarPair+libffi.m in Sources */,
+				04AEF94E24DD4FF1008EB64F /* ORCoreFunctionCall.s in Sources */,
 				EE197B862478DD190049CFDA /* ORInterpreter.m in Sources */,
 				EE1C6FA424BF364A00430A51 /* ORHandleTypeEncode.m in Sources */,
 			);
@@ -800,6 +788,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GCC_INPUT_FILETYPE = automatic;
 				INFOPLIST_FILE = OCRunner/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
@@ -811,6 +800,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/OCRunner/libffi",
+					"$(PROJECT_DIR)/OCRunner/ORCoreImp/ORCoreFunction/libffi",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = silverfruity.OCRunner;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -829,6 +819,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GCC_INPUT_FILETYPE = automatic;
 				INFOPLIST_FILE = OCRunner/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
@@ -840,6 +831,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/OCRunner/libffi",
+					"$(PROJECT_DIR)/OCRunner/ORCoreImp/ORCoreFunction/libffi",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = silverfruity.OCRunner;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
