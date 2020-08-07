@@ -15,7 +15,6 @@
  *  x4 uint  retFlag
  */
 #if !__has_include("ffi.h")
-#ifdef __arm64__
 .text
 .global _ORCoreFunctionCall
 _ORCoreFunctionCall:
@@ -117,5 +116,4 @@ _ORCoreFunctionCall:
 31:	ret				/* reserved */
 	nop
 ret
-#endif
 #endif

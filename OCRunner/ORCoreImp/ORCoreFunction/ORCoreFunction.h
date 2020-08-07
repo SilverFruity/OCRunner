@@ -10,10 +10,12 @@
 #define ORCoreFunction_h
 
 #if __has_include("ffi.h")
+
 #define __libffi__
 #import "ffi.h"
+
 #else
-#ifdef __arm64__
+
 # if __has_feature(ptrauth_calls)
 #  define HAVE_PTRAUTH 1
 # endif
@@ -48,7 +50,6 @@ void *core_register_function(void (*fun)(ffi_cif *,void *,void **, void*),
                              char **argTypeEncodes,
                              char *retTypeEncode);
 
-#endif /* __arm64__ */
 #endif /* __has_include  */
 
 

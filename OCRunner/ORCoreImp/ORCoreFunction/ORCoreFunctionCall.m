@@ -14,7 +14,6 @@
 #import "ptrauth.h"
 #import "ORCoreFunction.h"
 #ifndef __libffi__
-#ifdef __arm64__
 NSUInteger floatPointFlagsWithTypeEncode(const char * typeEncode){
     NSUInteger fieldCount = totalFieldCountWithTypeEncode(typeEncode);;
     if (fieldCount <= 4) {
@@ -279,7 +278,6 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
     void *ret = returnValue.pointer;
     core_invoke_function_pointer(&cif, funptr, argvs, ret);
 }
-#endif /* __arm64__ */
 #else
 #import "ORTypeVarPair+libffi.h"
 #import "ORTypeVarPair+TypeEncode.h"
@@ -297,7 +295,7 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
     }
     ffi_type *retType = typeEncode2ffi_type(returnValue.typeEncode);
     ffi_status ffi_status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, (unsigned int)argValues.count, retType, types);
-    #ifdef __arm64
+    #ifdef __arm64__
         cif.aarch64_nfixedargs = (unsigned)needArgs;
     #endif
     void *ret = returnValue.pointer;

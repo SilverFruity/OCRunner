@@ -66,7 +66,7 @@ int functionCall1(){
     CGRect rect1 = *(CGRect *)result1.pointer;
     XCTAssert(CGRectEqualToRect(CGRectMake(1, 2, 3, 4), rect1));
     
-#ifdef __arm64__
+
     UIView *view = [UIView new];
     CGRect rect = CGRectMake(1, 2, 3, 4);
     MFValue *result = [MFValue voidValue];
@@ -76,7 +76,6 @@ int functionCall1(){
                                        [[MFValue alloc] initTypeEncode:@encode(CGRect) pointer:&rect]], result);
     
     XCTAssert(CGRectEqualToRect(view.frame, rect));
-#endif 
 }
 
 void testRegister1(ffi_cif *cif, void* ret, void **args, void *userdata){

@@ -15,7 +15,6 @@
 #include <pthread.h>
 
 #ifndef __libffi__
-#ifdef __arm64__
 
 #ifdef HAVE_PTRAUTH
 #include <ptrauth.h>
@@ -452,7 +451,6 @@ void *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
     [argTypes addObjectsFromArray:args];
     return register_function(fun, argTypes, ret);
 }
-#endif /* __arm64__ */
 
 #else
 #import "ORTypeVarPair+libffi.h"
