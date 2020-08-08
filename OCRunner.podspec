@@ -13,6 +13,5 @@ s.source       = { :git => "https://github.com/SilverFruity/OCRunner.git", :tag 
 s.source_files  = "OCRunner/**/*.{h,m,c}"
 s.vendored_libraries  = 'OCRunner/libffi/libffi.a'
 s.dependency "oc2mangoLib", "~> 1.0"
-s.resources = "OCRunner/Scripts.bundle"
 end
 
