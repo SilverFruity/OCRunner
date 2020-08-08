@@ -51,8 +51,8 @@ Recommend:  start eating from the unit test.
 
 ## 3. Cocoapods
 ```ruby
-pod 'OCRunner'      #for all architectures, inclue libffi.a
-pod 'OCRunnerAmr64' #only for arm64 or amr64e, no libffi.a
+pod 'OCRunner'      #for all architectures, include libffi.a
+pod 'OCRunnerArm64' #only for arm64 or amr64e, no libffi.a
 ```
 
 
