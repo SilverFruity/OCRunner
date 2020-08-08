@@ -9,6 +9,18 @@
 #import "ViewController.h"
 #import <Masonry/Masonry.h>
 
+NSBundle *currentBundle = [NSBundle mainBundle];
+NSString *bundlePath = [currentBundle pathForResource:@"Scripts" ofType:@"bundle"];
+NSBundle *frameworkBundle = [NSBundle bundleWithPath:bundlePath];
+NSString *UIKitPath = [frameworkBundle pathForResource:@"UIKitRefrences" ofType:nil];
+NSString *UIKitData = [NSString stringWithContentsOfFile:UIKitPath encoding:NSUTF8StringEncoding error:nil];
+[ORInterpreter excute:UIKitData];
+
+NSString *GCDPath = [frameworkBundle pathForResource:@"GCDRefrences" ofType:nil];
+NSString *CCDData = [NSString stringWithContentsOfFile:GCDPath encoding:NSUTF8StringEncoding error:nil];
+[ORInterpreter excute:CCDData];
+
+
 @interface ShareInstance: NSObject
 @property (nonatomic,copy)NSDictionary *cache;
 @end

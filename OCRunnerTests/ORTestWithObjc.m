@@ -8,7 +8,6 @@
 
 #import <XCTest/XCTest.h>
 #import <OCRunner/OCRunner.h>
-#import <OCRunner/ORCoreImp.h>
 #import <OCRunner/ORHandleTypeEncode.h>
 
 //#import <OCRunnerArm64/OCRunner.h>
@@ -24,13 +23,26 @@
 @implementation ORTestWithObjc
 - (void)setUp {
     mf_add_built_in();
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSBundle *currentBundle = [NSBundle bundleForClass:[ORTestWithObjc class]];
+        NSString *bundlePath = [currentBundle pathForResource:@"Scripts" ofType:@"bundle"];
+        NSBundle *frameworkBundle = [NSBundle bundleWithPath:bundlePath];
+        NSString *UIKitPath = [frameworkBundle pathForResource:@"UIKitRefrences" ofType:nil];
+        NSString *UIKitData = [NSString stringWithContentsOfFile:UIKitPath encoding:NSUTF8StringEncoding error:nil];
+        [ORInterpreter excute:UIKitData];
+        
+        NSString *GCDPath = [frameworkBundle pathForResource:@"GCDRefrences" ofType:nil];
+        NSString *CCDData = [NSString stringWithContentsOfFile:GCDPath encoding:NSUTF8StringEncoding error:nil];
+        [ORInterpreter excute:CCDData];
+    });    
     self.topScope = [MFScopeChain topScope];
     XCTAssert(self.topScope.vars.count != 0);
     self.currentScope = [MFScopeChain scopeChainWithNext:self.topScope];
 }
 
 - (void)tearDown {
-    [OCParser clear];
+    
 }
 
 - (void)testExample {
@@ -163,8 +175,8 @@ Element2Struct *Element2StructMake(){
     "rect.origin.y = 10;"
     "rect.size.width = 100;"
     "rect.size.height = 100;";
-    [OCParser parseSource:source];
-    for (id <OCExecute> exp in OCParser.ast.globalStatements) {
+    AST *ast = [OCParser parseSource:source];
+    for (id <OCExecute> exp in ast.globalStatements) {
         [exp execute:scope];
     }
     MFValue *rectValue = [scope getValueWithIdentifier:@"rect"];
@@ -191,8 +203,8 @@ Element2Struct *Element2StructMake(){
     "CGSize size = frame.size;"
     "size.width = 100;"
     "size.height = 100;";
-    [OCParser parseSource:source];
-    for (id <OCExecute> exp in OCParser.ast.globalStatements) {
+    AST *ast = [OCParser parseSource:source];
+    for (id <OCExecute> exp in ast.globalStatements) {
         [exp execute:scope];
     }
     MFValue *rectValue = [scope getValueWithIdentifier:@"frame"];
@@ -208,8 +220,8 @@ Element2Struct *Element2StructMake(){
     "view.frame = CGRectMake(1,2,3,4);"
     "CGRect frame = view.frame;"
     "CGFloat a = frame.size.height;";
-    [OCParser parseSource:source];
-    for (id <OCExecute> exp in OCParser.ast.globalStatements) {
+    AST *ast = [OCParser parseSource:source];
+    for (id <OCExecute> exp in ast.globalStatements) {
         [exp execute:scope];
     }
     MFValue *frameValue = [scope getValueWithIdentifier:@"frame"];
@@ -296,14 +308,28 @@ typedef struct MyStruct2 {
         }
     }];
 }
+- (void)testParsePerformance{
+    [self measureBlock:^{
+        NSBundle *currentBundle = [NSBundle bundleForClass:[ORTestWithObjc class]];
+        NSString *bundlePath = [currentBundle pathForResource:@"Scripts" ofType:@"bundle"];
+        NSBundle *frameworkBundle = [NSBundle bundleWithPath:bundlePath];
+        NSString *UIKitPath = [frameworkBundle pathForResource:@"UIKitRefrences" ofType:nil];
+        NSString *UIKitData = [NSString stringWithContentsOfFile:UIKitPath encoding:NSUTF8StringEncoding error:nil];
+        [ORInterpreter excute:UIKitData];
+        
+        NSString *GCDPath = [frameworkBundle pathForResource:@"GCDRefrences" ofType:nil];
+        NSString *CCDData = [NSString stringWithContentsOfFile:GCDPath encoding:NSUTF8StringEncoding error:nil];
+        [ORInterpreter excute:CCDData];
+    }];
+}
 - (void)testGetPointerAddress{
     MFScopeChain *scope = self.currentScope;
     NSString * source =
     @"int a = 1;"
     @"int *b = &a;"
     @"int **c = &b;";
-    [OCParser parseSource:source];
-    for (id <OCExecute> exp in OCParser.ast.globalStatements) {
+    AST *ast = [OCParser parseSource:source];
+    for (id <OCExecute> exp in ast.globalStatements) {
         [exp execute:scope];
     }
     MFValue *a = [scope getValueWithIdentifier:@"a"];
@@ -324,8 +350,8 @@ typedef struct MyStruct2 {
     @"int *b = &a;"
     @"int **c = &b;"
     @"int d = **c;";
-    [OCParser parseSource:source];
-    for (id <OCExecute> exp in OCParser.ast.globalStatements) {
+    AST *ast = [OCParser parseSource:source];
+    for (id <OCExecute> exp in ast.globalStatements) {
         [exp execute:scope];
     }
     MFValue *d = [scope getValueWithIdentifier:@"d"];
@@ -355,11 +381,11 @@ typedef struct MyStruct2 {
     @"- (void)sleep{"
     @"}"
     @"@end";
-    [OCParser parseSource:source];
-    for (ORProtocol *protocol in OCParser.ast.protcolCache.allValues) {
+    AST *ast = [OCParser parseSource:source];
+    for (ORProtocol *protocol in ast.protcolCache.allValues) {
         [protocol execute:scope];
     }
-    for (ORClass *clas in OCParser.ast.classCache.allValues) {
+    for (ORClass *clas in ast.classCache.allValues) {
         [clas execute:scope];
     }
     Class testClass = NSClassFromString(@"TestObject");
@@ -378,8 +404,8 @@ typedef struct MyStruct2 {
     MFScopeChain *scope = self.currentScope;
     NSString * source =
     @"id object = @protocol(NSObject);";
-    [OCParser parseSource:source];
-    for (id <OCExecute> exp in OCParser.ast.globalStatements) {
+    AST *ast = [OCParser parseSource:source];
+    for (id <OCExecute> exp in ast.globalStatements) {
         [exp execute:scope];
     }
     MFValue *d = [scope getValueWithIdentifier:@"object"];

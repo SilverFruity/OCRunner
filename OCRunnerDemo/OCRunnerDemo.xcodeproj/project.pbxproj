@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		04ABA71924C1508C00C32E42 /* ORCoreFunctionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 04ABA71824C1508C00C32E42 /* ORCoreFunctionTests.m */; };
 		994370B6E6826AB9C293F686 /* Pods_OCRunnerDemo_OCRunnerDemoUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2566C827C6925E5FB35FC01D /* Pods_OCRunnerDemo_OCRunnerDemoUITests.framework */; };
 		D71B1056F7894677E4150783 /* Pods_OCRunnerDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A0001072323984F1566D9A7 /* Pods_OCRunnerDemo.framework */; };
 		E1C0C287355D76EFDEC55F55 /* Pods_OCRunnerDemoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A85091F96842C769C287311 /* Pods_OCRunnerDemoTests.framework */; };
@@ -28,6 +27,8 @@
 		EEBF3350248E84AA00DDE2E9 /* ORGCDTests.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3348248E84A900DDE2E9 /* ORGCDTests.m */; };
 		EEBF3351248E84AA00DDE2E9 /* ORTestReplaceClass.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF334A248E84A900DDE2E9 /* ORTestReplaceClass.m */; };
 		EEBF3353248E84D100DDE2E9 /* ORTestWithObjc.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3352248E84D100DDE2E9 /* ORTestWithObjc.m */; };
+		EEF1527D24DE867400574FA7 /* ORCoreFunctionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = EEF1527C24DE867400574FA7 /* ORCoreFunctionTests.m */; };
+		EEF1527F24DE867D00574FA7 /* Scripts.bundle in Resources */ = {isa = PBXBuildFile; fileRef = EEF1527E24DE867D00574FA7 /* Scripts.bundle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,7 +49,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		04ABA71824C1508C00C32E42 /* ORCoreFunctionTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORCoreFunctionTests.m; sourceTree = "<group>"; };
 		0EA667C064BFFB79847D34F5 /* Pods-OCRunnerDemoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRunnerDemoTests.release.xcconfig"; path = "Target Support Files/Pods-OCRunnerDemoTests/Pods-OCRunnerDemoTests.release.xcconfig"; sourceTree = "<group>"; };
 		1C9D422B1CDEE6B7B4FBECF4 /* Pods-OCRunnerDemo-OCRunnerDemoUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRunnerDemo-OCRunnerDemoUITests.release.xcconfig"; path = "Target Support Files/Pods-OCRunnerDemo-OCRunnerDemoUITests/Pods-OCRunnerDemo-OCRunnerDemoUITests.release.xcconfig"; sourceTree = "<group>"; };
 		2566C827C6925E5FB35FC01D /* Pods_OCRunnerDemo_OCRunnerDemoUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OCRunnerDemo_OCRunnerDemoUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -92,6 +92,8 @@
 		EEBF334A248E84A900DDE2E9 /* ORTestReplaceClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORTestReplaceClass.m; sourceTree = "<group>"; };
 		EEBF334B248E84A900DDE2E9 /* ORTestClassProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORTestClassProperty.h; sourceTree = "<group>"; };
 		EEBF3352248E84D100DDE2E9 /* ORTestWithObjc.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ORTestWithObjc.m; path = ../../OCRunnerTests/ORTestWithObjc.m; sourceTree = "<group>"; };
+		EEF1527C24DE867400574FA7 /* ORCoreFunctionTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ORCoreFunctionTests.m; path = ../../OCRunnerTests/ORCoreFunctionTests.m; sourceTree = "<group>"; };
+		EEF1527E24DE867D00574FA7 /* Scripts.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = Scripts.bundle; path = ../../OCRunnerTests/Scripts.bundle; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -166,6 +168,7 @@
 				EE480E9524794CDA003E4970 /* SceneDelegate.m */,
 				EE480E9724794CDA003E4970 /* ViewController.h */,
 				EE480E9824794CDA003E4970 /* ViewController.m */,
+				EEF1527E24DE867D00574FA7 /* Scripts.bundle */,
 				EE480EDA24794D4E003E4970 /* ViewController1 */,
 				EE480E9A24794CDA003E4970 /* Main.storyboard */,
 				EE480E9D24794CDB003E4970 /* Assets.xcassets */,
@@ -182,7 +185,7 @@
 				EE480EAF24794CDB003E4970 /* Info.plist */,
 				EEBF3312248E61FC00DDE2E9 /* OCRunnerDemoTests-Bridging-Header.h */,
 				EEBF333D248E848100DDE2E9 /* OCRunnerTests.swift */,
-				04ABA71824C1508C00C32E42 /* ORCoreFunctionTests.m */,
+				EEF1527C24DE867400574FA7 /* ORCoreFunctionTests.m */,
 				EEBF3352248E84D100DDE2E9 /* ORTestWithObjc.m */,
 				EEBF333F248E84A900DDE2E9 /* TestClass */,
 			);
@@ -341,6 +344,7 @@
 				EE480EDC24794D90003E4970 /* ViewController1 in Resources */,
 				EE480EA124794CDB003E4970 /* LaunchScreen.storyboard in Resources */,
 				EE480E9E24794CDB003E4970 /* Assets.xcassets in Resources */,
+				EEF1527F24DE867D00574FA7 /* Scripts.bundle in Resources */,
 				EE480E9C24794CDA003E4970 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -488,7 +492,7 @@
 				EEBF334F248E84AA00DDE2E9 /* ORTestClassIvar.m in Sources */,
 				EEBF334C248E84AA00DDE2E9 /* ORCallOCPropertyBlockTest.m in Sources */,
 				EEBF333E248E848100DDE2E9 /* OCRunnerTests.swift in Sources */,
-				04ABA71924C1508C00C32E42 /* ORCoreFunctionTests.m in Sources */,
+				EEF1527D24DE867400574FA7 /* ORCoreFunctionTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

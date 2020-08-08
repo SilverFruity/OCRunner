@@ -15,7 +15,6 @@
 		042AC264246E48ED00070814 /* ORTestClassProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC263246E48ED00070814 /* ORTestClassProperty.m */; };
 		042AC267246E49B200070814 /* ORCallOCPropertyBlockTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC266246E49B200070814 /* ORCallOCPropertyBlockTest.m */; };
 		042AC26A246E557200070814 /* ORCallSuperNoArgTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC269246E557200070814 /* ORCallSuperNoArgTest.m */; };
-		0449190B24DD487800DC9951 /* OCRunner.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 0449190A24DD487800DC9951 /* OCRunner.bundle */; };
 		047EF859246BF68D0071F9D3 /* OCRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */; };
 		048FAA3E247FA4820036F5EE /* built-in.h in Headers */ = {isa = PBXBuildFile; fileRef = 048FAA3B247FA47C0036F5EE /* built-in.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		048FAA85247FB6CA0036F5EE /* oc2mangoLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 048FAA79247FB6180036F5EE /* oc2mangoLib.framework */; };
@@ -24,17 +23,17 @@
 		04A531B8248F8AD600D83A48 /* SymbolSearch.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A531B6248F8AD600D83A48 /* SymbolSearch.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04A531BE248F972500D83A48 /* ORSearchedFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A531BC248F972500D83A48 /* ORSearchedFunction.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04A531BF248F972500D83A48 /* ORSearchedFunction.m in Sources */ = {isa = PBXBuildFile; fileRef = 04A531BD248F972500D83A48 /* ORSearchedFunction.m */; };
-		04AEF94C24DD4FF1008EB64F /* ORCoreImp.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF93524DD4FF1008EB64F /* ORCoreImp.h */; };
+		04AEF94C24DD4FF1008EB64F /* ORCoreImp.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF93524DD4FF1008EB64F /* ORCoreImp.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04AEF94D24DD4FF1008EB64F /* ORCoreImp.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AEF93624DD4FF1008EB64F /* ORCoreImp.m */; };
 		04AEF94E24DD4FF1008EB64F /* ORCoreFunctionCall.s in Sources */ = {isa = PBXBuildFile; fileRef = 04AEF93824DD4FF1008EB64F /* ORCoreFunctionCall.s */; };
 		04AEF94F24DD4FF1008EB64F /* ORCoreFunctionRegister.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AEF93924DD4FF1008EB64F /* ORCoreFunctionRegister.m */; };
-		04AEF95024DD4FF1008EB64F /* ORCoreFunctionCall.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF93A24DD4FF1008EB64F /* ORCoreFunctionCall.h */; };
-		04AEF95124DD4FF1008EB64F /* ORTypeVarPair+libffi.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF93B24DD4FF1008EB64F /* ORTypeVarPair+libffi.h */; };
+		04AEF95024DD4FF1008EB64F /* ORCoreFunctionCall.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF93A24DD4FF1008EB64F /* ORCoreFunctionCall.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		04AEF95124DD4FF1008EB64F /* ORTypeVarPair+libffi.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF93B24DD4FF1008EB64F /* ORTypeVarPair+libffi.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04AEF95224DD4FF1008EB64F /* ORCoreFunctionCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AEF93C24DD4FF1008EB64F /* ORCoreFunctionCall.m */; };
-		04AEF95324DD4FF1008EB64F /* ORCoreFunctionRegister.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF93D24DD4FF1008EB64F /* ORCoreFunctionRegister.h */; };
+		04AEF95324DD4FF1008EB64F /* ORCoreFunctionRegister.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF93D24DD4FF1008EB64F /* ORCoreFunctionRegister.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04AEF95424DD4FF1008EB64F /* ORCoreFunctionRegister.s in Sources */ = {isa = PBXBuildFile; fileRef = 04AEF93E24DD4FF1008EB64F /* ORCoreFunctionRegister.s */; };
 		04AEF95524DD4FF1008EB64F /* ORTypeVarPair+libffi.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AEF93F24DD4FF1008EB64F /* ORTypeVarPair+libffi.m */; };
-		04AEF97C24DD5091008EB64F /* ORCoreFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF97B24DD5091008EB64F /* ORCoreFunction.h */; };
+		04AEF97C24DD5091008EB64F /* ORCoreFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF97B24DD5091008EB64F /* ORCoreFunction.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04AEF9A624DD5414008EB64F /* ffitarget_arm64.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF99B24DD5414008EB64F /* ffitarget_arm64.h */; };
 		04AEF9A724DD5414008EB64F /* ffitarget.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF99C24DD5414008EB64F /* ffitarget.h */; };
 		04AEF9A824DD5414008EB64F /* ffi_arm.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF99D24DD5414008EB64F /* ffi_arm.h */; };
@@ -82,6 +81,8 @@
 		EE9899C62465923900ACF2C1 /* util.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899C02465923800ACF2C1 /* util.h */; };
 		EEA2AC82246855F100B08407 /* ORArgsStack.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA2AC80246855F100B08407 /* ORArgsStack.m */; };
 		EEA2AC83246855F100B08407 /* ORArgsStack.h in Headers */ = {isa = PBXBuildFile; fileRef = EEA2AC81246855F100B08407 /* ORArgsStack.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EEF1527724DE6DB600574FA7 /* Scripts.bundle in Resources */ = {isa = PBXBuildFile; fileRef = EEF1527324DE6B5200574FA7 /* Scripts.bundle */; };
+		EEF1527924DE709300574FA7 /* ORCoreFunctionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = EEF1527824DE709300574FA7 /* ORCoreFunctionTests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -149,7 +150,6 @@
 		042AC266246E49B200070814 /* ORCallOCPropertyBlockTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORCallOCPropertyBlockTest.m; sourceTree = "<group>"; };
 		042AC268246E557200070814 /* ORCallSuperNoArgTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORCallSuperNoArgTest.h; sourceTree = "<group>"; };
 		042AC269246E557200070814 /* ORCallSuperNoArgTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORCallSuperNoArgTest.m; sourceTree = "<group>"; };
-		0449190A24DD487800DC9951 /* OCRunner.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = OCRunner.bundle; sourceTree = "<group>"; };
 		047EF857246BF68D0071F9D3 /* OCRunnerTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OCRunnerTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRunnerTests.swift; sourceTree = "<group>"; };
 		048FAA3B247FA47C0036F5EE /* built-in.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "built-in.h"; sourceTree = "<group>"; };
@@ -221,6 +221,8 @@
 		EE9899C02465923800ACF2C1 /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
 		EEA2AC80246855F100B08407 /* ORArgsStack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORArgsStack.m; sourceTree = "<group>"; };
 		EEA2AC81246855F100B08407 /* ORArgsStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORArgsStack.h; sourceTree = "<group>"; };
+		EEF1527324DE6B5200574FA7 /* Scripts.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Scripts.bundle; sourceTree = "<group>"; };
+		EEF1527824DE709300574FA7 /* ORCoreFunctionTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORCoreFunctionTests.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -363,7 +365,6 @@
 				EE98998D24658F8900ACF2C1 /* RunEnv */,
 				EE9899BC2465923800ACF2C1 /* Util */,
 				EE98996E24658DA600ACF2C1 /* OCRunner.h */,
-				0449190A24DD487800DC9951 /* OCRunner.bundle */,
 				EE98996F24658DA600ACF2C1 /* Info.plist */,
 			);
 			path = OCRunner;
@@ -372,11 +373,13 @@
 		EE98997824658DA600ACF2C1 /* OCRunnerTests */ = {
 			isa = PBXGroup;
 			children = (
+				EEF1527324DE6B5200574FA7 /* Scripts.bundle */,
 				EE79FF66246D915C00ABE06F /* TestClass */,
 				047EF857246BF68D0071F9D3 /* OCRunnerTests-Bridging-Header.h */,
 				047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */,
 				EE98997B24658DA600ACF2C1 /* Info.plist */,
 				04E6659C2473C76D008DB08E /* ORTestWithObjc.m */,
+				EEF1527824DE709300574FA7 /* ORCoreFunctionTests.m */,
 			);
 			path = OCRunnerTests;
 			sourceTree = "<group>";
@@ -585,7 +588,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0449190B24DD487800DC9951 /* OCRunner.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -593,6 +595,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EEF1527724DE6DB600574FA7 /* Scripts.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -639,6 +642,7 @@
 				042AC267246E49B200070814 /* ORCallOCPropertyBlockTest.m in Sources */,
 				042AC264246E48ED00070814 /* ORTestClassProperty.m in Sources */,
 				042AC261246E48A400070814 /* ORTestClassIvar.m in Sources */,
+				EEF1527924DE709300574FA7 /* ORCoreFunctionTests.m in Sources */,
 				04E665AB2474D723008DB08E /* ORGCDTests.m in Sources */,
 				EE79FF6B246D917100ABE06F /* ORTestReplaceClass.m in Sources */,
 				042AC26A246E557200070814 /* ORCallSuperNoArgTest.m in Sources */,

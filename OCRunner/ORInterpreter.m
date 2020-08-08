@@ -19,26 +19,19 @@
     //添加内置结构体、函数、变量等
     mf_add_built_in();
     MFScopeChain *scope = [MFScopeChain topScope];
-    [OCParser parseSource:string];
+    AST *abstractAst = [OCParser parseSource:string];
     //注册Protcol
-    for (id <OCExecute> protcol in OCParser.ast.protcolCache.allValues){
+    for (id <OCExecute> protcol in abstractAst.protcolCache.allValues){
         [protcol execute:scope];
     }
     //注册Class
-    for (id <OCExecute> clazz in OCParser.ast.sortClasses){
+    for (id <OCExecute> clazz in abstractAst.sortClasses){
         [clazz execute:scope];
     }
     //执行全局变量，全局函数声明
-    for (id <OCExecute> expression in OCParser.ast.globalStatements) {
-        [expression execute:scope];
-    }
-}
-+ (void)excuteGlobalDeclare:(NSString *)string{
-    MFScopeChain *scope = [MFScopeChain topScope];
-    [OCParser parseSource:string];
     NSMutableArray <ORTypeVarPair *>*funcVars = [NSMutableArray array];
     NSMutableArray *names = [NSMutableArray array];
-    for (id <OCExecute> expression in OCParser.ast.globalStatements) {
+    for (id <OCExecute> expression in abstractAst.globalStatements) {
         if ([expression isKindOfClass:[ORDeclareExpression class]]) {
             ORTypeVarPair *pair = [(ORDeclareExpression *)expression pair];
             if ([pair.var isKindOfClass:[ORFuncVariable class]]) {
@@ -49,6 +42,7 @@
         }
         [expression execute:scope];
     }
+    //获取函数指针
     NSDictionary *table = [ORSearchedFunction functionTableForNames:names];
     for (ORTypeVarPair *pair in funcVars) {
         ORSearchedFunction *function = table[pair.var.varname];
@@ -64,6 +58,5 @@
     }
     NSLog(@"%@", build_ins);
     #endif
-    [OCParser clear];
 }
 @end

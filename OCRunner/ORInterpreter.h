@@ -12,7 +12,6 @@ NS_ASSUME_NONNULL_BEGIN
 @class ORClass;
 @interface ORInterpreter : NSObject
 + (void)excute:(NSString *)string;
-+ (void)excuteGlobalDeclare:(NSString *)string;
 @end
 
 NS_ASSUME_NONNULL_END

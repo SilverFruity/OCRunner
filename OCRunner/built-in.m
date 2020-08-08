@@ -103,23 +103,11 @@ static void add_build_in_var(){
     BOOL is32BitDevice = YES;
 #endif
     [MFScopeChain.topScope setValue:[MFValue valueWithBOOL:is32BitDevice ] withIndentifier:@"$is32BitDevice"];;
-    
-    
 }
 #import "ORInterpreter.h"
 void mf_add_built_in(void){
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        NSBundle *currentBundle = [NSBundle bundleForClass:[MFValue class]];
-        NSString *bundlePath = [currentBundle pathForResource:@"Scripts" ofType:@"bundle"];
-        NSBundle *frameworkBundle = [NSBundle bundleWithPath:bundlePath];
-        NSString *UIKitPath = [frameworkBundle pathForResource:@"UIKitRefrences" ofType:nil];
-        NSString *UIKitData = [NSString stringWithContentsOfFile:UIKitPath encoding:NSUTF8StringEncoding error:nil];
-        [ORInterpreter excuteGlobalDeclare:UIKitData];
-        
-        NSString *GCDPath = [frameworkBundle pathForResource:@"GCDRefrences" ofType:nil];
-        NSString *CCDData = [NSString stringWithContentsOfFile:GCDPath encoding:NSUTF8StringEncoding error:nil];
-        [ORInterpreter excuteGlobalDeclare:CCDData];
         add_build_in_function();
         add_build_in_var();
         add_gcd_build_in();

@@ -14,11 +14,26 @@ class CRunnerTests: XCTestCase {
     let ocparser = Parser.shared()
     var source = ""
     override func setUp() {
+        if MFScopeChain.topScope().vars.count == 0 {
+            let current = Bundle.init(for: CRunnerTests.classForCoder())
+            let bundlePath = current.path(forResource: "Scripts", ofType: "bundle")!
+            let scriptBundle = Bundle.init(path: bundlePath)!
+            
+            if let UIKitPath = scriptBundle.path(forResource: "UIKitRefrences", ofType: nil),
+                let UIKitData = try? String.init(contentsOfFile: UIKitPath, encoding: .utf8){
+                ORInterpreter.excute(UIKitData)
+            }
+            
+            if let GCDPath = scriptBundle.path(forResource: "GCDRefrences", ofType: nil),
+                let CCDData = try? String.init(contentsOfFile: GCDPath, encoding: .utf8){
+                ORInterpreter.excute(CCDData)
+            }
+        }
         mf_add_built_in()
         scope = MFScopeChain.init(next: MFScopeChain.topScope())
     }
     override func tearDown() {
-        ocparser.clear()
+        
     }
     func testDeclareExpression(){
         let source = """
@@ -36,8 +51,8 @@ class CRunnerTests: XCTestCase {
         double l = 0.5;
         char *str = "123";
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
@@ -88,8 +103,8 @@ class CRunnerTests: XCTestCase {
             int b = 0;
         };
         """
-        ocparser.parseSource(source)
-        let exp = ocparser.ast.globalStatements.firstObject as! ORDeclareExpression;
+        let ast = ocparser.parseSource(source)
+        let exp = ast.globalStatements.firstObject as! ORDeclareExpression;
         exp.execute(scope)
         let result = scope.getValueWithIdentifier("a")
         XCTAssert(result!.type == OCTypeObject)
@@ -107,8 +122,8 @@ class CRunnerTests: XCTestCase {
         };
         int b = a();
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
@@ -126,8 +141,8 @@ class CRunnerTests: XCTestCase {
         };
         int b = a(1);
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
@@ -153,8 +168,8 @@ class CRunnerTests: XCTestCase {
         int *k = &a;
         int l = *k;
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
@@ -192,8 +207,8 @@ class CRunnerTests: XCTestCase {
         BOOL s = a != b;
         BOOL t = a == b;
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
@@ -225,8 +240,8 @@ class CRunnerTests: XCTestCase {
         int c = a == 1 ? 1 : 3;
         int d = a?:3;
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
@@ -253,8 +268,8 @@ class CRunnerTests: XCTestCase {
         int c = func(15);
         int d = func(30);
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
@@ -289,8 +304,8 @@ class CRunnerTests: XCTestCase {
         int c = func(15);
         int d = func(30);
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
@@ -324,8 +339,8 @@ class CRunnerTests: XCTestCase {
         int c = func(15);
         int d = func(30);
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
@@ -358,8 +373,8 @@ class CRunnerTests: XCTestCase {
         int c = func(2);
         int d = func(3);
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
@@ -394,8 +409,8 @@ class CRunnerTests: XCTestCase {
         int c = func(3);
         int d = func(4);
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
@@ -429,8 +444,8 @@ class CRunnerTests: XCTestCase {
         int c = func(3);
         int d = func(4);
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
@@ -457,8 +472,8 @@ class CRunnerTests: XCTestCase {
         }
         int a = func(@[@(1),@(2),@(3)]);
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
@@ -507,12 +522,12 @@ class CRunnerTests: XCTestCase {
         @end
         """
         scope = MFScopeChain.topScope()
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
-        let classes = ocparser.ast.classCache.allValues as! [ORClass];
+        let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
             classValue.execute(scope);
         }
@@ -536,8 +551,8 @@ class CRunnerTests: XCTestCase {
         """
         NSString *b = [NSString stringWithFormat:@"%@",@"sss"];
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
@@ -557,8 +572,8 @@ class CRunnerTests: XCTestCase {
         }
         @end
         """
-        ocparser.parseSource(source)
-        let classes = ocparser.ast.classCache.allValues as! [ORClass];
+        let ast = ocparser.parseSource(source)
+        let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
             classValue.execute(scope);
         }
@@ -610,8 +625,8 @@ class CRunnerTests: XCTestCase {
         }
         @end
         """
-        ocparser.parseSource(source)
-        let classes = ocparser.ast.classCache.allValues as! [ORClass];
+        let ast = ocparser.parseSource(source)
+        let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
             classValue.execute(scope);
         }
@@ -653,8 +668,8 @@ class CRunnerTests: XCTestCase {
         }
         @end
         """
-        ocparser.parseSource(source)
-        let classes = ocparser.ast.classCache.allValues as! [ORClass];
+        let ast = ocparser.parseSource(source)
+        let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
             classValue.execute(scope);
         }
@@ -673,8 +688,8 @@ class CRunnerTests: XCTestCase {
         }
         @end
         """
-        ocparser.parseSource(source)
-        let classes = ocparser.ast.classCache.allValues as! [ORClass];
+        let ast = ocparser.parseSource(source)
+        let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
             classValue.execute(scope);
         }
@@ -691,9 +706,9 @@ class CRunnerTests: XCTestCase {
         }
         @end
         """
-        ocparser.parseSource(source)
+        let ast = ocparser.parseSource(source)
 
-        let classes = ocparser.ast.classCache.allValues as! [ORClass];
+        let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
             classValue.execute(scope);
         }
@@ -710,8 +725,8 @@ class CRunnerTests: XCTestCase {
         }
         @end
         """
-        ocparser.parseSource(source)
-        let classes = ocparser.ast.classCache.allValues as! [ORClass];
+        let ast = ocparser.parseSource(source)
+        let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
             classValue.execute(scope);
         }
@@ -761,8 +776,8 @@ class CRunnerTests: XCTestCase {
         }
         @end
         """
-        ocparser.parseSource(source)
-        let classes = ocparser.ast.classCache.allValues as! [ORClass];
+        let ast = ocparser.parseSource(source)
+        let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
             classValue.execute(scope);
         }
@@ -793,8 +808,8 @@ class CRunnerTests: XCTestCase {
         int b = func();
         int c = func();
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         exps[0].execute(scope);
         exps[1].execute(scope);
         XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 1)
@@ -804,7 +819,6 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 3)
     }
     func testDispatchOnce(){
-        mf_add_built_in()
         source =
         """
         typedef NSInteger dispatch_once_t;
@@ -813,8 +827,8 @@ class CRunnerTests: XCTestCase {
             [NSObject new];
         });
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
@@ -849,8 +863,8 @@ class CRunnerTests: XCTestCase {
             UIControlEventAllEvents                                         = 0xFFFFFFFF
         }UIControlEvents;
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
@@ -889,8 +903,8 @@ class CRunnerTests: XCTestCase {
         CGPoint p = CGPointMake(0.1,0.1);
         CGFloat a = p.x;
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
@@ -914,8 +928,8 @@ class CRunnerTests: XCTestCase {
             CGSize size;
         };
         """
-        ocparser.parseSource(source)
-        let exps = ocparser.ast.globalStatements as! [ORExpression]
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORExpression]
         for exp in exps {
             exp.execute(scope);
         }
