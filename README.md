@@ -2,6 +2,8 @@
 
 [中文介绍](https://github.com/SilverFruity/OCRunner/blob/master/README-CN.md)
 
+[Wiki](https://github.com/SilverFruity/OCRunner/wiki)
+
 Execute Objective-C code Dynamically.
 
 ## Run Demo
