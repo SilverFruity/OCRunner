@@ -50,14 +50,6 @@
     if (funcptr == NULL) {
         funcptr = [ORSystemFunctionTable pointerForFunctionName:self.name];
     }
-#if DEBUG
-    if (funcptr == NULL) {
-        NSLog(@"\n****************************************\n"
-              @"❕you need add the code in the application:\n"
-              @"[ORSystemFunctionTable reg:@\"%@\" pointer:&%@];\n"
-              @"****************************************\n",self.name,self.name);
-    }
-#endif
     NSAssert(funcptr != NULL, @"not found function %@", self.name);
     if (!self.funVar.isMultiArgs) {
         invoke_functionPointer(funcptr, args, returnValue);

@@ -17,45 +17,9 @@ static void add_gcd_build_in(){
         dispatch_once(onceTokenPtr,handler);
     }] withIndentifier:@"dispatch_once"];
     
-    [ORSystemFunctionTable reg:@"dispatch_get_global_queue" pointer:&dispatch_get_global_queue];
     [ORSystemFunctionTable reg:@"dispatch_get_main_queue" pointer:&dispatch_get_main_queue];
-    [ORSystemFunctionTable reg:@"dispatch_queue_create" pointer:&dispatch_queue_create];
-    [ORSystemFunctionTable reg:@"dispatch_after" pointer:&dispatch_after];
-    [ORSystemFunctionTable reg:@"dispatch_async" pointer:&dispatch_async];
-    [ORSystemFunctionTable reg:@"dispatch_sync" pointer:&dispatch_sync];
-    [ORSystemFunctionTable reg:@"dispatch_barrier_async" pointer:&dispatch_barrier_async];
-    [ORSystemFunctionTable reg:@"dispatch_barrier_sync" pointer:&dispatch_barrier_sync];
-    [ORSystemFunctionTable reg:@"dispatch_apply" pointer:&dispatch_apply];
-    [ORSystemFunctionTable reg:@"dispatch_group_create" pointer:&dispatch_group_create];
-    [ORSystemFunctionTable reg:@"dispatch_group_async" pointer:&dispatch_group_async];
-    [ORSystemFunctionTable reg:@"dispatch_group_wait" pointer:&dispatch_group_wait];
-    [ORSystemFunctionTable reg:@"dispatch_group_notify" pointer:&dispatch_group_notify];
-    [ORSystemFunctionTable reg:@"dispatch_group_enter" pointer:&dispatch_group_enter];
-    [ORSystemFunctionTable reg:@"dispatch_group_leave" pointer:&dispatch_group_leave];
-    [ORSystemFunctionTable reg:@"dispatch_block_create" pointer:&dispatch_block_create];
-    [ORSystemFunctionTable reg:@"dispatch_block_create_with_qos_class" pointer:&dispatch_block_create_with_qos_class];
-    [ORSystemFunctionTable reg:@"dispatch_block_perform" pointer:&dispatch_block_perform];
-    [ORSystemFunctionTable reg:@"dispatch_block_wait" pointer:&dispatch_block_wait];
     [ORSystemFunctionTable reg:@"dispatch_block_notify" pointer:&dispatch_block_notify];
     [ORSystemFunctionTable reg:@"dispatch_block_testcancel" pointer:&dispatch_block_testcancel];
-    [ORSystemFunctionTable reg:@"dispatch_block_cancel" pointer:&dispatch_block_cancel];
-    [ORSystemFunctionTable reg:@"dispatch_semaphore_create" pointer:&dispatch_semaphore_create];
-    [ORSystemFunctionTable reg:@"dispatch_semaphore_wait" pointer:&dispatch_semaphore_wait];
-    [ORSystemFunctionTable reg:@"dispatch_semaphore_signal" pointer:&dispatch_semaphore_signal];
-    [ORSystemFunctionTable reg:@"dispatch_time" pointer:&dispatch_time];
-    [ORSystemFunctionTable reg:@"dispatch_resume" pointer:&dispatch_resume];
-    [ORSystemFunctionTable reg:@"dispatch_suspend" pointer:&dispatch_suspend];
-    [ORSystemFunctionTable reg:@"dispatch_source_create" pointer:&dispatch_source_create];
-    [ORSystemFunctionTable reg:@"dispatch_source_set_event_handler" pointer:&dispatch_source_set_event_handler];
-    [ORSystemFunctionTable reg:@"dispatch_source_set_cancel_handler" pointer:&dispatch_source_set_cancel_handler];
-    [ORSystemFunctionTable reg:@"dispatch_source_cancel" pointer:&dispatch_source_cancel];
-    [ORSystemFunctionTable reg:@"dispatch_source_testcancel" pointer:&dispatch_source_testcancel];
-    [ORSystemFunctionTable reg:@"dispatch_source_get_handle" pointer:&dispatch_source_get_handle];
-    [ORSystemFunctionTable reg:@"dispatch_source_get_mask" pointer:&dispatch_source_get_mask];
-    [ORSystemFunctionTable reg:@"dispatch_source_get_data" pointer:&dispatch_source_get_data];
-    [ORSystemFunctionTable reg:@"dispatch_source_merge_data" pointer:&dispatch_source_merge_data];
-    [ORSystemFunctionTable reg:@"dispatch_source_set_timer" pointer:&dispatch_source_set_timer];
-    [ORSystemFunctionTable reg:@"dispatch_source_set_registration_handler" pointer:&dispatch_source_set_registration_handler];
     
     /* queue */
     [MFScopeChain.topScope setValue:[MFValue valueWithLongLong:DISPATCH_QUEUE_PRIORITY_HIGH] withIndentifier:@"DISPATCH_QUEUE_PRIORITY_HIGH"];

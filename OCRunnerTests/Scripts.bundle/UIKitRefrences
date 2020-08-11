@@ -143,7 +143,14 @@ typedef enum: NSUInteger {
 typedef struct UIEdgeInsets {
     CGFloat top, left, bottom, right;
 } UIEdgeInsets;
-UIEdgeInsets UIEdgeInsetsMake(CGFloat top, CGFloat left, CGFloat bottom, CGFloat right);
+UIEdgeInsets UIEdgeInsetsMake(CGFloat top, CGFloat left, CGFloat bottom, CGFloat right) {
+    UIEdgeInsets insets;
+    insets.top = top;
+    insets.left = left;
+    insets.bottom = bottom;
+    insets.right = right;
+    return insets;
+}
 
 struct CGAffineTransform {
   CGFloat a, b, c, d;
@@ -256,14 +263,25 @@ const CGAffineTransform CGAffineTransformIdentity;
       p' = p * t
     where p = [ x y 1 ]. */
 
- CGPoint CGPointApplyAffineTransform(CGPoint point,
-   CGAffineTransform t);
+ CGPoint CGPointApplyAffineTransform(CGPoint point, CGAffineTransform t)
+ {
+   CGPoint p;
+   p.x = (CGFloat)((double)t.a * point.x + (double)t.c * point.y + t.tx);
+   p.y = (CGFloat)((double)t.b * point.x + (double)t.d * point.y + t.ty);
+   return p;
+ }
 
  /* Transform `size' by `t' and return the result:
       s' = s * t
     where s = [ width height 0 ]. */
 
- CGSize CGSizeApplyAffineTransform(CGSize size, CGAffineTransform t);
+ CGSize CGSizeApplyAffineTransform(CGSize size, CGAffineTransform t)
+ {
+   CGSize s;
+   s.width = (CGFloat)((double)t.a * size.width + (double)t.c * size.height);
+   s.height = (CGFloat)((double)t.b * size.width + (double)t.d * size.height);
+   return s;
+ }
   
 
  /* Transform `rect' by `t' and return the result. Since affine transforms do

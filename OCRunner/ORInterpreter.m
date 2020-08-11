@@ -13,7 +13,7 @@
 #import "ORSearchedFunction.h"
 #import "MFValue.h"
 #import "ORStructDeclare.h"
-
+#import "ORSystemFunctionTable.h"
 @implementation ORInterpreter
 + (void)excute:(NSString *)string{
     //添加内置结构体、函数、变量等
@@ -47,16 +47,35 @@
     for (ORTypeVarPair *pair in funcVars) {
         ORSearchedFunction *function = table[pair.var.varname];
         function.funPair = pair;
-        [scope setValue:[MFValue valueWithObject:function] withIndentifier:function.name];
+        if ([scope getValueWithIdentifier:function.name] == nil) {
+            [scope setValue:[MFValue valueWithObject:function] withIndentifier:function.name];
+        }
     }
     #if DEBUG
-    NSMutableString *build_ins = [@"\n" mutableCopy];
+    NSMutableArray *functionNames = [NSMutableArray array];
     for (ORTypeVarPair *pair in funcVars){
-        NSString *name = pair.var.varname;
-        NSString *build_in_declare = [NSString stringWithFormat:@"[ORSystemFunctionTable reg:@\"%@\" pointer:&%@];\n",name,name];
-        [build_ins appendString:build_in_declare];
+        NSString *functionName = pair.var.varname;
+        ORSearchedFunction *function = table[functionName];
+        if (function.pointer == NULL
+            && [ORSystemFunctionTable pointerForFunctionName:functionName] == NULL) {
+            MFValue *value = [[MFScopeChain topScope] getValueWithIdentifier:functionName];
+            if (value == nil || [value.objectValue isKindOfClass:[ORSearchedFunction class]]) {
+                [functionNames addObject:functionName];
+            }
+        }
     }
-    NSLog(@"%@", build_ins);
+    if (functionNames.count > 0) {
+        NSMutableString *build_ins = [@"" mutableCopy];
+        [build_ins appendString:@"\n|----------------------------------------------|"];
+        [build_ins appendString:@"\n|❕you need add ⬇️ code in the application file|"];
+        [build_ins appendString:@"\n|----------------------------------------------|\n"];
+        for (NSString *name in functionNames) {
+            NSString *build_in_declare = [NSString stringWithFormat:@"[ORSystemFunctionTable reg:@\"%@\" pointer:&%@];\n",name,name];
+            [build_ins appendString:build_in_declare];
+        }
+        [build_ins appendString:@"-----------------------------------------------"];
+        NSLog(@"%@", build_ins);
+    }
     #endif
 }
 @end
