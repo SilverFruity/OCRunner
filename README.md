@@ -4,7 +4,7 @@
 
 Execute Objective-C code Dynamically.
 
-## 1. Run Demo
+## Run Demo
 You should use 'git clone --recursive'.
 ```shell
 git clone --recursive https://github.com/SilverFruity/OCRunner.git
@@ -18,7 +18,7 @@ git submodule update --init --recursive
 
 The unit tests of OCRunner.framework has move to OCRunnerDemo。
 
-## 2. Feature
+## Feature
 
 * Execute Objective-C code Dynamically。
 
@@ -49,24 +49,58 @@ The unit tests of OCRunner.framework has move to OCRunnerDemo。
 
 Recommend:  start eating from the unit test.
 
-## 3. Cocoapods
+## Example
+
+```objective-c
+NSString * source =
+@"@protocol Protocol1 <NSObject>"
+@"@property (nonatomic,copy)NSString *name;"
+@"-(NSUInteger)getAge;"
+@"-(void)setAge:(NSUInteger)age;"
+@"@end"
+@"@protocol Protocol2 <Protocol1>"
+@"- (void)sleep;"
+@"@end"
+@"@interface TestObject : NSObject <Protocol2>"
+@"@property (nonatomic,copy)NSString *name;"
+@"@end"
+@"@implementation TestObject"
+@"- (NSUInteger)getAge{"
+@"    return 100;"
+@"}"
+@"-(void)setAge:(NSUInteger)age{"
+@"}"
+@"- (void)sleep{"
+@"}"
+@"@end";
+[ORInterpreter excute:source];
+Class testClass = NSClassFromString(@"TestObject");
+NSAssert([testClass conformsToProtocol:NSProtocolFromString(@"Protocol1")]);
+NSAssert([testClass conformsToProtocol:NSProtocolFromString(@"Protocol2")]);
+id object = [[testClass alloc] init];
+NSAssert([object conformsToProtocol:NSProtocolFromString(@"Protocol1")]);
+NSAssert([object conformsToProtocol:NSProtocolFromString(@"Protocol2")]);
+```
+
+
+## Cocoapods
 ```ruby
 pod 'OCRunner'      #for all architectures, include libffi.a
 pod 'OCRunnerArm64' #only for arm64 or amr64e, no libffi.a
 ```
 
 
-## 4. What's the difference of Objective-C
+## What's the difference of Objective-C
 
-### 4.1 Not support pre-compile
+### Not support pre-compile
 
 Such as #define, #if etc.
 
-### 4.2 The problems of hot fix Class
+### The problems of hot fix Class
 
 * Problem 1:if Class1 have five method (a,b,c,d,e) and several properties, if i only want to hot fix 'a' method, how can i do it ?  anwser: you only need to imp the 'a' method in scripts.  
 
-#### 4.2.1 Fix Existed Class
+#### Fix Existed Class
 
 The shortest way:
 
@@ -97,7 +131,7 @@ If want to add properties (not support add ivars), you should:
 @end
 ```
 
-#### 4.2.2 Create new Class
+#### Create new Class
 
 In this situation, ORTestReplaceClass inherit NSObjece. 
 
@@ -139,7 +173,7 @@ Notice: ivar must be used in new Class.
 
 
 
-#### 4.2.3 Support Category Syntax
+#### Support Category Syntax
 
 ```objective-c
 @implementation Demo
@@ -151,7 +185,7 @@ Notice: ivar must be used in new Class.
 @end
 ```
 
-### 4.3 About Enum Syntax
+### About Enum Syntax
 
 Not surpport **NS_ENUM**和**NS_OPTION**.
 
@@ -165,7 +199,7 @@ typedef enum: NSUInteger {
 }UIControlEvents;
 ```
 
-### 4.4 About Struct Syntax
+### About Struct Syntax
 
 The referenced structure must be declared in advance.
 
@@ -187,9 +221,9 @@ struct CGSize {
 ```
 
 
-### 4.5 constant, type, struct, enum, global function.
+### constant, type, struct, enum, global function.
 
-#### 4.5.1 constant、struct、enum
+#### constant、struct、enum
 
 Way 1:
 
@@ -223,7 +257,7 @@ typedef enum: NSUInteger{
 // add four constants: UIControlEventTouchDown UIControlEventTouchDownRepeat UIControlEventTouchDragInside UIControlEventAllTouchEvents
 ```
 
-#### 4.5.2 Add new type
+#### Add new type
 
 ```objective-c
 // use it in Scripts
@@ -236,7 +270,7 @@ typedef long long IntegerType;
 typedef IntegerType dispatch_once_t;
 ```
 
-#### 4.5.3 Global Function
+#### Global Function
 
 1. Pre-compile function:
 
@@ -291,11 +325,11 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 }
 ```
 
-### 5. About #import
+### About #import
 
 **#import** can be omitted.
 
-### 6. Not Support 
+### Not Support 
 * int a\[x\]
 * typeof
 * @optional
@@ -314,9 +348,10 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 
 
 
-### 6. Thanks for
+### Thanks for
 
 * [Mango](https://github.com/YPLiang19/Mango)
 * [libffi](https://github.com/libffi/libffi)
 * Procedure Call Standard for the ARM 64-bit Architecture. 
+
 
