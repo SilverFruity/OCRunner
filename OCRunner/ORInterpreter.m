@@ -16,7 +16,7 @@
 #import "ORSystemFunctionTable.h"
 @implementation ORInterpreter
 + (void)excute:(NSString *)string{
-    //添加内置结构体、函数、变量等
+    //添加函数、变量等
     mf_add_built_in();
     MFScopeChain *scope = [MFScopeChain topScope];
     AST *abstractAst = [OCParser parseSource:string];
@@ -28,8 +28,19 @@
     for (id <OCExecute> clazz in abstractAst.sortClasses){
         [clazz execute:scope];
     }
-    //执行全局变量，全局函数声明
+    
+    //链接函数指针
+    [self linkFunctions:abstractAst scope:scope];
+    
+    // 执行全局函数声明等
+    for (id <OCExecute> expression in abstractAst.globalStatements) {
+        [expression execute:scope];
+    }
+}
+
++ (void)linkFunctions:(AST *)abstractAst scope:(MFScopeChain *)scope{
     NSMutableArray <ORTypeVarPair *>*funcVars = [NSMutableArray array];
+    NSMutableArray *normalStatements = [NSMutableArray array];
     NSMutableArray *names = [NSMutableArray array];
     for (id <OCExecute> expression in abstractAst.globalStatements) {
         if ([expression isKindOfClass:[ORDeclareExpression class]]) {
@@ -40,8 +51,11 @@
                 continue;
             }
         }
-        [expression execute:scope];
+        [normalStatements addObject:expression];
     }
+    //过滤 link functions
+    abstractAst.globalStatements = normalStatements;
+    
     //获取函数指针
     NSDictionary *table = [ORSearchedFunction functionTableForNames:names];
     for (ORTypeVarPair *pair in funcVars) {
