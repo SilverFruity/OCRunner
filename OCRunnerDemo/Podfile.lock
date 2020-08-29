@@ -1,7 +1,7 @@
 PODS:
   - Masonry (1.1.0)
-  - oc2mangoLib (1.0)
-  - OCRunner (1.0):
+  - oc2mangoLib (1.0.2)
+  - OCRunner (1.0.2):
     - oc2mangoLib (~> 1.0)
 
 DEPENDENCIES:
@@ -21,8 +21,8 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
-  oc2mangoLib: 7e945e9588047920ff03f0fee365e1f616c49cd9
-  OCRunner: cb7f8ef884fa4a2c3c8089ccc18003ff1199f241
+  oc2mangoLib: 658dc622713cdde26538ace01254c856e4be1e7d
+  OCRunner: fd3f349c942187b885968859b32aed4715639aa8
 
 PODFILE CHECKSUM: acc4960cff92ad4144076156b58ae2f0f4036d3e
 

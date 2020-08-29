@@ -82,7 +82,9 @@ NSString *CCDData = [NSString stringWithContentsOfFile:GCDPath encoding:NSUTF8St
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"点击" style:UIBarButtonItemStylePlain target:self action:@selector(showNext)];
 }
 - (void)showNext{
-    [self.navigationController pushViewController:[UIViewController new] animated:YES];
+    UIViewController *vc = [UIViewController new];
+    vc.view.backgroundColor = [UIColor whiteColor];
+    [self.navigationController pushViewController:vc animated:YES];
 }
 
 @end

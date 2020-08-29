@@ -679,7 +679,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @end
 @implementation ORDeclareExpression (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
-    BOOL staticVar = self.modifier & ORDeclarationModifierStatic;
+    BOOL staticVar = self.modifier & DeclarationModifierStatic;
     MFValue *(^initializeBlock)(void) = ^MFValue *{
         if (self.expression) {
             MFValue *value = [self.expression execute:scope];

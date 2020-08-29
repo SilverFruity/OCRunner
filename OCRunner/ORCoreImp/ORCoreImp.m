@@ -91,7 +91,7 @@ void setterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
     ORPropertyDeclare *propDef = [[MFPropertyMapTable shareInstance] getPropertyMapTableItemWith:[target class] name:propName].property;
     MFPropertyModifier modifier = propDef.modifier;
     if (modifier & MFPropertyModifierMemWeak) {
-        value.modifier = ORDeclarationModifierWeak;
+        value.modifier = DeclarationModifierWeak;
     }
     objc_AssociationPolicy associationPolicy = mf_AssociationPolicy_with_PropertyModifier(modifier);
     objc_setAssociatedObject(target, mf_propKey(propName), value, associationPolicy);
