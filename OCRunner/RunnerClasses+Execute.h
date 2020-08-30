@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol OCExecute <NSObject>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORCodeCheck (Execute) <OCExecute>
+@interface ORNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORTypeSpecial (Execute) <OCExecute>
@@ -65,9 +65,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ORTernaryExpression (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORStatement  (Execute) <OCExecute>
-- (nullable MFValue *)execute:(MFScopeChain *)scope;
-@end
+
 @interface ORIfStatement  (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end

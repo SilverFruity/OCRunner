@@ -132,15 +132,15 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         switch (expr.value_type) {
             case OCValueDictionary:{
                 for (NSArray *kv in expr.value) {
-                    ORExpression *keyExp = kv.firstObject;
-                    ORExpression *valueExp = kv.firstObject;
+                    ORNode *keyExp = kv.firstObject;
+                    ORNode *valueExp = kv.firstObject;
                     copy_undef_var(keyExp, chain, fromScope, destScope);
                     copy_undef_var(valueExp, chain, fromScope, destScope);
                 }
                 break;
             }
             case OCValueArray:{
-                for (ORExpression *valueExp in expr.value) {
+                for (ORNode *valueExp in expr.value) {
                     copy_undef_var(valueExp, chain, fromScope, destScope);
                 }
                 break;
@@ -278,7 +278,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         
     }
 }
-@implementation ORCodeCheck(Execute)
+@implementation ORNode(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     return nil;
 }
@@ -335,9 +335,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         case OCValueDictionary:{
             NSMutableArray *exps = self.value;
             NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-            for (NSMutableArray <ORExpression *>*kv in exps) {
-                ORExpression *keyExp = kv.firstObject;
-                ORExpression *valueExp = kv.lastObject;
+            for (NSMutableArray <ORNode *>*kv in exps) {
+                ORNode *keyExp = kv.firstObject;
+                ORNode *valueExp = kv.lastObject;
                 id key = [keyExp execute:scope].objectValue;
                 id value = [valueExp execute:scope].objectValue;
                 NSAssert(key != nil, @"the key of NSDictionary can't be nil");
@@ -349,7 +349,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         case OCValueArray:{
             NSMutableArray *exps = self.value;
             NSMutableArray *array = [NSMutableArray array];
-            for (ORExpression *exp in exps) {
+            for (ORNode *exp in exps) {
                 id value = [exp execute:scope].objectValue;
                 NSAssert(value != nil, @"the vale of NSArray can't be nil");
                 [array addObject:value];
@@ -407,7 +407,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     if (variable.type == OCTypeStruct) {
         if ([self.names.firstObject hasPrefix:@"set"]) {
             NSString *setterName = self.names.firstObject;
-            ORExpression *valueExp = self.values.firstObject;
+            ORNode *valueExp = self.values.firstObject;
             NSString *fieldKey = [setterName substringFromIndex:3];
             NSString *first = [[fieldKey substringToIndex:1] lowercaseString];
             NSString *other = setterName.length > 1 ? [fieldKey substringFromIndex:1] : @"";
@@ -435,8 +435,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     for (ORValueExpression *exp in self.values){
         [argValues addObject:[exp execute:scope]];
     }
-    if (self.caller.value_type == OCValueSuper) {
-        return invoke_sueper_values(instance, sel, argValues);
+    if ([self.caller isKindOfClass:[ORValueExpression class]]) {
+        ORValueExpression *value = (ORValueExpression *)self.caller;
+        if (value.value_type == OCValueSuper) {
+            return invoke_sueper_values(instance, sel, argValues);
+        }
     }
     NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
     NSUInteger argCount = [sig numberOfArguments];
@@ -576,7 +579,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @end
 @implementation ORAssignExpression (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
-    ORExpression *resultExp;
+    ORNode *resultExp;
 #define SetResultExpWithBinaryOperator(type)\
     ORBinaryExpression *exp = [ORBinaryExpression new];\
     exp.left = self.value;\
@@ -631,51 +634,52 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             break;
     }
     
-    switch (self.value.value_type) {
-        case OCValueSelf:{
-            MFValue *resultValue = [resultExp execute:scope];
-            [scope assignWithIdentifer:@"self" value:resultValue];
-            break;
-        }
-        case OCValueVariable:{
-            MFValue *resultValue = [resultExp execute:scope];
-            [scope assignWithIdentifer:(NSString *)self.value.value value:resultValue];
-            break;
-        }
-        case OCValueMethodCall:{
-            ORMethodCall *methodCall = (ORMethodCall *)self.value;
-            if (!methodCall.isDot) {
-                NSCAssert(0, @"must dot grammar");
+
+    if ([self.value isKindOfClass:[ORValueExpression class]]) {
+        ORValueExpression *valueExp = (ORValueExpression *)self.value;
+        switch (valueExp.value_type) {
+            case OCValueSelf:{
+                MFValue *resultValue = [resultExp execute:scope];
+                [scope assignWithIdentifer:@"self" value:resultValue];
+                break;
             }
-            //调用对象setter方法
-            NSString *setterName = methodCall.names.firstObject;
-            NSString *first = [[setterName substringToIndex:1] uppercaseString];
-            NSString *other = setterName.length > 1 ? [setterName substringFromIndex:1] : @"";
-            setterName = [NSString stringWithFormat:@"set%@%@",first,other];
-            ORMethodCall *setCaller = [ORMethodCall new];
-            setCaller.caller = [(ORMethodCall *)self.value caller];
-            setCaller.names = [@[setterName] mutableCopy];
-            setCaller.values = [@[resultExp] mutableCopy];
-            setCaller.isAssignedValue = YES;
-            [setCaller execute:scope];
-            break;
+            case OCValueVariable:{
+                MFValue *resultValue = [resultExp execute:scope];
+                [scope assignWithIdentifer:(NSString *)valueExp.value value:resultValue];
+                break;
+            }
+            default:
+                break;
         }
-        case OCValueCollectionGetValue:{
-            MFValue *resultValue = [resultExp execute:scope];
-            ORSubscriptExpression *subExp = (ORSubscriptExpression *)self.value;
-            MFValue *caller = [subExp.caller execute:scope];
-            MFValue *indexValue = [subExp.keyExp execute:scope];
-            [caller subscriptSetValue:resultValue index:indexValue];
+    }else if ([self.value isKindOfClass:[ORMethodCall class]]) {
+        ORMethodCall *methodCall = (ORMethodCall *)self.value;
+        if (!methodCall.isDot) {
+            NSCAssert(0, @"must dot grammar");
         }
-        default:
-            break;
+        //调用对象setter方法
+        NSString *setterName = methodCall.names.firstObject;
+        NSString *first = [[setterName substringToIndex:1] uppercaseString];
+        NSString *other = setterName.length > 1 ? [setterName substringFromIndex:1] : @"";
+        setterName = [NSString stringWithFormat:@"set%@%@",first,other];
+        ORMethodCall *setCaller = [ORMethodCall new];
+        setCaller.caller = [(ORMethodCall *)self.value caller];
+        setCaller.names = [@[setterName] mutableCopy];
+        setCaller.values = [@[resultExp] mutableCopy];
+        setCaller.isAssignedValue = YES;
+        [setCaller execute:scope];
+    }else if([self.value isKindOfClass:[ORSubscriptExpression class]]){
+        MFValue *resultValue = [resultExp execute:scope];
+        ORSubscriptExpression *subExp = (ORSubscriptExpression *)self.value;
+        MFValue *caller = [subExp.caller execute:scope];
+        MFValue *indexValue = [subExp.keyExp execute:scope];
+        [caller subscriptSetValue:resultValue index:indexValue];
     }
     return [MFValue normalEnd];
 }
 @end
 @implementation ORDeclareExpression (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
-    BOOL staticVar = self.modifier & ORDeclarationModifierStatic;
+    BOOL staticVar = self.modifier & DeclarationModifierStatic;
     MFValue *(^initializeBlock)(void) = ^MFValue *{
         if (self.expression) {
             MFValue *value = [self.expression execute:scope];
@@ -919,10 +923,6 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }
 }
 @end
-@implementation ORStatement (Execute)
-- (nullable MFValue *)execute:(MFScopeChain *)scope {
-    return [MFValue normalEnd];;
-}@end
 @implementation ORIfStatement (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     NSMutableArray *statements = [NSMutableArray array];
@@ -1024,7 +1024,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @implementation ORForStatement (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
-    for (ORExpression *exp in self.varExpressions) {
+    for (ORNode *exp in self.varExpressions) {
         [exp execute:current];
     }
     while (1) {
@@ -1040,7 +1040,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }else if (result.isContinue){
             continue;
         }
-        for (ORExpression *exp in self.expressions) {
+        for (ORNode *exp in self.expressions) {
             [exp execute:(MFScopeChain *)current];
         }
     }
@@ -1256,9 +1256,10 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     // 注册全局变量
     for (id exp in self.fields) {
         if ([exp isKindOfClass:[ORAssignExpression class]]) {
-            lastValue = [[(ORAssignExpression *)exp expression] execute:scope];
+            ORAssignExpression *assignExp = (ORAssignExpression *)exp;
+            lastValue = [assignExp.expression execute:scope];
             lastValue.typeEncode = typeEncode;
-            [scope setValue:lastValue withIndentifier:[(ORAssignExpression *)exp value].value];
+            [scope setValue:lastValue withIndentifier:[(ORValueExpression *)assignExp.value value]];
         }else if ([exp isKindOfClass:[ORValueExpression class]]){
             if (lastValue) {
                 lastValue = [MFValue valueWithLongLong:lastValue.longLongValue + 1];
@@ -1284,14 +1285,14 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @implementation ORTypedefExpressoin (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope{
     if ([self.expression isKindOfClass:[ORTypeVarPair class]]) {
-        [[ORTypeSymbolTable shareInstance] addTypePair:self.expression forAlias:self.typeNewName];
+        [[ORTypeSymbolTable shareInstance] addTypePair:(ORTypeVarPair *)self.expression forAlias:self.typeNewName];
     }else if ([self.expression isKindOfClass:[ORStructExpressoin class]]){
-        ORStructExpressoin *structExp = self.expression;
+        ORStructExpressoin *structExp = (ORStructExpressoin *)self.expression;
         [structExp execute:scope];
         ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:structExp.sturctName];
         [[ORTypeSymbolTable shareInstance] addSybolItem:item forAlias:self.typeNewName];
     }else if ([self.expression isKindOfClass:[OREnumExpressoin class]]){
-        OREnumExpressoin *enumExp = self.expression;
+        OREnumExpressoin *enumExp = (OREnumExpressoin *)self.expression;
         [enumExp execute:scope];
         ORTypeSpecial *special = [ORTypeSpecial specialWithType:enumExp.valueType name:self.typeNewName];
         ORTypeVarPair *pair = [[ORTypeVarPair alloc] init];

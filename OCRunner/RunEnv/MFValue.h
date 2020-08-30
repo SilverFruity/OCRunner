@@ -299,7 +299,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 
 @interface MFValue : NSObject <NSCopying>
 @property (assign, nonatomic) MFStatementResultType resultType;
-@property (assign,nonatomic)ORDeclarationModifier modifier;
+@property (assign,nonatomic)DeclarationModifier modifier;
 @property (assign,nonatomic,readonly)OCType type;
 @property (strong,nonatomic)NSString *typeName;
 @property (assign,nonatomic)NSInteger pointerCount;

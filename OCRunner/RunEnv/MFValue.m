@@ -121,8 +121,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     }
     return strcmp(self.typeEncode, OCTypeStringBlock) == 0;
 }
-- (void)setModifier:(ORDeclarationModifier)modifier{
-    if (modifier & ORDeclarationModifierWeak && (self.type == OCTypeObject || self.isBlockValue)) {
+- (void)setModifier:(DeclarationModifier)modifier{
+    if (modifier & DeclarationModifierWeak && (self.type == OCTypeObject || self.isBlockValue)) {
         self.weakObjectValue = self.strongObjectValue;
         self.strongObjectValue = nil;
     }

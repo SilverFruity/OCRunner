@@ -7,13 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
-#import <OCRunner/OCRunner.h>
-#import <OCRunner/ORCoreImp.h>
-#import <OCRunner/ORTypeVarPair+TypeEncode.h>
-//#import <OCRunnerArm64/OCRunner.h>≥
-//#import <OCRunnerArm64/ORCoreImp.h>
-//#import <OCRunnerArm64/ORTypeVarPair+TypeEncode.h>
-
+#import <OCRunner.h>
 #import <objc/message.h>
 @interface ORCoreFunctionTests : XCTestCase
 
