@@ -54,7 +54,6 @@
 		EE197B862478DD190049CFDA /* ORInterpreter.m in Sources */ = {isa = PBXBuildFile; fileRef = EE197B842478DD190049CFDA /* ORInterpreter.m */; };
 		EE1C6FA324BF364A00430A51 /* ORHandleTypeEncode.h in Headers */ = {isa = PBXBuildFile; fileRef = EE1C6FA124BF364A00430A51 /* ORHandleTypeEncode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE1C6FA424BF364A00430A51 /* ORHandleTypeEncode.m in Sources */ = {isa = PBXBuildFile; fileRef = EE1C6FA224BF364A00430A51 /* ORHandleTypeEncode.m */; };
-		EE38F997246C3C2A00E7C37B /* RunnerClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98998724658DB700ACF2C1 /* RunnerClasses.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE680BA424C1D511005BA3F5 /* ORSystemFunctionTable.h in Headers */ = {isa = PBXBuildFile; fileRef = EE680BA224C1D511005BA3F5 /* ORSystemFunctionTable.h */; };
 		EE680BA524C1D511005BA3F5 /* ORSystemFunctionTable.m in Sources */ = {isa = PBXBuildFile; fileRef = EE680BA324C1D511005BA3F5 /* ORSystemFunctionTable.m */; };
 		EE79FF6B246D917100ABE06F /* ORTestReplaceClass.m in Sources */ = {isa = PBXBuildFile; fileRef = EE79FF6A246D917100ABE06F /* ORTestReplaceClass.m */; };
@@ -113,6 +112,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = EED67A6D2270AE0E0015AC02;
 			remoteInfo = oc2mangoLib;
+		};
+		EE66C0D124FEAF4B00C85B31 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = EE4F367924F9251C00F685AF;
+			remoteInfo = BinaryPatchCodeGenerator;
+		};
+		EE66C0D324FEAF4B00C85B31 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = EE66C0A324FE97D500C85B31;
+			remoteInfo = PatchGenerator;
 		};
 		EE98997624658DA600ACF2C1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -200,7 +213,6 @@
 		EE98997424658DA600ACF2C1 /* OCRunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OCRunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE98997B24658DA600ACF2C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EE98998624658DB700ACF2C1 /* RunnerClasses+Execute.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RunnerClasses+Execute.m"; sourceTree = "<group>"; };
-		EE98998724658DB700ACF2C1 /* RunnerClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RunnerClasses.h; sourceTree = "<group>"; };
 		EE98998824658DB800ACF2C1 /* RunnerClasses+Execute.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RunnerClasses+Execute.h"; sourceTree = "<group>"; };
 		EE98998E24658F8900ACF2C1 /* MFPropertyMapTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFPropertyMapTable.h; sourceTree = "<group>"; };
 		EE98998F24658F8900ACF2C1 /* MFStaticVarTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFStaticVarTable.h; sourceTree = "<group>"; };
@@ -252,6 +264,8 @@
 				048FAA77247FB6180036F5EE /* oc2mango */,
 				048FAA79247FB6180036F5EE /* oc2mangoLib.framework */,
 				048FAA7B247FB6180036F5EE /* oc2mangoLibTests.xctest */,
+				EE66C0D224FEAF4B00C85B31 /* BinaryPatchCodeGenerator */,
+				EE66C0D424FEAF4B00C85B31 /* PatchGenerator */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -349,7 +363,6 @@
 			isa = PBXGroup;
 			children = (
 				048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */,
-				EE98998724658DB700ACF2C1 /* RunnerClasses.h */,
 				EE98998824658DB800ACF2C1 /* RunnerClasses+Execute.h */,
 				EE98998624658DB700ACF2C1 /* RunnerClasses+Execute.m */,
 				EE197B832478DD190049CFDA /* ORInterpreter.h */,
@@ -443,7 +456,6 @@
 				EE9899A424658F8900ACF2C1 /* MFPropertyMapTable.h in Headers */,
 				EE9899B624658F8900ACF2C1 /* MFMethodMapTable.h in Headers */,
 				04AEF95324DD4FF1008EB64F /* ORCoreFunctionRegister.h in Headers */,
-				EE38F997246C3C2A00E7C37B /* RunnerClasses.h in Headers */,
 				042AC259246D453700070814 /* MFBlock.h in Headers */,
 				EE9899AD24658F8900ACF2C1 /* MFScopeChain.h in Headers */,
 				EE197B852478DD190049CFDA /* ORInterpreter.h in Headers */,
@@ -579,6 +591,20 @@
 			fileType = wrapper.cfbundle;
 			path = oc2mangoLibTests.xctest;
 			remoteRef = 048FAA7A247FB6180036F5EE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		EE66C0D224FEAF4B00C85B31 /* BinaryPatchCodeGenerator */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = BinaryPatchCodeGenerator;
+			remoteRef = EE66C0D124FEAF4B00C85B31 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		EE66C0D424FEAF4B00C85B31 /* PatchGenerator */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = PatchGenerator;
+			remoteRef = EE66C0D324FEAF4B00C85B31 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */

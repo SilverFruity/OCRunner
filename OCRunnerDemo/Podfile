@@ -7,11 +7,11 @@ target 'OCRunnerDemo' do
   use_frameworks!
 
   pod 'Masonry'
-  pod 'oc2mangoLib', :path => '../oc2mango'
+  pod 'ORPatchFile', :path => '../oc2mango'
   pod 'OCRunner', :path => '../'
   target 'OCRunnerDemoTests' do
     inherit! :search_paths
-    # Pods for testing
+    pod 'oc2mangoLib', :path => '../oc2mango'
   end
 
   target 'OCRunnerDemoUITests' do

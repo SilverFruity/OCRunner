@@ -13,35 +13,40 @@
 #import "MFValue.h"
 #import "ORStructDeclare.h"
 #import "ORSystemFunctionTable.h"
+
 @implementation ORInterpreter
-+ (void)excute:(NSString *)string{
-    //添加函数、变量等
-    mf_add_built_in();
-    MFScopeChain *scope = [MFScopeChain topScope];
-    AST *abstractAst = [OCParser parseSource:string];
-    //注册Protcol
-    for (id <OCExecute> protcol in abstractAst.protcolCache.allValues){
-        [protcol execute:scope];
-    }
-    //注册Class
-    for (id <OCExecute> clazz in abstractAst.sortClasses){
-        [clazz execute:scope];
-    }
++ (void)excuteBinaryPatchFile:(NSString *)path{
     
-    //链接函数指针
-    [self linkFunctions:abstractAst scope:scope];
     
-    // 执行全局函数声明等
-    for (id <OCExecute> expression in abstractAst.globalStatements) {
-        [expression execute:scope];
+    //加载补丁文件
+    ORPatchFile *file = [ORPatchFile loadBinaryPatch:path];
+    
+    //如果版本判断未通过，则为nil
+    if (file == nil) {
+        return;
     }
+    [self excuteNodes:file.nodes];
 }
 
-+ (void)linkFunctions:(AST *)abstractAst scope:(MFScopeChain *)scope{
++ (void)excuteNodes:(NSArray <ORNode *>*)nodes{
+    MFScopeChain *scope = [MFScopeChain topScope];
+    
+    //添加函数、变量等
+    mf_add_built_in(scope);
+    
+    //链接函数指针，过滤一次
+    nodes = [self linkFunctions:nodes scope:scope];
+    
+    //注册Protcol 注册Class 全局函数声明等
+    for (ORNode *node in nodes) {
+        [node execute:scope];
+    }
+}
++ (NSArray *)linkFunctions:(NSArray *)nodes scope:(MFScopeChain *)scope{
     NSMutableArray <ORTypeVarPair *>*funcVars = [NSMutableArray array];
     NSMutableArray *normalStatements = [NSMutableArray array];
     NSMutableArray *names = [NSMutableArray array];
-    for (id <OCExecute> expression in abstractAst.globalStatements) {
+    for (id <OCExecute> expression in nodes) {
         if ([expression isKindOfClass:[ORDeclareExpression class]]) {
             ORTypeVarPair *pair = [(ORDeclareExpression *)expression pair];
             if ([pair.var isKindOfClass:[ORFuncVariable class]]) {
@@ -50,11 +55,9 @@
                 continue;
             }
         }
+        //过滤 link functions
         [normalStatements addObject:expression];
     }
-    //过滤 link functions
-    abstractAst.globalStatements = normalStatements;
-    
     //获取函数指针
     NSDictionary *table = [ORSearchedFunction functionTableForNames:names];
     for (ORTypeVarPair *pair in funcVars) {
@@ -90,5 +93,6 @@
         NSLog(@"%@", build_ins);
     }
     #endif
+    return normalStatements;
 }
 @end

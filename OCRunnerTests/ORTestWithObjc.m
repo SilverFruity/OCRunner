@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import <OCRunner.h>
+#import <oc2mangoLib/oc2mangoLib.h>
 #import <objc/message.h>
 @interface ORTestWithObjc : XCTestCase
 @property (nonatomic, strong)MFScopeChain *currentScope;
@@ -16,7 +17,6 @@
 
 @implementation ORTestWithObjc
 - (void)setUp {
-    mf_add_built_in();
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSBundle *currentBundle = [NSBundle bundleForClass:[ORTestWithObjc class]];
@@ -24,13 +24,16 @@
         NSBundle *frameworkBundle = [NSBundle bundleWithPath:bundlePath];
         NSString *UIKitPath = [frameworkBundle pathForResource:@"UIKitRefrences" ofType:nil];
         NSString *UIKitData = [NSString stringWithContentsOfFile:UIKitPath encoding:NSUTF8StringEncoding error:nil];
-        [ORInterpreter excute:UIKitData];
+        AST *ast = [OCParser parseSource:UIKitData];
+        [ORInterpreter excuteNodes:ast.nodes];
         
         NSString *GCDPath = [frameworkBundle pathForResource:@"GCDRefrences" ofType:nil];
         NSString *CCDData = [NSString stringWithContentsOfFile:GCDPath encoding:NSUTF8StringEncoding error:nil];
-        [ORInterpreter excute:CCDData];
+        ast = [OCParser parseSource:CCDData];
+        [ORInterpreter excuteNodes:ast.nodes];
     });    
     self.topScope = [MFScopeChain topScope];
+    mf_add_built_in(self.topScope);
     XCTAssert(self.topScope.vars.count != 0);
     self.currentScope = [MFScopeChain scopeChainWithNext:self.topScope];
 }
@@ -303,18 +306,7 @@ typedef struct MyStruct2 {
     }];
 }
 - (void)testParsePerformance{
-    [self measureBlock:^{
-        NSBundle *currentBundle = [NSBundle bundleForClass:[ORTestWithObjc class]];
-        NSString *bundlePath = [currentBundle pathForResource:@"Scripts" ofType:@"bundle"];
-        NSBundle *frameworkBundle = [NSBundle bundleWithPath:bundlePath];
-        NSString *UIKitPath = [frameworkBundle pathForResource:@"UIKitRefrences" ofType:nil];
-        NSString *UIKitData = [NSString stringWithContentsOfFile:UIKitPath encoding:NSUTF8StringEncoding error:nil];
-        [ORInterpreter excute:UIKitData];
-        
-        NSString *GCDPath = [frameworkBundle pathForResource:@"GCDRefrences" ofType:nil];
-        NSString *CCDData = [NSString stringWithContentsOfFile:GCDPath encoding:NSUTF8StringEncoding error:nil];
-        [ORInterpreter excute:CCDData];
-    }];
+    
 }
 - (void)testGetPointerAddress{
     MFScopeChain *scope = self.currentScope;

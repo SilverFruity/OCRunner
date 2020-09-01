@@ -8,7 +8,7 @@
 
 import XCTest
 import OCRunner
-//import OCRunnerArm64
+import oc2mangoLib
 class CRunnerTests: XCTestCase {
     var scope: MFScopeChain!
     let ocparser = Parser.shared()
@@ -21,16 +21,19 @@ class CRunnerTests: XCTestCase {
             
             if let UIKitPath = scriptBundle.path(forResource: "UIKitRefrences", ofType: nil),
                 let UIKitData = try? String.init(contentsOfFile: UIKitPath, encoding: .utf8){
-                ORInterpreter.excute(UIKitData)
+                let ast = ocparser.parseSource(UIKitData)
+                ORInterpreter.excuteNodes(ast.nodes as! [Any])
+                
             }
             
             if let GCDPath = scriptBundle.path(forResource: "GCDRefrences", ofType: nil),
                 let CCDData = try? String.init(contentsOfFile: GCDPath, encoding: .utf8){
-                ORInterpreter.excute(CCDData)
+                let ast = ocparser.parseSource(CCDData)
+                ORInterpreter.excuteNodes(ast.nodes as! [Any])
             }
         }
-        mf_add_built_in()
         scope = MFScopeChain.init(next: MFScopeChain.topScope())
+        mf_add_built_in(scope)
     }
     override func tearDown() {
         

@@ -1,13 +1,16 @@
 PODS:
   - Masonry (1.1.0)
-  - oc2mangoLib (1.0.2)
-  - OCRunner (1.0.2):
-    - oc2mangoLib (~> 1.0)
+  - oc2mangoLib (1.0.2):
+    - ORPatchFile (~> 2.0)
+  - OCRunner (2.0):
+    - ORPatchFile (~> 2.0)
+  - ORPatchFile (2.0)
 
 DEPENDENCIES:
   - Masonry
   - oc2mangoLib (from `../oc2mango`)
   - OCRunner (from `../`)
+  - ORPatchFile (from `../oc2mango`)
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
@@ -18,12 +21,15 @@ EXTERNAL SOURCES:
     :path: "../oc2mango"
   OCRunner:
     :path: "../"
+  ORPatchFile:
+    :path: "../oc2mango"
 
 SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
-  oc2mangoLib: 658dc622713cdde26538ace01254c856e4be1e7d
-  OCRunner: fd3f349c942187b885968859b32aed4715639aa8
+  oc2mangoLib: 8102206cf25a21ae0a2345105332152fef661951
+  OCRunner: 521cb695f3858942d7d07b2f2160490831b46349
+  ORPatchFile: a1497e28fa8e935afc65b3b2a91356f6d78d5fa9
 
-PODFILE CHECKSUM: acc4960cff92ad4144076156b58ae2f0f4036d3e
+PODFILE CHECKSUM: 442794f22a36d2ebe5d1dba0d6e31a14cea69242
 
 COCOAPODS: 1.8.4

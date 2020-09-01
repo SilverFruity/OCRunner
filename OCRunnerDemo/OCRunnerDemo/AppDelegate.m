@@ -17,9 +17,8 @@
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"ViewController1" ofType:nil];
-    NSString *data = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
-    [ORInterpreter excute:data];
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"binarypatch" ofType:nil];
+    [ORInterpreter excuteBinaryPatchFile:path];
     
 #if __x86_64__  &&  TARGET_OS_SIMULATOR  &&  !TARGET_OS_IOSMAC
     NSLog(@"SIMULATOR");

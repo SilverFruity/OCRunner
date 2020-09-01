@@ -8,7 +8,8 @@
 
 #ifndef built_in_h
 #define built_in_h
-extern void mf_add_built_in(void);
+@class MFScopeChain;
+extern void mf_add_built_in(MFScopeChain *scope);
 
 
 #endif /* built_in_h */

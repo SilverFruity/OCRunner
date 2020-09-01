@@ -12,6 +12,6 @@ s.ios.deployment_target = "8.0"
 s.source       = { :git => "https://github.com/SilverFruity/OCRunner.git", :tag => "#{s.version}" }
 s.source_files  = "OCRunner/**/*.{h,m,c}"
 s.vendored_libraries  = 'OCRunner/libffi/libffi.a'
-s.dependency "oc2mangoLib", "~> 1.0"
+s.dependency "ORPatchFile", "~> 1.0"
 end
 
