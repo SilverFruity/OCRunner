@@ -154,9 +154,12 @@
     [self addTypePair:typePair forAlias:typePair.var.varname];
 }
 - (void)addTypePair:(ORTypeVarPair *)typePair forAlias:(NSString *)alias{
-    ORSymbolItem *item = [[ORSymbolItem alloc] init];
-    item.typeEncode = [NSString stringWithUTF8String:typePair.typeEncode];
-    item.typeName = typePair.type.name;
+    ORSymbolItem *item = [self symbolItemForTypeName:alias];
+    if (item == nil) {
+        item = [[ORSymbolItem alloc] init];
+        item.typeEncode = [NSString stringWithUTF8String:typePair.typeEncode];
+        item.typeName = typePair.type.name;
+    }
     [self addSybolItem:item forAlias:alias];
 }
 - (void)addSybolItem:(ORSymbolItem *)item forAlias:(NSString *)alias{

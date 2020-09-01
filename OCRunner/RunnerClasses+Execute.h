@@ -6,9 +6,9 @@
 //  Copyright © 2020 yongpengliang. All rights reserved.
 //
 
-#import "RunnerClasses.h"
-@class MFValue;
+#import <oc2mangoLib/oc2mangoLib.h>
 #import <objc/runtime.h>
+@class MFValue;
 NS_ASSUME_NONNULL_BEGIN
 @class MFScopeChain;
 @protocol OCExecute <NSObject>

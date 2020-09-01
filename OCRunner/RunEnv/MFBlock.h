@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "RunnerClasses.h"
+#import "RunnerClasses+Execute.h"
 #import "MFScopeChain.h"
 enum {
 	BLOCK_DEALLOCATING =      (0x0001),

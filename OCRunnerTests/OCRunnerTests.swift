@@ -934,6 +934,23 @@ class CRunnerTests: XCTestCase {
             exp.execute(scope);
         }
         let rect = ORStructDeclareTable.shareInstance().getStructDeclare(withName: "CGRect")
-        print(NSString.init(utf8String: rect!.typeEncoding) == "{CGRect={CGPoint=dd}{CGSize=dd}}")
+        XCTAssert(NSString.init(utf8String: rect!.typeEncoding) == "{CGRect={CGPoint=dd}{CGSize=dd}}")
+    }
+    func testTypedef(){
+        source =
+        """
+        typedef long long IntegerType;
+        typedef IntegerType dispatch_once_t;
+        """
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORNode]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        let item1 = ORTypeSymbolTable.shareInstance().symbolItem(forTypeName: "IntegerType")
+        let item2 = ORTypeSymbolTable.shareInstance().symbolItem(forTypeName: "dispatch_once_t")
+        XCTAssert(item1.typeEncode == "q", item1.typeEncode)
+        XCTAssert(item2.typeEncode == "q", item2.typeEncode)
+        
     }
 }

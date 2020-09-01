@@ -7,7 +7,6 @@
 //
 
 #import "ORInterpreter.h"
-#import <oc2mangoLib/oc2mangoLib.h>
 #import "RunnerClasses+Execute.h"
 #import "MFScopeChain.h"
 #import "ORSearchedFunction.h"

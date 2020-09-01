@@ -6,7 +6,7 @@
 //  Copyright © 2020 SilverFruity. All rights reserved.
 //
 
-#import <oc2mangoLib/oc2mangoLib.h>
+#import "RunnerClasses+Execute.h"
 #if __has_include("ffi.h")
 #import "ffi.h"
 NS_ASSUME_NONNULL_BEGIN

@@ -10,7 +10,7 @@
 #define util_h
 #import <Foundation/Foundation.h>
 #include <objc/runtime.h>
-#import "RunnerClasses.h"
+#import "RunnerClasses+Execute.h"
 
 inline static  char *removeTypeEncodingPrefix(char *typeEncoding){
 	while (*typeEncoding == 'r' || // const

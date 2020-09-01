@@ -8,7 +8,7 @@
 
 #import "ORSearchedFunction.h"
 #import "SymbolSearch.h"
-#import "RunnerClasses.h"
+#import "RunnerClasses+Execute.h"
 #import "ORArgsStack.h"
 #import "MFValue.h"
 #import "ORTypeVarPair+TypeEncode.h"
