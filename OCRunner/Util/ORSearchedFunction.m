@@ -26,6 +26,8 @@
     return function;
 }
 + (NSDictionary *)functionTableForNames:(NSArray *)names{
+    //函数声明去重，解决多次链接的问题，因为最后一次查找始终会为NULL
+    names = [[NSSet setWithArray:names] allObjects];
     struct FunctionSearch searches[names.count];
     NSMutableDictionary *table = [NSMutableDictionary dictionary];
     for (int i = 0; i < names.count; i++) {
