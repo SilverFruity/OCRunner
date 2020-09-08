@@ -1,5 +1,5 @@
 # OCRunner
-
+[blog中的介绍](https://silverfruity.github.io/2020/09/04/OCRunner/)
 ## Demo运行
 
 直接下载zip，是无法正常运行的。必须通过git clone --recursive。
