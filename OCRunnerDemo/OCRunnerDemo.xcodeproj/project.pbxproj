@@ -10,7 +10,6 @@
 		994370B6E6826AB9C293F686 /* Pods_OCRunnerDemo_OCRunnerDemoUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2566C827C6925E5FB35FC01D /* Pods_OCRunnerDemo_OCRunnerDemoUITests.framework */; };
 		D71B1056F7894677E4150783 /* Pods_OCRunnerDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A0001072323984F1566D9A7 /* Pods_OCRunnerDemo.framework */; };
 		EE480E9324794CDA003E4970 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = EE480E9224794CDA003E4970 /* AppDelegate.m */; };
-		EE480E9624794CDA003E4970 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = EE480E9524794CDA003E4970 /* SceneDelegate.m */; };
 		EE480E9924794CDA003E4970 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EE480E9824794CDA003E4970 /* ViewController.m */; };
 		EE480E9C24794CDA003E4970 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EE480E9A24794CDA003E4970 /* Main.storyboard */; };
 		EE480E9E24794CDB003E4970 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EE480E9D24794CDB003E4970 /* Assets.xcassets */; };
@@ -64,8 +63,6 @@
 		EE480E8E24794CDA003E4970 /* OCRunnerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OCRunnerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE480E9124794CDA003E4970 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		EE480E9224794CDA003E4970 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		EE480E9424794CDA003E4970 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
-		EE480E9524794CDA003E4970 /* SceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SceneDelegate.m; sourceTree = "<group>"; };
 		EE480E9724794CDA003E4970 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		EE480E9824794CDA003E4970 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		EE480E9B24794CDA003E4970 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -172,8 +169,6 @@
 				EE480E9124794CDA003E4970 /* AppDelegate.h */,
 				EE480E9224794CDA003E4970 /* AppDelegate.m */,
 				EE66C0BF24FEAA0B00C85B31 /* binarypatch */,
-				EE480E9424794CDA003E4970 /* SceneDelegate.h */,
-				EE480E9524794CDA003E4970 /* SceneDelegate.m */,
 				EE480E9724794CDA003E4970 /* ViewController.h */,
 				EE480E9824794CDA003E4970 /* ViewController.m */,
 				EE66C0BD24FEA97000C85B31 /* Scripts.bundle */,
@@ -523,7 +518,6 @@
 				EE480E9924794CDA003E4970 /* ViewController.m in Sources */,
 				EE480E9324794CDA003E4970 /* AppDelegate.m in Sources */,
 				EE480EA424794CDB003E4970 /* main.m in Sources */,
-				EE480E9624794CDA003E4970 /* SceneDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
