@@ -319,7 +319,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             if (class) {
                 value = [MFValue valueWithClass:class];
             }else{
-                if (self.value) NSLog(@"OCRunner Warning: Can't find object or class : %@", self.value);
+#if DEBUG
+                if (self.value) NSLog(@"\n---------OCRunner Warning---------\n"
+                                      @"Can't find object or class: %@\n"
+                                      @"-----------------------------------", self.value);
+#endif
                 value = [MFValue voidValue];
             }
             return value;
