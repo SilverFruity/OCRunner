@@ -314,10 +314,14 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     switch (self.value_type) {
         case OCValueVariable:{
             MFValue *value = [scope getValueWithIdentifierInChain:self.value];
-            if (!value) {
-                value = [MFValue valueWithClass:NSClassFromString(self.value)];
+            if (value != nil) return value;
+            Class class = NSClassFromString(self.value);
+            if (class) {
+                value = [MFValue valueWithClass:class];
+            }else{
+                if (self.value) NSLog(@"OCRunner Warning: Can't find object or class : %@", self.value);
+                value = [MFValue voidValue];
             }
-            NSCAssert(value, @"must exsited");
             return value;
         }
         case OCValueSelf:
@@ -423,13 +427,6 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }
     }
     id instance = variable.objectValue;
-    if (!instance) {
-        if (variable.type == OCTypeClass) {
-            instance = *(Class *)variable.pointer;
-        }else{
-            NSCAssert(0, @"objectValue or classValue must has one");
-        }
-    }
     SEL sel = NSSelectorFromString(self.selectorName);
     NSMutableArray <MFValue *>*argValues = [NSMutableArray array];
     for (ORValueExpression *exp in self.values){
@@ -440,6 +437,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         if (value.value_type == OCValueSuper) {
             return invoke_sueper_values(instance, sel, argValues);
         }
+    }
+    if (instance == nil) {
+        return [MFValue voidValue];
     }
     NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
     NSUInteger argCount = [sig numberOfArguments];

@@ -956,4 +956,23 @@ class CRunnerTests: XCTestCase {
         XCTAssert(item2.typeEncode == "q", item2.typeEncode)
         
     }
+    
+    func testNilCallMethod(){
+        source =
+        """
+        id a = [nil new];
+        id b = [XXLabel new];
+        id c = [object new];
+        id d = [a callMethod];
+        """
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORNode]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        XCTAssert(scope.getValueWithIdentifier("a")?.objectValue == nil)
+        XCTAssert(scope.getValueWithIdentifier("b")?.objectValue == nil)
+        XCTAssert(scope.getValueWithIdentifier("c")?.objectValue == nil)
+        XCTAssert(scope.getValueWithIdentifier("d")?.objectValue == nil)
+    }
 }
