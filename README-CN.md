@@ -1,5 +1,5 @@
 # OCRunner
-[blog中的介绍](https://silverfruity.github.io/2020/09/04/OCRunner/)
+
 ## Demo运行
 
 直接下载zip，是无法正常运行的。必须通过git clone --recursive。
@@ -7,55 +7,50 @@
 ```shell
 git clone --recursive https://github.com/SilverFruity/OCRunner.git
 ```
-## 主要功能
 
-* 执行PatchGenerator生成的二进制补丁，进行热更新。
+## 简介
 
-* 可选libffi或者内置自定义实现的arm64 libff(基于TypeEncode不再是ffi_type)。
+### [OCRunner](https://github.com/SilverFruity/OCRunner)开发补丁的工作流
 
-  默认使用libffi.a实现。
+![0](https://silverfruity.github.io/2020/09/04/OCRunner/OCRunner_0.jpeg)
 
-  * 不使用libffi.a:  项目中移除的libffi文件夹的引用即可。
-  * 使用libffi.a:  导入libffi文件夹即可。
+### 初衷
 
-* 86%的单元测试覆盖。
+为了能够实现一篇文章的思路：Objective-C源码 -> 二进制补丁文件 ->热更新（具体是哪篇我忘了）。当时刚好开始了[oc2mango](https://github.com/SilverFruity/oc2mango)翻译器的漫漫长路（顺带为了学习编译原理，嘻嘻），等基本完成以后，就开始肝OCRunner：完全兼容struct，enum，系统C函数调用，魔改libffi，生成补丁文件等，尽可能兼容Objective-C，为了做一个直接运行OC的快乐人。
 
-## 支持的Objective-C语法
+### 各方职责
 
-* 除去预编译、C数组声明和赋值，其他语法皆已支持。
+* [oc2mangoLib](https://github.com/SilverFruity/oc2mango/tree/master/oc2mangoLib)相当于一个简单的编译器，负责生成语法树
+* [ORPatchFile](https://github.com/SilverFruity/oc2mango/tree/master/oc2mangoLib/PatchFile)负责将语法树序列化、反序列化和版本判断
+* [PatchGenerator](https://github.com/SilverFruity/oc2mango/tree/master/PatchGenerator)负责将oc2mangoLib和ORPatchFile的功能整合（以上工具都在[oc2mango](https://github.com/SilverFruity/oc2mango)项目下）
+* [OCRunner](https://github.com/SilverFruity/OCRunner)负责解释执行语法树
 
-* 支持方法替换以及新建类。
+### 与其他库的区别
 
-* 支持全局C函数声明，直接获取非内联函数指针。
+* 下发二进制补丁文件。增加安全性，减小补丁大小，省去词法分析与语法分析，优化启动时间，可在PatchGenerator阶段进行优化
 
-* 支持结构体。内置结构体内存布局，结构体取值与赋值等。
+* 自定义的Arm64 ABI （可以不使用libffi）
 
-* 支持枚举声明。
+* 完整的Objective-C语法支持，除去预编译和部分语法
 
-* 支持可变参数函数和方法调用。
+## 本地使用OCRunner运行补丁
 
-* 支持指针操作: '&'、'*'。
+[OCRunnerDemo](https://github.com/SilverFruity/OCRunner/tree/master/OCRunnerDemo)可以作为整个流程的参照.
 
-* 支持Protocol。
-
-  等.....
-
-## 如何使用
-
-###  1. Cocoapods导入
+###  Cocoapods导入OCRunner
 ```ruby
 pod 'OCRunner'      #支持所有架构，包含libffi.a
 # 或者
 pod 'OCRunnerArm64' #仅支持 arm64和arm64e，没有libffi.a
 ```
 
-### 2. 下载 [PatchGenerator](https://github.com/SilverFruity/oc2mango/releases)
+### 下载 [PatchGenerator](https://github.com/SilverFruity/oc2mango/releases)
 
 解压PatchGenerato.zip，然后将PatchGenerator保存到/usr/bin/或项目目录下.
 
-### 3.  添加PatchGenerator的 `Run Script` 
+### 添加PatchGenerator的 `Run Script` 
 
-1. Project Setting -> Build Phases -> 左上角的 `+` -> `New Run Script Phase`
+1. **Project Setting** -> **Build Phases** -> 左上角的 `+` -> `New Run Script Phase`
 
 2. PatchGenerator的路径 **-files** Objective-C源文件列表或者文件夹 **-refs** Objective-C头文件列表或者文件夹 **-output** 输出补丁保存的位置
 
@@ -65,13 +60,13 @@ pod 'OCRunnerArm64' #仅支持 arm64和arm64e，没有libffi.a
    $SRCROOT/OCRunnerDemo/PatchGenerator -files $SRCROOT/OCRunnerDemo/ViewController1 -refs  $SRCROOT/OCRunnerDemo/Scripts.bundle -output $SRCROOT/OCRunnerDemo/binarypatch
    ```
 
-### 4.  开发环境下: 测试脚本
+### 开发环境下: 运行补丁
 
 1. 将生成的补丁文件作为资源文件添加到项目中
 
 2. Appdelegate.m
 
-```objective-c
+```objc
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 #if DEBUG
     NSString *patchFilePath = [[NSBundle mainBundle] pathForResource:@"PatchFileName" ofType:nil];
@@ -85,244 +80,141 @@ pod 'OCRunnerArm64' #仅支持 arm64和arm64e，没有libffi.a
 
 3. 每次修改文件，记得Command+B，调用Run Scrip，重新生成补丁文件.
 
-### 5. 正式环境
+### 正式环境
 
 1. 将补丁上传到服务器
 2. App中下载补丁文件并保存到本地
 3. 使用**[ORInterpreter excuteBinaryPatchFile:PatchFilePath]** 执行补丁
 
-## 与Objective-C当前存在的语法差异
-
-### 预编译指令
-
-不支持预编译指令 #define #if等
-
-### 类修复问题
-
-* 问题1: 我有个类有abcde5个方法以及若干属性，如果我只想对其中的A方法进行重写，我要把其他几个都带上吗？ 答: 只需要重写A方法
-
-#### 已经存在的类
-
-支持的最简方式：
-
-```objective-c
-@implementation ORTestReplaceClass
-- (int)otherMethod{
-    return 10;
-}
-- (int)test{
-    return [self otherMethod];
-}
-@end
-```
-
-如果需要添加properties:
-
-```objective-c
-@interface ORTestReplaceClass : NSObject
-@property (assign, nonatomic) NSInteger num;
-@end
-@implementation ORTestReplaceClass
-- (int)otherMethod{
-    return 10;
-}
-- (int)test{
-    return [self otherMethod];
-}
-@end
-```
 
 
+## 使用介绍
 
-#### 新建类
+### 引入结构体、枚举、typedef
 
-这里新建的ORTestReplaceClass类默认会继承自NSObject.
+可以通过修改**OCRunnerDemo**中的**ViewController1**，运行以下代码.
 
-```objective-c
-@implementation ORTestReplaceClass
-- (int)otherMethod{
-    return 10;
-}
-- (int)test{
-    return [self otherMethod];
-}
-@end
-```
-
-如果你想添加 ivar, property或者父类，就必须使用@interface。
-
-提示：只有在新建类的时候，才能添加成员变量。
-
-```objective-c
-@interface ORTestReplaceClass : NSObject
-{
-  int _testValue;
-  id _testObject;
-}
-@property (assign, nonatomic) NSInteger num;
-@end
-@implementation ORTestReplaceClass
-{
-  int _impivar;
-}
-- (int)otherMethod{
-    return 10;
-}
-- (int)test{
-    return [self otherMethod];
-}
-@end
-```
-
-#### 支持分类写法
-
-```objective-c
-@implementation Demo
-- (instancetype)initWithBaseUrl:(NSURL *)baseUrl{ }
-- (NSString *)method2:(void(^)(NSString *name))callback{ }
-@end
-@implementation Demo (Category)
-- (NSString *)method3:(void(^)(NSString *name))callback{ }
-@end
-```
-
-### 枚举
-
-不支持**NS_ENUM**和**NS_OPTION**，转换为对应的C声明方式即可.
-
-例如：
-
-```objective-c
-typedef NS_OPTIONS(NSUInteger, UIControlEvents) {}
-typedef NS_ENUM(NSUInteger, UIControlEvents) {}
-// 需要转换为以下语法
-typedef enum: NSUInteger {
-
-}UIControlEvents;
-```
-
-### 关于结构体
-
-被引用结构，必须提前声明
-
-```objective-c
-// CGPoint必须在CGRect之前声明
-struct CGPoint { 
-    CGFloat x;
-    CGFloat y;
-};
-// CGSize必须在CGRect之前声明
-struct CGSize { 
-    CGFloat width;
-    CGFloat height;
-};
-struct CGSize { 
-    CGPoint point;
-    CGSize size; 
-};
-```
-
-
-### UIKit中的常量、类型、结构体、枚举、全局函数的应对方法
-
-#### 常量、结构体、枚举
-
-第一种:
-
-```objective-c
-// 需要在App中添加
-// 结构体
-ORStructDeclareTable *table = [ORStructDeclareTable shareInstance];
-[table addStructDeclare:[ORStructDeclare structDecalre:@encode(CGPoint) keys:@[@"x",@"y"]]];
-// 常量
-[MFScopeChain.topScope setValue:[MFValue valueWithLongLong:DISPATCH_QUEUE_PRIORITY_HIGH] withIndentifier:@"DISPATCH_QUEUE_PRIORITY_HIGH"];
-
-// 枚举值和常量相同
-[MFScopeChain.topScope setValue:[MFValue valueWithULongLong:UIControlEventTouchDragInside] withIndentifier:@"UIControlEventTouchDragInside"];
-```
-
-第二种:
-
-```objective-c
-// 以下代码在脚本中直接添加即可
-// 作用等同于上述的方式
-typedef struct CGPoint { 
-    CGFloat x;
-    CGFloat y;
-} CGPointss;
-// 直接把UIControlEvents的定义复制过来,修改NS_OPTIONS即可
-typedef enum: NSUInteger{
-    UIControlEventTouchDown = 1 <<  0,
-    UIControlEventTouchDownRepeat = 1 <<  1,
-    UIControlEventTouchDragInside = 1 <<  2,
-    UIControlEventAllTouchEvents = 0x00000FFF,
-}UIControlEvents;
-// 上述代码会新增了四个类型, dispatch_once_t, CGPoint, CGPointss, UIControlEvents
-// 新增四个常量 UIControlEventTouchDown UIControlEventTouchDownRepeat UIControlEventTouchDragInside UIControlEventAllTouchEvents
-
-id GlobalValue = [NSObject new]; //在OCRunner中是可以作为全局变量的
-```
-
-#### 新增类型
-
-typedef，目前还有typedef嵌套问题。
-
-```objective-c
-// 脚本中使用
+```objc
+// 将添加一个名为dispatch_once_t的新类型
 typedef NSInteger dispatch_once_t;
-```
-
-```objective-c
-// 脚本中使用
-// 问题代码
-typedef long long IntegerType;
-typedef IntegerType dispatch_once_t;
-```
-
-#### 全局函数
-
-1. 预编译函数
-
-```objective-c
-[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^void(dispatch_queue_t queue, void (^block)(void)) {
-		dispatch_async(queue, ^{
-			block();
-		});
-	}] withIndentifier:@"dispatch_async"]
-```
-
-2. 可通过ORSearchedFunction找的函数
-
-```objective-c
-// 直接在脚本中添加函数声明即可
+// link NSLog
 void NSLog(NSString *format, ...);
+
+typedef enum: NSUInteger{
+    UIControlEventTouchDown                                         = 1 <<  0,
+    UIControlEventTouchDownRepeat                                   = 1 <<  1,
+    UIControlEventTouchDragInside                                   = 1 <<  2,
+    UIControlEventTouchDragOutside                                  = 1 <<  3,
+    UIControlEventTouchDragEnter                                    = 1 <<  4
+}UIControlEvents;
+
+int main(){
+    UIControlEvents events = UIControlEventTouchDown | UIControlEventTouchDownRepeat;
+    if (events & UIControlEventTouchDown){
+        NSLog(@"UIControlEventTouchDown");
+    }
+    NSLog(@"enum test: %lu",events);
+    return events;
+}
+main();
 ```
 
-3. 不可通过ORSearchedFunction找的函数
+**Tips:** 
 
-   例如dispatch_get_main_queue
+推荐新建一个文件来放置以上代码，类似于OCRunnerDemo中的UIKitRefrence和GCDRefrence文件，然后使用**PatchGenerator**以**-links**的形式加入补丁生成。作者想偷偷懒，不想再去CV了，头文件太多了😭.
 
-   * 方式一
 
-   ```objective-c
-   	[MFScopeChain.topScope setValue:[MFValue valueWithBlock:^id() {
-   		return dispatch_get_main_queue();
-	}]withIndentifier:@"dispatch_get_main_queue"];
-   ```
 
-   * 方式二
-   
-   ```objective-c
-	 //脚本中添加声明: DEBUG模式下会自动在控制台打印App中需要添加的代码
-   dispatch_queue_main_t dispatch_get_main_queue(void);
-   //App中添加: 
-   [ORSystemFunctionTable reg:@"dispatch_get_main_queue" pointer:&dispatch_get_main_queue];
-   ```
-   
-4. OC中的inline函数、自定义函数
+### 使用系统内置C函数
 
-```objective-c
-//脚本中直接添加
+```objc
+//you only need to add the C function declaration in Script.
+//link NSLog
+void NSLog(NSString *format, ...);
+
+//then you can use it in Scrtips.
+NSLog(@"test for link function %@", @"xixi");
+```
+
+当你运行以上代码时. OCRunner将会使用`ORSearchedFunction` 搜索函数的指针. 
+
+这个过程的核心实现是 `SymbolSearch` (修改自`fishhook`).
+
+如果搜索到的结果是NULL，OCRunner将会自动在控制台打印如下信息:
+
+```objc
+|----------------------------------------------|
+|❕you need add ⬇️ code in the application file |
+|----------------------------------------------|
+[ORSystemFunctionTable reg:@"dispatch_source_set_timer" pointer:&dispatch_source_set_timer];
+```
+
+
+
+### 修复OC对象（类）方法、添加属性
+
+> 小天才英语学习机，不会哪里点哪里
+
+想修复哪个方法，将改方法实现即可，不用实现其他方法.
+
+
+```objc
+@interface ORTestClassProperty:NSObject
+@property (nonatomic,copy)NSString *strTypeProperty;
+@property (nonatomic,weak)id weakObjectProperty;
+@end
+@implementation ORTestClassProperty
+- (void)otherMethod{
+    self.strTypeProperty = @"Mango";
+}
+- (NSString *)testObjectPropertyTest{
+  	[self ORGtestObjectPropertyTest] //方法名前加'ORG'调用原方法
+    [self otherMethod];
+    return self.strTypeProperty;
+}
+@end
+```
+
+
+
+### Block使用、解决循环引用
+
+```objc
+// 用于解决循环引用
+__weak id object = [NSObject new];
+// 最简block声明
+void (^a)(void) = ^{
+    int b = 0;
+};
+a();
+```
+
+
+
+### 使用GCD
+
+本质就是 **使用系统内置C函数**，通过**GCDRefrences**文件添加，GCD相关的函数声明以及typedef皆在其中.
+
+比如:
+
+```objc
+// link dispatch_sync
+void dispatch_sync(dispatch_queue_t queue, dispatch_block_t block);
+void main(){
+  dispatch_queue_t queue = dispatch_queue_create("com.plliang19.mango",DISPATCH_QUEUE_SERIAL);
+	dispatch_async(queue, ^{
+   	completion(@"success");
+	});
+}
+main();
+```
+
+
+
+### 使用内联函数、预编译函数
+
+```objc
+// 内联函数：在补丁中，添加一个全局函数中即可，比如UIKitRefrences中的CGRectMake
 CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 {
   CGRect rect;
@@ -330,31 +222,62 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
   rect.size.width = width; rect.size.height = height;
   return rect;
 }
+// 预编译函数：需要在App中预埋
+[[MFScopeChain top] setValue:[MFValue valueWithBlock:^void(dispatch_once_t *onceTokenPtr,
+                                                                  dispatch_block_t _Nullable handler){
+        dispatch_once(onceTokenPtr,handler);
+    }] withIndentifier:@"dispatch_once"];
 ```
 
-### 不支持的语法
-* C数组声明：int a\[x\]等;
-* typeof
 
-* @optional
-* @encode
-* @synchronized
-* @try
-* @catch
-* @available
-* @autoreleasepool
-* @dynamic
-* @synthesize
-* IBOutlet
-* IBAction
-* IBInspectable
 
-强烈建议看看单元测试中支持的语法。
+### 如何确定补丁中是否包含源文件
+
+![1](https://silverfruity.github.io/2020/09/04/OCRunner/OCRunner_2.jpeg)
+
+查看Run Script打印的 **InputFiles** 中是否包含源文件.
 
 
 
-### Thanks for
 
-* [Mango](https://github.com/YPLiang19/Mango)
-* [libffi](https://github.com/libffi/libffi)
-* Procedure Call Standard for the ARM 64-bit Architecture. 
+## 性能测试
+
+![2](https://silverfruity.github.io/2020/09/04/OCRunner/OCRunner_1.jpeg)
+
+根据已知数据，OCRunner的补丁加载速度是JSPatch的20倍+，随着补丁大小的不断增加，这个倍数会不断增加。运行速度和内存占用与MangoFix差距不大。内存占用方面应该会更优，OCRunner中MFValue的值采用malloc来复制值，不会有多个类型的实例变量。
+
+
+
+## 目前的问题
+
+1. 指针与乘号识别冲突问题，衍生的问题：类型转换等等
+2. 不支持static、inline函数声明
+3. 不支持C数组声明:  type a[]和type a[2]，以及 value = { 0 , 0 , 0 , 0 } 这种表达式
+4. 不支持 ‘->’ 操作符号
+5. 不支持C函数替换
+
+
+
+## 支持语法
+1. 类声明与实现，支持分类写法
+3. Protocol
+4. Block语法
+4. 结构体、枚举、typedef
+5. 使用函数声明，链接系统函数指针
+6. 全局函数
+7. 多参数调用（方法和函数）
+8. **\***、**&**  (指针操作)
+9. 变量static关键字
+9. NSArray: @[value1, value2]，NSDictionary: @{ key: value },  NSNumer:  @(value)
+10. NSArray取值和NSDictionary取值和赋值语法，id value = a[var];  a[var] = value;
+11. [运算符，除去'->'皆已实现](https://baike.baidu.com/item/%E8%BF%90%E7%AE%97%E7%AC%A6%E4%BC%98%E5%85%88%E7%BA%A7/4752611?fr=aladdin)
+
+... 等
+
+
+## 目标
+
+* 完善当前的语法支持
+* 更多的单元测试覆盖（尽管目前显示是84%）
+* PatchGenerator阶段进行优化：未被调用的函数声明、结构体、枚举等，不会在补丁中，减少包大小以及加载时间等
+* 尝试Swift热更新（新建库吧，哈哈）
