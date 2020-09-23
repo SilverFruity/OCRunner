@@ -8,7 +8,7 @@
 
 ### The work flow of using [OCRunner](https://github.com/SilverFruity/OCRunner) to generate a patch 
 
-![image](https://silverfruity.github.io/2020/09/04/OCRunner/OCRunner_EN_0.jpeg)
+![image](https://www.sayhelloworld.blog/2020/09/04/OCRunner/OCRunner_EN_0.jpeg)
 
 ### Responsibilities of all parties
 
@@ -222,13 +222,13 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 
 ### How to determine if source files are included in a patch
 
-![image](https://silverfruity.github.io/2020/09/04/OCRunner/OCRunner_2.jpeg)
+![image](https://www.sayhelloworld.blog/2020/09/04/OCRunner/OCRunner_2.jpeg)
 
 
 
 ## Performance Testing
 
-![image](https://silverfruity.github.io/2020/09/04/OCRunner/OCRunner_EN_1.jpeg)
+![image](https://www.sayhelloworld.blog/2020/09/04/OCRunner/OCRunner_EN_1.jpeg)
 
 OCRunner's patch loading speed is about 20 times + that of JSPatch, and this value increases as the patch size increases. The running speed and memory usage are not much different from MangoFix. The memory usage should be better. The value of MFValue in OCRunner uses malloc to copy the value, and there will be no multiple types of instance variables.
 
