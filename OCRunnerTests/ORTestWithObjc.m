@@ -15,6 +15,21 @@
 @property (nonatomic, strong)MFScopeChain *topScope;
 @end
 
+@interface Fibonaccia: NSObject
+@end
+@implementation Fibonaccia
+-(int)run:(int)n{
+    if (n == 1 || n == 2)
+        return 1;
+    return [self run:n - 1] + [self run:n - 2];
+}
+@end
+int fibonaccia(int n) {
+    if (n == 1 || n == 2)
+        return 1;
+    return fibonaccia(n - 1) + fibonaccia(n - 2);
+}
+
 @implementation ORTestWithObjc
 - (void)setUp {
     static dispatch_once_t onceToken;
@@ -398,11 +413,6 @@ typedef struct MyStruct2 {
     Protocol *protocol = d.objectValue;
     XCTAssert([NSStringFromProtocol(protocol) isEqualToString:@"NSObject"]);
 }
-int fibonaccia(int n) {
-    if (n == 1 || n == 2)
-        return 1;
-    return fibonaccia(n - 1) + fibonaccia(n - 2);
-}
 - (void)testRecursiveFunction{
     MFScopeChain *scope = self.currentScope;
     NSString * source =
@@ -419,13 +429,36 @@ int fibonaccia(int n) {
     MFValue *c = [scope getValueWithIdentifier:@"a"];
     XCTAssert(c.intValue == fibonaccia(20));
 }
+- (void)testRecursiveMethod{
+    MFScopeChain *scope = self.currentScope;
+    NSString * source =
+    @"@implementation Fibonaccia"
+    @"-(int)run:(int)n{"
+    @"    if (n == 1 || n == 2)"
+    @"        return 1;"
+    @"    return [self run:n - 1] + [self run:n - 2];"
+    @"}"
+    @"@end"
+    @"int a = [[Fibonaccia new] run:20];";
+    AST *ast = [OCParser parseSource:source];
+    for (id <OCExecute> exp in ast.nodes) {
+        [exp execute:scope];
+    }
+    MFValue *a = [scope getValueWithIdentifier:@"a"];
+    XCTAssert(a.intValue == fibonaccia(20));
+}
 
-- (void)testCRecursivePerformanceExample {
+- (void)testOCRecursiveFunctionPerformanceExample {
     [self measureBlock:^{
         fibonaccia(20);
     }];
 }
-- (void)testOCRunnerRecursivePerformanceExample {
+- (void)testOCRecursiveMethodPerformanceExample {
+    [self measureBlock:^{
+        [[Fibonaccia new] run:20];
+    }];
+}
+- (void)testOCRunnerRecursiveFunctionPerformanceExample {
     MFScopeChain *scope = self.currentScope;
     NSString * source =
     @"int fibonaccia(int n){"
@@ -437,6 +470,24 @@ int fibonaccia(int n) {
     AST *ast = [OCParser parseSource:source];
     [self measureBlock:^{
         for (id <OCExecute> exp in ast.globalStatements) {
+            [exp execute:scope];
+        }
+    }];
+}
+- (void)testOCRunnerRecursiveMethodPerformanceExample {
+    MFScopeChain *scope = self.currentScope;
+    NSString * source =
+    @"@implementation Fibonaccia"
+    @"-(int)run:(int)n{"
+    @"    if (n == 1 || n == 2)"
+    @"        return 1;"
+    @"    return [self run:n - 1] + [self run:n - 2];"
+    @"}"
+    @"@end"
+    @"int a = [[Fibonaccia new] run:20];";
+    AST *ast = [OCParser parseSource:source];
+    [self measureBlock:^{
+        for (id <OCExecute> exp in ast.nodes) {
             [exp execute:scope];
         }
     }];
