@@ -149,7 +149,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             case OCValueSuper:{
                 NSString *identifier = @"self";
                 if (![chain isInChain:identifier]) {
-                    MFValue *value = [fromScope getValueWithIdentifier:identifier endScope:[MFScopeChain topScope]];
+                    MFValue *value = [fromScope recursiveGetValueWithIdentifier:identifier];
                     if (value) {
                         [destScope setValue:value withIndentifier:identifier];
                     }
@@ -159,7 +159,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             case OCValueVariable:{
                 NSString *identifier = expr.value;
                 if (![chain isInChain:identifier]) {
-                   MFValue *value = [fromScope getValueWithIdentifier:identifier endScope:[MFScopeChain topScope]];
+                   MFValue *value = [fromScope recursiveGetValueWithIdentifier:identifier];
                     if (value) {
                         [destScope setValue:value withIndentifier:identifier];
                     }
@@ -313,7 +313,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     switch (self.value_type) {
         case OCValueVariable:{
-            MFValue *value = [scope getValueWithIdentifierInChain:self.value];
+            MFValue *value = [scope recursiveGetValueWithIdentifier:self.value];
             if (value != nil) return value;
             Class class = NSClassFromString(self.value);
             if (class) {
@@ -330,7 +330,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }
         case OCValueSelf:
         case OCValueSuper:{
-            return [scope getValueWithIdentifier:@"self"];
+            return scope.instance;
         }
         case OCValueSelector:{
             NSString *value = self.value;
@@ -377,28 +377,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             NSString *value = self.value;
             return [MFValue valueWithCString:(char *)value.UTF8String];
         }
-        case OCValueInt:{
-            NSString *value = self.value;
-            if ([value hasPrefix:@"0x"]) {
-                long interger = strtol(value.UTF8String, NULL, 16);
-                return [MFValue valueWithLongLong:interger];
-            }else{
-                return [MFValue valueWithLongLong:value.longLongValue];
-            }
-        }
-        case OCValueDouble:{
-            NSString *value = self.value;
-            return [MFValue valueWithDouble:value.doubleValue];
-        }
         case OCValueNil:{
             return [MFValue valueWithObject:nil];
         }
         case OCValueNULL:{
             return [MFValue valueWithPointer:NULL];
-        }
-        case OCValueBOOL:{
-            return [MFValue valueWithBOOL:[self.value isEqual:@"YES"] ? YES: NO];
-            break;
         }
         default:
             break;
@@ -406,6 +389,24 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     return [MFValue valueWithObject:nil];
 }
 @end
+
+@implementation ORIntegerValue (Execute)
+- (nullable MFValue *)execute:(MFScopeChain *)scope {
+    return [MFValue valueWithULongLong:self.value];;
+}
+@end
+
+@implementation ORDoubleValue (Execute)
+- (nullable MFValue *)execute:(MFScopeChain *)scope {
+    return [MFValue valueWithDouble:self.value];;
+}
+@end
+@implementation ORBoolValue (Execute)
+- (nullable MFValue *)execute:(MFScopeChain *)scope {
+    return [MFValue valueWithBOOL:self.value];;
+}
+@end
+
 @implementation ORMethodCall(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     if ([self.caller isKindOfClass:[ORMethodCall class]]) {
@@ -503,7 +504,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         MFValue *value = [(ORMethodCall *)self.caller execute:scope];
         return invoke_MFBlockValue(value, args);
     }
-    MFValue *blockValue = [scope getValueWithIdentifier:self.caller.value];
+    MFValue *blockValue = [scope recursiveGetValueWithIdentifier:self.caller.value];
     if (self.caller.value_type == OCValueVariable && blockValue != nil) {
         if (blockValue.isBlockValue) {
             return invoke_MFBlockValue(blockValue, args);
@@ -547,7 +548,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         && self.declare.funVar.varname
         && self.declare.funVar.ptCount == 0) {
         NSString *funcName = self.declare.funVar.varname;
-        if ([scope getValueWithIdentifier:funcName] == nil) {
+        if ([scope recursiveGetValueWithIdentifier:funcName] == nil) {
             [scope setValue:[MFValue valueWithObject:self] withIndentifier:funcName];
         }
         return [MFValue normalEnd];
@@ -644,7 +645,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         switch (valueExp.value_type) {
             case OCValueSelf:{
                 MFValue *resultValue = [resultExp execute:scope];
-                [scope assignWithIdentifer:@"self" value:resultValue];
+                scope.instance = resultValue;
                 break;
             }
             case OCValueVariable:{
@@ -1100,7 +1101,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @implementation ORPropertyDeclare(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     NSString *propertyName = self.var.var.varname;
-    MFValue *classValue = [scope getValueWithIdentifier:@"Class"];
+    MFValue *classValue = [scope recursiveGetValueWithIdentifier:@"Class"];
     Class class = *(Class *)classValue.pointer;
     class_replaceProperty(class, [propertyName UTF8String], self.propertyAttributes, 3);
     MFPropertyMapTableItem *propItem = [[MFPropertyMapTableItem alloc] initWithClass:class property:self];

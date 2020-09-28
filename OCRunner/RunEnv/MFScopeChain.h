@@ -16,10 +16,11 @@ extern const void *mf_propKey(NSString *propName);
 @property (strong, nonatomic) NSMutableDictionary<NSString *,MFValue *> *vars;
 + (instancetype)topScope;
 @property (strong, nonatomic) MFScopeChain *next;
+@property (strong, nonatomic) MFValue *instance;
 
 + (instancetype)scopeChainWithNext:(MFScopeChain *)next;
 - (nullable MFValue *)getValueWithIdentifier:(NSString *)identifier endScope:(nullable MFScopeChain *)endScope;
-- (nullable MFValue *)getValueWithIdentifierInChain:(NSString *)identifier;
+- (nullable MFValue *)recursiveGetValueWithIdentifier:(NSString *)identifier;
 - (nullable MFValue *)getValueWithIdentifier:(NSString *)identifer;
 - (void)setValue:(MFValue *)value withIndentifier:(NSString *)identier;
 - (void)assignWithIdentifer:(NSString *)identifier value:(MFValue *)value;

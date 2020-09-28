@@ -30,10 +30,10 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     }
     Class class;
     if (classMethod) {
-        [scope setValue:[MFValue valueWithClass:target] withIndentifier:@"self"];
+        scope.instance = [MFValue valueWithClass:target];
         class = objc_getMetaClass(NSStringFromClass(target).UTF8String);
     }else{
-        [scope setValue:[MFValue valueWithObject:target] withIndentifier:@"self"];
+        scope.instance = [MFValue valueWithObject:target];
         class = [target class];
     }
     [ORArgsStack push:argValues];

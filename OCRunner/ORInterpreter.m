@@ -63,7 +63,7 @@
     for (ORTypeVarPair *pair in funcVars) {
         ORSearchedFunction *function = table[pair.var.varname];
         function.funPair = pair;
-        if ([scope getValueWithIdentifier:function.name] == nil) {
+        if ([scope recursiveGetValueWithIdentifier:function.name] == nil) {
             [scope setValue:[MFValue valueWithObject:function] withIndentifier:function.name];
         }
     }
@@ -74,7 +74,7 @@
         ORSearchedFunction *function = table[functionName];
         if (function.pointer == NULL
             && [ORSystemFunctionTable pointerForFunctionName:functionName] == NULL) {
-            MFValue *value = [[MFScopeChain topScope] getValueWithIdentifier:functionName];
+            MFValue *value = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:functionName];
             if (value == nil || [value.objectValue isKindOfClass:[ORSearchedFunction class]]) {
                 [functionNames addObject:functionName];
             }

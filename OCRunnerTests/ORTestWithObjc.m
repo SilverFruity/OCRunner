@@ -191,7 +191,7 @@ Element2Struct *Element2StructMake(){
     for (id <OCExecute> exp in ast.globalStatements) {
         [exp execute:scope];
     }
-    MFValue *rectValue = [scope getValueWithIdentifier:@"rect"];
+    MFValue *rectValue = [scope recursiveGetValueWithIdentifier:@"rect"];
     CGRect rect = *(CGRect *) rectValue.pointer;
     XCTAssert(rectValue.type == OCTypeStruct);
     XCTAssert(rect.origin.x == 10);
@@ -219,7 +219,7 @@ Element2Struct *Element2StructMake(){
     for (id <OCExecute> exp in ast.globalStatements) {
         [exp execute:scope];
     }
-    MFValue *rectValue = [scope getValueWithIdentifier:@"frame"];
+    MFValue *rectValue = [scope recursiveGetValueWithIdentifier:@"frame"];
     CGRect rect = *(CGRect *) rectValue.pointer;
     XCTAssert(rectValue.type == OCTypeStruct);
     XCTAssert(rect.size.width == 2);
@@ -236,11 +236,11 @@ Element2Struct *Element2StructMake(){
     for (id <OCExecute> exp in ast.globalStatements) {
         [exp execute:scope];
     }
-    MFValue *frameValue = [scope getValueWithIdentifier:@"frame"];
+    MFValue *frameValue = [scope recursiveGetValueWithIdentifier:@"frame"];
     CGRect rect = *(CGRect *) frameValue.pointer;
     NSLog(@"%@",[NSValue valueWithCGRect:rect]);
     XCTAssert(frameValue.type == OCTypeStruct);
-    MFValue * aValue = [scope getValueWithIdentifier:@"a"];
+    MFValue * aValue = [scope recursiveGetValueWithIdentifier:@"a"];
     XCTAssert(aValue.type == OCTypeDouble);
     XCTAssert(aValue.doubleValue == 4);
 }
@@ -333,13 +333,13 @@ typedef struct MyStruct2 {
     for (id <OCExecute> exp in ast.globalStatements) {
         [exp execute:scope];
     }
-    MFValue *a = [scope getValueWithIdentifier:@"a"];
+    MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
     XCTAssert(strcmp(a.typeEncode, "i") == 0);
     XCTAssert(*(int *)a.pointer == 1);
-    MFValue *b = [scope getValueWithIdentifier:@"b"];
+    MFValue *b = [scope recursiveGetValueWithIdentifier:@"b"];
     XCTAssert(strcmp(b.typeEncode, "^i") == 0);
     XCTAssert(**(int **)b.pointer == 1);
-    MFValue *c = [scope getValueWithIdentifier:@"c"];
+    MFValue *c = [scope recursiveGetValueWithIdentifier:@"c"];
     XCTAssert(strcmp(c.typeEncode, "^^i") == 0);
     NSLog(@"%s",c.typeEncode);
     XCTAssert(***(int ***)c.pointer == 1);
@@ -355,7 +355,7 @@ typedef struct MyStruct2 {
     for (id <OCExecute> exp in ast.globalStatements) {
         [exp execute:scope];
     }
-    MFValue *d = [scope getValueWithIdentifier:@"d"];
+    MFValue *d = [scope recursiveGetValueWithIdentifier:@"d"];
     XCTAssert(strcmp(d.typeEncode, "i") == 0);
     XCTAssert(*(int *)d.pointer == 1);
 }
@@ -409,7 +409,7 @@ typedef struct MyStruct2 {
     for (id <OCExecute> exp in ast.globalStatements) {
         [exp execute:scope];
     }
-    MFValue *d = [scope getValueWithIdentifier:@"object"];
+    MFValue *d = [scope recursiveGetValueWithIdentifier:@"object"];
     Protocol *protocol = d.objectValue;
     XCTAssert([NSStringFromProtocol(protocol) isEqualToString:@"NSObject"]);
 }
@@ -426,7 +426,7 @@ typedef struct MyStruct2 {
     for (id <OCExecute> exp in ast.globalStatements) {
         [exp execute:scope];
     }
-    MFValue *c = [scope getValueWithIdentifier:@"a"];
+    MFValue *c = [scope recursiveGetValueWithIdentifier:@"a"];
     XCTAssert(c.intValue == fibonaccia(20));
 }
 - (void)testRecursiveMethod{
@@ -444,7 +444,7 @@ typedef struct MyStruct2 {
     for (id <OCExecute> exp in ast.nodes) {
         [exp execute:scope];
     }
-    MFValue *a = [scope getValueWithIdentifier:@"a"];
+    MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
     XCTAssert(a.intValue == fibonaccia(20));
 }
 
@@ -466,12 +466,13 @@ typedef struct MyStruct2 {
     @"        return 1;"
     @"    return fibonaccia(n - 1) + fibonaccia(n - 2);"
     @"}"
-    @"fibonaccia(20);";
+    @"int a = fibonaccia(20);";
     AST *ast = [OCParser parseSource:source];
     [self measureBlock:^{
         for (id <OCExecute> exp in ast.globalStatements) {
             [exp execute:scope];
         }
+        NSLog(@"%d",[scope getValueWithIdentifier:@"a"].uIntValue);
     }];
 }
 - (void)testOCRunnerRecursiveMethodPerformanceExample {
@@ -490,6 +491,7 @@ typedef struct MyStruct2 {
         for (id <OCExecute> exp in ast.nodes) {
             [exp execute:scope];
         }
+        NSLog(@"%d",[scope getValueWithIdentifier:@"a"].uIntValue);
     }];
 }
 
