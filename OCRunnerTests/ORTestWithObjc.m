@@ -398,5 +398,48 @@ typedef struct MyStruct2 {
     Protocol *protocol = d.objectValue;
     XCTAssert([NSStringFromProtocol(protocol) isEqualToString:@"NSObject"]);
 }
+int fibonaccia(int n) {
+    if (n == 1 || n == 2)
+        return 1;
+    return fibonaccia(n - 1) + fibonaccia(n - 2);
+}
+- (void)testRecursiveFunction{
+    MFScopeChain *scope = self.currentScope;
+    NSString * source =
+    @"int fibonaccia(int n){"
+    @"    if (n == 1 || n == 2)"
+    @"        return 1;"
+    @"    return fibonaccia(n - 1) + fibonaccia(n - 2);"
+    @"}"
+    @"int a = fibonaccia(20);";
+    AST *ast = [OCParser parseSource:source];
+    for (id <OCExecute> exp in ast.globalStatements) {
+        [exp execute:scope];
+    }
+    MFValue *c = [scope getValueWithIdentifier:@"a"];
+    XCTAssert(c.intValue == fibonaccia(20));
+}
+
+- (void)testCRecursivePerformanceExample {
+    [self measureBlock:^{
+        fibonaccia(20);
+    }];
+}
+- (void)testOCRunnerRecursivePerformanceExample {
+    MFScopeChain *scope = self.currentScope;
+    NSString * source =
+    @"int fibonaccia(int n){"
+    @"    if (n == 1 || n == 2)"
+    @"        return 1;"
+    @"    return fibonaccia(n - 1) + fibonaccia(n - 2);"
+    @"}"
+    @"fibonaccia(20);";
+    AST *ast = [OCParser parseSource:source];
+    [self measureBlock:^{
+        for (id <OCExecute> exp in ast.globalStatements) {
+            [exp execute:scope];
+        }
+    }];
+}
 
 @end
