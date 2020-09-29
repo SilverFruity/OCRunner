@@ -72,6 +72,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 - (void)setPointer:(void *)pointer{
     NSCAssert(self.typeEncode != NULL, @"TypeEncode must exist");
     [self deallocPointer];
+    
     if(TypeEncodeIsBaseType(self.typeEncode)){
         [self saveBaseValue:pointer];
         return;
@@ -132,22 +133,29 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     }
     _modifier = modifier;
 }
-- (OCType)type{
-    if (self.typeEncode == NULL) {
-        return OCTypeLongLong;
-    }
-    return *self.typeEncode;
-}
 - (void)dealloc{
     [self deallocPointer];
-    if(_typeEncode != NULL) free((void *)_typeEncode);
+    if(_typeEncode != NULL && !TypeEncodeIsBaseType(_typeEncode)) free((void *)_typeEncode);
 }
 - (void)setTypeEncode:(const char *)typeEncode{
-    
-    void *result = NULL;
-    [self convertValueWithTypeEncode:typeEncode result:&result];
-    
-    if(_typeEncode != NULL)
+    if (typeEncode == NULL) {
+        typeEncode = OCTypeStringULongLong;
+    }
+    _type = *typeEncode;
+    //基础类型转换
+    if (TypeEncodeIsBaseType(typeEncode)) {
+        void *result = NULL;
+        [self convertValueWithTypeEncode:typeEncode result:&result];
+        if (result != NULL) {
+            [self setPointer:&result];
+        }
+        //针对基础类型的TypeEncode不需要使用malloc复制
+        _typeString.type = _type;
+        _typeString.end = '\0';
+        _typeEncode = (char *)&_typeString;
+        return;
+    }
+    if(_typeEncode != NULL && !TypeEncodeIsBaseType(_typeEncode))
         free((void *)_typeEncode);
     
     size_t strLen = strlen(typeEncode);
@@ -155,10 +163,6 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     buffer[strLen] = '\0';
     strncpy((void *)buffer, typeEncode, strLen);
     _typeEncode = buffer;
-
-    if (result != NULL) {
-        [self setPointer:&result];
-    }
     _pointerCount = startDetectPointerCount(typeEncode);
     if (*typeEncode == OCTypeClass) {
         self.typeName = @"Class";

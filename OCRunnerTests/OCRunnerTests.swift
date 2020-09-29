@@ -544,9 +544,9 @@ class CRunnerTests: XCTestCase {
         XCTAssert(ORTestReplaceClass.testMethodReplaceTest())
         XCTAssert(test.testOriginalMethod() == 2)
         XCTAssert(test.testAddGlobalVar() == 1111)
-        if let dict = test.testMethodParameterListAndReturnValue(with: "ggggg") { (value) -> String in
+        if let dict = test.testMethodParameterListAndReturnValue(with: "ggggg", block: { (value) -> String in
             return "hhhh" + value
-        }() as? [AnyHashable:String]{
+        })() as? [AnyHashable:String]{
             XCTAssert(dict["param1"] == "ggggg")
             XCTAssert(dict["param2"] == "hhhhMango")
         }

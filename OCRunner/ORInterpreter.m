@@ -73,11 +73,9 @@
         NSString *functionName = pair.var.varname;
         ORSearchedFunction *function = table[functionName];
         if (function.pointer == NULL
-            && [ORSystemFunctionPointerTable pointerForFunctionName:functionName] == NULL) {
-            id function = [[ORGlobalFunctionTable shared] getFunctionNodeWithName:functionName];
-            if (function == nil || [function isKindOfClass:[ORSearchedFunction class]]) {
-                [functionNames addObject:functionName];
-            }
+            && [ORSystemFunctionPointerTable pointerForFunctionName:functionName] == NULL
+            && [[MFScopeChain topScope] getValueWithIdentifier:functionName] == nil) {
+            [functionNames addObject:functionName];
         }
     }
     if (functionNames.count > 0) {

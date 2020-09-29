@@ -257,6 +257,11 @@ typedef union{
     double doubleValue;
 }MFRealBaseValue;
 
+typedef struct {
+    OCType type;
+    char end;
+}OCBaseTypeString;
+
 ORTypeVarPair *typePairWithTypeEncode(const char *tyepEncode);
 
 extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
@@ -268,7 +273,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 }
 @property (assign, nonatomic) MFStatementResultType resultType;
 @property (assign,nonatomic)DeclarationModifier modifier;
-@property (assign,nonatomic,readonly)OCType type;
+@property (assign,nonatomic)OCBaseTypeString typeString;
+@property (assign,nonatomic)OCType type;
 @property (strong,nonatomic)NSString *typeName;
 @property (assign,nonatomic)NSInteger pointerCount;
 @property (nonatomic,assign)const char* typeEncode;
