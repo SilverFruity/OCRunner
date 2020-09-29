@@ -147,13 +147,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             }
             case OCValueSelf:
             case OCValueSuper:{
-                NSString *identifier = @"self";
-                if (![chain isInChain:identifier]) {
-                    MFValue *value = [fromScope recursiveGetValueWithIdentifier:identifier];
-                    if (value) {
-                        [destScope setValue:value withIndentifier:identifier];
-                    }
-                }
+                destScope.instance = fromScope.instance;
                 break;
             }
             case OCValueVariable:{
@@ -559,7 +553,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             // xxx = ^void (int x){ }, block作为值
             MFBlock *manBlock = [[MFBlock alloc] init];
             manBlock.func = [self normalFunctionImp];
-            MFScopeChain *blockScope = [MFScopeChain scopeChainWithNext:[MFScopeChain topScope]];
+            MFScopeChain *blockScope = [MFScopeChain scopeChainWithNext:scope];
             copy_undef_var(self, [MFVarDeclareChain new], scope, blockScope);
             manBlock.outScope = blockScope;
             manBlock.retType = manBlock.func.declare.returnType;
