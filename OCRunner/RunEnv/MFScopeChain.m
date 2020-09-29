@@ -16,7 +16,6 @@
 #import "RunnerClasses+Execute.h"
 #import "ORTypeVarPair+TypeEncode.h"
 @interface MFScopeChain()
-@property (strong,nonatomic)NSLock *lock;
 @end
 static MFScopeChain *instance = nil;
 @implementation MFScopeChain
@@ -37,20 +36,15 @@ static MFScopeChain *instance = nil;
 - (instancetype)init{
 	if (self = [super init]) {
 		_vars = [NSMutableDictionary dictionary];
-        _lock = [[NSLock alloc] init];
 	}
 	return self;
 }
 - (void)setValue:(MFValue *)value withIndentifier:(NSString *)identier{
-    [self.lock lock];
     self.vars[identier] = value;
-    [self.lock unlock];
 }
 
 - (MFValue *)getValueWithIdentifier:(NSString *)identifer{
-    [self.lock lock];
     MFValue *value = self.vars[identifer];
-    [self.lock unlock];
 	return value;
 }
 
@@ -123,11 +117,6 @@ const void *mf_propKey(NSString *propName) {
 }
 
 - (MFValue *)getValueWithIdentifier:(NSString *)identifier endScope:(MFScopeChain *)endScope{
-    //TODO: 针对递归函数的优化
-    MFValue *globalValue = [[MFScopeChain topScope] getValueWithIdentifier:identifier];
-    if (globalValue != nil && *globalValue.typeEncode == OCTypeObject && [globalValue.objectValue isKindOfClass:[ORFunctionImp class]]) {
-        return globalValue;
-    }
     MFScopeChain *pos = self;
     // FIX: while self == endScope, will ignore self
     do {
@@ -181,27 +170,8 @@ const void *mf_propKey(NSString *propName) {
     return [self getValueWithIdentifier:identifier endScope:nil];
 }
 
-- (void)setMangoBlockVarNil{
-//    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-//        [self.lock lock];
-//        NSArray *allValues = [self.vars allValues];
-//        for (MFValue *value in allValues) {
-//            if ([value isObject]) {
-//                Class ocBlockClass = NSClassFromString(@"NSBlock");
-//                if ([[value c2objectValue] isKindOfClass:ocBlockClass]) {
-//                    struct MFSimulateBlock *blockStructPtr = (__bridge void *)value.objectValue;
-//                    if (blockStructPtr->flags & BLOCK_CREATED_FROM_MFGO) {
-//                        value.objectValue = nil;
-//                    }
-//                }
-//            }
-//        }
-//        [self.lock unlock];
-//    });
-}
 - (void)clear{
     _vars = [NSMutableDictionary dictionary];
-    _lock = [[NSLock alloc] init];
 }
 @end
 

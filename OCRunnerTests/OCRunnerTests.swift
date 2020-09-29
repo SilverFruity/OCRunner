@@ -9,12 +9,13 @@
 import XCTest
 import OCRunner
 import oc2mangoLib
+var hasAddScripts = false
 class CRunnerTests: XCTestCase {
     var scope: MFScopeChain!
     let ocparser = Parser.shared()
     var source = ""
     override func setUp() {
-        if MFScopeChain.topScope().vars.count == 0 {
+        if !hasAddScripts{
             let current = Bundle.init(for: CRunnerTests.classForCoder())
             let bundlePath = current.path(forResource: "Scripts", ofType: "bundle")!
             let scriptBundle = Bundle.init(path: bundlePath)!
@@ -31,6 +32,7 @@ class CRunnerTests: XCTestCase {
                 let ast = ocparser.parseSource(CCDData)
                 ORInterpreter.excuteNodes(ast.nodes as! [Any])
             }
+            hasAddScripts = true
         }
         scope = MFScopeChain.init(next: MFScopeChain.topScope())
         mf_add_built_in(scope)
@@ -255,7 +257,7 @@ class CRunnerTests: XCTestCase {
     func testIfStatement(){
         let source =
         """
-        int func(int a){
+        int testIfStatement(int a){
             if (a <= 1){
               return 0;
             }else if (a < 10){
@@ -266,10 +268,10 @@ class CRunnerTests: XCTestCase {
               return 3;
             }
         }
-        int a = func(1);
-        int b = func(3);
-        int c = func(15);
-        int d = func(30);
+        int a = testIfStatement(1);
+        int b = testIfStatement(3);
+        int c = testIfStatement(15);
+        int d = testIfStatement(30);
         """
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
@@ -285,7 +287,7 @@ class CRunnerTests: XCTestCase {
     func testWhileStatement(){
         let source =
         """
-        int func(int x){
+        int testWhileStatement(int x){
             int a = 1;
             while(a < x){
                 if (x < 3){
@@ -302,12 +304,13 @@ class CRunnerTests: XCTestCase {
             }
             return a;
         }
-        int a = func(2);
-        int b = func(3);
-        int c = func(15);
-        int d = func(30);
+        int a = testWhileStatement(2);
+        int b = testWhileStatement(3);
+        int c = testWhileStatement(15);
+        int d = testWhileStatement(30);
         """
         let ast = ocparser.parseSource(source)
+        let scope = MFScopeChain.topScope()
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
             exp.execute(scope);
@@ -320,7 +323,7 @@ class CRunnerTests: XCTestCase {
     func testDoWhileStatement(){
         let source =
         """
-        int func(int x){
+        int testDoWhileStatement(int x){
             int a = 1;
             do{
                 a++;
@@ -337,10 +340,10 @@ class CRunnerTests: XCTestCase {
             }while(a < x)
             return a;
         }
-        int a = func(2);
-        int b = func(3);
-        int c = func(15);
-        int d = func(30);
+        int a = testDoWhileStatement(2);
+        int b = testDoWhileStatement(3);
+        int c = testDoWhileStatement(15);
+        int d = testDoWhileStatement(30);
         """
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
@@ -355,7 +358,7 @@ class CRunnerTests: XCTestCase {
     func testSwitchStatement(){
         let source =
         """
-        int func(int x){
+        int testSwitchStatement(int x){
             int a = 0;
             switch (x){
                 case 0:
@@ -371,10 +374,10 @@ class CRunnerTests: XCTestCase {
             }
             return a;
         }
-        int a = func(0);
-        int b = func(1);
-        int c = func(2);
-        int d = func(3);
+        int a = testSwitchStatement(0);
+        int b = testSwitchStatement(1);
+        int c = testSwitchStatement(2);
+        int d = testSwitchStatement(3);
         """
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
@@ -390,7 +393,7 @@ class CRunnerTests: XCTestCase {
     func testForStatement(){
         let source =
         """
-        int func(int x){
+        int testForStatement(int x){
             int a = 1;
             for (a; a < x; a++){
                 if (x == 2){
@@ -407,10 +410,10 @@ class CRunnerTests: XCTestCase {
             }
             return a;
         }
-        int a = func(0);
-        int b = func(2);
-        int c = func(3);
-        int d = func(4);
+        int a = testForStatement(0);
+        int b = testForStatement(2);
+        int c = testForStatement(3);
+        int d = testForStatement(4);
         """
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
@@ -425,7 +428,7 @@ class CRunnerTests: XCTestCase {
     func testForStatementWithDeclare(){
         let source =
         """
-        int func(int x){
+        int testForStatementWithDeclare(int x){
             int b = 0;
             for (int a = 1; a < x; a++){
                 if (x == 2){
@@ -442,10 +445,10 @@ class CRunnerTests: XCTestCase {
             }
             return b;
         }
-        int a = func(0);
-        int b = func(2);
-        int c = func(3);
-        int d = func(4);
+        int a = testForStatementWithDeclare(0);
+        int b = testForStatementWithDeclare(2);
+        int c = testForStatementWithDeclare(3);
+        int d = testForStatementWithDeclare(4);
         """
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
@@ -461,7 +464,7 @@ class CRunnerTests: XCTestCase {
     func testForInStatement(){
         let source =
         """
-        int func(NSArray *x){
+        int testForInStatement(NSArray *x){
             int b = 0;
             for (NSNumber *value in x){
                 if ([value intValue] == 1)
@@ -473,7 +476,7 @@ class CRunnerTests: XCTestCase {
             }
             return b;
         }
-        int a = func(@[@(1),@(2),@(3)]);
+        int a = testForInStatement(@[@(1),@(2),@(3)]);
         """
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]

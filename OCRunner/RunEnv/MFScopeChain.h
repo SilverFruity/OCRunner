@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "ORArgsStack.h"
+#import "ORGlobalFunctionTable.h"
 #import "built-in.h"
 @class MFValue;
 NS_ASSUME_NONNULL_BEGIN
@@ -24,7 +25,6 @@ extern const void *mf_propKey(NSString *propName);
 - (nullable MFValue *)getValueWithIdentifier:(NSString *)identifer;
 - (void)setValue:(MFValue *)value withIndentifier:(NSString *)identier;
 - (void)assignWithIdentifer:(NSString *)identifier value:(MFValue *)value;
-- (void)setMangoBlockVarNil;
 - (void)clear;
 @end
 NS_ASSUME_NONNULL_END

@@ -12,7 +12,7 @@
 #import "ORSearchedFunction.h"
 #import "MFValue.h"
 #import "ORStructDeclare.h"
-#import "ORSystemFunctionTable.h"
+#import "ORSystemFunctionPointerTable.h"
 
 @implementation ORInterpreter
 + (void)excuteBinaryPatchFile:(NSString *)path{
@@ -63,8 +63,8 @@
     for (ORTypeVarPair *pair in funcVars) {
         ORSearchedFunction *function = table[pair.var.varname];
         function.funPair = pair;
-        if ([scope recursiveGetValueWithIdentifier:function.name] == nil) {
-            [scope setValue:[MFValue valueWithObject:function] withIndentifier:function.name];
+        if ([[ORGlobalFunctionTable shared] getFunctionNodeWithName:function.name] == nil) {
+            [[ORGlobalFunctionTable shared] setFunctionNode:function WithName:function.name];
         }
     }
     #if DEBUG
@@ -73,9 +73,9 @@
         NSString *functionName = pair.var.varname;
         ORSearchedFunction *function = table[functionName];
         if (function.pointer == NULL
-            && [ORSystemFunctionTable pointerForFunctionName:functionName] == NULL) {
-            MFValue *value = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:functionName];
-            if (value == nil || [value.objectValue isKindOfClass:[ORSearchedFunction class]]) {
+            && [ORSystemFunctionPointerTable pointerForFunctionName:functionName] == NULL) {
+            id function = [[ORGlobalFunctionTable shared] getFunctionNodeWithName:functionName];
+            if (function == nil || [function isKindOfClass:[ORSearchedFunction class]]) {
                 [functionNames addObject:functionName];
             }
         }
@@ -86,7 +86,7 @@
         [build_ins appendString:@"\n|❕you need add ⬇️ code in the application file|"];
         [build_ins appendString:@"\n|----------------------------------------------|\n"];
         for (NSString *name in functionNames) {
-            NSString *build_in_declare = [NSString stringWithFormat:@"[ORSystemFunctionTable reg:@\"%@\" pointer:&%@];\n",name,name];
+            NSString *build_in_declare = [NSString stringWithFormat:@"[ORSystemFunctionPointerTable reg:@\"%@\" pointer:&%@];\n",name,name];
             [build_ins appendString:build_in_declare];
         }
         [build_ins appendString:@"-----------------------------------------------"];

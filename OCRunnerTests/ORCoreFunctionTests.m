@@ -34,6 +34,8 @@ int functionCall1(){
 }
 - (void)testCallStructPointer{
     MFValue *result = [MFValue defaultValueWithTypeEncoding:@encode(CGAffineTransform)];
+    ORStructDeclare *declare = [ORStructDeclare structDecalre:@encode(CGAffineTransform) keys:@[@"a",@"b",@"c",@"d",@"tx",@"ty"]];
+    [[ORStructDeclareTable shareInstance] addStructDeclare:declare];
     void *funcptr = &CGAffineTransformScale;
     invoke_functionPointer(funcptr, @[[[MFValue alloc] initTypeEncode:@encode(CGAffineTransform) pointer:&CGAffineTransformIdentity],
                                       [MFValue valueWithDouble:0.5],

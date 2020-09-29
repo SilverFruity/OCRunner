@@ -498,24 +498,20 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         MFValue *value = [(ORMethodCall *)self.caller execute:scope];
         return invoke_MFBlockValue(value, args);
     }
-    MFValue *blockValue = [scope recursiveGetValueWithIdentifier:self.caller.value];
-    if (self.caller.value_type == OCValueVariable && blockValue != nil) {
+    //TODO: 递归函数优化, 优先查找全局函数
+    id functionImp = [[ORGlobalFunctionTable shared] getFunctionNodeWithName:self.caller.value];
+    if ([functionImp isKindOfClass:[ORFunctionImp class]]){
+        // global function calll
+        [ORArgsStack push:args];
+        return [(ORFunctionImp *)functionImp execute:scope];
+    }else if([functionImp isKindOfClass:[ORSearchedFunction class]]) {
+        // 调用系统函数
+        [ORArgsStack push:args];
+        return [(ORSearchedFunction *)functionImp execute:scope];
+    }else{
+        MFValue *blockValue = [scope recursiveGetValueWithIdentifier:self.caller.value];
         if (blockValue.isBlockValue) {
             return invoke_MFBlockValue(blockValue, args);
-        }else{
-            if ([blockValue.objectValue isKindOfClass:[ORFunctionImp class]]) {
-                // global function calll
-                [ORArgsStack push:args];
-                ORFunctionImp *imp = blockValue.objectValue;
-                MFValue *result = [imp execute:scope];
-                return result;
-            }else if ([blockValue.objectValue isKindOfClass:[ORSearchedFunction class]]) {
-                ORSearchedFunction *function = blockValue.objectValue;
-                [ORArgsStack push:args];
-                MFValue *result = [function execute:scope];
-                return result;
-            }
-            
         }
     }
     return [MFValue valueWithObject:nil];
@@ -542,8 +538,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         && self.declare.funVar.varname
         && self.declare.funVar.ptCount == 0) {
         NSString *funcName = self.declare.funVar.varname;
-        if ([scope recursiveGetValueWithIdentifier:funcName] == nil) {
-            [scope setValue:[MFValue valueWithObject:self] withIndentifier:funcName];
+        if ([[ORGlobalFunctionTable shared] getFunctionNodeWithName:funcName] == nil) {
+            [[ORGlobalFunctionTable shared] setFunctionNode:self WithName:funcName];
         }
         return [MFValue normalEnd];
     }

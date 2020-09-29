@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ORSystemFunctionTable : NSObject
+@interface ORSystemFunctionPointerTable : NSObject
 + (void)reg:(NSString *)name pointer:(void *)pointer;
 + (void *)pointerForFunctionName:(NSString *)name;
 @end

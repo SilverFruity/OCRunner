@@ -10,16 +10,16 @@
 #import "MFScopeChain.h"
 #import "ORStructDeclare.h"
 #import <UIKit/UIKit.h>
-#import "ORSystemFunctionTable.h"
+#import "ORSystemFunctionPointerTable.h"
 static void add_gcd_build_in(MFScopeChain *scope){
     [scope setValue:[MFValue valueWithBlock:^void(dispatch_once_t *onceTokenPtr,
                                                                   dispatch_block_t _Nullable handler){
         dispatch_once(onceTokenPtr,handler);
     }] withIndentifier:@"dispatch_once"];
     
-    [ORSystemFunctionTable reg:@"dispatch_get_main_queue" pointer:&dispatch_get_main_queue];
-    [ORSystemFunctionTable reg:@"dispatch_block_notify" pointer:&dispatch_block_notify];
-    [ORSystemFunctionTable reg:@"dispatch_block_testcancel" pointer:&dispatch_block_testcancel];
+    [ORSystemFunctionPointerTable reg:@"dispatch_get_main_queue" pointer:&dispatch_get_main_queue];
+    [ORSystemFunctionPointerTable reg:@"dispatch_block_notify" pointer:&dispatch_block_notify];
+    [ORSystemFunctionPointerTable reg:@"dispatch_block_testcancel" pointer:&dispatch_block_testcancel];
     
     /* queue */
     [scope setValue:[MFValue valueWithLongLong:DISPATCH_QUEUE_PRIORITY_HIGH] withIndentifier:@"DISPATCH_QUEUE_PRIORITY_HIGH"];

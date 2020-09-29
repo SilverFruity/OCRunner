@@ -6,9 +6,9 @@
 //  Copyright © 2020 SilverFruity. All rights reserved.
 //
 
-#import "ORSystemFunctionTable.h"
+#import "ORSystemFunctionPointerTable.h"
 
-@implementation ORSystemFunctionTable
+@implementation ORSystemFunctionPointerTable
 {
     NSMutableDictionary <NSString *,NSValue *>*_table;
 }
@@ -24,15 +24,15 @@
     static id st_instance;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        st_instance = [[ORSystemFunctionTable alloc] init];
+        st_instance = [[ORSystemFunctionPointerTable alloc] init];
     });
     return st_instance;
 }
 + (void)reg:(NSString *)name pointer:(void *)pointer{
-    [ORSystemFunctionTable shareInstance]->_table[name] = [NSValue valueWithPointer:pointer];
+    [ORSystemFunctionPointerTable shareInstance]->_table[name] = [NSValue valueWithPointer:pointer];
 }
 + (void *)pointerForFunctionName:(NSString *)name{
-    NSValue *value = [ORSystemFunctionTable shareInstance]->_table[name];
+    NSValue *value = [ORSystemFunctionPointerTable shareInstance]->_table[name];
     return value.pointerValue;
 }
 @end
