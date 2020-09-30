@@ -502,12 +502,20 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     id functionImp = [[ORGlobalFunctionTable shared] getFunctionNodeWithName:self.caller.value];
     if ([functionImp isKindOfClass:[ORFunctionImp class]]){
         // global function calll
-        [ORArgsStack push:args];
-        return [(ORFunctionImp *)functionImp execute:scope];
+        MFValue *result = nil;
+        @autoreleasepool {
+            [ORArgsStack push:args];
+            result = [(ORFunctionImp *)functionImp execute:scope];
+        }
+        return result;
     }else if([functionImp isKindOfClass:[ORSearchedFunction class]]) {
         // 调用系统函数
-        [ORArgsStack push:args];
-        return [(ORSearchedFunction *)functionImp execute:scope];
+        MFValue *result = nil;
+        @autoreleasepool {
+            [ORArgsStack push:args];
+            result = [(ORSearchedFunction *)functionImp execute:scope];
+        }
+        return result;
     }else{
         MFValue *blockValue = [scope recursiveGetValueWithIdentifier:self.caller.value];
         if (blockValue.isBlockValue) {
@@ -520,10 +528,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 
 @implementation ORScopeImp (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope{
-    MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
     //{ }
     for (id <OCExecute>statement in self.statements) {
-        MFValue *result = [statement execute:current];
+        MFValue *result = [statement execute:scope];
         if (!result.isNormal) {
             return result;
         }
@@ -929,21 +936,24 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     for (ORIfStatement *statement in statements) {
         MFValue *conditionValue = [statement.condition execute:scope];
         if (conditionValue.isSubtantial) {
-            return [statement.scopeImp execute:scope];
+            MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
+            return [statement.scopeImp execute:current];
         }
     }
     if (self.condition == nil) {
-        return [self.scopeImp execute:scope];
+        MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
+        return [self.scopeImp execute:current];
     }
     return [MFValue normalEnd];
 }@end
 @implementation ORWhileStatement (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
+    MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
     while (1) {
         if (![self.condition execute:scope].isSubtantial) {
             break;
         }
-        MFValue *resultValue = [self.scopeImp execute:scope];
+        MFValue *resultValue = [self.scopeImp execute:current];
         if (resultValue.isBreak) {
             resultValue.resultType = MFStatementResultTypeNormal;
             break;
@@ -960,8 +970,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @end
 @implementation ORDoWhileStatement (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
+    MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
     while (1) {
-        MFValue *resultValue = [self.scopeImp execute:scope];
+        MFValue *resultValue = [self.scopeImp execute:current];
         if (resultValue.isBreak) {
             resultValue.resultType = MFStatementResultTypeNormal;
             break;
@@ -981,8 +992,10 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @end
 @implementation ORCaseStatement (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
-    return [self.scopeImp execute:scope];
-}@end
+    MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
+    return [self.scopeImp execute:current];
+}
+@end
 @implementation ORSwitchStatement (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *value = [self.value execute:scope];
@@ -997,7 +1010,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
                     continue;
                 }
             }
-            MFValue *result = [statement.scopeImp execute:scope];
+            MFValue *result = [statement execute:scope];
             if (result.isBreak) {
                 result.resultType = MFStatementResultTypeNormal;
                 return result;
@@ -1007,7 +1020,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
                 return result;
             }
         }else{
-            MFValue *result = [statement.scopeImp execute:scope];
+            MFValue *result = [statement execute:scope];
             if (result.isBreak) {
                 result.resultType = MFStatementResultTypeNormal;
                 return value;
