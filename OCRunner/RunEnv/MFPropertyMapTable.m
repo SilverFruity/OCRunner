@@ -22,6 +22,7 @@
 
 @implementation MFPropertyMapTable{
     NSLock *_lock;
+    NSCache *classCaches;
 }
 
 + (instancetype)shareInstance{
@@ -46,18 +47,18 @@
     if (!propertyName.length) {
         return;
     }
-    NSString *index = [NSString stringWithFormat:@"%@_%@",NSStringFromClass(propertyMapTableItem.clazz),propertyName];
-    [_lock lock];
-    _dic[index] = propertyMapTableItem;
-    [_lock unlock];
+    Class class = propertyMapTableItem.clazz;
+    NSCache *propertyMap = [classCaches objectForKey:class];
+    if (propertyMap == NULL){
+        propertyMap = [NSCache new];
+        [classCaches setObject:propertyMap forKey:class];
+    }
+    [propertyMap setObject:propertyMapTableItem forKey:propertyName];
 }
 
 - (MFPropertyMapTableItem *)getPropertyMapTableItemWith:(Class)clazz name:(NSString *)name{
-    NSString *index = [NSString stringWithFormat:@"%@_%@",NSStringFromClass(clazz),name];
-    [_lock lock];
-    MFPropertyMapTableItem *propertyMapTableItem = _dic[index];
-    [_lock unlock];
-    return propertyMapTableItem;
+    NSCache *propertyMap = [classCaches objectForKey:clazz];
+    return [propertyMap objectForKey:name];
 }
 
 

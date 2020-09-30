@@ -19,7 +19,8 @@
 @end
 
 @implementation MFMethodMapTable{
-	NSMutableDictionary<NSString *, MFMethodMapTableItem *> *_dic;
+    NSCache *classMethodCache;
+    NSCache *instanceMethodCache;
     NSLock *_lock;
 }
 
@@ -34,26 +35,41 @@
 
 - (instancetype)init{
 	if (self = [super init]) {
-		_dic = [NSMutableDictionary dictionary];
+        classMethodCache = [NSCache new];
+        instanceMethodCache = [NSCache new];
         _lock = [[NSLock alloc] init];
 	}
 	return self;
 }
 
 - (void)addMethodMapTableItem:(MFMethodMapTableItem *)methodMapTableItem{
-    NSString *methodName = [methodMapTableItem.methodImp.declare selectorName];
-    NSString *index = [NSString stringWithFormat:@"%d_%@_%@,",methodMapTableItem.methodImp.declare.isClassMethod,NSStringFromClass(methodMapTableItem.clazz),methodName];
-    [_lock lock];
-	_dic[index] = methodMapTableItem;
-    [_lock unlock];
+    Class class = methodMapTableItem.clazz;
+    NSString *sel = [methodMapTableItem.methodImp.declare selectorName];
+    if (methodMapTableItem.methodImp.declare.isClassMethod){
+        NSCache *classMap = [classMethodCache objectForKey:class];
+        if (classMap == NULL){
+            classMap = [NSCache new];
+            [classMethodCache setObject:classMap forKey:class];
+        }
+        [classMap setObject:methodMapTableItem forKey:sel];
+    }else{
+        NSCache *classMap = [instanceMethodCache objectForKey:class];
+        if (classMap == NULL){
+            classMap = [NSCache new];
+            [instanceMethodCache setObject:classMap forKey:class];
+        }
+        [classMap setObject:methodMapTableItem forKey:sel];
+    }
 }
 
 - (MFMethodMapTableItem *)getMethodMapTableItemWith:(Class)clazz classMethod:(BOOL)classMethod sel:(SEL)sel{
-    NSString *index = [NSString stringWithFormat:@"%d_%@_%@,",classMethod,NSStringFromClass(clazz),NSStringFromSelector(sel)];
-    [_lock lock];
-	MFMethodMapTableItem *item = _dic[index];
-    [_lock unlock];
-    return item;
+    NSString *selector = NSStringFromSelector(sel);
+    if (classMethod){
+        NSCache *classMap = [classMethodCache objectForKey:clazz];
+        return [classMap objectForKey:selector];
+    }else{
+        NSCache *classMap = [instanceMethodCache objectForKey:clazz];
+        return [classMap objectForKey:selector];
+    }
 }
-
 @end
