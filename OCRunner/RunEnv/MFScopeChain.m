@@ -67,7 +67,7 @@ const void *mf_propKey(NSString *propName) {
         return nil;
     }
     
-    if (![ivarName hasPrefix:@"_"]) {
+    if (*ivarName.UTF8String != '_') {
         return nil;
     }
     

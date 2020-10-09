@@ -10,10 +10,10 @@
 #import "RunnerClasses+Execute.h"
 #import "ORHandleTypeEncode.h"
 
-#define startBox(value)\
+#define START_BOX \
 MFRealBaseValue box = { 0 };\
 
-#define endBox(result)\
+#define END_BOX(result)\
 result->realBaseValue = box;\
 
 #define PrefixUnaryExecuteInt(operator,value)\

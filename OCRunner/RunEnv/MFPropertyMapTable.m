@@ -38,6 +38,7 @@
     if (self = [super init]) {
         _dic = [NSMutableDictionary dictionary];
         _lock = [[NSLock alloc] init];
+        classCaches = [NSCache new];
     }
     return self;
 }
@@ -49,7 +50,7 @@
     }
     Class class = propertyMapTableItem.clazz;
     NSCache *propertyMap = [classCaches objectForKey:class];
-    if (propertyMap == NULL){
+    if (propertyMap == nil){
         propertyMap = [NSCache new];
         [classCaches setObject:propertyMap forKey:class];
     }
