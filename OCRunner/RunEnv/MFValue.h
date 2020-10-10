@@ -255,6 +255,7 @@ typedef union{
     unsigned long long uLongLongValue;
     float floatValue;
     double doubleValue;
+    void *pointerValue;
 }MFRealBaseValue;
 
 typedef struct {
