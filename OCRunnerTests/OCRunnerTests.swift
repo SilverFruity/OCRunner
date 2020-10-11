@@ -892,8 +892,8 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scope.getValueWithIdentifier("UIControlEventAllTouchEvents")!.uLongLongValue == 0x00000FFF)
         XCTAssert(scope.getValueWithIdentifier("UIControlEventAllEditingEvents")!.uLongLongValue == 0x000F0000)
         XCTAssert(scope.getValueWithIdentifier("UIControlEventApplicationReserved")!.uLongLongValue == 0x0F000000)
-        XCTAssert(scope.getValueWithIdentifier("UIControlEventSystemReserved")!.uLongLongValue == 0xF0000000)
-        XCTAssert(scope.getValueWithIdentifier("UIControlEventAllEvents")!.uLongLongValue == 0xFFFFFFFF)
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventSystemReserved")!.uLongLongValue == UInt64(0xF0000000))
+        XCTAssert(scope.getValueWithIdentifier("UIControlEventAllEvents")!.uLongLongValue == UInt64(0xFFFFFFFF))
     }
     
     func testStructDeclare(){

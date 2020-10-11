@@ -71,14 +71,12 @@
 
 
 @implementation ORStructDeclareTable{
-    NSMutableDictionary<NSString *, ORStructDeclare *> *_dic;
-    NSLock *_lock;
+    NSCache<NSString *, ORStructDeclare *> *_cache;
 }
 
 - (instancetype)init{
     if (self = [super init]) {
-        _dic = [NSMutableDictionary dictionary];
-        _lock = [[NSLock alloc] init];
+        _cache = [NSCache new];
     }
     return self;
 }
@@ -91,27 +89,21 @@
     return st_instance;
 }
 - (void)addAlias:(NSString *)alias forTypeName:(NSString *)name{
-    [_lock lock];
-    if (_dic[name]) {
-        _dic[alias] = _dic[name];
+    id value = [_cache objectForKey:name];
+    if (value) {
+        [_cache setObject:value forKey:name];
     }
-    [_lock unlock];
 }
 - (void)addAlias:(NSString *)alias forStructTypeEncode:(const char *)typeEncode{
     NSString *structName = startStructNameDetect(typeEncode);
     [self addAlias:alias forTypeName:structName];
 }
 - (void)addStructDeclare:(ORStructDeclare *)structDeclare{
-    [_lock lock];
-    _dic[structDeclare.name] = structDeclare;
-    [_lock unlock];
+    [_cache setObject:structDeclare forKey:structDeclare.name];
 }
 
 - (ORStructDeclare *)getStructDeclareWithName:(NSString *)name{
-    [_lock lock];
-    ORStructDeclare *declare = _dic[name];
-    [_lock unlock];
-    return declare;
+    return [_cache objectForKey:name];
 }
 @end
 
