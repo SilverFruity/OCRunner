@@ -51,7 +51,11 @@
         make.width.equalTo(@(200));
         make.height.equalTo(@(200));
     }];
-    view.transform = CGAffineTransformScale(view.transform, 0.5, 0.5);
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [UIView animateWithDuration:0.25 animations:^{
+            view.transform = CGAffineTransformScale(view.transform, 0.5, 0.5);
+        }];
+    });
     UIView *frameView = [[UIView alloc] initWithFrame:CGRectMake(0, 100, 50, 50)];
     frameView.backgroundColor = [UIColor greenColor];
     [self.view addSubview:frameView];

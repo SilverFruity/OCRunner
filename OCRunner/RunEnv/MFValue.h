@@ -280,7 +280,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @property (assign,nonatomic)NSInteger pointerCount;
 @property (nonatomic,assign)const char* typeEncode;
 @property (nonatomic,assign, nullable)void *pointer;
-- (void)setPointerWithNoCopy:(void *)pointer;
+- (void)setStructPointerWithNoCopy:(void *)pointer;
 - (void)setDefaultValue;
 - (BOOL)isBlockValue;
 

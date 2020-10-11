@@ -61,17 +61,16 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     if (_pointer != NULL && _isAlloced) {
         free(realBaseValue.pointerValue);
         realBaseValue.pointerValue = NULL;
-        _pointer = NULL;
-        _strongObjectValue = nil;
-        _weakObjectValue = nil;
     }
+    realBaseValue.pointerValue = NULL;
+    _pointer = NULL;
+    _strongObjectValue = nil;
+    _weakObjectValue = nil;
 }
 - (void)setPointer:(void *)pointer{
     NSCAssert(_typeEncode != NULL, @"TypeEncode must exist");
     [self deallocPointer];
     _isAlloced = NO;
-    _strongObjectValue = nil;
-    _weakObjectValue = nil;
     void *replace = NULL;
     if (pointer == NULL) {
         pointer = &replace;
@@ -181,7 +180,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
                 memcpy(dst, pointer, size);
             }
             realBaseValue.pointerValue = dst;
-            _pointer = &realBaseValue.pointerValue;
+            _pointer = realBaseValue.pointerValue;
             break;
         case OCTypePointer:
             realBaseValue.pointerValue = *(void **)pointer;
@@ -209,8 +208,9 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
         self.typeEncode = typeencode;
     }
 }
-- (void)setPointerWithNoCopy:(void *)pointer{
+- (void)setStructPointerWithNoCopy:(void *)pointer{
     [self deallocPointer];
+    realBaseValue.pointerValue = pointer;
     _pointer = pointer;
     _isAlloced = NO;
 }
@@ -257,7 +257,6 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     strncpy((void *)buffer, typeEncode, strLen);
     _typeEncode = buffer;
     _pointerCount = startDetectPointerCount(typeEncode);
-    NSLog(@"%@",_typeName);
     if (*typeEncode == OCTypeClass) {
         self.typeName = @"Class";
     }else if(*typeEncode == OCTypeStruct){
@@ -502,7 +501,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     if (copied) {
         result.pointer = realBaseValue.pointerValue + offset;
     }else{
-        [result setPointerWithNoCopy:realBaseValue.pointerValue + offset];
+        [result setStructPointerWithNoCopy:realBaseValue.pointerValue + offset];
     }
     return result;
 }
