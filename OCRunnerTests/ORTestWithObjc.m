@@ -175,7 +175,7 @@ Element2Struct *Element2StructMake(){
     MFScopeChain *scope = self.currentScope;
     CGRect rect1 = CGRectZero;
     MFValue *value = [MFValue defaultValueWithTypeEncoding:@encode(CGRect)];
-    [value setPointerWithNoCopy:&rect1];
+    [value setStructPointerWithNoCopy:&rect1];
     [[value fieldNoCopyForKey:@"origin"] setFieldWithValue:[MFValue valueWithDouble:1] forKey:@"x"];
     [[value fieldNoCopyForKey:@"origin"] setFieldWithValue:[MFValue valueWithDouble:2] forKey:@"y"];
     XCTAssert(rect1.origin.x == 1, @"origin.x %f", rect1.origin.x);
@@ -204,7 +204,7 @@ Element2Struct *Element2StructMake(){
     MFScopeChain *scope = self.currentScope;
     CGRect rect1 = CGRectZero;
     MFValue *value = [MFValue defaultValueWithTypeEncoding:@encode(CGRect)];
-    [value setPointerWithNoCopy:&rect1];
+    [value setStructPointerWithNoCopy:&rect1];
     [[value fieldForKey:@"origin"] setFieldWithValue:[MFValue valueWithDouble:1] forKey:@"x"];
     [[value fieldForKey:@"origin"] setFieldWithValue:[MFValue valueWithDouble:2] forKey:@"y"];
     XCTAssert(rect1.origin.x == 0, @"origin.x %f", rect1.origin.x);
