@@ -327,9 +327,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             return scope.instance;
         }
         case OCValueSelector:{
+            //SEL 作为参数时，在OC中，是以NSString传递的，1.0.4前的ORMethodCall只使用libffi调用objc_msgSend时，就会出现objc_retain的崩溃
             NSString *value = self.value;
-            NSString *selector = [value substringWithRange:NSMakeRange(10, value.length - 11)];
-            return [MFValue valueWithSEL:NSSelectorFromString(selector)];
+            return [MFValue valueWithObject:value];
         }
         case OCValueProtocol:{
             return [MFValue valueWithObject:NSProtocolFromString(self.value)];
@@ -443,8 +443,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
     NSUInteger argCount = [sig numberOfArguments];
     void *retValuePointer = alloca([sig methodReturnLength]);
+    //解决多参数调用问题
     if (argValues.count + 2 > argCount && sig != nil) {
-        //多参数调用问题
         NSMutableArray *methodArgs = [@[[MFValue valueWithObject:instance],
                                        [MFValue valueWithSEL:sel]] mutableCopy];
         [methodArgs addObjectsFromArray:argValues];
@@ -456,8 +456,6 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
         invocation.target = instance;
         invocation.selector = sel;
-        //根据MFValue的type传入值的原因: 模拟在OC中的调用
-        //FIXME: 多参数问题，self.values.count + 2 > argCount 时，采用多参数，超出参数压栈
         for (NSUInteger i = 2; i < argCount; i++) {
             MFValue *value = argValues[i-2];
             // 基础类型转换
@@ -1218,8 +1216,6 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }else{
             [typeEncode appendFormat:@"%s",exp.pair.typeEncode];
         }
-        //FIXME: struct 嵌套的问题
-        //FIXME: struct 嵌套层级排序，类似ORClass
         [keys addObject:exp.pair.var.varname];
     }
     [typeEncode appendString:@"}"];
