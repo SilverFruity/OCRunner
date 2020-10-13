@@ -68,6 +68,7 @@
     }];
     label.text = [[ShareInstance shared] cacheForKey:@"1"];
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"点击" style:UIBarButtonItemStylePlain target:self action:@selector(showNext)];
+    NSLog(@"%@",@(-1));
 }
 - (void)showNext{
     UIViewController *vc = [UIViewController new];

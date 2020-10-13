@@ -386,6 +386,12 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 
 @implementation ORIntegerValue (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
+    return [MFValue valueWithLongLong:self.value];;
+}
+@end
+
+@implementation ORUIntegerValue (Execute)
+- (nullable MFValue *)execute:(MFScopeChain *)scope {
     return [MFValue valueWithULongLong:self.value];;
 }
 @end
