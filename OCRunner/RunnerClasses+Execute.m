@@ -329,7 +329,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         case OCValueSelector:{
             //SEL 作为参数时，在OC中，是以NSString传递的，1.0.4前的ORMethodCall只使用libffi调用objc_msgSend时，就会出现objc_retain的崩溃
             NSString *value = self.value;
-            return [MFValue valueWithObject:value];
+            return [MFValue valueWithSEL:NSSelectorFromString(value)];
         }
         case OCValueProtocol:{
             return [MFValue valueWithObject:NSProtocolFromString(self.value)];

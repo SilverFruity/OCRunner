@@ -55,6 +55,7 @@ class CRunnerTests: XCTestCase {
         float k = 0.5;
         double l = 0.5;
         char *str = "123";
+        SEL sel = @selector(test);
         """
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
@@ -100,6 +101,8 @@ class CRunnerTests: XCTestCase {
         scopeValue = scope.getValueWithIdentifier("str")
         XCTAssert(scopeValue!.type == OCTypeCString)
         XCTAssert(String(utf8String: scopeValue!.cStringValue!) == "123")
+        scopeValue = scope.getValueWithIdentifier("sel")
+        XCTAssert(scopeValue!.selValue == Selector("test"))
     }
     func testeDeclareBlock(){
         let source =
