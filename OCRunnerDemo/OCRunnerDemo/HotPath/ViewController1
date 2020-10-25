@@ -71,7 +71,7 @@
     NSLog(@"%@",@(-1));
 }
 - (void)showNext{
-    UIViewController *vc = [UIViewController new];
+    HotFixController *vc = [HotFixController new];
     vc.view.backgroundColor = [UIColor whiteColor];
     [self.navigationController pushViewController:vc animated:YES];
 }
