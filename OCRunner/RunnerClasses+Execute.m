@@ -1197,11 +1197,13 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }
     // 添加Class变量到作用域
     [current setValue:[MFValue valueWithClass:clazz] withIndentifier:@"Class"];
-    for (ORMethodImplementation *method in self.methods) {
-        replace_method(clazz, method, current);
-    }
+    // 先添加属性
     for (ORPropertyDeclare *property in self.properties) {
         [property execute:current];
+    }
+    // 在添加方法，这样可以解决属性的懒加载不生效的问题
+    for (ORMethodImplementation *method in self.methods) {
+        replace_method(clazz, method, current);
     }
     return nil;
 }
