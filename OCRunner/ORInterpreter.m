@@ -16,10 +16,19 @@
 
 @implementation ORInterpreter
 + (void)excuteBinaryPatchFile:(NSString *)path{
-    
-    
     //加载补丁文件
     ORPatchFile *file = [ORPatchFile loadBinaryPatch:path];
+    
+    //如果版本判断未通过，则为nil
+    if (file == nil) {
+        return;
+    }
+    [self excuteNodes:file.nodes];
+}
+
++ (void)excuteJsonPatchFile:(NSString *)path decrptMapPath:(NSString *)decrptMapPath {
+    //加载补丁文件
+    ORPatchFile *file = [ORPatchFile loadJsonPatch:path decrptMapPath:decrptMapPath];
     
     //如果版本判断未通过，则为nil
     if (file == nil) {

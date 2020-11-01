@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		329B22EE254E5ACB00CB9DAB /* jsonPatch in Resources */ = {isa = PBXBuildFile; fileRef = 329B22ED254E5ACB00CB9DAB /* jsonPatch */; };
+		329B2304254E694A00CB9DAB /* ClassDecryptMap.json in Resources */ = {isa = PBXBuildFile; fileRef = 329B2303254E694A00CB9DAB /* ClassDecryptMap.json */; };
 		994370B6E6826AB9C293F686 /* Pods_OCRunnerDemo_OCRunnerDemoUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2566C827C6925E5FB35FC01D /* Pods_OCRunnerDemo_OCRunnerDemoUITests.framework */; };
 		D71B1056F7894677E4150783 /* Pods_OCRunnerDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A0001072323984F1566D9A7 /* Pods_OCRunnerDemo.framework */; };
 		EE480E9324794CDA003E4970 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = EE480E9224794CDA003E4970 /* AppDelegate.m */; };
@@ -53,6 +55,9 @@
 		1C9D422B1CDEE6B7B4FBECF4 /* Pods-OCRunnerDemo-OCRunnerDemoUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRunnerDemo-OCRunnerDemoUITests.release.xcconfig"; path = "Target Support Files/Pods-OCRunnerDemo-OCRunnerDemoUITests/Pods-OCRunnerDemo-OCRunnerDemoUITests.release.xcconfig"; sourceTree = "<group>"; };
 		2566C827C6925E5FB35FC01D /* Pods_OCRunnerDemo_OCRunnerDemoUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OCRunnerDemo_OCRunnerDemoUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3241B9612545363F000302CF /* HotViewcontroller */ = {isa = PBXFileReference; lastKnownFileType = text; path = HotViewcontroller; sourceTree = "<group>"; };
+		329B22ED254E5ACB00CB9DAB /* jsonPatch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = jsonPatch; sourceTree = "<group>"; };
+		329B2303254E694A00CB9DAB /* ClassDecryptMap.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ClassDecryptMap.json; sourceTree = "<group>"; };
+		329B2308254E696B00CB9DAB /* ClassEncryptMap.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ClassEncryptMap.json; sourceTree = "<group>"; };
 		3489C29640E3FB1F05C6053D /* Pods-OCRunnerDemo-OCRunnerDemoUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRunnerDemo-OCRunnerDemoUITests.debug.xcconfig"; path = "Target Support Files/Pods-OCRunnerDemo-OCRunnerDemoUITests/Pods-OCRunnerDemo-OCRunnerDemoUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		4A0001072323984F1566D9A7 /* Pods_OCRunnerDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OCRunnerDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		67BDCC0265C38B9F51A32E8C /* Pods-OCRunnerDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRunnerDemo.debug.xcconfig"; path = "Target Support Files/Pods-OCRunnerDemo/Pods-OCRunnerDemo.debug.xcconfig"; sourceTree = "<group>"; };
@@ -141,13 +146,22 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
-		3241B960254535F3000302CF /* HotPath */ = {
+		3241B960254535F3000302CF /* RunnerFile */ = {
 			isa = PBXGroup;
 			children = (
 				EE66C09E24FE95D600C85B31 /* ViewController1 */,
 				3241B9612545363F000302CF /* HotViewcontroller */,
 			);
-			path = HotPath;
+			path = RunnerFile;
+			sourceTree = "<group>";
+		};
+		329B22DF254E5A6400CB9DAB /* JsonMap */ = {
+			isa = PBXGroup;
+			children = (
+				329B2308254E696B00CB9DAB /* ClassEncryptMap.json */,
+				329B2303254E694A00CB9DAB /* ClassDecryptMap.json */,
+			);
+			path = JsonMap;
 			sourceTree = "<group>";
 		};
 		EE480E8524794CDA003E4970 = {
@@ -177,16 +191,18 @@
 			children = (
 				EE480E9124794CDA003E4970 /* AppDelegate.h */,
 				EE480E9224794CDA003E4970 /* AppDelegate.m */,
-				3241B960254535F3000302CF /* HotPath */,
+				EE480E9D24794CDB003E4970 /* Assets.xcassets */,
 				EE66C0BF24FEAA0B00C85B31 /* binarypatch */,
+				EE480EA224794CDB003E4970 /* Info.plist */,
+				329B22DF254E5A6400CB9DAB /* JsonMap */,
+				329B22ED254E5ACB00CB9DAB /* jsonPatch */,
+				EE480E9F24794CDB003E4970 /* LaunchScreen.storyboard */,
+				EE480EA324794CDB003E4970 /* main.m */,
+				EE480E9A24794CDA003E4970 /* Main.storyboard */,
+				3241B960254535F3000302CF /* RunnerFile */,
+				EE66C0BD24FEA97000C85B31 /* Scripts.bundle */,
 				EE480E9724794CDA003E4970 /* ViewController.h */,
 				EE480E9824794CDA003E4970 /* ViewController.m */,
-				EE66C0BD24FEA97000C85B31 /* Scripts.bundle */,
-				EE480E9A24794CDA003E4970 /* Main.storyboard */,
-				EE480E9D24794CDB003E4970 /* Assets.xcassets */,
-				EE480E9F24794CDB003E4970 /* LaunchScreen.storyboard */,
-				EE480EA224794CDB003E4970 /* Info.plist */,
-				EE480EA324794CDB003E4970 /* main.m */,
 			);
 			path = OCRunnerDemo;
 			sourceTree = "<group>";
@@ -255,6 +271,7 @@
 				27AA2D25C133AEBD58CE17FE /* [CP] Check Pods Manifest.lock */,
 				EE480E8A24794CDA003E4970 /* Sources */,
 				EE480E8B24794CDA003E4970 /* Frameworks */,
+				329B22DB254E594600CB9DAB /* PatchJson */,
 				EE66C0B824FEA72A00C85B31 /* PatchGenerator */,
 				EE480E8C24794CDA003E4970 /* Resources */,
 				ECC75E2B37FCA0D7E0C662E2 /* [CP] Embed Pods Frameworks */,
@@ -359,7 +376,9 @@
 				EE480EA124794CDB003E4970 /* LaunchScreen.storyboard in Resources */,
 				EE480E9E24794CDB003E4970 /* Assets.xcassets in Resources */,
 				EE66C0C024FEAA0B00C85B31 /* binarypatch in Resources */,
+				329B22EE254E5ACB00CB9DAB /* jsonPatch in Resources */,
 				EE480E9C24794CDA003E4970 /* Main.storyboard in Resources */,
+				329B2304254E694A00CB9DAB /* ClassDecryptMap.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -424,6 +443,24 @@
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
+		};
+		329B22DB254E594600CB9DAB /* PatchJson */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = PatchJson;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "$SRCROOT/OCRunnerDemo/PatchJson -files $SRCROOT/OCRunnerDemo/RunnerFile -refs  $SRCROOT/OCRunnerDemo/Scripts.bundle -encrptMap $SRCROOT/OCRunnerDemo/JsonMap/ClassEncryptMap.json -output $SRCROOT/OCRunnerDemo/jsonPatch\n";
 		};
 		4FE3DD32E86F36371C142998 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -514,7 +551,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SRCROOT/OCRunnerDemo/PatchGenerator -files $SRCROOT/OCRunnerDemo/HotPath -refs  $SRCROOT/OCRunnerDemo/Scripts.bundle -output $SRCROOT/OCRunnerDemo/binarypatch\n";
+			shellScript = "$SRCROOT/OCRunnerDemo/PatchGenerator -files $SRCROOT/OCRunnerDemo/RunnerFile -refs  $SRCROOT/OCRunnerDemo/Scripts.bundle -output $SRCROOT/OCRunnerDemo/binarypatch\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
