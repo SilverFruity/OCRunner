@@ -437,6 +437,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     for (ORValueExpression *exp in self.values){
         [argValues addObject:[exp execute:scope]];
     }
+    // instance为nil时，依然要执行参数相关的表达式
     if ([self.caller isKindOfClass:[ORValueExpression class]]) {
         ORValueExpression *value = (ORValueExpression *)self.caller;
         if (value.value_type == OCValueSuper) {
@@ -445,6 +446,17 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }
     if (instance == nil) {
         return [MFValue voidValue];
+    }
+    
+    //如果在方法缓存表的中已经找到相关方法，直接调用，省去一次中间类型转换问题。优化性能，在方法递归时，调用耗时减少33%，0.15s -> 0.10s
+    BOOL classMethod = object_isClass(instance);
+    Class class = classMethod ? instance : [instance class];
+    MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:class classMethod:classMethod sel:sel];
+    if (map) {
+        MFScopeChain *newScope = [MFScopeChain scopeChainWithNext:scope];
+        newScope.instance = classMethod ? [MFValue valueWithClass:instance] : [MFValue valueWithObject:instance];
+        [ORArgsStack push:argValues];
+        return [map.methodImp execute:newScope];
     }
     NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
     NSUInteger argCount = [sig numberOfArguments];
