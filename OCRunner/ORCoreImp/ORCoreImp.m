@@ -37,11 +37,9 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
         class = [target class];
     }
     MFValue *value = nil;
-    @autoreleasepool {
-        [ORArgsStack push:argValues];
-        MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:class classMethod:classMethod sel:sel];
-        value = [map.methodImp execute:scope];
-    }
+    [ORArgsStack push:argValues];
+    MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:class classMethod:classMethod sel:sel];
+    value = [map.methodImp execute:scope];
     if (value.type != TypeVoid && value.pointer != NULL){
         // 类型转换
         [value writePointer:ret typeEncode:[sig methodReturnType]];
@@ -58,10 +56,8 @@ void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
         [argValues addObject:argValue];
     }
     MFValue *value = nil;
-    @autoreleasepool {
-        [ORArgsStack push:argValues];
-        value = [mangoBlock.func execute:mangoBlock.outScope];
-    }
+    [ORArgsStack push:argValues];
+    value = [mangoBlock.func execute:mangoBlock.outScope];
     if (value.type != TypeVoid && value.pointer != NULL){
         // 类型转换
         [value writePointer:ret typeEncode:[sig methodReturnType]];

@@ -523,18 +523,14 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     if ([functionImp isKindOfClass:[ORFunctionImp class]]){
         // global function calll
         MFValue *result = nil;
-        @autoreleasepool {
-            [ORArgsStack push:args];
-            result = [(ORFunctionImp *)functionImp execute:scope];
-        }
+        [ORArgsStack push:args];
+        result = [(ORFunctionImp *)functionImp execute:scope];
         return result;
     }else if([functionImp isKindOfClass:[ORSearchedFunction class]]) {
         // 调用系统函数
         MFValue *result = nil;
-        @autoreleasepool {
-            [ORArgsStack push:args];
-            result = [(ORSearchedFunction *)functionImp execute:scope];
-        }
+        [ORArgsStack push:args];
+        result = [(ORSearchedFunction *)functionImp execute:scope];
         return result;
     }else{
         MFValue *blockValue = [scope recursiveGetValueWithIdentifier:self.caller.value];
