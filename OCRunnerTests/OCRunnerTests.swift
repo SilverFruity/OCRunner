@@ -981,4 +981,35 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scope.getValueWithIdentifier("c")?.objectValue == nil)
         XCTAssert(scope.getValueWithIdentifier("d")?.objectValue == nil)
     }
+    func testMethodReturn(){
+        let source =
+        """
+        @implementation ORMethodReturnTest
+        - (NSString *)showLog{
+           [self getMsg:@"Hello world!"];
+           return @"test";
+        }
+        - (NSString *)getMsg:(NSString *)msg{
+            return [NSString stringWithFormat:@"{OCRunner} %@", msg];
+        }
+        @end
+        NSString *value = [[ORMethodReturnTest new] showLog];
+        """
+        let ast = ocparser.parseSource(source)
+        for classValue in ast.nodes {
+            (classValue as! OCExecute).execute(scope);
+        }
+        let value = scope.getValueWithIdentifier("value")?.objectValue as? String ?? "failed"
+        XCTAssert(value == "test", value)
+    }
+    func testUnknownSelector(){
+        let source =
+        """
+        [UIColor red];
+        """
+        let ast = ocparser.parseSource(source)
+        for classValue in ast.nodes {
+            (classValue as! OCExecute).execute(scope);
+        }
+    }
 }

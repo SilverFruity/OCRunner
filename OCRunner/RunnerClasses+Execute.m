@@ -459,6 +459,10 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         return [map.methodImp execute:newScope];
     }
     NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
+    if (sig == nil) {
+        NSLog(@"⚠️⚠️ Unrecognized Selector %@",self.selectorName);
+        return [MFValue voidValue];
+    }
     NSUInteger argCount = [sig numberOfArguments];
     void *retValuePointer = alloca([sig methodReturnLength]);
     //解决多参数调用问题
@@ -579,13 +583,16 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             manBlock.paramTypes = manBlock.func.declare.funVar.pairs;
             __autoreleasing id ocBlock = [manBlock ocBlock];
             MFValue *value = [MFValue valueWithBlock:ocBlock];
+            value.resultType = MFStatementResultTypeNormal;
             CFRelease((__bridge void *)ocBlock);
             return value;
         }else{
             [self.declare execute:current];
         }
     }
-    return [self.scopeImp execute:current];
+    MFValue *value = [self.scopeImp execute:current];
+    value.resultType = MFStatementResultTypeNormal;
+    return value;
 }
 @end
 @implementation ORSubscriptExpression(Execute)
@@ -1181,7 +1188,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
     [self.declare execute:current];
-    return [self.scopeImp execute:current];
+    MFValue *result = [self.scopeImp execute:current];
+    result.resultType = MFStatementResultTypeNormal;
+    return result;
 }
 @end
 #import <objc/runtime.h>
