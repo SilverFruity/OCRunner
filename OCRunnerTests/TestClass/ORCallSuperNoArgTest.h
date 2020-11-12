@@ -23,4 +23,20 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+@interface Car : NSObject
+
+- (int)run;
+
+@end
+
+@interface BMW : Car
+
+- (int)run;
+
+@end
+
+@interface MiniBMW : BMW
+
+@end
+
 NS_ASSUME_NONNULL_END

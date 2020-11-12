@@ -13,7 +13,7 @@
 @implementation MFCallSuperNoArgTestSupserTest
 
 - (BOOL)testCallSuperNoArgTestSupser{
-    return YES;
+    return NO;
 }
 
 @end
@@ -21,7 +21,35 @@
 @implementation MFCallSuperNoArgTest
 
 - (BOOL)testCallSuperNoArgTestSupser{
-    return NO;
+    return [super testCallSuperNoArgTestSupser];
 }
+
+@end
+
+#pragma mark - Car
+
+@implementation Car
+
+- (int)run
+{
+    return 0;
+}
+
+@end
+
+#pragma mark - BMW
+
+@implementation BMW
+
+- (int)run
+{
+    return 1;
+}
+
+@end
+
+#pragma mark - MiniBMW
+
+@implementation MiniBMW
 
 @end

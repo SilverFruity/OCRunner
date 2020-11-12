@@ -48,7 +48,8 @@ NSUInteger resultFlagsForTypeEncode(const char *retTypeEncode, char **argTypeEnc
 void *core_register_function(void (*fun)(ffi_cif *,void *,void **, void*),
                              unsigned nargs,
                              char **argTypeEncodes,
-                             char *retTypeEncode);
+                             char *retTypeEncode,
+                             void *userdata);
 
 #endif /* __has_include  */
 
@@ -67,9 +68,20 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
 
 void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
                         NSArray <ORTypeVarPair *>*args,
-                        ORTypeVarPair *ret);
+                        ORTypeVarPair *ret)  __attribute__((overloadable));
+
+void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
+                        NSArray <ORTypeVarPair *>*args,
+                        ORTypeVarPair *ret,
+                        void *userdata);
+
 void *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
                       NSArray <ORTypeVarPair *>*args,
-                      ORTypeVarPair *ret);
+                      ORTypeVarPair *ret) __attribute__((overloadable));
+
+void *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
+                      NSArray <ORTypeVarPair *>*args,
+                      ORTypeVarPair *ret,
+                      void *userdata);
 
 #endif /* ORCoreFunction_h */

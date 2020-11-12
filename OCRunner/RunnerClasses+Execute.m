@@ -54,10 +54,7 @@ static void replace_method(Class clazz, ORMethodImplementation *methodImp, MFSco
     ORMethodDeclare *declare = methodImp.declare;
     NSString *methodName = declare.selectorName;
     SEL sel = NSSelectorFromString(methodName);
-    
-    MFMethodMapTableItem *item = [[MFMethodMapTableItem alloc] initWithClass:clazz method:methodImp];
-    [[MFMethodMapTable shareInstance] addMethodMapTableItem:item];
-    
+
     BOOL needFreeTypeEncoding = NO;
     const char *typeEncoding;
     Method ocMethod;
@@ -87,7 +84,11 @@ static void replace_method(Class clazz, ORMethodImplementation *methodImp, MFSco
             class_addMethod(c2, orgSel, method_getImplementation(ocMethod), typeEncoding);
         }
     }
-    void *imp = register_method(&methodIMP, declare.parameterTypes, declare.returnType);
+    
+    MFMethodMapTableItem *item = [[MFMethodMapTableItem alloc] initWithClass:c2 method:methodImp];
+    [[MFMethodMapTable shareInstance] addMethodMapTableItem:item];
+    
+    void *imp = register_method(&methodIMP, declare.parameterTypes, declare.returnType, (__bridge void *)methodImp);
     class_replaceMethod(c2, sel, imp, typeEncoding);
     if (needFreeTypeEncoding) {
         free((void *)typeEncoding);
@@ -98,7 +99,7 @@ static void replace_getter_method(Class clazz, ORPropertyDeclare *prop){
     SEL getterSEL = NSSelectorFromString(prop.var.var.varname);
     const char *retTypeEncoding  = prop.var.typeEncode;
     const char * typeEncoding = mf_str_append(retTypeEncoding, "@:");
-    void *imp = register_method(&getterImp, @[], prop.var);
+    void *imp = register_method(&getterImp, @[], prop.var, (__bridge  void *)prop);
     class_replaceMethod(clazz, getterSEL, imp, typeEncoding);
     free((void *)typeEncoding);
 }
@@ -110,7 +111,7 @@ static void replace_setter_method(Class clazz, ORPropertyDeclare *prop){
     SEL setterSEL = NSSelectorFromString([NSString stringWithFormat:@"set%@%@:",str1,str2]);
     const char *prtTypeEncoding  = prop.var.typeEncode;
     const char * typeEncoding = mf_str_append("v@:", prtTypeEncoding);
-    void *imp = register_method(&setterImp, @[prop.var], [ORTypeVarPair typePairWithTypeKind:TypeVoid]);
+    void *imp = register_method(&setterImp, @[prop.var], [ORTypeVarPair typePairWithTypeKind:TypeVoid],(__bridge  void *)prop);
     class_replaceMethod(clazz, setterSEL, imp, typeEncoding);
     free((void *)typeEncoding);
 }
@@ -449,12 +450,12 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }
     
     //如果在方法缓存表的中已经找到相关方法，直接调用，省去一次中间类型转换问题。优化性能，在方法递归时，调用耗时减少33%，0.15s -> 0.10s
-    BOOL classMethod = object_isClass(instance);
-    Class class = classMethod ? instance : [instance class];
-    MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:class classMethod:classMethod sel:sel];
+    BOOL isClassMethod = object_isClass(instance);
+    Class class = isClassMethod ? objc_getMetaClass(class_getName(instance)) : [instance class];
+    MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:class classMethod:isClassMethod sel:sel];
     if (map) {
         MFScopeChain *newScope = [MFScopeChain scopeChainWithNext:scope];
-        newScope.instance = classMethod ? [MFValue valueWithClass:instance] : [MFValue valueWithObject:instance];
+        newScope.instance = isClassMethod ? [MFValue valueWithClass:instance] : [MFValue valueWithObject:instance];
         [ORArgsStack push:argValues];
         return [map.methodImp execute:newScope];
     }

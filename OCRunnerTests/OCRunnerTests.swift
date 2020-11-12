@@ -709,9 +709,9 @@ class CRunnerTests: XCTestCase {
     func testSuperMethodCall(){
         let source =
         """
-        @implementation MFCallSuperNoArgTest
+        @implementation MFCallSuperNoArgTestSupserTest
         - (BOOL)testCallSuperNoArgTestSupser{
-            return [super testCallSuperNoArgTestSupser];
+            return YES;
         }
         @end
         """
@@ -741,6 +741,24 @@ class CRunnerTests: XCTestCase {
         }
         let test = MFCallSuperNoArgTest.init()
         XCTAssert(test.testCallSuperNoArgTestSupser())
+    }
+    func testSuperClassReplace(){
+        let source =
+        """
+        @implementation BMW
+        - (int)run
+        {
+            return 2;
+        }
+        @end
+        """
+        let ast = ocparser.parseSource(source)
+        let classes = ast.classCache.allValues as! [ORClass];
+        for classValue in classes {
+            classValue.execute(scope);
+        }
+        let test = MiniBMW.init()
+        XCTAssert(test.run() == 2)
     }
     func testGCD(){
         let source =

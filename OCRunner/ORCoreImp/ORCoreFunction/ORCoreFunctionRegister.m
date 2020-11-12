@@ -263,7 +263,8 @@ ffi_prep_closure_loc(ffi_closure *closure,
 void *core_register_function(void (*imp)(ffi_cif *,void *,void **, void*),
                              unsigned nargs,
                              char **argTypeEncodes,
-                             char *retTypeEncode){
+                             char *retTypeEncode,
+                             void *userdata){
     ffi_cif *cif = malloc(sizeof(ffi_cif));
     cif->arg_typeEncodes = argTypeEncodes;
     cif->nargs = nargs;
@@ -271,7 +272,7 @@ void *core_register_function(void (*imp)(ffi_cif *,void *,void **, void*),
     cif->flags = (unsigned) resultFlagsForTypeEncode(retTypeEncode, argTypeEncodes, nargs);
     void *result = NULL;
     ffi_closure *closure = ffi_closure_alloc(sizeof(ffi_closure), &result);
-    ffi_prep_closure_loc(closure, cif, imp, NULL, result);
+    ffi_prep_closure_loc(closure, cif, imp, userdata, result);
     return result;
 }
 
@@ -429,27 +430,41 @@ char *mallocCopyStr(const char *source){
     result[sLen] = '\0';
     return result;
 }
+
 void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
                         NSArray <ORTypeVarPair *>*args,
-                        ORTypeVarPair *ret)
+                        ORTypeVarPair *ret) __attribute__((overloadable))
+{
+    return register_function(fun, args, ret, NULL);
+}
+
+void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
+                        NSArray <ORTypeVarPair *>*args,
+                        ORTypeVarPair *ret,
+                        void *userdata)
 {
     char **argTypes = malloc(args.count * sizeof(char *));
     for (int i = 0; i < args.count; i++) {
         argTypes[i] = mallocCopyStr(args[i].typeEncode);
     }
     char *retTyep = mallocCopyStr(ret.typeEncode);
-    return core_register_function(fun, (int)args.count, argTypes, retTyep);
+    return core_register_function(fun, (int)args.count, argTypes, retTyep, userdata);
 }
-
 void *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
                       NSArray <ORTypeVarPair *>*args,
-                      ORTypeVarPair *ret)
+                      ORTypeVarPair *ret) __attribute__((overloadable))
+{
+    return register_method(fun, args, ret, NULL);
+}
+void *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
+                      NSArray <ORTypeVarPair *>*args,
+                      ORTypeVarPair *ret, void *userdata)
 {
     NSMutableArray *argTypes = [NSMutableArray array];
     [argTypes addObject:[ORTypeVarPair typePairWithTypeKind:TypeObject]];
     [argTypes addObject:[ORTypeVarPair typePairWithTypeKind:TypeSEL]];
     [argTypes addObjectsFromArray:args];
-    return register_function(fun, argTypes, ret);
+    return register_function(fun, argTypes, ret, userdata);
 }
 
 #else
@@ -464,7 +479,14 @@ char *mallocCopyStr(const char *source){
 }
 void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
                         NSArray <ORTypeVarPair *>*args,
-                        ORTypeVarPair *ret)
+                        ORTypeVarPair *ret)  __attribute__((overloadable))
+{
+    return register_function(fun, args, ret, NULL);
+}
+void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
+                        NSArray <ORTypeVarPair *>*args,
+                        ORTypeVarPair *ret,
+                        void *userdata)
 {
     void *imp = NULL;
     ffi_cif *cif = malloc(sizeof(ffi_cif));//不可以free
@@ -476,20 +498,26 @@ void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
     }
     if(ffi_prep_cif(cif, FFI_DEFAULT_ABI, (unsigned int)args.count, returnType, arg_types) == FFI_OK)
     {
-        ffi_prep_closure_loc(closure, cif, fun, NULL, imp);
+        ffi_prep_closure_loc(closure, cif, fun, userdata, imp);
     }
     return imp;
 }
 
 void *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
                       NSArray <ORTypeVarPair *>*args,
-                      ORTypeVarPair *ret)
+                      ORTypeVarPair *ret) __attribute__((overloadable))
+{
+    return register_method(fun, args, ret, NULL);
+}
+void *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
+                      NSArray <ORTypeVarPair *>*args,
+                      ORTypeVarPair *ret,
+                      void *userdata)
 {
     NSMutableArray *argTypes = [NSMutableArray array];
     [argTypes addObject:[ORTypeVarPair typePairWithTypeKind:TypeObject]];
     [argTypes addObject:[ORTypeVarPair typePairWithTypeKind:TypeSEL]];
     [argTypes addObjectsFromArray:args];
-    return register_function(fun, argTypes, ret);
+    return register_function(fun, argTypes, ret, userdata);
 }
-
 #endif/* __libffi__ */

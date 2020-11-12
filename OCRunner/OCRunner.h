@@ -24,4 +24,5 @@ FOUNDATION_EXPORT const unsigned char OCRunnerVersionString[];
 #import "RunnerClasses+Execute.h"
 #import "ORInterpreter.h"
 #import "ORStructDeclare.h"
+#import "ORSystemFunctionPointerTable.h"
 
