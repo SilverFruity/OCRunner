@@ -272,7 +272,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
     @public
     MFRealBaseValue realBaseValue;
 }
-@property (assign, nonatomic) MFStatementResultType resultType;
+@property (assign, nonatomic)MFStatementResultType resultType;
 @property (assign,nonatomic)DeclarationModifier modifier;
 @property (assign,nonatomic)OCBaseTypeString typeString;
 @property (assign,nonatomic)OCType type;
@@ -302,6 +302,9 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 - (NSUInteger)memerySize;
 - (MFValue *)subscriptGetWithIndex:(MFValue *)index;
 - (void)subscriptSetValue:(MFValue *)value index:(MFValue *)index;
+
+///  仅仅针对函数指针变量的调用，记录签名信息， int (*xxx)(int a ) = &x;  xxxx();
+@property (nonatomic,strong)ORTypeVarPair *funPair;
 @end
 
 @interface MFValue (Struct)

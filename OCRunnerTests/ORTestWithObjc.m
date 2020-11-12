@@ -447,6 +447,21 @@ typedef struct MyStruct2 {
     MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
     XCTAssert(a.intValue == fibonaccia(20));
 }
+- (void)testFunctionPointerCall{
+    MFScopeChain *scope = self.currentScope;
+    [ORSystemFunctionPointerTable reg:@"class_getMethodImplementation" pointer:&class_getMethodImplementation];
+    NSString * source =
+    @"void *class_getMethodImplementation(Class cls, SEL name);"
+    @"int (*imp)(id target, SEL sel) = class_getMethodImplementation([ORTestReplaceClass class], @selector(testOriginalMethod));"
+    @"id value = [ORTestReplaceClass new];"
+    @"int a = imp();";
+    AST *ast = [OCParser parseSource:source];
+    for (id <OCExecute> exp in ast.nodes) {
+        [exp execute:scope];
+    }
+    MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
+    XCTAssert(a.intValue == 1);
+}
 
 - (void)testOCRecursiveFunctionPerformanceExample {
     [self measureBlock:^{

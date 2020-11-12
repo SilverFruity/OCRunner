@@ -535,8 +535,19 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         return result;
     }else{
         MFValue *blockValue = [scope recursiveGetValueWithIdentifier:self.caller.value];
+        //调用block
         if (blockValue.isBlockValue) {
             return invoke_MFBlockValue(blockValue, args);
+        //调用函数指针 int (*xxx)(int a ) = &x;  xxxx();
+        }else if (blockValue.funPair) {
+            ORSearchedFunction *function = [ORSearchedFunction functionWithName:blockValue.funPair.var.varname];
+            while (blockValue.pointerCount > 1) {
+                blockValue.pointerCount--;
+            }
+            function.funPair = blockValue.funPair;
+            function.pointer = blockValue->realBaseValue.pointerValue;
+            [ORArgsStack push:args];
+            return [function execute:scope];
         }
     }
     return [MFValue valueWithObject:nil];
@@ -714,6 +725,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
                 NSString *reason = [NSString stringWithFormat:@"Unknown Class: %@",value.typeName];
                 @throw [NSException exceptionWithName:@"OCRunner" reason:reason userInfo:nil];
             }
+            if ([self.pair.var isKindOfClass:[ORFuncVariable class]]&& [(ORFuncVariable *)self.pair.var isBlock] == NO)
+                value.funPair = self.pair;
+            
             [scope setValue:value withIndentifier:self.pair.var.varname];
             return value;
         }else{
@@ -730,6 +744,10 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
                 NSString *reason = [NSString stringWithFormat:@"Unknown Type Identifier: %@",value.typeName];
                 @throw [NSException exceptionWithName:@"OCRunner" reason:reason userInfo:nil];
             }
+            
+            if ([self.pair.var isKindOfClass:[ORFuncVariable class]]&& [(ORFuncVariable *)self.pair.var isBlock] == NO)
+                value.funPair = self.pair;
+            
             [scope setValue:value withIndentifier:self.pair.var.varname];
             return value;
         }

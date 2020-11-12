@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic,strong,readonly)ORFuncVariable *funVar;
 @property (nonatomic,copy)NSString *name;
 @property (nonatomic,assign)void *pointer;
++ (instancetype)functionWithName:(NSString *)name;
 + (NSDictionary <NSString *, ORSearchedFunction *>*)functionTableForNames:(NSArray *)names;
 @end
 
