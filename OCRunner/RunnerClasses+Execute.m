@@ -88,7 +88,7 @@ static void replace_method(Class clazz, ORMethodImplementation *methodImp, MFSco
     MFMethodMapTableItem *item = [[MFMethodMapTableItem alloc] initWithClass:c2 method:methodImp];
     [[MFMethodMapTable shareInstance] addMethodMapTableItem:item];
     
-    void *imp = register_method(&methodIMP, declare.parameterTypes, declare.returnType, (__bridge void *)methodImp);
+    void *imp = register_method(&methodIMP, declare.parameterTypes, declare.returnType, (__bridge_retained void *)methodImp);
     class_replaceMethod(c2, sel, imp, typeEncoding);
     if (needFreeTypeEncoding) {
         free((void *)typeEncoding);
@@ -111,7 +111,7 @@ static void replace_setter_method(Class clazz, ORPropertyDeclare *prop){
     SEL setterSEL = NSSelectorFromString([NSString stringWithFormat:@"set%@%@:",str1,str2]);
     const char *prtTypeEncoding  = prop.var.typeEncode;
     const char * typeEncoding = mf_str_append("v@:", prtTypeEncoding);
-    void *imp = register_method(&setterImp, @[prop.var], [ORTypeVarPair typePairWithTypeKind:TypeVoid],(__bridge  void *)prop);
+    void *imp = register_method(&setterImp, @[prop.var], [ORTypeVarPair typePairWithTypeKind:TypeVoid],(__bridge_retained  void *)prop);
     class_replaceMethod(clazz, setterSEL, imp, typeEncoding);
     free((void *)typeEncoding);
 }
