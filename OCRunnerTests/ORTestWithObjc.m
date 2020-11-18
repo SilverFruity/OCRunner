@@ -454,7 +454,7 @@ typedef struct MyStruct2 {
     @"void *class_getMethodImplementation(Class cls, SEL name);"
     @"int (*imp)(id target, SEL sel) = class_getMethodImplementation([ORTestReplaceClass class], @selector(testOriginalMethod));"
     @"id value = [ORTestReplaceClass new];"
-    @"int a = imp();";
+    @"int a = imp(value, @selector(testOriginalMethod));";
     AST *ast = [OCParser parseSource:source];
     for (id <OCExecute> exp in ast.nodes) {
         [exp execute:scope];

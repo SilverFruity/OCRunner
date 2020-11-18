@@ -63,9 +63,9 @@
     for (ORTypeVarPair *pair in funcVars) {
         ORSearchedFunction *function = table[pair.var.varname];
         function.funPair = pair;
-        if ([[ORGlobalFunctionTable shared] getFunctionNodeWithName:function.name] == nil) {
-            [[ORGlobalFunctionTable shared] setFunctionNode:function WithName:function.name];
-        }
+        // 将每个ORSearchedFunction都保存在ORGlobalFunctionTable中，保证不会被释放。
+        // 因为在SymbolSearch.c中，将会给它的pointer成员变量赋值，如果在赋值前，对象被释放了，那么在给function->pointer赋值时将会得到一个访问已经被释放内存的错误。
+        [[ORGlobalFunctionTable shared] setFunctionNode:function WithName:function.name];
     }
     #if DEBUG
     NSMutableArray *functionNames = [NSMutableArray array];
