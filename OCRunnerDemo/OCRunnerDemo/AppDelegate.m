@@ -18,7 +18,8 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 #if DEBUG
-    NSString *patchFilePath = [[NSBundle mainBundle] pathForResource:@"binarypatch" ofType:nil];
+    NSString *binaryPatchFilePath = [[NSBundle mainBundle] pathForResource:@"binarypatch" ofType:nil];
+    NSString *jsonPatchFilePath = [[NSBundle mainBundle] pathForResource:@"jsonpatch" ofType:nil];
 #else
     NSURL *serverFileUrl = [NSURL URLWithString:@"http://127.0.0.1:8086/binarypatch"];
     NSString *patchFilePath = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject;
@@ -40,7 +41,9 @@
     }] resume] ;
     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
 #endif
-    [ORInterpreter excuteBinaryPatchFile:patchFilePath];
+    [ORInterpreter excuteBinaryPatchFile:binaryPatchFilePath];
+    
+    [ORInterpreter excuteJsonPatchFile:jsonPatchFilePath];
     
 #if __x86_64__  &&  TARGET_OS_SIMULATOR  &&  !TARGET_OS_IOSMAC
     NSLog(@"SIMULATOR");

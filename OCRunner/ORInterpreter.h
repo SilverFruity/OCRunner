@@ -11,6 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 @interface ORInterpreter : NSObject
 + (void)excuteBinaryPatchFile:(NSString *)path;
++ (void)excuteJsonPatchFile:(NSString *)path;
 + (void)excuteNodes:(NSArray *)nodes;
 @end
 
