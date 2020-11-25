@@ -233,7 +233,7 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 
 ### 如何确定补丁中是否包含源文件
 
-![1](https://silverfruity.github.io/2020/09/04/OCRunner/OCRunner_2.jpeg)
+![1](https://raw.githubusercontent.com/SilverFruity/silverfruity.github.io/server/source/_posts/OCRunner/OCRunner_2.jpeg)
 
 查看Run Script打印的 **InputFiles** 中是否包含源文件.
 
@@ -244,7 +244,10 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 
 ![2](https://silverfruity.github.io/2020/09/04/OCRunner/OCRunner_1.jpeg)
 
-根据已知数据，OCRunner的补丁加载速度是JSPatch的20倍+，随着补丁大小的不断增加，这个倍数会不断增加。运行速度和内存占用与MangoFix差距不大。内存占用方面应该会更优，OCRunner中MFValue的值采用malloc来复制值，不会有多个类型的实例变量。
+* 目前递归方法调用的速度，大约为JSPatch的1/4倍，为MangoFix的15倍左右
+* OCRunner的补丁加载速度是JSPatch的20倍+，随着补丁大小的不断增加，这个倍数会不断增加
+
+* 运行速度和内存占用与MangoFix差距不大。但应该会更优，OCRunner中MFValue的值采用union来实现，对象中不会有多个类型的实例变量。针对递归方法调用时的内存，目前存在内存占用过大的问题。
 
 
 

@@ -8,7 +8,7 @@
 
 ### The work flow of using [OCRunner](https://github.com/SilverFruity/OCRunner) to generate a patch 
 
-![image](https://www.sayhelloworld.blog/2020/09/04/OCRunner/OCRunner_EN_0.jpeg)
+![image](https://raw.githubusercontent.com/SilverFruity/silverfruity.github.io/server/source/_posts/OCRunner/OCRunner_EN_0.jpeg)
 
 ### Responsibilities of all parties
 
@@ -30,6 +30,7 @@
 [OCRunnerDemo](https://github.com/SilverFruity/OCRunner/tree/master/OCRunnerDemo) can be used as a reference for the entire process.
 
 ###  Cocoapods
+
 ```ruby
 pod 'OCRunner'      #Support all architectures, including libffi.a
 # or
@@ -222,15 +223,17 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 
 ### How to determine if source files are included in a patch
 
-![image](https://www.sayhelloworld.blog/2020/09/04/OCRunner/OCRunner_2.jpeg)
+![image](https://raw.githubusercontent.com/SilverFruity/silverfruity.github.io/server/source/_posts/OCRunner/OCRunner_2.jpeg)
 
 
 
 ## Performance Testing
 
-![image](https://www.sayhelloworld.blog/2020/09/04/OCRunner/OCRunner_EN_1.jpeg)
+![image](https://raw.githubusercontent.com/SilverFruity/silverfruity.github.io/server/source/_posts/OCRunner/OCRunner_EN_1.jpeg)
 
-OCRunner's patch loading speed is about 20 times + that of JSPatch, and this value increases as the patch size increases. The running speed and memory usage are not much different from MangoFix. The memory usage should be better. The value of MFValue in OCRunner uses malloc to copy the value, and there will be no multiple types of instance variables.
+* When testing with recursive functions, the performance of OCRunner is 1/4 times JSPatch's, and is 15 times Mango's.
+* OCRunner's patch loading speed is about 20 times + that of JSPatch, and this value increases as the patch size increases. 
+* The running speed and memory usage are not much different from MangoFix. The memory usage should be better. The value of MFValue in OCRunner uses malloc to copy the value, and there will be no multiple types of instance variables.
 
 
 
@@ -245,18 +248,19 @@ OCRunner's patch loading speed is about 20 times + that of JSPatch, and this val
 
 
 ## Support grammar
+
 1. Class declaration and implementation, support Category
-3. Protocol
-4. Block
+2. Protocol
+3. Block
 4. struct、enum、typedef
 5. Use function declarations to link system function pointers
 6. Global function
 7. Multi-parameter call (methods and functions)
 8. **\***、**&**  (Pointer operation)
 9. Variable static keyword
-9. NSArray: @[value1, value2]，NSDictionary: @{ key: value },  NSNumer:  @(value)
-10. NSArray, NSDictionary value and assignment syntax: id value = a[var];  a[var] = value;
-11. [Operator, except for'->' all have been implemented](https://baike.baidu.com/item/%E8%BF%90%E7%AE%97%E7%AC%A6%E4%BC%98%E5%85%88%E7%BA%A7/4752611?fr=aladdin)
+10. NSArray: @[value1, value2]，NSDictionary: @{ key: value },  NSNumer:  @(value)
+11. NSArray, NSDictionary value and assignment syntax: id value = a[var];  a[var] = value;
+12. [Operator, except for'->' all have been implemented](https://baike.baidu.com/item/%E8%BF%90%E7%AE%97%E7%AC%A6%E4%BC%98%E5%85%88%E7%BA%A7/4752611?fr=aladdin)
 
 etc.
 
@@ -266,5 +270,3 @@ etc.
 * [Mango](https://github.com/YPLiang19/Mango)
 * [libffi](https://github.com/libffi/libffi)
 * Procedure Call Standard for the ARM 64-bit Architecture. 
-
-
