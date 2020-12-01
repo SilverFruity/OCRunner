@@ -837,23 +837,19 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     START_BOX;
     switch (self.operatorType) {
         case BinaryOperatorAdd:{
-            BinaryExecuteInt(leftValue, +, rightValue, resultValue);
-            BinaryExecuteFloat(leftValue, +, rightValue, resultValue);
+            CalculateExecute(leftValue, +, rightValue, resultValue);
             break;
         }
         case BinaryOperatorSub:{
-            BinaryExecuteInt(leftValue, -, rightValue, resultValue);
-            BinaryExecuteFloat(leftValue, -, rightValue, resultValue);
+            CalculateExecute(leftValue, -, rightValue, resultValue);
             break;
         }
         case BinaryOperatorDiv:{
-            BinaryExecuteInt(leftValue, /, rightValue, resultValue);
-            BinaryExecuteFloat(leftValue, /, rightValue, resultValue);
+            CalculateExecute(leftValue, /, rightValue, resultValue);
             break;
         }
         case BinaryOperatorMulti:{
-            BinaryExecuteInt(leftValue, *, rightValue, resultValue);
-            BinaryExecuteFloat(leftValue, *, rightValue, resultValue);
+            CalculateExecute(leftValue, *, rightValue, resultValue);
             break;
         }
         case BinaryOperatorMod:{
