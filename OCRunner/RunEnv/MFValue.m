@@ -176,9 +176,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             NSUInteger size = self.memerySize;
             void *dst = malloc(size);
             memset(dst, 0, size);
-            if (*(void **)pointer != NULL) {
-                memcpy(dst, pointer, size);
-            }
+            memcpy(dst, pointer, size);
             realBaseValue.pointerValue = dst;
             _pointer = realBaseValue.pointerValue;
             break;

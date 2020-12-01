@@ -229,7 +229,7 @@ Element2Struct *Element2StructMake(){
     MFScopeChain *scope = self.currentScope;
     NSString * source =
     @"UIView *view = [UIView new];"
-    "view.frame = CGRectMake(1,2,3,4);"
+    "view.frame = CGRectMake(0,0,3,4);"
     "CGRect frame = view.frame;"
     "CGFloat a = frame.size.height;";
     AST *ast = [OCParser parseSource:source];
