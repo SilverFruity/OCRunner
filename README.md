@@ -233,7 +233,9 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 
 ![2](https://silverfruity.github.io/2020/09/04/OCRunner/OCRunner_1.jpeg)
 
-### Execution speed
+### Execution speed and memory usage
+
+Device:  iPhone SE2 , iOS 14.2,  Xcode 12.1.
 
 Take the classic Fibonacci sequence function as an example, find the test result of the value of the 25th term
 

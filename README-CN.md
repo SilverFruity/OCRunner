@@ -246,9 +246,11 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 
 ![2](https://silverfruity.github.io/2020/09/04/OCRunner/OCRunner_1.jpeg)
 
-### 执行速度
+### 执行速度和内存占用
 
-以经典的斐波那契数列函数例，求第25项的值的测试结果
+设备：iPhone SE2 , iOS 14.2,  Xcode 12.1.
+
+以经典的斐波那契数列函数作为例子，求第25项的值的测试结果.
 
 #### JSPatch
 
