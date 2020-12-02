@@ -794,12 +794,14 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }
         case UnaryOperatorNot:{
             cal_result.box.boolValue = !currentValue.isSubtantial;
+            cal_result.typeEncode = OCTypeStringBOOL;
             break;
         }
         case UnaryOperatorSizeOf:{
             size_t result = 0;
             UnaryExecute(result, sizeof, currentValue);
             cal_result.box.longlongValue = result;
+            cal_result.typeEncode = OCTypeStringLongLong;
             break;
         }
         case UnaryOperatorBiteNot:{
