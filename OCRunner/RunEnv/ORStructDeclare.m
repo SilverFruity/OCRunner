@@ -71,12 +71,12 @@
 
 
 @implementation ORStructDeclareTable{
-    NSCache<NSString *, ORStructDeclare *> *_cache;
+    NSMutableDictionary<NSString *, ORStructDeclare *> *_cache;
 }
 
 - (instancetype)init{
     if (self = [super init]) {
-        _cache = [NSCache new];
+        _cache = [NSMutableDictionary dictionary];
     }
     return self;
 }
@@ -91,7 +91,7 @@
 - (void)addAlias:(NSString *)alias forTypeName:(NSString *)name{
     id value = [_cache objectForKey:name];
     if (value) {
-        [_cache setObject:value forKey:name];
+        _cache[name] = value;
     }
 }
 - (void)addAlias:(NSString *)alias forStructTypeEncode:(const char *)typeEncode{
@@ -99,11 +99,13 @@
     [self addAlias:alias forTypeName:structName];
 }
 - (void)addStructDeclare:(ORStructDeclare *)structDeclare{
-    [_cache setObject:structDeclare forKey:structDeclare.name];
+    if (structDeclare && structDeclare.name) {
+        _cache[structDeclare.name] = structDeclare;
+    }
 }
 
 - (ORStructDeclare *)getStructDeclareWithName:(NSString *)name{
-    return [_cache objectForKey:name];
+    return _cache[name];
 }
 @end
 
@@ -129,7 +131,6 @@
 - (instancetype)init{
     if (self = [super init]) {
         _table = [NSMutableDictionary dictionary];
-        _lock = [[NSLock alloc] init];
     }
     return self;
 }
@@ -159,14 +160,10 @@
     if (alias.length == 0) {
         return;
     }
-    [_lock lock];
     _table[alias] = item;
-    [_lock unlock];
 }
 - (ORSymbolItem *)symbolItemForTypeName:(NSString *)typeName{
-    [_lock lock];
     ORSymbolItem *item = _table[typeName];
-    [_lock unlock];
     return item;
 }
 @end

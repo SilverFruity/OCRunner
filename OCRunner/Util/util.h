@@ -13,6 +13,7 @@
 #import "RunnerClasses+Execute.h"
 
 inline static  char *removeTypeEncodingPrefix(char *typeEncoding){
+    if(typeEncoding == NULL) return NULL;
 	while (*typeEncoding == 'r' || // const
 		   *typeEncoding == 'n' || // in
 		   *typeEncoding == 'N' || // inout

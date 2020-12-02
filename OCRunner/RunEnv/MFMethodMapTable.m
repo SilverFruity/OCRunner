@@ -10,66 +10,66 @@
 
 @implementation MFMethodMapTableItem
 - (instancetype)initWithClass:(Class)clazz method:(ORMethodImplementation *)method; {
-	if (self = [super init]) {
-		_clazz = clazz;
-		_methodImp = method;
-	}
-	return self;
+    if (self = [super init]) {
+        _clazz = clazz;
+        _methodImp = method;
+    }
+    return self;
 }
 @end
 
 @implementation MFMethodMapTable{
-    NSCache *classMethodCache;
-    NSCache *instanceMethodCache;
-    NSLock *_lock;
+    CFMutableDictionaryRef classMethodCache;
+    CFMutableDictionaryRef instanceMethodCache;
 }
 
 + (instancetype)shareInstance{
-	static id st_instance;
-	static dispatch_once_t onceToken;
-	dispatch_once(&onceToken, ^{
-		st_instance = [[MFMethodMapTable alloc] init];
-	});
-	return st_instance;
+    static id st_instance;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        st_instance = [[MFMethodMapTable alloc] init];
+    });
+    return st_instance;
 }
 
 - (instancetype)init{
-	if (self = [super init]) {
-        classMethodCache = [NSCache new];
-        instanceMethodCache = [NSCache new];
-        _lock = [[NSLock alloc] init];
-	}
-	return self;
+    if (self = [super init]) {
+        classMethodCache = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        instanceMethodCache = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    }
+    return self;
 }
 
 - (void)addMethodMapTableItem:(MFMethodMapTableItem *)methodMapTableItem{
     Class class = methodMapTableItem.clazz;
     NSString *sel = [methodMapTableItem.methodImp.declare selectorName];
     if (methodMapTableItem.methodImp.declare.isClassMethod){
-        NSCache *classMap = [classMethodCache objectForKey:class];
+        CFMutableDictionaryRef classMap = (CFMutableDictionaryRef)CFDictionaryGetValue(classMethodCache, (__bridge const void *)(class));
         if (classMap == NULL){
-            classMap = [NSCache new];
-            [classMethodCache setObject:classMap forKey:class];
+            classMap = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+            CFDictionarySetValue(classMethodCache, (__bridge const void *)(class), classMap);
         }
-        [classMap setObject:methodMapTableItem forKey:sel];
+        CFDictionarySetValue(classMap, (__bridge CFStringRef)(sel), (__bridge const void *)(methodMapTableItem));
     }else{
-        NSCache *classMap = [instanceMethodCache objectForKey:class];
+        CFMutableDictionaryRef classMap = (CFMutableDictionaryRef)CFDictionaryGetValue(instanceMethodCache, (__bridge const void *)(class));
         if (classMap == NULL){
-            classMap = [NSCache new];
-            [instanceMethodCache setObject:classMap forKey:class];
+            classMap = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+            CFDictionarySetValue(instanceMethodCache, (__bridge const void *)(class), classMap);
         }
-        [classMap setObject:methodMapTableItem forKey:sel];
+        CFDictionarySetValue(classMap, (__bridge CFStringRef)(sel), (__bridge const void *)(methodMapTableItem));
     }
 }
 
 - (MFMethodMapTableItem *)getMethodMapTableItemWith:(Class)clazz classMethod:(BOOL)classMethod sel:(SEL)sel{
     NSString *selector = NSStringFromSelector(sel);
     if (classMethod){
-        NSCache *classMap = [classMethodCache objectForKey:clazz];
-        return [classMap objectForKey:selector];
+        CFDictionaryRef classMap = CFDictionaryGetValue(classMethodCache, (__bridge const void *)(clazz));
+        if (classMap == NULL) return nil;
+        return CFDictionaryGetValue(classMap, (__bridge CFStringRef)(selector));
     }else{
-        NSCache *classMap = [instanceMethodCache objectForKey:clazz];
-        return [classMap objectForKey:selector];
+        CFDictionaryRef classMap = CFDictionaryGetValue(instanceMethodCache, (__bridge const void *)(clazz));
+        if (classMap == NULL) return nil;
+        return CFDictionaryGetValue(classMap, (__bridge CFStringRef)(selector));
     }
 }
 @end

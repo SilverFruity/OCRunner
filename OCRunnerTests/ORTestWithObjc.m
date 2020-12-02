@@ -460,7 +460,7 @@ typedef struct MyStruct2 {
         [exp execute:scope];
     }
     MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
-    XCTAssert(a.intValue == 1);
+    XCTAssert(a.intValue == 2);
 }
 - (void)testMutiTypeCalculate{
     MFScopeChain *scope = self.currentScope;

@@ -21,8 +21,7 @@
 @end
 
 @implementation MFPropertyMapTable{
-    NSLock *_lock;
-    NSCache *classCaches;
+    CFMutableDictionaryRef _propertyCache;
 }
 
 + (instancetype)shareInstance{
@@ -36,9 +35,7 @@
 
 - (instancetype)init{
     if (self = [super init]) {
-        _dic = [NSMutableDictionary dictionary];
-        _lock = [[NSLock alloc] init];
-        classCaches = [NSCache new];
+        _propertyCache = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     }
     return self;
 }
@@ -49,17 +46,18 @@
         return;
     }
     Class class = propertyMapTableItem.clazz;
-    NSCache *propertyMap = [classCaches objectForKey:class];
-    if (propertyMap == nil){
-        propertyMap = [NSCache new];
-        [classCaches setObject:propertyMap forKey:class];
+    CFMutableDictionaryRef propertyMap = (CFMutableDictionaryRef)CFDictionaryGetValue(_propertyCache, (__bridge const void *)(class));
+    if (propertyMap == NULL){
+        propertyMap = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        CFDictionarySetValue(_propertyCache, (__bridge const void *)(class), propertyMap);
     }
-    [propertyMap setObject:propertyMapTableItem forKey:propertyName];
+    CFDictionarySetValue(propertyMap, (__bridge CFStringRef)(propertyName), (__bridge const void *)(propertyMapTableItem));
 }
 
 - (MFPropertyMapTableItem *)getPropertyMapTableItemWith:(Class)clazz name:(NSString *)name{
-    NSCache *propertyMap = [classCaches objectForKey:clazz];
-    return [propertyMap objectForKey:name];
+    CFDictionaryRef propertyMap = CFDictionaryGetValue(_propertyCache, (__bridge const void *)(clazz));
+    if (propertyMap == NULL) return nil;
+    return CFDictionaryGetValue(propertyMap, (__bridge CFStringRef)(name));
 }
 
 
