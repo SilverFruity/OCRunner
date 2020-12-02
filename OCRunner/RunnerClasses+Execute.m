@@ -22,6 +22,51 @@
 #import "ORCoreImp.h"
 #import "ORSearchedFunction.h"
 
+#if DEBUG
+NSMutableArray *ORDebugMainFrameStack(void){
+    NSMutableDictionary *threadInfo = [[NSThread mainThread] threadDictionary];
+    return threadInfo[@"ORDebugStack"];
+}
+NSMutableArray *ORDebugFrameStack(void){
+    NSMutableDictionary *threadInfo = [[NSThread currentThread] threadDictionary];
+    NSMutableArray *stack = threadInfo[@"ORDebugStack"];
+    if (!stack) {
+        stack = [NSMutableArray array];
+        threadInfo[@"ORDebugStack"] = stack;
+    }
+    return stack;
+}
+void ORDebugFrameStackPush(MFValue *value, NSObject *node){
+    if (value) {
+        [ORDebugFrameStack() addObject:@[value, node]];
+    }else{
+        [ORDebugFrameStack() addObject:@[node]];
+    }
+}
+void ORDebugFrameStackPop(void){
+    [ORDebugFrameStack() removeLastObject];
+}
+NSString *OCRunnerFrameStackHistory(void){
+    NSMutableArray *frames = ORDebugMainFrameStack();
+    NSMutableString *log = [@"OCRunner Frames:\n\n" mutableCopy];
+    for (NSArray *frame in frames) {
+        if (frame.count == 2) {
+            MFValue *target = frame.firstObject;
+            ORMethodImplementation *imp = frame.lastObject;
+            [log appendFormat:@"%@ %@ %@\n", imp.declare.isClassMethod ? @"+" : @"-", target.objectValue, imp.declare.selectorName];
+        }else{
+            ORFunctionImp *imp = frame.firstObject;
+            if (imp.declare.funVar.varname == nil){
+                [log appendString:@"  Block Call \n"];
+            }else{
+                [log appendFormat:@"  CFunction: %@\n", imp.declare.funVar.varname];
+            }
+        }
+    }
+    return log;
+}
+#endif
+
 static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
     const char *blockTypeEncoding = [MFBlock typeEncodingForBlock:blockValue.objectValue];
     NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:blockTypeEncoding];
@@ -598,8 +643,10 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             [self.declare execute:current];
         }
     }
+    ORDebugFrameStackPush(nil, self);
     MFValue *value = [self.scopeImp execute:current];
     value.resultType = MFStatementResultTypeNormal;
+    ORDebugFrameStackPop();
     return value;
 }
 @end
@@ -1209,9 +1256,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @implementation ORMethodImplementation(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
+    ORDebugFrameStackPush(scope.instance, self);
     [self.declare execute:current];
     MFValue *result = [self.scopeImp execute:current];
     result.resultType = MFStatementResultTypeNormal;
+    ORDebugFrameStackPop();
     return result;
 }
 @end
