@@ -76,7 +76,7 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scopeValue!.longValue == -1)
         scopeValue = scope.getValueWithIdentifier("e")
         XCTAssert(scopeValue!.type == OCTypeLongLong)
-        XCTAssert(scopeValue!.longLongValue == -1)
+        XCTAssert(scopeValue!.longlongValue == -1)
         scopeValue = scope.getValueWithIdentifier("f")
         XCTAssert(scopeValue!.type == OCTypeUChar)
         XCTAssert(scopeValue!.uCharValue == 1)

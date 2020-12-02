@@ -784,6 +784,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }
         case UnaryOperatorIncrementPrefix:{
             PrefixUnaryExecuteInt(++, currentValue);
+            PrefixUnaryExecuteFloat(++, currentValue);
             break;
         }
         case UnaryOperatorDecrementPrefix:{
@@ -792,13 +793,13 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             break;
         }
         case UnaryOperatorNot:{
-            box.boolValue = !currentValue.isSubtantial;
+            cal_result.box.boolValue = !currentValue.isSubtantial;
             break;
         }
         case UnaryOperatorSizeOf:{
             size_t result = 0;
             UnaryExecute(result, sizeof, currentValue);
-            box.longlongValue = result;
+            cal_result.box.longlongValue = result;
             break;
         }
         case UnaryOperatorBiteNot:{
@@ -837,83 +838,91 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     START_BOX;
     switch (self.operatorType) {
         case BinaryOperatorAdd:{
-            CalculateExecute(leftValue, +, rightValue, resultValue);
+            CalculateExecute(leftValue, +, rightValue);
             break;
         }
         case BinaryOperatorSub:{
-            CalculateExecute(leftValue, -, rightValue, resultValue);
+            CalculateExecute(leftValue, -, rightValue);
             break;
         }
         case BinaryOperatorDiv:{
-            CalculateExecute(leftValue, /, rightValue, resultValue);
+            CalculateExecute(leftValue, /, rightValue);
             break;
         }
         case BinaryOperatorMulti:{
-            CalculateExecute(leftValue, *, rightValue, resultValue);
+            CalculateExecute(leftValue, *, rightValue);
             break;
         }
         case BinaryOperatorMod:{
-            BinaryExecuteInt(leftValue, %, rightValue, resultValue);
+            BinaryExecuteInt(leftValue, %, rightValue);
             break;
         }
         case BinaryOperatorShiftLeft:{
-            BinaryExecuteInt(leftValue, <<, rightValue, resultValue);
+            BinaryExecuteInt(leftValue, <<, rightValue);
             break;
         }
         case BinaryOperatorShiftRight:{
-            BinaryExecuteInt(leftValue, >>, rightValue, resultValue);
+            BinaryExecuteInt(leftValue, >>, rightValue);
             break;
         }
         case BinaryOperatorAnd:{
-            BinaryExecuteInt(leftValue, &, rightValue, resultValue);
+            BinaryExecuteInt(leftValue, &, rightValue);
             break;
         }
         case BinaryOperatorOr:{
-            BinaryExecuteInt(leftValue, |, rightValue, resultValue);
+            BinaryExecuteInt(leftValue, |, rightValue);
             break;
         }
         case BinaryOperatorXor:{
-            BinaryExecuteInt(leftValue, ^, rightValue, resultValue);
+            BinaryExecuteInt(leftValue, ^, rightValue);
             break;
         }
         case BinaryOperatorLT:{
             LogicBinaryOperatorExecute(leftValue, <, rightValue);
-            box.boolValue = logicResultValue;
+            cal_result.box.boolValue = logicResultValue;
+            cal_result.typeEncode = OCTypeStringBOOL;
             break;
         }
         case BinaryOperatorGT:{
             LogicBinaryOperatorExecute(leftValue, >, rightValue);
-            box.boolValue = logicResultValue;
+            cal_result.box.boolValue = logicResultValue;
+            cal_result.typeEncode = OCTypeStringBOOL;
             break;
         }
         case BinaryOperatorLE:{
             LogicBinaryOperatorExecute(leftValue, <=, rightValue);
-            box.boolValue = logicResultValue;
+            cal_result.box.boolValue = logicResultValue;
+            cal_result.typeEncode = OCTypeStringBOOL;
             break;
         }
         case BinaryOperatorGE:{
             LogicBinaryOperatorExecute(leftValue, >=, rightValue);
-            box.boolValue = logicResultValue;
+            cal_result.box.boolValue = logicResultValue;
+            cal_result.typeEncode = OCTypeStringBOOL;
             break;
         }
         case BinaryOperatorNotEqual:{
             LogicBinaryOperatorExecute(leftValue, !=, rightValue);
-            box.boolValue = logicResultValue;
+            cal_result.box.boolValue = logicResultValue;
+            cal_result.typeEncode = OCTypeStringBOOL;
             break;
         }
         case BinaryOperatorEqual:{
             LogicBinaryOperatorExecute(leftValue, ==, rightValue);
-            box.boolValue = logicResultValue;
+            cal_result.box.boolValue = logicResultValue;
+            cal_result.typeEncode = OCTypeStringBOOL;
             break;
         }
         case BinaryOperatorLOGIC_AND:{
             LogicBinaryOperatorExecute(leftValue, &&, rightValue);
-            box.boolValue = logicResultValue;
+            cal_result.box.boolValue = logicResultValue;
+            cal_result.typeEncode = OCTypeStringBOOL;
             break;
         }
         case BinaryOperatorLOGIC_OR:{
             LogicBinaryOperatorExecute(leftValue, ||, rightValue);
-            box.boolValue = logicResultValue;
+            cal_result.box.boolValue = logicResultValue;
+            cal_result.typeEncode = OCTypeStringBOOL;
             break;
         }
         default:
@@ -1288,7 +1297,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             [scope setValue:lastValue withIndentifier:[(ORValueExpression *)assignExp.value value]];
         }else if ([exp isKindOfClass:[ORValueExpression class]]){
             if (lastValue) {
-                lastValue = [MFValue valueWithLongLong:lastValue.longLongValue + 1];
+                lastValue = [MFValue valueWithLongLong:lastValue.longlongValue + 1];
                 lastValue.typeEncode = typeEncode;
                 [scope setValue:lastValue withIndentifier:[(ORValueExpression *)exp value]];
             }else{

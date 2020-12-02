@@ -462,6 +462,39 @@ typedef struct MyStruct2 {
     MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
     XCTAssert(a.intValue == 1);
 }
+- (void)testMutiTypeCalculate{
+    MFScopeChain *scope = self.currentScope;
+    NSString * source =
+    @"int a = 1 * 1.1;"
+    "int b = 2 * 10;"
+    "double c = 1 + 1.12;"
+    "double d = 1 / 2.0;"
+    "double e = 1 - 0.25;"
+    "BOOL f = 0 < 0.25;"
+    "BOOL g = 0.25 <= 0;"
+    "double h = 0.25 - 1;"
+    ;
+    AST *ast = [OCParser parseSource:source];
+    for (id <OCExecute> exp in ast.nodes) {
+        [exp execute:scope];
+    }
+    MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
+    MFValue *b = [scope recursiveGetValueWithIdentifier:@"b"];
+    MFValue *c = [scope recursiveGetValueWithIdentifier:@"c"];
+    MFValue *d = [scope recursiveGetValueWithIdentifier:@"d"];
+    MFValue *e = [scope recursiveGetValueWithIdentifier:@"e"];
+    MFValue *f = [scope recursiveGetValueWithIdentifier:@"f"];
+    MFValue *g = [scope recursiveGetValueWithIdentifier:@"g"];
+    MFValue *h = [scope recursiveGetValueWithIdentifier:@"h"];
+    XCTAssert(a.intValue == 1);
+    XCTAssert(b.intValue == 20);
+    XCTAssert(c.doubleValue == 2.12);
+    XCTAssert(d.doubleValue == 0.5);
+    XCTAssert(e.doubleValue == 0.75);
+    XCTAssert(f.boolValue == YES);
+    XCTAssert(g.boolValue == NO);
+    XCTAssert(h.doubleValue == -0.75);
+}
 
 - (void)testOCRecursiveFunctionPerformanceExample {
     [self measureBlock:^{

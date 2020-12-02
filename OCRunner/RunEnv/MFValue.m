@@ -147,7 +147,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             size_t len = strlen(str);
             char * cstring = malloc(len * sizeof(char) + 1);
             cstring[len] = '\0';
-            if (*(void **)pointer != NULL) {
+            if (pointer != &replace) {
                 memcpy(cstring, str, len);
             }
             realBaseValue.pointerValue = cstring;
@@ -176,7 +176,9 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             NSUInteger size = self.memerySize;
             void *dst = malloc(size);
             memset(dst, 0, size);
-            memcpy(dst, pointer, size);
+            if (pointer != &replace) {
+                memcpy(dst, pointer, size);
+            }
             realBaseValue.pointerValue = dst;
             _pointer = realBaseValue.pointerValue;
             break;
@@ -236,6 +238,10 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     _type = *typeEncode;
     //基础类型转换
     if (strlen(typeEncode) == 1) {
+        //类型相同时，直接跳过
+        if (_typeEncode != NULL && *typeEncode == *_typeEncode) {
+            return;
+        }
         void *result = NULL;
         [self convertValueWithTypeEncode:typeEncode result:&result];
         _typeString.type = _type;
@@ -597,7 +603,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     MFValueBridge(self, int);
     return result;
 }
-- (long long)longLongValue{
+- (long long)longlongValue{
     MFValueBridge(self, long long);
     return result;
 }
