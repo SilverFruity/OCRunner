@@ -8,7 +8,7 @@ DESC
 s.homepage     = "https://github.com/SilverFruity/OCRunner"
 s.license      = "MIT"
 s.author             = { "SilverFruity" => "15328044115@163.com" }
-s.ios.deployment_target = "8.0"
+s.ios.deployment_target = "9.0"
 s.source       = { :git => "https://github.com/SilverFruity/OCRunner.git", :tag => "#{s.version}" }
 s.source_files  = "OCRunner/*.{h,m,c}","OCRunner/ORCoreImp/**/*.{h,m,c,s}","OCRunner/RunEnv/*.{h,m,c}","OCRunner/Util/*.{h,m,c}"
 s.pod_target_xcconfig = { 'VALID_ARCHS' => 'arm64 arm64e', 'VALID_ARCHS[sdk=iphonesimulator*]' => '' }
