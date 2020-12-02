@@ -229,11 +229,48 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 
 ## Performance Testing
 
-![image](https://raw.githubusercontent.com/SilverFruity/silverfruity.github.io/server/source/_posts/OCRunner/OCRunner_EN_1.jpeg)
+### Loading time
 
-* When testing with recursive functions, the performance of OCRunner is 1/4 times JSPatch's, and is 15 times Mango's.
-* OCRunner's patch loading speed is about 20 times + that of JSPatch, and this value increases as the patch size increases. 
-* The running speed and memory usage are not much different from MangoFix. The memory usage should be better. The value of MFValue in OCRunner uses malloc to copy the value, and there will be no multiple types of instance variables.
+![2](https://silverfruity.github.io/2020/09/04/OCRunner/OCRunner_1.jpeg)
+
+### Execution speed
+
+Take the classic Fibonacci sequence function as an example, find the test result of the value of the 25th term
+
+#### JSPatch
+
+* Execution time, the average time is 0.169s
+
+  ![](./ImageSource/JSPatchTimes.png)
+
+* Memory usage has been stable at around 12MB
+
+
+![](./ImageSource/JSPatchMemory.png)
+
+#### OCRunner
+* Execution time, the average time is 1.05s
+
+  ![](./ImageSource/OCRunnerTimes.png)
+
+* Memory usage, peak value is about 60MB
+
+
+![](./ImageSource/OCRunnerMemory.png)
+
+#### Mango
+* Execution time, the average time is 2.38s
+
+  ![](./ImageSource/MangoTimes.png)
+
+* The memory usage continues to rise, reaching about 350MB at the highest point.
+
+
+![](./ImageSource/MangoMemory.png)
+
+* When testing with recursive functions, the performance of OCRunner is 1/5 times JSPatch's, and is 2.5 times Mango's.
+* OCRunner's patch loading speed is about 20 times + that of Mango, and this value increases as the patch size increases.  and the result of JSPatch is unknown.
+* Regarding the memory usage of recursive method calls, there is currently a problem of excessive usage. When finding the 30th item of the Fibonacci sequence, Mango will burst the memory, and the peak memory usage of OCRunner is about 600MB.
 
 
 
