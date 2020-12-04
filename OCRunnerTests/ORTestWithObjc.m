@@ -499,14 +499,27 @@ typedef struct MyStruct2 {
 - (void)testCFunctionReturnTypeEncode{
     NSString * source =
     @"CGFloat testFunctionReturnType(int arg);"
-    @"CGFloat (***testFunctionReturnType)(int arg);";
+    @"CGFloat (***testFunctionReturnType)(int arg);"
+    @"CGFloat *testFunctionReturnType(int arg);"
+    @"XCTestCase *testFunctionReturnType(int arg);"
+    @"XCTestCase *(^testFunctionReturnType)(int arg);"
+    ;
     AST *ast = [OCParser parseSource:source];
-    ORDeclareExpression *declare1 = ast.globalStatements.firstObject;
-    ORDeclareExpression *declare2 = ast.globalStatements.lastObject;
+    ORDeclareExpression *declare1 = ast.globalStatements[0];
+    ORDeclareExpression *declare2 = ast.globalStatements[1];
+    ORDeclareExpression *declare3 = ast.globalStatements[2];
+    ORDeclareExpression *declare4 = ast.globalStatements[3];
+    ORDeclareExpression *declare5 = ast.globalStatements[4];
     NSString *returnType1 = [NSString stringWithUTF8String:declare1.pair.typeEncode];
     XCTAssert([returnType1 isEqualToString:@"d"], @"%@", returnType1);
     NSString *returnType2 = [NSString stringWithUTF8String:declare2.pair.typeEncode];
-    XCTAssert([returnType2 isEqualToString:@"^^^"], @"%@", returnType2);
+    XCTAssert([returnType2 isEqualToString:@"^^^d"], @"%@", returnType2);
+    NSString *returnType3 = [NSString stringWithUTF8String:declare3.pair.typeEncode];
+    XCTAssert([returnType3 isEqualToString:@"^d"], @"%@", returnType3);
+    NSString *returnType4 = [NSString stringWithUTF8String:declare4.pair.typeEncode];
+    XCTAssert([returnType4 isEqualToString:@"@"], @"%@", returnType4);
+    NSString *returnType5 = [NSString stringWithUTF8String:declare5.pair.typeEncode];
+    XCTAssert([returnType5 isEqualToString:@"@?"], @"%@", returnType5);
 }
 - (void)testOCRecursiveFunctionPerformanceExample {
     [self measureBlock:^{

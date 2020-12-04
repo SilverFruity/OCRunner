@@ -17,9 +17,6 @@
         // Block的typeEncode
         if (self.var.isBlock) {
             return @"@?".UTF8String;
-        // 函数指针的typeEncode
-        }else if (self.var.ptCount > 0){
-            type = TypeUnKnown;
         }
     }
     if (type == TypeStruct && self.var.ptCount == 0) {
