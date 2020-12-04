@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import <OCRunner.h>
+#import "ORTypeVarPair+TypeEncode.h"
 #import <oc2mangoLib/oc2mangoLib.h>
 #import <objc/message.h>
 @interface ORTestWithObjc : XCTestCase
@@ -495,7 +496,18 @@ typedef struct MyStruct2 {
     XCTAssert(g.boolValue == NO);
     XCTAssert(h.doubleValue == -0.75);
 }
-
+- (void)testCFunctionReturnTypeEncode{
+    NSString * source =
+    @"CGFloat testFunctionReturnType(int arg);"
+    @"CGFloat (***testFunctionReturnType)(int arg);";
+    AST *ast = [OCParser parseSource:source];
+    ORDeclareExpression *declare1 = ast.globalStatements.firstObject;
+    ORDeclareExpression *declare2 = ast.globalStatements.lastObject;
+    NSString *returnType1 = [NSString stringWithUTF8String:declare1.pair.typeEncode];
+    XCTAssert([returnType1 isEqualToString:@"d"], @"%@", returnType1);
+    NSString *returnType2 = [NSString stringWithUTF8String:declare2.pair.typeEncode];
+    XCTAssert([returnType2 isEqualToString:@"^^^"], @"%@", returnType2);
+}
 - (void)testOCRecursiveFunctionPerformanceExample {
     [self measureBlock:^{
         fibonaccia(20);
@@ -542,5 +554,4 @@ typedef struct MyStruct2 {
         NSLog(@"%d",[scope getValueWithIdentifier:@"a"].uIntValue);
     }];
 }
-
 @end
