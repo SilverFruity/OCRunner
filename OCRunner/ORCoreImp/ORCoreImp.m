@@ -65,13 +65,12 @@ void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
 void getterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
     id target = *(__strong id *)args[0];
     SEL sel = *(SEL *)args[1];
-    NSString *propName = NSStringFromSelector(sel);
     ORPropertyDeclare *propDef = (__bridge ORPropertyDeclare *)userdata;
-    const char *type = propDef.var.typeEncode;
+    NSString *propName = propDef.var.var.varname;
     NSMethodSignature *sig = [target methodSignatureForSelector:sel];
     __autoreleasing MFValue *propValue = objc_getAssociatedObject(target, mf_propKey(propName));
     if (!propValue) {
-        propValue = [MFValue defaultValueWithTypeEncoding:type];
+        propValue = [MFValue defaultValueWithTypeEncoding:propDef.var.typeEncode];
     }
     if (propValue.type != TypeVoid && propValue.pointer != NULL){
         [propValue writePointer:ret typeEncode:sig.methodReturnType];
@@ -83,11 +82,8 @@ void setterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
     SEL sel = *(SEL *)args[1];
     const char *argTypeEncode = [[target methodSignatureForSelector:sel] getArgumentTypeAtIndex:2];
     MFValue *value = [MFValue valueWithTypeEncode:argTypeEncode pointer:args[2]];
-    NSString *setter = NSStringFromSelector(sel);
-    NSString *name = [setter substringWithRange:NSMakeRange(3, setter.length - 4)];
-    NSString *first = [name substringWithRange:NSMakeRange(0, 1)].lowercaseString;
-    NSString *propName = [NSString stringWithFormat:@"%@%@",first,[name substringFromIndex:1]];
     ORPropertyDeclare *propDef = (__bridge ORPropertyDeclare *)userdata;
+    NSString *propName = propDef.var.var.varname;
     MFPropertyModifier modifier = propDef.modifier;
     if (modifier & MFPropertyModifierMemWeak) {
         value.modifier = DeclarationModifierWeak;

@@ -8,3 +8,4 @@
 #import "ORCallOCPropertyBlockTest.h"
 #import "ORCallSuperNoArgTest.h"
 #import "ORGCDTests.h"
+#import "ORWeakPropertyAndIvar.h"

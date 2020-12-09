@@ -594,8 +594,6 @@ class CRunnerTests: XCTestCase {
         """
         @interface ORTestClassProperty:NSObject
         @property (nonatomic,copy)NSString *strTypeProperty;
-        @property (nonatomic,weak)id weakObjectProperty;
-        @property (nonatomic,strong)id strongObjectProperty;
         @property (assign, nonatomic) NSInteger count;
         @end
         @implementation ORTestClassProperty
@@ -606,15 +604,6 @@ class CRunnerTests: XCTestCase {
         - (NSString *)testObjectPropertyTest{
             [self otherMethod];
             return self.strTypeProperty;
-        }
-
-        - (id)testWeakObjectProperty{
-            self.weakObjectProperty = self;//制造循环引用,下一个运行时释放
-            return self.weakObjectProperty;
-        }
-        - (id)testStrongObjectProperty{
-            self.strongObjectProperty = self;//制造循环引用
-            return self.strongObjectProperty;
         }
         - (id)testIvarx{
             _strTypeProperty = @"Mango-testIvar";
@@ -645,21 +634,6 @@ class CRunnerTests: XCTestCase {
         XCTAssert(test.testIvarx() == "Mango-testIvar")
         XCTAssert(test.testBasePropertyTest() == 100000)
         XCTAssert(test.testIvar() == 100001)
-        let weakResult = autoreleasepool{ () -> NSMutableString in
-            let flag = NSMutableString.init()
-            let weakTest = ORTestClassProperty.init(deallocFlag: flag)
-            XCTAssert(weakTest.testWeakObjectProperty() is ORTestClassProperty)
-            return flag
-        }
-        XCTAssert(weakResult == "has_dealloc")
-        
-        let strongResult = autoreleasepool{ () -> NSMutableString in
-            let flag = NSMutableString.init()
-            let strongTest = ORTestClassProperty.init(deallocFlag: flag)
-            XCTAssert(strongTest.testStrongObjectProperty() is ORTestClassProperty)
-            return flag
-        }
-        XCTAssert(strongResult == "")
 
     }
     func testClassIvar(){
@@ -667,13 +641,18 @@ class CRunnerTests: XCTestCase {
         """
         @implementation ORTestClassIvar
         - (id)testObjectIvar{
-            _objectIvar = [[NSObject alloc] init];
+            _objectIvar = @"test";
             return _objectIvar;
         }
-
         - (NSInteger)testIntIvar{
-            _intIvar = 10000001;
+            _intIvar = -1;
             return _intIvar;
+        }
+        - (unsigned int)testUIntIvar{
+            return 1000;
+        }
+        - (double)testDoubleIvar{
+            return 0.55;
         }
         @end
         """
@@ -683,9 +662,10 @@ class CRunnerTests: XCTestCase {
             classValue.execute(scope);
         }
         let test = ORTestClassIvar.init()
-//        XCTAssert(test.testObjectIvar() is NSObject)
-        let value = test.testIntIvar();
-        XCTAssert(value == 10000001,"\(value)")
+        XCTAssert(test.testObjectIvar() == "test")
+        XCTAssert(test.testIntIvar() == -1)
+        XCTAssert(test.testUIntIvar() == 1000)
+        XCTAssert(test.testDouble() == 0.55)
     }
     func testCallOCReturnBlock(){
         let source =

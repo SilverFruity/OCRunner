@@ -11,6 +11,7 @@
 #import "ORTypeVarPair+TypeEncode.h"
 #import <oc2mangoLib/oc2mangoLib.h>
 #import <objc/message.h>
+#import "ORWeakPropertyAndIvar.h"
 @interface ORTestWithObjc : XCTestCase
 @property (nonatomic, strong)MFScopeChain *currentScope;
 @property (nonatomic, strong)MFScopeChain *topScope;
@@ -520,6 +521,61 @@ typedef struct MyStruct2 {
     XCTAssert([returnType4 isEqualToString:@"@"], @"%@", returnType4);
     NSString *returnType5 = [NSString stringWithUTF8String:declare5.pair.typeEncode];
     XCTAssert([returnType5 isEqualToString:@"@?"], @"%@", returnType5);
+}
+- (void)testWeakPropertyAndIvar{
+    MFScopeChain *scope = self.currentScope;
+    NSString *source =
+    @""
+    "@interface ORWeakPropertyAndIvar()"
+    "@property(nonatomic, strong)id strongValue;"
+    "@property(nonatomic, weak)id weakValue;"
+    "@end"
+    "@implementation ORWeakPropertyAndIvar"
+    "- (void)propertyStrong{"
+    "   self.strongValue = self;"
+    "}"
+    "- (void)propertyWeak{"
+    "   self.weakValue = self;"
+    "}"
+    "- (void)ivarStrong{"
+    "   _strongValue = self;"
+    "}"
+    "- (void)ivarWeak{"
+    "   _weakValue = self;"
+    "}"
+    "@end";
+    
+    AST *ast = [OCParser parseSource:source];
+    for (id <OCExecute> exp in ast.nodes) {
+        [exp execute:scope];
+    }
+    NSMutableString *propertyStrong = [NSMutableString string];
+    @autoreleasepool {
+        ORWeakPropertyAndIvar *test = [[ORWeakPropertyAndIvar alloc] initWithContainer:propertyStrong];
+        [test propertyStrong];
+    }
+    XCTAssert(propertyStrong.length == 0);
+    
+    NSMutableString *propertyWeak = [NSMutableString string];
+    @autoreleasepool {
+        ORWeakPropertyAndIvar *test = [[ORWeakPropertyAndIvar alloc] initWithContainer:propertyWeak];
+        [test propertyWeak];
+    }
+    XCTAssert([propertyWeak isEqualToString:@"dealloc"]);
+    
+    NSMutableString *ivarStrong = [NSMutableString string];
+    @autoreleasepool {
+        ORWeakPropertyAndIvar *test = [[ORWeakPropertyAndIvar alloc] initWithContainer:ivarStrong];
+        [test ivarStrong];
+    }
+    XCTAssert(ivarStrong.length == 0);
+    
+    NSMutableString *ivarWeak = [NSMutableString string];
+    @autoreleasepool {
+        ORWeakPropertyAndIvar *test = [[ORWeakPropertyAndIvar alloc] initWithContainer:ivarWeak];
+        [test ivarWeak];
+    }
+    XCTAssert([ivarWeak isEqualToString:@"dealloc"]);
 }
 - (void)testOCRecursiveFunctionPerformanceExample {
     [self measureBlock:^{

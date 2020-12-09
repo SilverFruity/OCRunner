@@ -15,13 +15,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (assign, nonatomic) NSInteger num;
 - (instancetype)initDeallocFlag:(NSMutableString *)flag;
 - (NSString *)testObjectPropertyTest;
-- (id)testWeakObjectProperty;
-- (id)testStrongObjectProperty;
 - (NSString *)testIvarx;
 - (NSInteger)testProMathAdd;
 
 - (NSInteger)testBasePropertyTest;
 - (NSInteger)testPropertyIvar;
+- (nullable id)testWeakObject;
+- (nullable NSString *)testStrongObject;
 @end
 
 NS_ASSUME_NONNULL_END

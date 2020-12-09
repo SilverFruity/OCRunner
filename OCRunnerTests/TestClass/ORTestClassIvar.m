@@ -12,7 +12,13 @@
 - (id)testObjectIvar{
     return nil;
 }
-- (NSInteger)testIntIvar{
+- (int)testIntIvar{
+    return 0;
+}
+- (unsigned int)testUIntIvar{
+    return 0;
+}
+- (double)testDoubleIvar{
     return 0;
 }
 @end

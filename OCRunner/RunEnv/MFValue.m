@@ -53,6 +53,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 - (instancetype)initTypeEncode:(const char *)typeEncoding pointer:(void *)pointer{
     self = [super init];
     typeEncoding = removeTypeEncodingPrefix((char *)typeEncoding);
+    _modifier = DeclarationModifierNone;
     [self setTypeEncode:typeEncoding];
     [self setPointer:pointer];
     return self;
@@ -221,9 +222,16 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return strcmp(self.typeEncode, OCTypeStringBlock) == 0;
 }
 - (void)setModifier:(DeclarationModifier)modifier{
-    if (modifier & DeclarationModifierWeak && (self.type == OCTypeObject || self.isBlockValue)) {
-        self.weakObjectValue = self.strongObjectValue;
-        self.strongObjectValue = nil;
+    if (self.type == OCTypeObject || self.isBlockValue) {
+        if  (modifier & DeclarationModifierWeak
+            && (self.modifier & (DeclarationModifierNone | DeclarationModifierStrong))) {
+            self.weakObjectValue = self.strongObjectValue;
+            self.strongObjectValue = nil;
+        }else if (self.modifier & DeclarationModifierWeak
+                  && (modifier & (DeclarationModifierNone | DeclarationModifierStrong))){
+            self.strongObjectValue = self.weakObjectValue;
+            self.weakObjectValue = nil;
+        }
     }
     _modifier = modifier;
 }

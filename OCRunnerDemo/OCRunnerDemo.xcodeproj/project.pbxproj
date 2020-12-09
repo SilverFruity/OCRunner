@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0480FEE82580A77F00D6D914 /* ORWeakPropertyAndIvar.m in Sources */ = {isa = PBXBuildFile; fileRef = 0480FEE72580A77F00D6D914 /* ORWeakPropertyAndIvar.m */; };
 		32C54D1C256B4E6D00D067A2 /* jsonpatch in Resources */ = {isa = PBXBuildFile; fileRef = 32C54D1B256B4E6D00D067A2 /* jsonpatch */; };
 		994370B6E6826AB9C293F686 /* Pods_OCRunnerDemo_OCRunnerDemoUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2566C827C6925E5FB35FC01D /* Pods_OCRunnerDemo_OCRunnerDemoUITests.framework */; };
 		D71B1056F7894677E4150783 /* Pods_OCRunnerDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A0001072323984F1566D9A7 /* Pods_OCRunnerDemo.framework */; };
@@ -50,6 +51,8 @@
 
 /* Begin PBXFileReference section */
 		038B17776BFE18A7DEB3184D /* Pods-OCRunnerDemo-OCRunnerDemoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRunnerDemo-OCRunnerDemoTests.release.xcconfig"; path = "Target Support Files/Pods-OCRunnerDemo-OCRunnerDemoTests/Pods-OCRunnerDemo-OCRunnerDemoTests.release.xcconfig"; sourceTree = "<group>"; };
+		0480FEE62580A77F00D6D914 /* ORWeakPropertyAndIvar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORWeakPropertyAndIvar.h; sourceTree = "<group>"; };
+		0480FEE72580A77F00D6D914 /* ORWeakPropertyAndIvar.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORWeakPropertyAndIvar.m; sourceTree = "<group>"; };
 		0EA667C064BFFB79847D34F5 /* Pods-OCRunnerDemoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRunnerDemoTests.release.xcconfig"; path = "Target Support Files/Pods-OCRunnerDemoTests/Pods-OCRunnerDemoTests.release.xcconfig"; sourceTree = "<group>"; };
 		1C9D422B1CDEE6B7B4FBECF4 /* Pods-OCRunnerDemo-OCRunnerDemoUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRunnerDemo-OCRunnerDemoUITests.release.xcconfig"; path = "Target Support Files/Pods-OCRunnerDemo-OCRunnerDemoUITests/Pods-OCRunnerDemo-OCRunnerDemoUITests.release.xcconfig"; sourceTree = "<group>"; };
 		2566C827C6925E5FB35FC01D /* Pods_OCRunnerDemo_OCRunnerDemoUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OCRunnerDemo_OCRunnerDemoUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -235,6 +238,8 @@
 				EEBF3340248E84A900DDE2E9 /* ORCallOCPropertyBlockTest.m */,
 				EEBF3349248E84A900DDE2E9 /* ORCallSuperNoArgTest.h */,
 				EEBF3343248E84A900DDE2E9 /* ORCallSuperNoArgTest.m */,
+				0480FEE62580A77F00D6D914 /* ORWeakPropertyAndIvar.h */,
+				0480FEE72580A77F00D6D914 /* ORWeakPropertyAndIvar.m */,
 				EEBF3341248E84A900DDE2E9 /* ORGCDTests.h */,
 				EEBF3348248E84A900DDE2E9 /* ORGCDTests.m */,
 				EEBF3342248E84A900DDE2E9 /* ORTestClassIvar.h */,
@@ -565,6 +570,7 @@
 				EEBF334C248E84AA00DDE2E9 /* ORCallOCPropertyBlockTest.m in Sources */,
 				EEBF333E248E848100DDE2E9 /* OCRunnerTests.swift in Sources */,
 				EEF1527D24DE867400574FA7 /* ORCoreFunctionTests.m in Sources */,
+				0480FEE82580A77F00D6D914 /* ORWeakPropertyAndIvar.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

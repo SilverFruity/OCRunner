@@ -78,33 +78,27 @@ const void *mf_propKey(NSString *propName) {
 	for (MFScopeChain *pos = self; pos; pos = pos.next) {
 		if (pos.instance) {
             id instance = [(MFValue *)pos.instance objectValue];
-            NSString *propName = [self propNameByIvarName:identifier];
-            MFPropertyMapTable *table = [MFPropertyMapTable shareInstance];
             Class clazz = object_getClass(instance);
-            ORPropertyDeclare *propDef = [table getPropertyMapTableItemWith:clazz name:propName].property;
-            Ivar ivar;
-            if (propDef) {
-                id associationValue = value;
-                const char *type = propDef.var.typeEncode;
-                if (*type == '@') {
-                    associationValue = value.objectValue;
+            NSString *propName = [self propNameByIvarName:identifier];
+            if (propName != nil) {
+                MFPropertyMapTable *table = [MFPropertyMapTable shareInstance];
+                ORPropertyDeclare *propDef = [table getPropertyMapTableItemWith:clazz name:propName].property;
+                if (propDef) {
+                    MFPropertyModifier modifier = propDef.modifier;
+                    if ((modifier & MFPropertyModifierMemMask) == MFPropertyModifierMemWeak) {
+                        value = [value copy];
+                        value.modifier = DeclarationModifierWeak;
+                    }
+                    objc_AssociationPolicy associationPolicy = mf_AssociationPolicy_with_PropertyModifier(modifier);
+                    objc_setAssociatedObject(instance, mf_propKey(propName), value, associationPolicy);
+                    return;
                 }
-                MFPropertyModifier modifier = propDef.modifier;
-                if ((modifier & MFPropertyModifierMemMask) == MFPropertyModifierMemWeak) {
-                    associationValue = [[MFWeakPropertyBox alloc] initWithTarget:value];
-                }
-                objc_AssociationPolicy associationPolicy = mf_AssociationPolicy_with_PropertyModifier(modifier);
-                objc_setAssociatedObject(instance, mf_propKey(propName), associationValue, associationPolicy);
-                return;
-            }else if((ivar = class_getInstanceVariable(object_getClass(instance),identifier.UTF8String))){
+            }
+            Ivar ivar = class_getInstanceVariable(object_getClass(instance),identifier.UTF8String);
+            if(ivar){
                 const char *ivarEncoding = ivar_getTypeEncoding(ivar);
-                if (*ivarEncoding == '@') {
-                    object_setIvar(instance, ivar, value.objectValue);
-                }else{
-                    ptrdiff_t offset = ivar_getOffset(ivar);
-                    void *ptr = (__bridge void *)(instance) + offset;
-                    [value writePointer:ptr typeEncode:ivarEncoding];
-                }
+                void *ptr = (__bridge void *)(instance) + ivar_getOffset(ivar);
+                [value writePointer:ptr typeEncode:ivarEncoding];
                 return;
             }
 		}
@@ -122,39 +116,27 @@ const void *mf_propKey(NSString *propName) {
     do {
         if (pos.instance) {
             id instance = [(MFValue *)pos.instance objectValue];
-            NSString *propName = [self propNameByIvarName:identifier];
-            MFPropertyMapTable *table = [MFPropertyMapTable shareInstance];
             Class clazz = object_getClass(instance);
-            ORPropertyDeclare *propDef = [table getPropertyMapTableItemWith:clazz name:propName].property;
-            Ivar ivar;
-            if (propDef) {
-                id propValue = objc_getAssociatedObject(instance, mf_propKey(propName));
-                const char *type = propDef.var.typeEncode;
-                MFValue *value = propValue;
-                if (!propValue) {
-                    value = [MFValue defaultValueWithTypeEncoding:type];
-                }else if(*type == '@'){
-                    if ([propValue isKindOfClass:[MFWeakPropertyBox class]]) {
-                        MFWeakPropertyBox *box = propValue;
-                        MFValue *weakValue = box.target;
-                        value = [MFValue valueWithObject:weakValue];
-                    }else{
-                        value = [MFValue valueWithObject:propValue];
+            NSString *propName = [self propNameByIvarName:identifier];
+            if (propName != nil) {
+                MFPropertyMapTable *table = [MFPropertyMapTable shareInstance];
+                ORPropertyDeclare *propDef = [table getPropertyMapTableItemWith:clazz name:propName].property;
+                if (propDef) {
+                    MFValue *propValue = objc_getAssociatedObject(instance, mf_propKey(propName));
+                    if (!propValue) {
+                        return [MFValue defaultValueWithTypeEncoding:propDef.var.typeEncode];
                     }
+                    if (propValue.modifier & DeclarationModifierWeak) {
+                        propValue = [propValue copy];
+                    }
+                    return propValue;
                 }
-                return value;
-                
-            }else if((ivar = class_getInstanceVariable(object_getClass(instance),identifier.UTF8String))){
-                MFValue *value;
+            }
+            Ivar ivar = class_getInstanceVariable(clazz, identifier.UTF8String);
+            if(ivar){
                 const char *ivarEncoding = ivar_getTypeEncoding(ivar);
-                if (*ivarEncoding == '@') {
-                    id ivarValue = object_getIvar(instance, ivar);
-                    value = [MFValue valueWithObject:ivarValue];
-                }else{
-                    void *ptr = (__bridge void *)(instance) +  ivar_getOffset(ivar);
-                    value = [[MFValue alloc] initTypeEncode:ivarEncoding pointer:ptr];
-                }
-                return value;
+                void *ptr = (__bridge void *)(instance) + ivar_getOffset(ivar);
+                return [[MFValue alloc] initTypeEncode:ivarEncoding pointer:ptr];
             }
         }
         MFValue *value = [pos getValueWithIdentifier:identifier];

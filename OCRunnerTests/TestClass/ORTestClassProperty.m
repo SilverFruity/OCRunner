@@ -20,13 +20,6 @@
 - (NSString *)testObjectPropertyTest{
     return nil;
 }
-
-- (id)testWeakObjectProperty{
-    return nil;
-}
-- (id)testStrongObjectProperty{
-    return nil;
-}
 - (NSString *)testIvarx{
     return @"";
 }
