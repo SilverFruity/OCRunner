@@ -12,7 +12,6 @@
 #import "MFMethodMapTable.h"
 #import "MFPropertyMapTable.h"
 #import "MFVarDeclareChain.h"
-#import "MFWeakPropertyBox.h"
 #import "MFBlock.h"
 #import "MFValue.h"
 #import "MFStaticVarTable.h"

@@ -11,7 +11,6 @@
 #import "MFValue.h"
 #import "MFBlock.h"
 #import "MFPropertyMapTable.h"
-#import "MFWeakPropertyBox.h"
 #import "util.h"
 #import "RunnerClasses+Execute.h"
 #import "ORTypeVarPair+TypeEncode.h"

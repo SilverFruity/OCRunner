@@ -10,7 +10,6 @@
 #import "MFValue.h"
 #import <objc/message.h>
 #import "RunnerClasses+Execute.h"
-#import "MFWeakPropertyBox.h"
 #import "MFMethodMapTable.h"
 #import "MFPropertyMapTable.h"
 #import "ORTypeVarPair+TypeEncode.h"
