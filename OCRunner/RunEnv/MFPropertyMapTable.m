@@ -51,12 +51,14 @@
         propertyMap = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
         CFDictionarySetValue(_propertyCache, (__bridge const void *)(class), propertyMap);
     }
+    if (propertyName == nil) return;
     CFDictionarySetValue(propertyMap, (__bridge CFStringRef)(propertyName), (__bridge const void *)(propertyMapTableItem));
 }
 
 - (MFPropertyMapTableItem *)getPropertyMapTableItemWith:(Class)clazz name:(NSString *)name{
     CFDictionaryRef propertyMap = CFDictionaryGetValue(_propertyCache, (__bridge const void *)(clazz));
     if (propertyMap == NULL) return nil;
+    if (name == nil) return nil;
     return CFDictionaryGetValue(propertyMap, (__bridge CFStringRef)(name));
 }
 
