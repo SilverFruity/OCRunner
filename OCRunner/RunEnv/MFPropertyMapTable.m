@@ -41,11 +41,15 @@
 }
 
 - (void)addPropertyMapTableItem:(MFPropertyMapTableItem *)propertyMapTableItem{
+    if (!propertyMapTableItem) return;
+    
     NSString *propertyName = propertyMapTableItem.property.var.var.varname;
-    if (!propertyName.length) {
-        return;
-    }
+    if (!propertyName.length) return;
+    
     Class class = propertyMapTableItem.clazz;
+    
+    if (class == NULL) return;
+    
     CFMutableDictionaryRef propertyMap = (CFMutableDictionaryRef)CFDictionaryGetValue(_propertyCache, (__bridge const void *)(class));
     if (propertyMap == NULL){
         propertyMap = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
@@ -56,9 +60,12 @@
 }
 
 - (MFPropertyMapTableItem *)getPropertyMapTableItemWith:(Class)clazz name:(NSString *)name{
+    if (clazz == NULL) return nil;
+    if (name == nil) return nil;
+
     CFDictionaryRef propertyMap = CFDictionaryGetValue(_propertyCache, (__bridge const void *)(clazz));
     if (propertyMap == NULL) return nil;
-    if (name == nil) return nil;
+    
     return CFDictionaryGetValue(propertyMap, (__bridge CFStringRef)(name));
 }
 

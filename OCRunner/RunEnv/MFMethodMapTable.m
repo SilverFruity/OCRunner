@@ -41,8 +41,16 @@
 }
 
 - (void)addMethodMapTableItem:(MFMethodMapTableItem *)methodMapTableItem{
+    if (!methodMapTableItem) return;
+    
     Class class = methodMapTableItem.clazz;
+    
+    if (class == NULL) return;
+    
     NSString *sel = [methodMapTableItem.methodImp.declare selectorName];
+    
+    if (!sel) return;
+    
     if (methodMapTableItem.methodImp.declare.isClassMethod){
         CFMutableDictionaryRef classMap = (CFMutableDictionaryRef)CFDictionaryGetValue(classMethodCache, (__bridge const void *)(class));
         if (classMap == NULL){
@@ -61,7 +69,12 @@
 }
 
 - (MFMethodMapTableItem *)getMethodMapTableItemWith:(Class)clazz classMethod:(BOOL)classMethod sel:(SEL)sel{
+    if (clazz == NULL) { return nil; }
+    
     NSString *selector = NSStringFromSelector(sel);
+    
+    if (!selector) { return nil; }
+    
     if (classMethod){
         CFDictionaryRef classMap = CFDictionaryGetValue(classMethodCache, (__bridge const void *)(clazz));
         if (classMap == NULL) return nil;
