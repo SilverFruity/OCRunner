@@ -56,7 +56,7 @@
 		0EA667C064BFFB79847D34F5 /* Pods-OCRunnerDemoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRunnerDemoTests.release.xcconfig"; path = "Target Support Files/Pods-OCRunnerDemoTests/Pods-OCRunnerDemoTests.release.xcconfig"; sourceTree = "<group>"; };
 		1C9D422B1CDEE6B7B4FBECF4 /* Pods-OCRunnerDemo-OCRunnerDemoUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRunnerDemo-OCRunnerDemoUITests.release.xcconfig"; path = "Target Support Files/Pods-OCRunnerDemo-OCRunnerDemoUITests/Pods-OCRunnerDemo-OCRunnerDemoUITests.release.xcconfig"; sourceTree = "<group>"; };
 		2566C827C6925E5FB35FC01D /* Pods_OCRunnerDemo_OCRunnerDemoUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OCRunnerDemo_OCRunnerDemoUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		3241B9612545363F000302CF /* HotViewcontroller */ = {isa = PBXFileReference; lastKnownFileType = text; path = HotViewcontroller; sourceTree = "<group>"; };
+		3241B9612545363F000302CF /* HotViewcontroller.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HotViewcontroller.m; sourceTree = "<group>"; };
 		32C54D1B256B4E6D00D067A2 /* jsonpatch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = jsonpatch; sourceTree = "<group>"; };
 		3489C29640E3FB1F05C6053D /* Pods-OCRunnerDemo-OCRunnerDemoUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRunnerDemo-OCRunnerDemoUITests.debug.xcconfig"; path = "Target Support Files/Pods-OCRunnerDemo-OCRunnerDemoUITests/Pods-OCRunnerDemo-OCRunnerDemoUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		4A0001072323984F1566D9A7 /* Pods_OCRunnerDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OCRunnerDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -81,7 +81,7 @@
 		EE480EB824794CDB003E4970 /* OCRunnerDemoUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OCRunnerDemoUITests.m; sourceTree = "<group>"; };
 		EE480EBA24794CDB003E4970 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EE50145724890C9200B463BB /* oc2mangoLib.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = oc2mangoLib.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		EE66C09E24FE95D600C85B31 /* ViewController1 */ = {isa = PBXFileReference; lastKnownFileType = text; path = ViewController1; sourceTree = "<group>"; };
+		EE66C09E24FE95D600C85B31 /* ViewController1.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController1.m; sourceTree = "<group>"; };
 		EE66C0BD24FEA97000C85B31 /* Scripts.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Scripts.bundle; sourceTree = "<group>"; };
 		EE66C0BF24FEAA0B00C85B31 /* binarypatch */ = {isa = PBXFileReference; lastKnownFileType = file; path = binarypatch; sourceTree = "<group>"; };
 		EE66C0C124FEAC0F00C85B31 /* Scripts.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = Scripts.bundle; path = OCRunnerDemo/Scripts.bundle; sourceTree = SOURCE_ROOT; };
@@ -149,8 +149,8 @@
 		3241B960254535F3000302CF /* HotPath */ = {
 			isa = PBXGroup;
 			children = (
-				EE66C09E24FE95D600C85B31 /* ViewController1 */,
-				3241B9612545363F000302CF /* HotViewcontroller */,
+				EE66C09E24FE95D600C85B31 /* ViewController1.m */,
+				3241B9612545363F000302CF /* HotViewcontroller.m */,
 			);
 			path = HotPath;
 			sourceTree = "<group>";

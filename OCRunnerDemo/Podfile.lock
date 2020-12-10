@@ -1,10 +1,10 @@
 PODS:
   - Masonry (1.1.0)
-  - oc2mangoLib (1.0.3):
-    - ORPatchFile (= 1.0.3)
-  - OCRunner (1.0.4):
-    - ORPatchFile (= 1.0.3)
-  - ORPatchFile (1.0.3)
+  - oc2mangoLib (1.0.4):
+    - ORPatchFile (= 1.0.4)
+  - OCRunner (1.0.8):
+    - ORPatchFile (= 1.0.4)
+  - ORPatchFile (1.0.4)
 
 DEPENDENCIES:
   - Masonry
@@ -26,9 +26,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
-  oc2mangoLib: 500cdd889d5aebe8d71db859f0925b7bbd372c77
-  OCRunner: 2d35aeccde621d1012bb4a62f0be9e64d5334d71
-  ORPatchFile: 1398e2386be4f340bf80f8a47e1b75f5cce4fc0d
+  oc2mangoLib: 70a426ca21a051cd5082915fe592ce8962018b87
+  OCRunner: d9be88cd292b6ae7fe951a918378008e34c2cf3f
+  ORPatchFile: 14a8a7ab2536bf2787546146681780bd777313ba
 
 PODFILE CHECKSUM: 442794f22a36d2ebe5d1dba0d6e31a14cea69242
 
