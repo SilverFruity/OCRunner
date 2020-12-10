@@ -67,13 +67,14 @@
         make.top.equalTo(self.view).offset(100);
     }];
     label.text = [[ShareInstance shared] cacheForKey:@"1"];
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"点击" style:UIBarButtonItemStylePlain target:self action:@selector(showNext)];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"点击" style:UIBarButtonItemStylePlain target:self action:@selector(showNext:)];
     NSLog(@"%@",@(-1));
 }
-- (void)showNext{
+- (void)showNext:(UIBarButtonItem *)sender{
     HotFixController *vc = [HotFixController new];
     vc.view.backgroundColor = [UIColor whiteColor];
     [self.navigationController pushViewController:vc animated:YES];
+    NSLog(@"xxxxxxx%@", sender);
 }
 
 @end
