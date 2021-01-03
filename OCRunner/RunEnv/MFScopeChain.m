@@ -83,13 +83,13 @@ const void *mf_propKey(NSString *propName) {
                 MFPropertyMapTable *table = [MFPropertyMapTable shareInstance];
                 ORPropertyDeclare *propDef = [table getPropertyMapTableItemWith:clazz name:propName].property;
                 if (propDef) {
+                    MFValue *result = [[MFValue alloc] initTypeEncode:propDef.var.typeEncode pointer:value.pointer];
                     MFPropertyModifier modifier = propDef.modifier;
                     if ((modifier & MFPropertyModifierMemMask) == MFPropertyModifierMemWeak) {
-                        value = [value copy];
-                        value.modifier = DeclarationModifierWeak;
+                        result.modifier = DeclarationModifierWeak;
                     }
                     objc_AssociationPolicy associationPolicy = mf_AssociationPolicy_with_PropertyModifier(modifier);
-                    objc_setAssociatedObject(instance, mf_propKey(propName), value, associationPolicy);
+                    objc_setAssociatedObject(instance, mf_propKey(propName), result, associationPolicy);
                     return;
                 }
             }

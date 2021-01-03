@@ -19,7 +19,7 @@
 void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     MFScopeChain *scope = [MFScopeChain scopeChainWithNext:[MFScopeChain topScope]];
     ORMethodImplementation *methodImp = (__bridge ORMethodImplementation *)userdata;
-    id target = *(__strong id *)args[0];
+    __unsafe_unretained id target = *(__unsafe_unretained id *)args[0];
     SEL sel = *(SEL *)args[1];
     BOOL classMethod = object_isClass(target);
     NSMethodSignature *sig = [target methodSignatureForSelector:sel];
@@ -31,11 +31,17 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     if (classMethod) {
         scope.instance = [MFValue valueWithClass:target];
     }else{
-        scope.instance = [MFValue valueWithObject:target];
+        // 方法调用时不应该增加引用计数
+        scope.instance = [MFValue valueWithPointer:(__bridge void *)(target)];
     }
     MFValue *value = nil;
     [ORArgsStack push:argValues];
     value = [methodImp execute:scope];
+    if (sel == NSSelectorFromString(@"dealloc")) {
+        Method deallocMethod = class_getInstanceMethod(object_getClass(target), NSSelectorFromString(@"ORGdealloc"));
+        void (*originalDealloc)(__unsafe_unretained id, SEL) = (__typeof__(originalDealloc))method_getImplementation(deallocMethod);
+        originalDealloc(target, NSSelectorFromString(@"dealloc"));
+    }
     if (value.type != TypeVoid && value.pointer != NULL){
         // 类型转换
         [value writePointer:ret typeEncode:[sig methodReturnType]];
