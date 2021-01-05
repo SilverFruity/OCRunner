@@ -509,7 +509,6 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         return [MFValue voidValue];
     }
     NSUInteger argCount = [sig numberOfArguments];
-    void *retValuePointer = alloca([sig methodReturnLength]);
     //解决多参数调用问题
     if (argValues.count + 2 > argCount && sig != nil) {
         NSMutableArray *methodArgs = [@[[MFValue valueWithObject:instance],
@@ -520,6 +519,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         invoke_functionPointer(msg_send, methodArgs, result, argCount);
         return result;
     }else{
+        void *retValuePointer = alloca([sig methodReturnLength]);
+        char *returnType = (char *)[sig methodReturnType];
         NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
         invocation.target = instance;
         invocation.selector = sel;
@@ -531,22 +532,19 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }
         // func replaceIMP execute
         [invocation invoke];
-        char *returnType = (char *)[sig methodReturnType];
         returnType = removeTypeEncodingPrefix(returnType);
         if (*returnType == 'v') {
             return [MFValue voidValue];
         }
         [invocation getReturnValue:retValuePointer];
+        MFValue *value = [[MFValue alloc] initTypeEncode:returnType pointer:retValuePointer];
+        // 针对一下方法调用，需要和CF一样，最终都要release. 与JSPatch和Mango中的__bridge_transfer效果相同
+        if (sel == @selector(alloc) || sel == @selector(new)||
+            sel == @selector(copy) || sel == @selector(mutableCopy)) {
+            CFRelease(*(void **)retValuePointer);
+        }
+        return value;
     }
-    const char * returnType = [sig methodReturnType];
-    NSString *selectorName = NSStringFromSelector(sel);
-    if ([selectorName isEqualToString:@"alloc"] || [selectorName isEqualToString:@"new"] ||
-        [selectorName isEqualToString:@"copy"] || [selectorName isEqualToString:@"mutableCopy"]) {
-        return [[MFValue alloc] initTypeEncode:returnType pointer:retValuePointer];
-    }else{
-        return [[MFValue alloc] initTypeEncode:returnType pointer:retValuePointer];
-    }
-    
 }
 @end
 @implementation ORCFuncCall(Execute)
