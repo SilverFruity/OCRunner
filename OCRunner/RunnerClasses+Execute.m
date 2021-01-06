@@ -815,8 +815,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @implementation ORUnaryExpression (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *currentValue = [self.value execute:scope];
-    MFValue *resultValue = [MFValue defaultValueWithTypeEncoding:currentValue.typeEncode];
     START_BOX;
+    cal_result.typeEncode = currentValue.typeEncode;
     switch (self.operatorType) {
         case UnaryOperatorIncrementSuffix:{
             SuffixUnaryExecuteInt(++, currentValue);
@@ -860,12 +860,14 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             break;
         }
         case UnaryOperatorAdressPoint:{
+            MFValue *resultValue = [MFValue defaultValueWithTypeEncoding:currentValue.typeEncode];
             void *pointer = currentValue.pointer;
             resultValue.pointerCount += 1;
             resultValue.pointer = &pointer;
             return resultValue;
         }
         case UnaryOperatorAdressValue:{
+            MFValue *resultValue = [MFValue defaultValueWithTypeEncoding:currentValue.typeEncode];
             resultValue.pointerCount -= 1;
             resultValue.pointer = *(void **)currentValue.pointer;
             return resultValue;
@@ -873,8 +875,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         default:
             break;
     }
-    END_BOX(resultValue);
-    return resultValue;
+    return [MFValue valueWithORCaculateValue:cal_result];
 }
 @end
 
@@ -882,8 +883,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *rightValue = [self.right execute:scope];
     MFValue *leftValue = [self.left execute:scope];
-    MFValue *resultValue = [MFValue defaultValueWithTypeEncoding:leftValue.typeEncode];
     START_BOX;
+    cal_result.typeEncode = leftValue.typeEncode;
     switch (self.operatorType) {
         case BinaryOperatorAdd:{
             CalculateExecute(leftValue, +, rightValue);
@@ -976,8 +977,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         default:
             break;
     }
-    END_BOX(resultValue);
-    return resultValue;
+    return [MFValue valueWithORCaculateValue:cal_result];
 }
 @end
 @implementation ORTernaryExpression(Execute)

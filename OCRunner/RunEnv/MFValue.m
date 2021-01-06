@@ -14,21 +14,20 @@
 
 #define MFValueBridge(target,resultType)\
 resultType result;\
-const char *typeEncode = target.typeEncode;\
-switch (*typeEncode) {\
-    case OCTypeUChar: result = (resultType)*(unsigned char *)target.pointer; break;\
-    case OCTypeUInt: result = (resultType)*(unsigned int *)target.pointer; break;\
-    case OCTypeUShort: result = (resultType)*(unsigned short *)target.pointer; break;\
-    case OCTypeULong: result = (resultType)*(unsigned int *)target.pointer; break;\
-    case OCTypeULongLong: result = (resultType)*(unsigned long long *)target.pointer; break;\
-    case OCTypeBOOL: result = (resultType)*(BOOL *)target.pointer; break;\
-    case OCTypeChar: result = (resultType)*(char *)target.pointer; break;\
-    case OCTypeShort: result = (resultType)*(short *)target.pointer; break;\
-    case OCTypeInt: result = (resultType)*(int *)target.pointer; break;\
-    case OCTypeLong: result = (resultType)*(int *)target.pointer; break;\
-    case OCTypeLongLong: result = (resultType)*(long long *)target.pointer; break;\
-    case OCTypeFloat: result = (resultType)*(float *)target.pointer; break;\
-    case OCTypeDouble: result = (resultType)*(double *)target.pointer; break;\
+switch (*target->_typeEncode) {\
+    case OCTypeUChar: result = (resultType)target->realBaseValue.uCharValue; break;\
+    case OCTypeUInt: result = (resultType)target->realBaseValue.uIntValue; break;\
+    case OCTypeUShort: result = (resultType)target->realBaseValue.uShortValue; break;\
+    case OCTypeULong: result = (resultType)target->realBaseValue.uLongValue; break;\
+    case OCTypeULongLong: result = (resultType)target->realBaseValue.uLongLongValue; break;\
+    case OCTypeBOOL: result = (resultType)target->realBaseValue.boolValue; break;\
+    case OCTypeChar: result = (resultType)target->realBaseValue.charValue; break;\
+    case OCTypeShort: result = (resultType)target->realBaseValue.shortValue; break;\
+    case OCTypeInt: result = (resultType)target->realBaseValue.intValue; break;\
+    case OCTypeLong: result = (resultType)target->realBaseValue.longValue; break;\
+    case OCTypeLongLong: result = (resultType)target->realBaseValue.longlongValue; break;\
+    case OCTypeFloat: result = (resultType)target->realBaseValue.floatValue; break;\
+    case OCTypeDouble: result = (resultType)target->realBaseValue.doubleValue; break;\
     default: result = 0;\
 }
 
@@ -49,6 +48,13 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 + (instancetype)valueWithTypeEncode:(const char *)typeEncode pointer:(void *)pointer{
     return [[MFValue alloc]initTypeEncode:typeEncode pointer:pointer];
+}
++ (instancetype)valueWithORCaculateValue:(ORCaculateValue)value{
+    MFValue *result = [MFValue new];
+    result.typeEncode = value.typeEncode;
+    result->realBaseValue = value.box;
+    result->_pointer = &result->realBaseValue;
+    return result;
 }
 - (instancetype)initTypeEncode:(const char *)typeEncoding pointer:(void *)pointer{
     self = [super init];

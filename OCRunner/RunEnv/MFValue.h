@@ -340,6 +340,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 
 + (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding;
 + (instancetype)valueWithTypeEncode:(const char *)typeEncode pointer:(nullable void *)pointer;
++ (instancetype)valueWithORCaculateValue:(ORCaculateValue)value;
 - (instancetype)initTypeEncode:(const char *)tyepEncode pointer:(nullable void *)pointer;
 
 - (void)writePointer:(void *)pointer typeEncode:(const char *)typeEncode;
