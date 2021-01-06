@@ -1,7 +1,8 @@
 # Xcode
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
-
+/OCRunnerDemo/OCRunnerDemo/binarypatch
+/OCRunnerDemo/OCRunnerDemo/jsonpatch
 ## User settings
 xcuserdata/
 

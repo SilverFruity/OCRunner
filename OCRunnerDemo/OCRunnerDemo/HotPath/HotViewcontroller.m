@@ -41,4 +41,7 @@
     }
     return _tableView;
 }
+- (void)dealloc{
+    NSLog(@"HotFixController dealloc");
+}
 @end
