@@ -22,6 +22,10 @@
     [ORInterpreter excuteBinaryPatchFile:binaryPatchFilePath];
     [ORInterpreter excuteJsonPatchFile:jsonPatchFilePath];
     
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        [ORInterpreter reverse];
+//    });
+    
 #if __x86_64__  &&  TARGET_OS_SIMULATOR  &&  !TARGET_OS_IOSMAC
     NSLog(@"SIMULATOR");
 #endif

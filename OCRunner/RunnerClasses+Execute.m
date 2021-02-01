@@ -93,50 +93,45 @@ static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
     [invocation getReturnValue:retValuePtr];
     return [[MFValue alloc] initTypeEncode:retType pointer:retValuePtr];;
 }
-
-static void replace_method(Class clazz, ORMethodImplementation *methodImp, MFScopeChain *scope){
-    ORMethodDeclare *declare = methodImp.declare;
-    NSString *methodName = declare.selectorName;
-    SEL sel = NSSelectorFromString(methodName);
-
-    BOOL needFreeTypeEncoding = NO;
-    const char *typeEncoding;
+void or_method_replace(BOOL isClassMethod, Class clazz, SEL sel, IMP imp, const char *typeEncode){
     Method ocMethod;
-    if (methodImp.declare.isClassMethod) {
+    if (isClassMethod) {
         ocMethod = class_getClassMethod(clazz, sel);
     }else{
         ocMethod = class_getInstanceMethod(clazz, sel);
     }
     if (ocMethod) {
-        typeEncoding = method_getTypeEncoding(ocMethod);
-    }else{
-        typeEncoding = methodImp.declare.returnType.typeEncode;
-        needFreeTypeEncoding = YES;
-        typeEncoding = mf_str_append(typeEncoding, "@:"); //add self and _cmd
-        for (ORTypeVarPair *pair in methodImp.declare.parameterTypes) {
-            const char *paramTypeEncoding = pair.typeEncode;
-            const char *beforeTypeEncoding = typeEncoding;
-            typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
-            free((void *)beforeTypeEncoding);
-        }
+        typeEncode = method_getTypeEncoding(ocMethod);
     }
-    Class c2 = methodImp.declare.isClassMethod ? objc_getMetaClass(class_getName(clazz)) : clazz;
+    Class c2 = isClassMethod ? objc_getMetaClass(class_getName(clazz)) : clazz;
     if (class_respondsToSelector(c2, sel)) {
-        NSString *orgSelName = [NSString stringWithFormat:@"ORG%@",methodName];
+        NSString *orgSelName = [NSString stringWithFormat:@"ORG%@", NSStringFromSelector(sel)];
         SEL orgSel = NSSelectorFromString(orgSelName);
         if (!class_respondsToSelector(c2, orgSel)) {
-            class_addMethod(c2, orgSel, method_getImplementation(ocMethod), typeEncoding);
+            class_addMethod(c2, orgSel, method_getImplementation(ocMethod), typeEncode);
         }
     }
-    
+    class_replaceMethod(c2, sel, imp, typeEncode);
+}
+static void replace_method(Class clazz, ORMethodImplementation *methodImp){
+    const char *typeEncoding = methodImp.declare.returnType.typeEncode;
+    typeEncoding = mf_str_append(typeEncoding, "@:"); //add self and _cmd
+    for (ORTypeVarPair *pair in methodImp.declare.parameterTypes) {
+        const char *paramTypeEncoding = pair.typeEncode;
+        const char *beforeTypeEncoding = typeEncoding;
+        typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
+        free((void *)beforeTypeEncoding);
+    }
+    Class c2 = methodImp.declare.isClassMethod ? objc_getMetaClass(class_getName(clazz)) : clazz;
     MFMethodMapTableItem *item = [[MFMethodMapTableItem alloc] initWithClass:c2 method:methodImp];
     [[MFMethodMapTable shareInstance] addMethodMapTableItem:item];
     
+    ORMethodDeclare *declare = methodImp.declare;
     void *imp = register_method(&methodIMP, declare.parameterTypes, declare.returnType, (__bridge_retained void *)methodImp);
-    class_replaceMethod(c2, sel, imp, typeEncoding);
-    if (needFreeTypeEncoding) {
-        free((void *)typeEncoding);
-    }
+    
+    SEL sel = NSSelectorFromString(methodImp.declare.selectorName);
+    or_method_replace(methodImp.declare.isClassMethod, clazz, sel, imp, typeEncoding);
+    free((void *)typeEncoding);
 }
 
 static void replace_getter_method(Class clazz, ORPropertyDeclare *prop){
@@ -144,7 +139,7 @@ static void replace_getter_method(Class clazz, ORPropertyDeclare *prop){
     const char *retTypeEncoding  = prop.var.typeEncode;
     const char * typeEncoding = mf_str_append(retTypeEncoding, "@:");
     void *imp = register_method(&getterImp, @[], prop.var, (__bridge  void *)prop);
-    class_replaceMethod(clazz, getterSEL, imp, typeEncoding);
+    or_method_replace(NO, clazz, getterSEL, imp, typeEncoding);
     free((void *)typeEncoding);
 }
 
@@ -156,7 +151,7 @@ static void replace_setter_method(Class clazz, ORPropertyDeclare *prop){
     const char *prtTypeEncoding  = prop.var.typeEncode;
     const char * typeEncoding = mf_str_append("v@:", prtTypeEncoding);
     void *imp = register_method(&setterImp, @[prop.var], [ORTypeVarPair typePairWithTypeKind:TypeVoid],(__bridge_retained  void *)prop);
-    class_replaceMethod(clazz, setterSEL, imp, typeEncoding);
+    or_method_replace(NO, clazz, setterSEL, imp, typeEncoding);
     free((void *)typeEncoding);
 }
 
@@ -615,9 +610,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         && self.declare.funVar.varname
         && self.declare.funVar.ptCount == 0) {
         NSString *funcName = self.declare.funVar.varname;
-        if ([[ORGlobalFunctionTable shared] getFunctionNodeWithName:funcName] == nil) {
-            [[ORGlobalFunctionTable shared] setFunctionNode:self WithName:funcName];
-        }
+        // NOTE: 恢复后，再执行时，应该覆盖旧的实现
+        [[ORGlobalFunctionTable shared] setFunctionNode:self WithName:funcName];
         return [MFValue normalEnd];
     }
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
@@ -1283,6 +1277,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }
         clazz = objc_allocateClassPair(superClass, self.className.UTF8String, 0);
         objc_registerClassPair(clazz);
+        [[MFScopeChain topScope] setValue:[MFValue valueWithClass:clazz] withIndentifier:self.className];
     }
     // 添加Class变量到作用域
     [current setValue:[MFValue valueWithClass:clazz] withIndentifier:@"Class"];
@@ -1292,7 +1287,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }
     // 在添加方法，这样可以解决属性的懒加载不生效的问题
     for (ORMethodImplementation *method in self.methods) {
-        replace_method(clazz, method, current);
+        replace_method(clazz, method);
     }
     return nil;
 }
@@ -1391,6 +1386,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 
 @implementation ORProtocol (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope{
+    if (NSProtocolFromString(self.protcolName) != nil) {
+        return [MFValue voidValue];
+    }
     Protocol *protocol = objc_allocateProtocol(self.protcolName.UTF8String);
     for (NSString *name in self.protocols) {
         Protocol *superP = NSProtocolFromString(name);

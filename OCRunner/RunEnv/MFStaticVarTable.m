@@ -46,5 +46,9 @@
     _dic[key] = value;
     [_lock unlock];
 }
-
+- (void)clear{
+    [_lock lock];
+    _dic = [NSMutableDictionary dictionary];
+    [_lock unlock];
+}
 @end

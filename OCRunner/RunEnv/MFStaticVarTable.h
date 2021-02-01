@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (nullable MFValue *)getStaticVarValueWithKey:(NSString *)key;
 - (void)setStaticVarValue:(MFValue *)value withKey:(NSString *)key;
-
+- (void)clear;
 @end
 
 NS_ASSUME_NONNULL_END
