@@ -297,6 +297,11 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 4. 不支持 ‘->’ 操作符号
 5. 不支持C函数替换
 
+## 感谢
+* 贡献者：[@jokerwking](https://github.com/jokerwking)
+* [Mango](https://github.com/YPLiang19/Mango)
+* [libffi](https://github.com/libffi/libffi)
+* Procedure Call Standard for the ARM 64-bit Architecture. 
 
 
 ## 支持语法

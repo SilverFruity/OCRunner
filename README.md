@@ -305,7 +305,7 @@ etc.
 
 
 ### Thanks for
-
 * [Mango](https://github.com/YPLiang19/Mango)
 * [libffi](https://github.com/libffi/libffi)
 * Procedure Call Standard for the ARM 64-bit Architecture. 
+* [@jokerwking](https://github.com/jokerwking)
