@@ -25,6 +25,7 @@ extern const void *mf_propKey(NSString *propName);
 - (nullable MFValue *)getValueWithIdentifier:(NSString *)identifer;
 - (void)setValue:(MFValue *)value withIndentifier:(NSString *)identier;
 - (void)assignWithIdentifer:(NSString *)identifier value:(MFValue *)value;
+- (void)removeForIdentifier:(NSString *)key;
 - (void)clear;
 @end
 NS_ASSUME_NONNULL_END

@@ -15,6 +15,7 @@
 #import "ORStructDeclare.h"
 #import "ORSystemFunctionPointerTable.h"
 #import "MFStaticVarTable.h"
+#import "ORffiResultCache.h"
 
 @interface ORInterpreter()
 @property (nonatomic, copy)NSArray *currentNodes;
@@ -135,6 +136,7 @@
     [[MFStaticVarTable shareInstance] clear];
     [[ORStructDeclareTable shareInstance] clear];
     [[ORTypeSymbolTable shareInstance] clear];
+    [[ORffiResultCache shared] clear];
     ORInterpreter.shared.currentNodes = [NSArray array];
     
 }

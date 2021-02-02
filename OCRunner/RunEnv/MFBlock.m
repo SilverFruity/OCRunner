@@ -29,6 +29,7 @@ void dispose_helper(struct MFSimulateBlock *src)
 @implementation MFBlock{
     BOOL _generatedPtr;
     void *_blockPtr;
+    or_ffi_result *_ffi_result;
     struct MFGOSimulateBlockDescriptor *_descriptor;
 }
 
@@ -77,14 +78,14 @@ void dispose_helper(struct MFSimulateBlock *src)
         (void (*)(const void *src))dispose_helper,
         typeEncoding
     };
-    void *blockImp = register_function(&blockInter, self.paramTypes, self.retType);
+    _ffi_result = register_function(&blockInter, self.paramTypes, self.retType);
     _descriptor = malloc(sizeof(struct MFGOSimulateBlockDescriptor));
     memcpy(_descriptor, &descriptor, sizeof(struct MFGOSimulateBlockDescriptor));
     struct MFSimulateBlock simulateBlock = {
         &_NSConcreteStackBlock,
         (BLOCK_HAS_COPY_DISPOSE | BLOCK_HAS_SIGNATURE | BLOCK_CREATED_FROM_MFGO),
         0,
-        blockImp,
+        _ffi_result->function_imp,
         _descriptor,
         (__bridge void*)self
     };
@@ -94,6 +95,7 @@ void dispose_helper(struct MFSimulateBlock *src)
 
 -(void)dealloc{
     free(_descriptor);
+    or_ffi_result_free(_ffi_result);
     return;
 }
 

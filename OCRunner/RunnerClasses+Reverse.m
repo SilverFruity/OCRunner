@@ -19,6 +19,7 @@
 #import "ORTypeVarPair+TypeEncode.h"
 #import "ORCoreImp.h"
 #import "ORSearchedFunction.h"
+#import "ORffiResultCache.h"
 void reverse_method(BOOL isClassMethod, Class clazz, SEL sel){
     NSString *orgSelName = [NSString stringWithFormat:@"ORG%@",NSStringFromSelector(sel)];
     SEL orgsel = NSSelectorFromString(orgSelName);
@@ -28,10 +29,12 @@ void reverse_method(BOOL isClassMethod, Class clazz, SEL sel){
     }else{
         ocMethod = class_getInstanceMethod(clazz, orgsel);
     }
-    const char *typeEncoding = method_getTypeEncoding(ocMethod);
-    Class c2 = isClassMethod ? objc_getMetaClass(class_getName(clazz)) : clazz;
-    IMP orgImp = class_getMethodImplementation(c2, orgsel);
-    class_replaceMethod(c2, sel, orgImp, typeEncoding);
+    if (ocMethod) {
+        const char *typeEncoding = method_getTypeEncoding(ocMethod);
+        Class c2 = isClassMethod ? objc_getMetaClass(class_getName(clazz)) : clazz;
+        IMP orgImp = class_getMethodImplementation(c2, orgsel);
+        class_replaceMethod(c2, sel, orgImp, typeEncoding);
+    }
 }
 
 @implementation ORNode (Reverse)
@@ -41,19 +44,23 @@ void reverse_method(BOOL isClassMethod, Class clazz, SEL sel){
 @end
 
 @implementation ORClass (Reverse)
+- (void)deallocffiReusltForKey:(NSValue *)key{
+    or_ffi_result *result = [[ORffiResultCache shared] ffiResultForKey:key];
+    if (result) {
+        [[ORffiResultCache shared] removeForKey:key];
+        or_ffi_result_free(result);
+    }
+}
 - (void)reverse{
-    BOOL isRegisterClass = NO;
     MFValue *classValue = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:self.className];
     Class classVar = classValue.classValue;
     Class class = NSClassFromString(self.className);
-    if (classVar != nil && classVar == class) {
-        isRegisterClass = YES;
-    }
-    // FIXME: Reverse时，释放ffi_closure和ffi_type
+    // Reverse时，释放ffi_closure和ffi_type
     for (ORMethodImplementation *imp in self.methods) {
         SEL sel = NSSelectorFromString(imp.declare.selectorName);
         BOOL isClassMethod = imp.declare.isClassMethod;
         reverse_method(isClassMethod, class, sel);
+        [self deallocffiReusltForKey:[NSValue valueWithPointer:(__bridge void *)imp]];
         CFRelease((__bridge CFTypeRef)(imp));
     }
     for (ORPropertyDeclare *prop in self.properties){
@@ -64,12 +71,15 @@ void reverse_method(BOOL isClassMethod, Class clazz, SEL sel){
         SEL setterSEL = NSSelectorFromString([NSString stringWithFormat:@"set%@%@:",str1,str2]);
         reverse_method(NO, class, getterSEL);
         reverse_method(NO, class, setterSEL);
+        [self deallocffiReusltForKey:[NSValue valueWithPointer:(__bridge void *)prop]];
         CFRelease((__bridge CFTypeRef)(prop));
     }
     [[MFMethodMapTable shareInstance] removeMethodsForClass:class];
     [[MFPropertyMapTable shareInstance] removePropertiesForClass:class];
-    if (isRegisterClass) {
-        objc_disposeClassPair(class);
+    
+    // FIXME: 真机下，调用后崩溃的问题
+    if (classVar != nil && classVar == class) {
+        objc_disposeClassPair(classVar);
     }
 }
 

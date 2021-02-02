@@ -20,7 +20,7 @@
 #import "ORTypeVarPair+TypeEncode.h"
 #import "ORCoreImp.h"
 #import "ORSearchedFunction.h"
-
+#import "ORffiResultCache.h"
 #if DEBUG
 NSMutableArray *ORDebugMainFrameStack(void){
     NSMutableDictionary *threadInfo = [[NSThread mainThread] threadDictionary];
@@ -125,12 +125,11 @@ static void replace_method(Class clazz, ORMethodImplementation *methodImp){
     Class c2 = methodImp.declare.isClassMethod ? objc_getMetaClass(class_getName(clazz)) : clazz;
     MFMethodMapTableItem *item = [[MFMethodMapTableItem alloc] initWithClass:c2 method:methodImp];
     [[MFMethodMapTable shareInstance] addMethodMapTableItem:item];
-    
     ORMethodDeclare *declare = methodImp.declare;
-    void *imp = register_method(&methodIMP, declare.parameterTypes, declare.returnType, (__bridge_retained void *)methodImp);
-    
+    or_ffi_result *result = register_method(&methodIMP, declare.parameterTypes, declare.returnType, (__bridge_retained void *)methodImp);
+    [[ORffiResultCache shared] saveffiResult:result WithKey:[NSValue valueWithPointer:(__bridge void *)methodImp]];
     SEL sel = NSSelectorFromString(methodImp.declare.selectorName);
-    or_method_replace(methodImp.declare.isClassMethod, clazz, sel, imp, typeEncoding);
+    or_method_replace(methodImp.declare.isClassMethod, clazz, sel, result->function_imp, typeEncoding);
     free((void *)typeEncoding);
 }
 
@@ -138,8 +137,9 @@ static void replace_getter_method(Class clazz, ORPropertyDeclare *prop){
     SEL getterSEL = NSSelectorFromString(prop.var.var.varname);
     const char *retTypeEncoding  = prop.var.typeEncode;
     const char * typeEncoding = mf_str_append(retTypeEncoding, "@:");
-    void *imp = register_method(&getterImp, @[], prop.var, (__bridge  void *)prop);
-    or_method_replace(NO, clazz, getterSEL, imp, typeEncoding);
+    or_ffi_result *result = register_method(&getterImp, @[], prop.var, (__bridge  void *)prop);
+    [[ORffiResultCache shared] saveffiResult:result WithKey:[NSValue valueWithPointer:(__bridge void *)prop]];
+    or_method_replace(NO, clazz, getterSEL, result->function_imp, typeEncoding);
     free((void *)typeEncoding);
 }
 
@@ -150,8 +150,8 @@ static void replace_setter_method(Class clazz, ORPropertyDeclare *prop){
     SEL setterSEL = NSSelectorFromString([NSString stringWithFormat:@"set%@%@:",str1,str2]);
     const char *prtTypeEncoding  = prop.var.typeEncode;
     const char * typeEncoding = mf_str_append("v@:", prtTypeEncoding);
-    void *imp = register_method(&setterImp, @[prop.var], [ORTypeVarPair typePairWithTypeKind:TypeVoid],(__bridge_retained  void *)prop);
-    or_method_replace(NO, clazz, setterSEL, imp, typeEncoding);
+    or_ffi_result *result = register_method(&setterImp, @[prop.var], [ORTypeVarPair typePairWithTypeKind:TypeVoid],(__bridge_retained  void *)prop);
+    or_method_replace(NO, clazz, setterSEL, result->function_imp, typeEncoding);
     free((void *)typeEncoding);
 }
 
@@ -1268,14 +1268,14 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             // 针对仅实现 @implementation xxxx @end 的类, 默认继承NSObjectt
             superClass = [NSObject class];
         }
+        clazz = objc_allocateClassPair(superClass, self.className.UTF8String, 0);
         //添加协议
         for (NSString *name in self.protocols) {
             Protocol *protcol = NSProtocolFromString(name);
             if (protcol) {
-                class_addProtocol(superClass, protcol);
+                class_addProtocol(clazz, protcol);
             }
         }
-        clazz = objc_allocateClassPair(superClass, self.className.UTF8String, 0);
         objc_registerClassPair(clazz);
         [[MFScopeChain topScope] setValue:[MFValue valueWithClass:clazz] withIndentifier:self.className];
     }

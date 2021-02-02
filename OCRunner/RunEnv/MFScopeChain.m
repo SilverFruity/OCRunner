@@ -150,7 +150,9 @@ const void *mf_propKey(NSString *propName) {
 - (MFValue *)recursiveGetValueWithIdentifier:(NSString *)identifier{
     return [self getValueWithIdentifier:identifier endScope:nil];
 }
-
+- (void)removeForIdentifier:(NSString *)key{
+    [_vars removeObjectForKey:key];
+}
 - (void)clear{
     _vars = [NSMutableDictionary dictionary];
 }

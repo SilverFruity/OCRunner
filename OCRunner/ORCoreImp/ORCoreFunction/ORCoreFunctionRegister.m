@@ -20,19 +20,7 @@
 #include <ptrauth.h>
 #endif
 
-typedef enum {
-    FFI_OK = 0,
-    FFI_BAD_TYPEDEF,
-    FFI_BAD_ABI
-} ffi_status;
 
-typedef struct {
-    void *trampoline_table;
-    void *trampoline_table_entry;
-    ffi_cif   *cif;
-    void     (*fun)(ffi_cif*,void*,void**,void*);
-    void  *user_data;
-} ffi_closure;
 
 extern void *ffi_closure_trampoline_table_page;
 
@@ -260,7 +248,7 @@ ffi_prep_closure_loc(ffi_closure *closure,
     return FFI_OK;
 }
 
-void *core_register_function(void (*imp)(ffi_cif *,void *,void **, void*),
+or_ffi_result *core_register_function(void (*func)(ffi_cif *,void *,void **, void*),
                              unsigned nargs,
                              char **argTypeEncodes,
                              char *retTypeEncode,
@@ -270,9 +258,14 @@ void *core_register_function(void (*imp)(ffi_cif *,void *,void **, void*),
     cif->nargs = nargs;
     cif->r_typeEncode = retTypeEncode;
     cif->flags = (unsigned) resultFlagsForTypeEncode(retTypeEncode, argTypeEncodes, nargs);
-    void *result = NULL;
-    ffi_closure *closure = ffi_closure_alloc(sizeof(ffi_closure), &result);
-    ffi_prep_closure_loc(closure, cif, imp, userdata, result);
+    void *imp = NULL;
+    ffi_closure *closure = ffi_closure_alloc(sizeof(ffi_closure), &imp);
+    ffi_prep_closure_loc(closure, cif, func, userdata, imp);
+    
+    or_ffi_result *result = malloc(sizeof(or_ffi_result));
+    result->cif = cif;
+    result->closure = closure;
+    result->function_imp = imp;
     return result;
 }
 
@@ -431,14 +424,14 @@ char *mallocCopyStr(const char *source){
     return result;
 }
 
-void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
+or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
                         NSArray <ORTypeVarPair *>*args,
                         ORTypeVarPair *ret) __attribute__((overloadable))
 {
     return register_function(fun, args, ret, NULL);
 }
 
-void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
+or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
                         NSArray <ORTypeVarPair *>*args,
                         ORTypeVarPair *ret,
                         void *userdata)
@@ -450,13 +443,13 @@ void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
     char *retTyep = mallocCopyStr(ret.typeEncode);
     return core_register_function(fun, (int)args.count, argTypes, retTyep, userdata);
 }
-void *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
+or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
                       NSArray <ORTypeVarPair *>*args,
                       ORTypeVarPair *ret) __attribute__((overloadable))
 {
     return register_method(fun, args, ret, NULL);
 }
-void *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
+or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
                       NSArray <ORTypeVarPair *>*args,
                       ORTypeVarPair *ret, void *userdata)
 {
@@ -477,13 +470,15 @@ char *mallocCopyStr(const char *source){
     result[sLen] = '\0';
     return result;
 }
-void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
+or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
                         NSArray <ORTypeVarPair *>*args,
                         ORTypeVarPair *ret)  __attribute__((overloadable))
 {
     return register_function(fun, args, ret, NULL);
 }
-void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
+
+
+or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
                         NSArray <ORTypeVarPair *>*args,
                         ORTypeVarPair *ret,
                         void *userdata)
@@ -500,16 +495,21 @@ void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
     {
         ffi_prep_closure_loc(closure, cif, fun, userdata, imp);
     }
-    return imp;
+    or_ffi_result *result = malloc(sizeof(or_ffi_result));
+    result->cif = cif;
+    result->arg_types = arg_types;
+    result->closure = closure;
+    result->function_imp = imp;
+    return result;
 }
 
-void *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
+or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
                       NSArray <ORTypeVarPair *>*args,
                       ORTypeVarPair *ret) __attribute__((overloadable))
 {
     return register_method(fun, args, ret, NULL);
 }
-void *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
+or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
                       NSArray <ORTypeVarPair *>*args,
                       ORTypeVarPair *ret,
                       void *userdata)
@@ -521,3 +521,18 @@ void *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
     return register_function(fun, argTypes, ret, userdata);
 }
 #endif/* __libffi__ */
+
+void or_ffi_result_free(or_ffi_result *result){
+#ifdef __libffi__
+    free(result->arg_types);
+#else
+    for (int i = 0; i < result->cif->nargs; i++) {
+        free(result->cif->arg_typeEncodes[i]);
+    }
+    free(result->cif->arg_typeEncodes);
+    free(result->cif->r_typeEncode);
+#endif
+    free(result->cif);
+    ffi_closure_free(result->closure);
+    free(result);
+}
