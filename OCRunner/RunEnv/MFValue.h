@@ -403,7 +403,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @property (assign, nonatomic, readonly) double doubleValue;
 
 @property (nonatomic, nullable, readonly) id objectValue;
-@property (nonatomic, nullable, readonly) Class classValue;
+@property (nonatomic, nullable, readonly) void *classValue;
 @property (nonatomic, nullable, readonly) SEL selValue;
 @property (nonatomic, nullable, readonly) char *cStringValue;
 

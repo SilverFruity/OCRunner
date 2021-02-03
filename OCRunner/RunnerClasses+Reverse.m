@@ -52,8 +52,6 @@ void reverse_method(BOOL isClassMethod, Class clazz, SEL sel){
     }
 }
 - (void)reverse{
-    MFValue *classValue = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:self.className];
-    Class classVar = classValue.classValue;
     Class class = NSClassFromString(self.className);
     // Reverse时，释放ffi_closure和ffi_type
     for (ORMethodImplementation *imp in self.methods) {
@@ -77,7 +75,7 @@ void reverse_method(BOOL isClassMethod, Class clazz, SEL sel){
     [[MFMethodMapTable shareInstance] removeMethodsForClass:class];
     [[MFPropertyMapTable shareInstance] removePropertiesForClass:class];
     
-    // FIXME: 真机下，调用后崩溃的问题
+    Class classVar = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:self.className].classValue;
     if (classVar != nil && classVar == class) {
         objc_disposeClassPair(classVar);
     }

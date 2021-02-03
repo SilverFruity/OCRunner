@@ -630,8 +630,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 - (id)objectValue{
     return *(__strong id *)self.pointer;
 }
-- (Class)classValue{
-    return *(Class *)self.pointer;
+- (void *)classValue{
+    return *(void **)self.pointer;
 }
 - (SEL)selValue{
     return *(SEL *)self.pointer;
