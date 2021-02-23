@@ -378,6 +378,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 
 - (void)writePointer:(void *)pointer typeEncode:(const char *)typeEncode{
+    typeEncode = typeEncode == NULL ? OCTypeStringPointer : typeEncode;
     if (pointer == NULL) {
         return;
     }

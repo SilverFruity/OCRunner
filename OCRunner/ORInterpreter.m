@@ -8,7 +8,7 @@
 
 #import "ORInterpreter.h"
 #import "RunnerClasses+Execute.h"
-#import "RunnerClasses+Reverse.h"
+#import "RunnerClasses+Recover.h"
 #import "MFScopeChain.h"
 #import "ORSearchedFunction.h"
 #import "MFValue.h"
@@ -125,19 +125,23 @@
     return normalStatements;
 }
 
-+ (void)reverse{
++ (void)recover{
+    [self recoverWithClearEnvironment:YES];
+}
++ (void)recoverWithClearEnvironment:(BOOL)clear{
     if (ORInterpreter.shared.currentNodes == nil) {
         return;
     }
     for (ORNode *node in ORInterpreter.shared.currentNodes) {
-        [node reverse];
+        [node recover];
     }
-    [[MFScopeChain topScope] clear];
-    [[MFStaticVarTable shareInstance] clear];
-    [[ORStructDeclareTable shareInstance] clear];
-    [[ORTypeSymbolTable shareInstance] clear];
     [[ORffiResultCache shared] clear];
+    if (clear) {
+        [[MFScopeChain topScope] clear];
+        [[MFStaticVarTable shareInstance] clear];
+        [[ORStructDeclareTable shareInstance] clear];
+        [[ORTypeSymbolTable shareInstance] clear];
+    }
     ORInterpreter.shared.currentNodes = [NSArray array];
-    
 }
 @end

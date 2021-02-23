@@ -151,7 +151,7 @@
     [self addTypePair:typePair forAlias:typePair.var.varname];
 }
 - (void)addTypePair:(ORTypeVarPair *)typePair forAlias:(NSString *)alias{
-    ORSymbolItem *item = [self symbolItemForTypeName:alias];
+    ORSymbolItem *item = [self symbolItemForTypeName:typePair.type.name];
     if (item == nil) {
         item = [[ORSymbolItem alloc] init];
         item.typeEncode = [NSString stringWithUTF8String:typePair.typeEncode];

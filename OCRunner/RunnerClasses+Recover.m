@@ -5,7 +5,7 @@
 //  Created by Jiang on 2021/2/1.
 //
 
-#import "RunnerClasses+Reverse.h"
+#import "RunnerClasses+Recover.h"
 #import "MFScopeChain.h"
 #import "util.h"
 #import "MFMethodMapTable.h"
@@ -20,7 +20,7 @@
 #import "ORCoreImp.h"
 #import "ORSearchedFunction.h"
 #import "ORffiResultCache.h"
-void reverse_method(BOOL isClassMethod, Class clazz, SEL sel){
+void recover_method(BOOL isClassMethod, Class clazz, SEL sel){
     NSString *orgSelName = [NSString stringWithFormat:@"ORG%@",NSStringFromSelector(sel)];
     SEL orgsel = NSSelectorFromString(orgSelName);
     Method ocMethod;
@@ -38,7 +38,7 @@ void reverse_method(BOOL isClassMethod, Class clazz, SEL sel){
 }
 
 @implementation ORNode (Reverse)
-- (void)reverse{
+- (void)recover{
     
 }
 @end
@@ -51,13 +51,13 @@ void reverse_method(BOOL isClassMethod, Class clazz, SEL sel){
         or_ffi_result_free(result);
     }
 }
-- (void)reverse{
+- (void)recover{
     Class class = NSClassFromString(self.className);
     // Reverse时，释放ffi_closure和ffi_type
     for (ORMethodImplementation *imp in self.methods) {
         SEL sel = NSSelectorFromString(imp.declare.selectorName);
         BOOL isClassMethod = imp.declare.isClassMethod;
-        reverse_method(isClassMethod, class, sel);
+        recover_method(isClassMethod, class, sel);
         [self deallocffiReusltForKey:[NSValue valueWithPointer:(__bridge void *)imp]];
         CFRelease((__bridge CFTypeRef)(imp));
     }
@@ -67,8 +67,8 @@ void reverse_method(BOOL isClassMethod, Class clazz, SEL sel){
         NSString *str2 = name.length > 1 ? [name substringFromIndex:1] : nil;
         SEL getterSEL = NSSelectorFromString(name);
         SEL setterSEL = NSSelectorFromString([NSString stringWithFormat:@"set%@%@:",str1,str2]);
-        reverse_method(NO, class, getterSEL);
-        reverse_method(NO, class, setterSEL);
+        recover_method(NO, class, getterSEL);
+        recover_method(NO, class, setterSEL);
         [self deallocffiReusltForKey:[NSValue valueWithPointer:(__bridge void *)prop]];
         CFRelease((__bridge CFTypeRef)(prop));
     }

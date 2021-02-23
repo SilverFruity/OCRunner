@@ -10,6 +10,7 @@
 #import <OCRunner.h>
 #import "ORTypeVarPair+TypeEncode.h"
 #import <oc2mangoLib/oc2mangoLib.h>
+#import "ORRecoverClass.h"
 #import <objc/message.h>
 #import "ORWeakPropertyAndIvar.h"
 @interface ORTestWithObjc : XCTestCase
@@ -576,6 +577,34 @@ typedef struct MyStruct2 {
         [test ivarWeak];
     }
     XCTAssert([ivarWeak isEqualToString:@"dealloc"]);
+}
+- (void)testRecover{
+    NSString *source = @"\
+    @interface ORRecoverClass : NSObject\
+    @property (nonatomic, assign)int value1;\
+    @property (nonatomic, copy)NSString *value2;\
+    @end\
+    @implementation ORRecoverClass\
+    + (int)classMethodTest{ return 0; }\
+    - (int)methodTest1{ return 0; }\
+    - (int)methodTest2{ return 0; }\
+    - (int)value1{ return 1; }\
+    - (NSString *)value2{ return @\"123\"; }\
+    @end";
+    AST *ast = [OCParser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    ORRecoverClass *object = [ORRecoverClass new];
+    XCTAssert([object value1] == 1);
+    XCTAssert([[object value2] isEqual:@"123"]);
+    XCTAssert([object methodTest1] == 0);
+    XCTAssert([object methodTest2] == 0);
+    XCTAssert([ORRecoverClass classMethodTest] == 0);
+    [ORInterpreter recoverWithClearEnvironment:NO];
+    XCTAssert([object value1] == 0);
+    XCTAssert([object value2] == nil);
+    XCTAssert([object methodTest1] == 1);
+    XCTAssert([object methodTest2] == 1);
+    XCTAssert([ORRecoverClass classMethodTest] == 1);
 }
 - (void)testOCRecursiveFunctionPerformanceExample {
     [self measureBlock:^{

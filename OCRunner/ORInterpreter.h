@@ -14,7 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)excuteBinaryPatchFile:(NSString *)path;
 + (void)excuteJsonPatchFile:(NSString *)path;
 + (void)excuteNodes:(NSArray *)nodes;
-+ (void)reverse;
++ (void)recover;
++ (void)recoverWithClearEnvironment:(BOOL)clear;
 @end
 
 NS_ASSUME_NONNULL_END
