@@ -606,6 +606,24 @@ typedef struct MyStruct2 {
     XCTAssert([object methodTest2] == 1);
     XCTAssert([ORRecoverClass classMethodTest] == 1);
 }
+- (void)testArgumentWithTypeDefBlock{
+    NSString *source = @"\
+    \
+    typedef NSString * (^TestBlock)  (NSString *);\
+    typedef NSString * (^TestBlock1) (TestBlock);\
+    TestBlock1 block = ^NSString *(TestBlock value){\
+        return value(@\"123321\");\
+    };\
+    NSString *result = block(^NSString *(NSString* value){\
+        return value;\
+    });";
+    AST *ast = [OCParser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    MFValue *h = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:@"result"];
+    XCTAssert([h.objectValue isEqual:@"123321"]);
+}
+
+
 - (void)testOCRecursiveFunctionPerformanceExample {
     [self measureBlock:^{
         fibonaccia(20);
