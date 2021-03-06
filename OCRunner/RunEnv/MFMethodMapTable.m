@@ -67,6 +67,18 @@
         CFDictionarySetValue(classMap, (__bridge CFStringRef)(sel), (__bridge const void *)(methodMapTableItem));
     }
 }
+- (void)removeMethodsForClass:(Class)clazz{
+    if (clazz == NULL) return;
+    const void *key  = (__bridge const void *)clazz;
+    if (CFDictionaryGetValue(classMethodCache, key)) {
+        CFRelease(CFDictionaryGetValue(classMethodCache, key));
+    }
+    if (CFDictionaryGetValue(instanceMethodCache, key)) {
+        CFRelease(CFDictionaryGetValue(instanceMethodCache, key));
+    }
+    CFDictionaryRemoveValue(classMethodCache, key);
+    CFDictionaryRemoveValue(instanceMethodCache, key);
+}
 
 - (MFMethodMapTableItem *)getMethodMapTableItemWith:(Class)clazz classMethod:(BOOL)classMethod sel:(SEL)sel{
     if (clazz == NULL) { return nil; }

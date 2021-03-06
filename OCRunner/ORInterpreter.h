@@ -10,9 +10,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 @interface ORInterpreter : NSObject
++ (instancetype)shared;
 + (void)excuteBinaryPatchFile:(NSString *)path;
 + (void)excuteJsonPatchFile:(NSString *)path;
 + (void)excuteNodes:(NSArray *)nodes;
++ (void)recover;
++ (void)recoverWithClearEnvironment:(BOOL)clear;
 @end
 
 NS_ASSUME_NONNULL_END

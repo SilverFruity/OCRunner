@@ -8,13 +8,29 @@
 
 #import "ORInterpreter.h"
 #import "RunnerClasses+Execute.h"
+#import "RunnerClasses+Recover.h"
 #import "MFScopeChain.h"
 #import "ORSearchedFunction.h"
 #import "MFValue.h"
 #import "ORStructDeclare.h"
 #import "ORSystemFunctionPointerTable.h"
+#import "MFStaticVarTable.h"
+#import "ORffiResultCache.h"
+
+@interface ORInterpreter()
+@property (nonatomic, copy)NSArray *currentNodes;
+@end
 
 @implementation ORInterpreter
+
++ (instancetype)shared{
+    static dispatch_once_t onceToken;
+    static ORInterpreter *_instance = nil;
+    dispatch_once(&onceToken, ^{
+        _instance = [ORInterpreter new];
+    });
+    return _instance;
+}
 + (void)excuteBinaryPatchFile:(NSString *)path{
     //加载补丁文件
     ORPatchFile *file = [ORPatchFile loadBinaryPatch:path];
@@ -38,6 +54,9 @@
 }
 
 + (void)excuteNodes:(NSArray <ORNode *>*)nodes{
+    
+    ORInterpreter.shared.currentNodes = nodes;
+    
     MFScopeChain *scope = [MFScopeChain topScope];
     
     //添加函数、变量等
@@ -58,9 +77,12 @@
     for (id <OCExecute> expression in nodes) {
         if ([expression isKindOfClass:[ORDeclareExpression class]]) {
             ORTypeVarPair *pair = [(ORDeclareExpression *)expression pair];
+            NSString *name = pair.var.varname;
             if ([pair.var isKindOfClass:[ORFuncVariable class]]) {
-                [funcVars addObject:pair];
-                [names addObject:pair.var.varname];
+                if ([ORGlobalFunctionTable.shared getFunctionNodeWithName:name] == nil) {
+                    [funcVars addObject:pair];
+                    [names addObject:name];
+                }
                 continue;
             }
         }
@@ -101,5 +123,25 @@
     }
     #endif
     return normalStatements;
+}
+
++ (void)recover{
+    [self recoverWithClearEnvironment:YES];
+}
++ (void)recoverWithClearEnvironment:(BOOL)clear{
+    if (ORInterpreter.shared.currentNodes == nil) {
+        return;
+    }
+    for (ORNode *node in ORInterpreter.shared.currentNodes) {
+        [node recover];
+    }
+    [[ORffiResultCache shared] clear];
+    if (clear) {
+        [[MFScopeChain topScope] clear];
+        [[MFStaticVarTable shareInstance] clear];
+        [[ORStructDeclareTable shareInstance] clear];
+        [[ORTypeSymbolTable shareInstance] clear];
+    }
+    ORInterpreter.shared.currentNodes = [NSArray array];
 }
 @end

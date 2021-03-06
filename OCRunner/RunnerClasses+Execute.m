@@ -20,7 +20,7 @@
 #import "ORTypeVarPair+TypeEncode.h"
 #import "ORCoreImp.h"
 #import "ORSearchedFunction.h"
-
+#import "ORffiResultCache.h"
 #if DEBUG
 NSMutableArray *ORDebugMainFrameStack(void){
     NSMutableDictionary *threadInfo = [[NSThread mainThread] threadDictionary];
@@ -93,58 +93,53 @@ static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
     [invocation getReturnValue:retValuePtr];
     return [[MFValue alloc] initTypeEncode:retType pointer:retValuePtr];;
 }
-
-static void replace_method(Class clazz, ORMethodImplementation *methodImp, MFScopeChain *scope){
-    ORMethodDeclare *declare = methodImp.declare;
-    NSString *methodName = declare.selectorName;
-    SEL sel = NSSelectorFromString(methodName);
-
-    BOOL needFreeTypeEncoding = NO;
-    const char *typeEncoding;
+void or_method_replace(BOOL isClassMethod, Class clazz, SEL sel, IMP imp, const char *typeEncode){
     Method ocMethod;
-    if (methodImp.declare.isClassMethod) {
+    if (isClassMethod) {
         ocMethod = class_getClassMethod(clazz, sel);
     }else{
         ocMethod = class_getInstanceMethod(clazz, sel);
     }
     if (ocMethod) {
-        typeEncoding = method_getTypeEncoding(ocMethod);
-    }else{
-        typeEncoding = methodImp.declare.returnType.typeEncode;
-        needFreeTypeEncoding = YES;
-        typeEncoding = mf_str_append(typeEncoding, "@:"); //add self and _cmd
-        for (ORTypeVarPair *pair in methodImp.declare.parameterTypes) {
-            const char *paramTypeEncoding = pair.typeEncode;
-            const char *beforeTypeEncoding = typeEncoding;
-            typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
-            free((void *)beforeTypeEncoding);
-        }
+        typeEncode = method_getTypeEncoding(ocMethod);
     }
-    Class c2 = methodImp.declare.isClassMethod ? objc_getMetaClass(class_getName(clazz)) : clazz;
+    Class c2 = isClassMethod ? objc_getMetaClass(class_getName(clazz)) : clazz;
     if (class_respondsToSelector(c2, sel)) {
-        NSString *orgSelName = [NSString stringWithFormat:@"ORG%@",methodName];
+        NSString *orgSelName = [NSString stringWithFormat:@"ORG%@", NSStringFromSelector(sel)];
         SEL orgSel = NSSelectorFromString(orgSelName);
         if (!class_respondsToSelector(c2, orgSel)) {
-            class_addMethod(c2, orgSel, method_getImplementation(ocMethod), typeEncoding);
+            class_addMethod(c2, orgSel, method_getImplementation(ocMethod), typeEncode);
         }
     }
-    
+    class_replaceMethod(c2, sel, imp, typeEncode);
+}
+static void replace_method(Class clazz, ORMethodImplementation *methodImp){
+    const char *typeEncoding = methodImp.declare.returnType.typeEncode;
+    typeEncoding = mf_str_append(typeEncoding, "@:"); //add self and _cmd
+    for (ORTypeVarPair *pair in methodImp.declare.parameterTypes) {
+        const char *paramTypeEncoding = pair.typeEncode;
+        const char *beforeTypeEncoding = typeEncoding;
+        typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
+        free((void *)beforeTypeEncoding);
+    }
+    Class c2 = methodImp.declare.isClassMethod ? objc_getMetaClass(class_getName(clazz)) : clazz;
     MFMethodMapTableItem *item = [[MFMethodMapTableItem alloc] initWithClass:c2 method:methodImp];
     [[MFMethodMapTable shareInstance] addMethodMapTableItem:item];
-    
-    void *imp = register_method(&methodIMP, declare.parameterTypes, declare.returnType, (__bridge_retained void *)methodImp);
-    class_replaceMethod(c2, sel, imp, typeEncoding);
-    if (needFreeTypeEncoding) {
-        free((void *)typeEncoding);
-    }
+    ORMethodDeclare *declare = methodImp.declare;
+    or_ffi_result *result = register_method(&methodIMP, declare.parameterTypes, declare.returnType, (__bridge_retained void *)methodImp);
+    [[ORffiResultCache shared] saveffiResult:result WithKey:[NSValue valueWithPointer:(__bridge void *)methodImp]];
+    SEL sel = NSSelectorFromString(methodImp.declare.selectorName);
+    or_method_replace(methodImp.declare.isClassMethod, clazz, sel, result->function_imp, typeEncoding);
+    free((void *)typeEncoding);
 }
 
 static void replace_getter_method(Class clazz, ORPropertyDeclare *prop){
     SEL getterSEL = NSSelectorFromString(prop.var.var.varname);
     const char *retTypeEncoding  = prop.var.typeEncode;
     const char * typeEncoding = mf_str_append(retTypeEncoding, "@:");
-    void *imp = register_method(&getterImp, @[], prop.var, (__bridge  void *)prop);
-    class_replaceMethod(clazz, getterSEL, imp, typeEncoding);
+    or_ffi_result *result = register_method(&getterImp, @[], prop.var, (__bridge  void *)prop);
+    [[ORffiResultCache shared] saveffiResult:result WithKey:[NSValue valueWithPointer:(__bridge void *)prop]];
+    or_method_replace(NO, clazz, getterSEL, result->function_imp, typeEncoding);
     free((void *)typeEncoding);
 }
 
@@ -155,8 +150,8 @@ static void replace_setter_method(Class clazz, ORPropertyDeclare *prop){
     SEL setterSEL = NSSelectorFromString([NSString stringWithFormat:@"set%@%@:",str1,str2]);
     const char *prtTypeEncoding  = prop.var.typeEncode;
     const char * typeEncoding = mf_str_append("v@:", prtTypeEncoding);
-    void *imp = register_method(&setterImp, @[prop.var], [ORTypeVarPair typePairWithTypeKind:TypeVoid],(__bridge_retained  void *)prop);
-    class_replaceMethod(clazz, setterSEL, imp, typeEncoding);
+    or_ffi_result *result = register_method(&setterImp, @[prop.var], [ORTypeVarPair typePairWithTypeKind:TypeVoid],(__bridge_retained  void *)prop);
+    or_method_replace(NO, clazz, setterSEL, result->function_imp, typeEncoding);
     free((void *)typeEncoding);
 }
 
@@ -615,9 +610,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         && self.declare.funVar.varname
         && self.declare.funVar.ptCount == 0) {
         NSString *funcName = self.declare.funVar.varname;
-        if ([[ORGlobalFunctionTable shared] getFunctionNodeWithName:funcName] == nil) {
-            [[ORGlobalFunctionTable shared] setFunctionNode:self WithName:funcName];
-        }
+        // NOTE: 恢复后，再执行时，应该覆盖旧的实现
+        [[ORGlobalFunctionTable shared] setFunctionNode:self WithName:funcName];
         return [MFValue normalEnd];
     }
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
@@ -813,8 +807,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @implementation ORUnaryExpression (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *currentValue = [self.value execute:scope];
-    MFValue *resultValue = [MFValue defaultValueWithTypeEncoding:currentValue.typeEncode];
     START_BOX;
+    cal_result.typeEncode = currentValue.typeEncode;
     switch (self.operatorType) {
         case UnaryOperatorIncrementSuffix:{
             SuffixUnaryExecuteInt(++, currentValue);
@@ -858,12 +852,14 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             break;
         }
         case UnaryOperatorAdressPoint:{
+            MFValue *resultValue = [MFValue defaultValueWithTypeEncoding:currentValue.typeEncode];
             void *pointer = currentValue.pointer;
             resultValue.pointerCount += 1;
             resultValue.pointer = &pointer;
             return resultValue;
         }
         case UnaryOperatorAdressValue:{
+            MFValue *resultValue = [MFValue defaultValueWithTypeEncoding:currentValue.typeEncode];
             resultValue.pointerCount -= 1;
             resultValue.pointer = *(void **)currentValue.pointer;
             return resultValue;
@@ -871,8 +867,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         default:
             break;
     }
-    END_BOX(resultValue);
-    return resultValue;
+    return [MFValue valueWithORCaculateValue:cal_result];
 }
 @end
 
@@ -880,8 +875,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *rightValue = [self.right execute:scope];
     MFValue *leftValue = [self.left execute:scope];
-    MFValue *resultValue = [MFValue defaultValueWithTypeEncoding:leftValue.typeEncode];
     START_BOX;
+    cal_result.typeEncode = leftValue.typeEncode;
     switch (self.operatorType) {
         case BinaryOperatorAdd:{
             CalculateExecute(leftValue, +, rightValue);
@@ -974,8 +969,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         default:
             break;
     }
-    END_BOX(resultValue);
-    return resultValue;
+    return [MFValue valueWithORCaculateValue:cal_result];
 }
 @end
 @implementation ORTernaryExpression(Execute)
@@ -1274,15 +1268,16 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             // 针对仅实现 @implementation xxxx @end 的类, 默认继承NSObjectt
             superClass = [NSObject class];
         }
+        clazz = objc_allocateClassPair(superClass, self.className.UTF8String, 0);
         //添加协议
         for (NSString *name in self.protocols) {
             Protocol *protcol = NSProtocolFromString(name);
             if (protcol) {
-                class_addProtocol(superClass, protcol);
+                class_addProtocol(clazz, protcol);
             }
         }
-        clazz = objc_allocateClassPair(superClass, self.className.UTF8String, 0);
         objc_registerClassPair(clazz);
+        [[MFScopeChain topScope] setValue:[MFValue valueWithClass:clazz] withIndentifier:self.className];
     }
     // 添加Class变量到作用域
     [current setValue:[MFValue valueWithClass:clazz] withIndentifier:@"Class"];
@@ -1292,7 +1287,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }
     // 在添加方法，这样可以解决属性的懒加载不生效的问题
     for (ORMethodImplementation *method in self.methods) {
-        replace_method(clazz, method, current);
+        replace_method(clazz, method);
     }
     return nil;
 }
@@ -1391,6 +1386,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 
 @implementation ORProtocol (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope{
+    if (NSProtocolFromString(self.protcolName) != nil) {
+        return [MFValue voidValue];
+    }
     Protocol *protocol = objc_allocateProtocol(self.protcolName.UTF8String);
     for (NSString *name in self.protocols) {
         Protocol *superP = NSProtocolFromString(name);

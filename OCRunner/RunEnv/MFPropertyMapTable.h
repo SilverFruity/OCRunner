@@ -29,7 +29,7 @@ NSMutableDictionary<NSString *, MFPropertyMapTableItem *> *_dic;
 
 - (void)addPropertyMapTableItem:(MFPropertyMapTableItem *)propertyMapTableItem;
 - (nullable MFPropertyMapTableItem *)getPropertyMapTableItemWith:(Class)clazz name:(NSString *)name;
-
+- (void)removePropertiesForClass:(Class)clazz;
 
 @end
 

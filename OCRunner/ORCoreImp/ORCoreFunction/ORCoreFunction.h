@@ -43,16 +43,34 @@ typedef struct {
     unsigned nfixedargs; //可变参数需要的个数
 } ffi_cif;
 
+typedef enum {
+    FFI_OK = 0,
+    FFI_BAD_TYPEDEF,
+    FFI_BAD_ABI
+} ffi_status;
+
+typedef struct {
+    void *trampoline_table;
+    void *trampoline_table_entry;
+    ffi_cif   *cif;
+    void     (*fun)(ffi_cif*,void*,void**,void*);
+    void  *user_data;
+} ffi_closure;
+
 NSUInteger floatPointFlagsWithTypeEncode(const char *typeEncode);
 NSUInteger resultFlagsForTypeEncode(const char *retTypeEncode, char **argTypeEncodes, int narg);
-void *core_register_function(void (*fun)(ffi_cif *,void *,void **, void*),
-                             unsigned nargs,
-                             char **argTypeEncodes,
-                             char *retTypeEncode,
-                             void *userdata);
-
+void ffi_closure_free(void *ptr);
 #endif /* __has_include  */
 
+typedef struct {
+    ffi_cif *cif;
+    ffi_closure *closure;
+#ifdef __libffi__
+    ffi_type **arg_types;
+#endif
+    void *function_imp;
+}or_ffi_result;
+void or_ffi_result_free(or_ffi_result *result);
 
 @class NSArray;
 @class MFValue;
@@ -66,20 +84,20 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
 
 
 
-void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
+or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
                         NSArray <ORTypeVarPair *>*args,
                         ORTypeVarPair *ret)  __attribute__((overloadable));
 
-void *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
+or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
                         NSArray <ORTypeVarPair *>*args,
                         ORTypeVarPair *ret,
                         void *userdata);
 
-void *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
+or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
                       NSArray <ORTypeVarPair *>*args,
                       ORTypeVarPair *ret) __attribute__((overloadable));
 
-void *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
+or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
                       NSArray <ORTypeVarPair *>*args,
                       ORTypeVarPair *ret,
                       void *userdata);

@@ -47,6 +47,9 @@
 }
 
 - (void)showNext:(UIBarButtonItem *)sender{
-    [self.navigationController pushViewController:[NSClassFromString(@"HotFixController") new] animated:YES];
+    UIViewController *vc = [NSClassFromString(@"HotFixController") new];
+    if (vc) {
+        [self.navigationController pushViewController:vc animated:YES];
+    }
 }
 @end

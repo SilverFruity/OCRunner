@@ -27,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)addAlias:(NSString *)alias forStructTypeEncode:(const char *)typeEncode;
 - (void)addStructDeclare:(ORStructDeclare *)structDeclare;
 - (nullable ORStructDeclare *)getStructDeclareWithName:(NSString *)name;
+- (void)clear;
 @end
 
 
@@ -45,5 +46,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)addTypePair:(ORTypeVarPair *)item forAlias:(NSString *)alias;
 - (void)addSybolItem:(ORSymbolItem *)item forAlias:(NSString *)alias;
 - (ORSymbolItem *)symbolItemForTypeName:(NSString *)typeName;
+- (void)clear;
 @end
 NS_ASSUME_NONNULL_END

@@ -69,5 +69,12 @@
     return CFDictionaryGetValue(propertyMap, (__bridge CFStringRef)(name));
 }
 
-
+- (void)removePropertiesForClass:(Class)clazz{
+    if (clazz == nil) return;
+    const void *key  = (__bridge const void *)clazz;
+    if (CFDictionaryGetValue(_propertyCache, key)) {
+        CFRelease(CFDictionaryGetValue(_propertyCache, key));
+    }
+    CFDictionaryRemoveValue(_propertyCache, key);
+}
 @end

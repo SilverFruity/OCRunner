@@ -23,6 +23,12 @@
         ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:self.type.name];
         return declare.typeEncoding;
     }
+    if (self.var.ptCount == 0 && type == TypeObject){
+        ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:self.type.name];
+        if (item) {
+            return item.typeEncode.UTF8String;
+        }
+    }
     char encoding[128];
     memset(encoding, 0, 128);
 #define append(str) strcat(encoding,str)

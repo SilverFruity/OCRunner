@@ -73,7 +73,9 @@
 @implementation ORStructDeclareTable{
     NSMutableDictionary<NSString *, ORStructDeclare *> *_cache;
 }
-
+- (void)clear{
+    _cache = [NSMutableDictionary dictionary];
+}
 - (instancetype)init{
     if (self = [super init]) {
         _cache = [NSMutableDictionary dictionary];
@@ -127,7 +129,9 @@
     NSMutableDictionary<NSString *, ORSymbolItem *> *_table;
     NSLock *_lock;
 }
-
+- (void)clear{
+    _table = [NSMutableDictionary dictionary];
+}
 - (instancetype)init{
     if (self = [super init]) {
         _table = [NSMutableDictionary dictionary];

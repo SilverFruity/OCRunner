@@ -340,6 +340,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 
 + (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding;
 + (instancetype)valueWithTypeEncode:(const char *)typeEncode pointer:(nullable void *)pointer;
++ (instancetype)valueWithORCaculateValue:(ORCaculateValue)value;
 - (instancetype)initTypeEncode:(const char *)tyepEncode pointer:(nullable void *)pointer;
 
 - (void)writePointer:(void *)pointer typeEncode:(const char *)typeEncode;
@@ -403,7 +404,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @property (assign, nonatomic, readonly) double doubleValue;
 
 @property (nonatomic, nullable, readonly) id objectValue;
-@property (nonatomic, nullable, readonly) Class classValue;
+@property (nonatomic, nullable, readonly) void *classValue;
 @property (nonatomic, nullable, readonly) SEL selValue;
 @property (nonatomic, nullable, readonly) char *cStringValue;
 

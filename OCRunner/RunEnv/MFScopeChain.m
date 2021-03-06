@@ -66,7 +66,7 @@ const void *mf_propKey(NSString *propName) {
         return nil;
     }
     
-    if (*ivarName.UTF8String != '_') {
+    if ([ivarName characterAtIndex:0] != '_') {
         return nil;
     }
     
@@ -113,7 +113,7 @@ const void *mf_propKey(NSString *propName) {
     MFScopeChain *pos = self;
     // FIX: while self == endScope, will ignore self
     do {
-        if (pos.instance) {
+        if ([identifier characterAtIndex:0] == '_' && pos.instance) {
             id instance = [(MFValue *)pos.instance objectValue];
             Class clazz = object_getClass(instance);
             NSString *propName = [self propNameByIvarName:identifier];
@@ -150,7 +150,9 @@ const void *mf_propKey(NSString *propName) {
 - (MFValue *)recursiveGetValueWithIdentifier:(NSString *)identifier{
     return [self getValueWithIdentifier:identifier endScope:nil];
 }
-
+- (void)removeForIdentifier:(NSString *)key{
+    [_vars removeObjectForKey:key];
+}
 - (void)clear{
     _vars = [NSMutableDictionary dictionary];
 }

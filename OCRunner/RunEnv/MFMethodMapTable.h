@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MFMethodMapTable : NSObject
 
 + (instancetype)shareInstance;
-
+- (void)removeMethodsForClass:(Class)clazz;
 - (void)addMethodMapTableItem:(MFMethodMapTableItem *)methodMapTableItem;
 - (nullable MFMethodMapTableItem *)getMethodMapTableItemWith:(Class)clazz classMethod:(BOOL)classMethod sel:(SEL)sel;
 
