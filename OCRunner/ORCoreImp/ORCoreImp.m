@@ -26,14 +26,12 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     NSMutableArray<MFValue *> *argValues = [NSMutableArray array];
     for (NSUInteger i = 2; i < sig.numberOfArguments; i++) {
         MFValue *argValue = [[MFValue alloc] initTypeEncode:[sig getArgumentTypeAtIndex:i] pointer:args[i]];
-        if (argValue.isObject && argValue.isBlockValue) {
-            if (NSBlockHasSignature(argValue.objectValue) == NO) {
-                ORFuncVariable *blockSig = (ORFuncVariable *)methodImp.declare.parameterTypes[i - 2].var;
-                if ([blockSig isKindOfClass:[ORFuncVariable class]]) {
-                    // TypeEncode for block decl
-//                    NSBlockSetSignature(argValue.objectValue, "block type encode");
-                }
-
+        //针对系统传入的block，检查一次签名，如果没有，将在结构体中添加签名信息.
+        if (argValue.isObject && argValue.isBlockValue && NSBlockHasSignature(argValue.objectValue) == NO) {
+            ORTypeVarPair *blockdecl = methodImp.declare.parameterTypes[i - 2];
+            ORFuncVariable *blockSig = (ORFuncVariable *)blockdecl.var;
+            if ([blockSig isKindOfClass:[ORFuncVariable class]]) {
+                NSBlockSetSignature(argValue.objectValue, blockdecl.blockSignature);
             }
         }
         [argValues addObject:argValue];

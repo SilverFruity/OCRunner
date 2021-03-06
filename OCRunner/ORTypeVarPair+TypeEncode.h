@@ -11,6 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ORTypeVarPair (TypeEncode)
+- (const char *)blockSignature;
 - (const char *)typeEncode;
 @end
 
