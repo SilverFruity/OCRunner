@@ -62,5 +62,6 @@ struct MFGOSimulateBlockDescriptor {
 
 - (id)ocBlock;
 + (const char *)typeEncodingForBlock:(id)block;
-
 @end
+BOOL NSBlockHasSignature(id block);
+void NSBlockSetSignature(id block, const char *typeencode);

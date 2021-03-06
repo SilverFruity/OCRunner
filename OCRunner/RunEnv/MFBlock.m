@@ -98,3 +98,22 @@ void dispose_helper(struct MFSimulateBlock *src)
 }
 
 @end
+BOOL NSBlockHasSignature(id block){
+    struct MFSimulateBlock *blockRef = (__bridge struct MFSimulateBlock *)block;
+    int flags = blockRef->flags;
+    return flags & BLOCK_HAS_SIGNATURE;
+}
+void NSBlockSetSignature(id block, const char *typeencode){
+    struct MFSimulateBlock *blockRef = (__bridge struct MFSimulateBlock *)block;
+    void *signatureLocation = blockRef->descriptor;
+    signatureLocation += sizeof(unsigned long int);
+    signatureLocation += sizeof(unsigned long int);
+    int flags = blockRef->flags;
+    if (flags & BLOCK_HAS_COPY_DISPOSE) {
+        signatureLocation += sizeof(void(*)(void *dst, void *src));
+        signatureLocation += sizeof(void (*)(void *src));
+    }
+    char *copied = strdup(typeencode);
+    *(char **)signatureLocation = copied;
+    blockRef->flags |= BLOCK_HAS_SIGNATURE;
+}
