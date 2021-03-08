@@ -30,5 +30,7 @@
 - (NSDictionary* (^)(void))testMethodParameterListAndReturnValueWithString:(NSString *)str block:(NSString *(^)(NSString *))block{
     return nil;
 }
-
+- (int)testNoSignatureBlock:(int(^)(int))arg{
+    return 0;
+}
 @end

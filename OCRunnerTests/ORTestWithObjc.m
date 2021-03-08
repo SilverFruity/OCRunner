@@ -13,6 +13,7 @@
 #import "ORRecoverClass.h"
 #import <objc/message.h>
 #import "ORWeakPropertyAndIvar.h"
+#import "ORTestReplaceClass.h"
 @interface ORTestWithObjc : XCTestCase
 @property (nonatomic, strong)MFScopeChain *currentScope;
 @property (nonatomic, strong)MFScopeChain *topScope;
@@ -622,8 +623,23 @@ typedef struct MyStruct2 {
     MFValue *h = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:@"result"];
     XCTAssert([h.objectValue isEqual:@"123321"]);
 }
-
-
+int signatureBlockPtr(id object, int b){
+    return b * 2;
+}
+- (void)testNoSignatureBlock{
+    NSString *source = @"\
+    @implementation ORTestReplaceClass\
+    - (int)testNoSignatureBlock:(int(^)(int))arg{\
+        return arg(10);\
+    }\
+    @end\
+    ";
+    AST *ast = [OCParser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    id block = (__bridge id)simulateNSBlock(NULL, &signatureBlockPtr, NULL);
+    int result = [[ORTestReplaceClass new] testNoSignatureBlock: block];
+    XCTAssert(result == 20);
+}
 - (void)testOCRecursiveFunctionPerformanceExample {
     [self measureBlock:^{
         fibonaccia(20);

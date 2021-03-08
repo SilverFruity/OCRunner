@@ -51,6 +51,10 @@ struct MFGOSimulateBlockDescriptor {
 		const char *signature;
 	};
 };
+const char *NSBlockGetSignature(id block);
+BOOL NSBlockHasSignature(id block);
+void NSBlockSetSignature(id block, const char *typeencode);
+void *simulateNSBlock(const char* typeEncoding, void *imp, void *userdata);
 
 @class ORTypeVarPair;
 @interface MFBlock : NSObject
@@ -59,9 +63,5 @@ struct MFGOSimulateBlockDescriptor {
 @property (strong, nonatomic) ORFunctionImp *func;
 @property (strong, nonatomic) NSMutableArray <ORTypeVarPair *>*paramTypes;
 @property (strong, nonatomic) ORTypeVarPair *retType;
-
 - (id)ocBlock;
-+ (const char *)typeEncodingForBlock:(id)block;
 @end
-BOOL NSBlockHasSignature(id block);
-void NSBlockSetSignature(id block, const char *typeencode);

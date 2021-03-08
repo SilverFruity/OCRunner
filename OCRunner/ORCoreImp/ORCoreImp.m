@@ -29,8 +29,7 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
         //针对系统传入的block，检查一次签名，如果没有，将在结构体中添加签名信息.
         if (argValue.isObject && argValue.isBlockValue && NSBlockHasSignature(argValue.objectValue) == NO) {
             ORTypeVarPair *blockdecl = methodImp.declare.parameterTypes[i - 2];
-            ORFuncVariable *blockSig = (ORFuncVariable *)blockdecl.var;
-            if ([blockSig isKindOfClass:[ORFuncVariable class]]) {
+            if ([blockdecl.var isKindOfClass:[ORFuncVariable class]]) {
                 NSBlockSetSignature(argValue.objectValue, blockdecl.blockSignature);
             }
         }
@@ -59,7 +58,7 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
 void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
     struct MFSimulateBlock *block = *(void **)args[0];
     MFBlock *mangoBlock =  (__bridge MFBlock *)(block->wrapper);
-    NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:[MFBlock typeEncodingForBlock:mangoBlock.ocBlock]];
+    NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:NSBlockGetSignature(mangoBlock.ocBlock)];
     NSMutableArray<MFValue *> *argValues = [NSMutableArray array];
     for (NSUInteger i = 1; i < cfi->nargs; i++) {
         MFValue *argValue = [[MFValue alloc] initTypeEncode:[sig getArgumentTypeAtIndex:i] pointer:args[i]];

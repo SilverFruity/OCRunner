@@ -19,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSInteger)testOriginalMethod;
 - (NSInteger)testAddGlobalVar;
 - (NSDictionary *(^)(void))testMethodParameterListAndReturnValueWithString:(NSString *)str block:(NSString *(^)(NSString *))block;
+- (int)testNoSignatureBlock:(int(^)(int))arg;
 @end
 
 NS_ASSUME_NONNULL_END
