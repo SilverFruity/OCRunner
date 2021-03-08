@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name         = "OCRunnerArm64"
-s.version      = "1.0.11"
+s.version      = "1.0.12"
 s.summary      = "OCRunnerArm64"
 s.description  = <<-DESC
 Only Support Arm64, Execute Objective-C code Dynamically. iOS hotfix SDK.
