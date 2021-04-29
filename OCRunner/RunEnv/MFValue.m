@@ -151,13 +151,10 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
         case OCTypeCString:
             _isAlloced = YES;
             char *str = *(char **)pointer;
-            size_t len = strlen(str);
-            char * cstring = malloc(len * sizeof(char) + 1);
-            cstring[len] = '\0';
-            if (pointer != &replace) {
-                memcpy(cstring, str, len);
+            if (str != NULL) {
+                str = strdup(str);
             }
-            realBaseValue.pointerValue = cstring;
+            realBaseValue.pointerValue = str;
             _pointer = &realBaseValue.pointerValue;
             break;
         
