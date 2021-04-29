@@ -298,10 +298,12 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
     #ifdef __arm64__
         cif.aarch64_nfixedargs = (unsigned)needArgs;
     #endif
-    void *ret = returnValue.pointer;
+    void *ret = alloca(returnValue.memerySize);
     if (ffi_status == FFI_OK) {
         ffi_call(&cif, funptr, ret, argvs);
     }
+    // 触发 setPointer
+    returnValue.pointer = ret;
 }
 
 #endif/* __libffi__ */

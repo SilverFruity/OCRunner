@@ -73,7 +73,6 @@ static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
     [invocation setTarget:blockValue.objectValue];
     NSUInteger numberOfArguments = [sig numberOfArguments];
     if (numberOfArguments - 1 != args.count) {
-        //            mf_throw_error(expr.lineNumber, MFRuntimeErrorParameterListCountNoMatch, @"expect count: %zd, pass in cout:%zd",numberOfArguments - 1,expr.args.count);
         return [MFValue valueWithObject:nil];
     }
     //根据MFValue的type传入值的原因: 模拟在OC中的调用
@@ -358,7 +357,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
                                       @"Can't find object or class: %@\n"
                                       @"-----------------------------------", self.value);
 #endif
-                value = [MFValue voidValue];
+                value = [MFValue valueWithPointer:NULL];
             }
             return value;
         }

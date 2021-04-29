@@ -43,6 +43,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.view.backgroundColor = UIColor.whiteColor;
     UIView *view = [[UIView alloc] init];
     view.backgroundColor = [UIColor redColor];
     [self.view addSubview:view];
@@ -69,6 +70,9 @@
     label.text = [[ShareInstance shared] cacheForKey:@"1"];
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"点击" style:UIBarButtonItemStylePlain target:self action:@selector(showNext:)];
     NSLog(@"%@",@(-1));
+    
+    id vc = [[UIApplication sharedApplication].keyWindow.rootViewController childViewControllers].firstObject;
+    [vc updateFrame];
 }
 - (void)showNext:(UIBarButtonItem *)sender{
     HotFixController *vc = [HotFixController new];

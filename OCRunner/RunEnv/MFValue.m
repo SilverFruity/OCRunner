@@ -174,8 +174,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             break;
         
         case OCTypeSEL:
-            realBaseValue.uLongLongValue = *(unsigned long long *)pointer;
-            _pointer = &realBaseValue.uLongLongValue;
+            realBaseValue.pointerValue = *(void **)pointer;
+            _pointer = &realBaseValue.pointerValue;
             break;
         
         case OCTypeStruct:
@@ -268,12 +268,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     }
     if(_typeEncode != NULL && strlen(_typeEncode) > 1)
         free((void *)_typeEncode);
-    
-    size_t strLen = strlen(typeEncode);
-    char *buffer = malloc(strLen+1);
-    buffer[strLen] = '\0';
-    strncpy((void *)buffer, typeEncode, strLen);
-    _typeEncode = buffer;
+    _typeEncode = strdup(typeEncode);
     _pointerCount = startDetectPointerCount(typeEncode);
     if (*typeEncode == OCTypeClass) {
         self.typeName = @"Class";
@@ -707,5 +702,16 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 + (instancetype)valueWithPointer:(void *)pointerValue{
     return [MFValue valueWithTypeEncode:OCTypeStringPointer pointer:&pointerValue];
 }
-
+#if DEBUG
+- (NSString *)description{
+    return [NSString stringWithFormat:@"\
+            MFValue: %p \n\
+            type: %d \n\
+            typeName: %@ \n\
+            typeEncode: %s \n\
+            pointerValue: %p \n\
+            "
+            ,self,self.type,self.typeName,self.typeEncode,self->realBaseValue.pointerValue];
+}
+#endif
 @end
