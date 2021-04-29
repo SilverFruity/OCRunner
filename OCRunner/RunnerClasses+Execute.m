@@ -620,7 +620,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             // xxx = ^void (int x){ }, block作为值
             MFBlock *manBlock = [[MFBlock alloc] init];
             manBlock.func = [self normalFunctionImp];
-            MFScopeChain *blockScope = [MFScopeChain scopeChainWithNext:scope];
+            MFScopeChain *blockScope = [MFScopeChain scopeChainWithNext:[MFScopeChain topScope]];
             copy_undef_var(self, [MFVarDeclareChain new], scope, blockScope);
             manBlock.outScope = blockScope;
             manBlock.retType = manBlock.func.declare.returnType;
@@ -753,7 +753,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     BOOL staticVar = self.modifier & DeclarationModifierStatic;
     MFValue *(^initializeBlock)(void) = ^MFValue *{
         if (self.expression) {
-            MFValue *value = [self.expression execute:scope];
+            MFValue *value = [[self.expression execute:scope] copy];
             value.modifier = self.modifier;
             value.typeName = self.pair.type.name;
             value.typeEncode = self.pair.typeEncode;
