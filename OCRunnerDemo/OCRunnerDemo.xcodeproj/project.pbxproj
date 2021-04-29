@@ -19,6 +19,8 @@
 		EE480EA124794CDB003E4970 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EE480E9F24794CDB003E4970 /* LaunchScreen.storyboard */; };
 		EE480EA424794CDB003E4970 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = EE480EA324794CDB003E4970 /* main.m */; };
 		EE480EB924794CDB003E4970 /* OCRunnerDemoUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = EE480EB824794CDB003E4970 /* OCRunnerDemoUITests.m */; };
+		EE48547F263ACB5D0080AE07 /* SwiftViewController1.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE48547D263ACB5D0080AE07 /* SwiftViewController1.swift */; };
+		EE485480263ACB5D0080AE07 /* SwiftViewController1.xib in Resources */ = {isa = PBXBuildFile; fileRef = EE48547E263ACB5D0080AE07 /* SwiftViewController1.xib */; };
 		EE66C0C024FEAA0B00C85B31 /* binarypatch in Resources */ = {isa = PBXBuildFile; fileRef = EE66C0BF24FEAA0B00C85B31 /* binarypatch */; };
 		EE66C0C224FEAC0F00C85B31 /* Scripts.bundle in Resources */ = {isa = PBXBuildFile; fileRef = EE66C0C124FEAC0F00C85B31 /* Scripts.bundle */; };
 		EEBF333E248E848100DDE2E9 /* OCRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEBF333D248E848100DDE2E9 /* OCRunnerTests.swift */; };
@@ -84,6 +86,8 @@
 		EE480EB424794CDB003E4970 /* OCRunnerDemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OCRunnerDemoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE480EB824794CDB003E4970 /* OCRunnerDemoUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OCRunnerDemoUITests.m; sourceTree = "<group>"; };
 		EE480EBA24794CDB003E4970 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EE48547D263ACB5D0080AE07 /* SwiftViewController1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftViewController1.swift; sourceTree = "<group>"; };
+		EE48547E263ACB5D0080AE07 /* SwiftViewController1.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SwiftViewController1.xib; sourceTree = "<group>"; };
 		EE50145724890C9200B463BB /* oc2mangoLib.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = oc2mangoLib.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE66C09E24FE95D600C85B31 /* ViewController1.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController1.m; sourceTree = "<group>"; };
 		EE66C0BD24FEA97000C85B31 /* Scripts.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Scripts.bundle; sourceTree = "<group>"; };
@@ -189,6 +193,8 @@
 				EE480E9124794CDA003E4970 /* AppDelegate.h */,
 				EE480E9224794CDA003E4970 /* AppDelegate.m */,
 				EEF439332620030E0058B805 /* SwiftViewController.swift */,
+				EE48547D263ACB5D0080AE07 /* SwiftViewController1.swift */,
+				EE48547E263ACB5D0080AE07 /* SwiftViewController1.xib */,
 				3241B960254535F3000302CF /* HotPath */,
 				EE66C0BF24FEAA0B00C85B31 /* binarypatch */,
 				32C54D1B256B4E6D00D067A2 /* jsonpatch */,
@@ -378,6 +384,7 @@
 			files = (
 				EE480EA124794CDB003E4970 /* LaunchScreen.storyboard in Resources */,
 				EE480E9E24794CDB003E4970 /* Assets.xcassets in Resources */,
+				EE485480263ACB5D0080AE07 /* SwiftViewController1.xib in Resources */,
 				EE66C0C024FEAA0B00C85B31 /* binarypatch in Resources */,
 				32C54D1C256B4E6D00D067A2 /* jsonpatch in Resources */,
 				EE480E9C24794CDA003E4970 /* Main.storyboard in Resources */,
@@ -566,6 +573,7 @@
 				EE480E9924794CDA003E4970 /* ViewController.m in Sources */,
 				EE480E9324794CDA003E4970 /* AppDelegate.m in Sources */,
 				EE480EA424794CDB003E4970 /* main.m in Sources */,
+				EE48547F263ACB5D0080AE07 /* SwiftViewController1.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -43,6 +43,12 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    UIButton *swiftButton = [[UIButton alloc] initWithFrame:CGRectMake(150,150,200,40)];
+    [swiftButton setTitle:@"SwiftViewController" forState:UIControlStateNormal];
+    [swiftButton setTitleColor:UIColor.blueColor forState:UIControlStateNormal];
+    [swiftButton addTarget:self action:@selector(pushSwiftControlelr) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:swiftButton];
+    
     self.view.backgroundColor = UIColor.whiteColor;
     UIView *view = [[UIView alloc] init];
     view.backgroundColor = [UIColor redColor];
@@ -79,6 +85,10 @@
     vc.view.backgroundColor = [UIColor whiteColor];
     [self.navigationController pushViewController:vc animated:YES];
     NSLog(@"xxxxxxx%@", sender);
+}
+- (void)pushSwiftControlelr1{
+    UIViewController *vc = [[NSClassFromString(@"OCRunnerDemo.SwiftViewController1") alloc] init];
+    [self.navigationController pushViewController:vc animated:YES];
 }
 
 @end

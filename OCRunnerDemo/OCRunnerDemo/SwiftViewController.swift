@@ -12,9 +12,12 @@ class SwiftViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            let vc = ViewController.init()
-            self.navigationController?.pushViewController(vc, animated: true)
+        self.view.backgroundColor = UIColor.white;
+        if self.navigationController?.viewControllers.count ?? 1 == 1 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                let vc = ViewController.init()
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
         }
     }
     @objc func updateFrame(){

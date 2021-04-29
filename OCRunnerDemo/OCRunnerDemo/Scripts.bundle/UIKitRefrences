@@ -401,3 +401,6 @@ const CGAffineTransform CGAffineTransformIdentity;
    null rect. */
 
  bool CGRectIntersectsRect(CGRect rect1, CGRect rect2);
+
+
+Class _Nullable NSClassFromString(NSString *aClassName);
