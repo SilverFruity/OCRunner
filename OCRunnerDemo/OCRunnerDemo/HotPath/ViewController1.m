@@ -46,7 +46,7 @@
     UIButton *swiftButton = [[UIButton alloc] initWithFrame:CGRectMake(150,150,200,40)];
     [swiftButton setTitle:@"SwiftViewController" forState:UIControlStateNormal];
     [swiftButton setTitleColor:UIColor.blueColor forState:UIControlStateNormal];
-    [swiftButton addTarget:self action:@selector(pushSwiftControlelr) forControlEvents:UIControlEventTouchUpInside];
+    [swiftButton addTarget:self action:@selector(pushSwiftControlelr1) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:swiftButton];
     
     self.view.backgroundColor = UIColor.whiteColor;
