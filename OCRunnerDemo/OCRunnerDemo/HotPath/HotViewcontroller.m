@@ -1,10 +1,10 @@
-
-
 #import <Masonry/Masonry.h>
 #import <UIKit/UIKit.h>
+#import <MJRefresh/MJRefresh.h>
 
 @interface HotFixController : UIViewController <UITableViewDelegate, UITableViewDataSource>
 @property (nonatomic, strong) UITableView *tableView;
+@property (nonatomic, copy) void (^block)(void);
 @end
 
 @implementation HotFixController
@@ -17,6 +17,9 @@
     [self.tableView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.bottom.right.top.mas_equalTo(self.view);
     }];
+    self.block = ^{
+        NSLog(@"block");
+    };
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -38,6 +41,14 @@
         _tableView.estimatedSectionHeaderHeight = 0;
         _tableView.estimatedSectionFooterHeight = 0;
         _tableView.backgroundColor = [UIColor whiteColor];
+        __weak typeof(self) weakSelf = self;
+        _tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+            __strong id strongSelf = weakSelf;
+            [strongSelf.tableView.mj_header endRefreshing];
+        }];
+        [self.tableView.mj_header endRefreshingWithCompletionBlock:^{
+            [weakSelf.navigationController popViewControllerAnimated:YES];
+        }];
     }
     return _tableView;
 }
