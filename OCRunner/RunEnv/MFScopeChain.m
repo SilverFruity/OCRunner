@@ -29,6 +29,11 @@ static MFScopeChain *instance = nil;
 	MFScopeChain *scope = [MFScopeChain new];
 	scope.next = next;
     scope.instance = next.instance;
+#if DEBUG
+    MFValue *value = [MFValue valueWithObject:scope];
+    value.modifier = DeclarationModifierWeak;
+    [scope setValue:value withIndentifier:@"$curScope"];
+#endif
 	return scope;
 }
 

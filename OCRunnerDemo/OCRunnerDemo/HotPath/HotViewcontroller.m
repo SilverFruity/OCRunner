@@ -17,9 +17,6 @@
     [self.tableView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.bottom.right.top.mas_equalTo(self.view);
     }];
-    self.block = ^{
-        NSLog(@"block");
-    };
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -47,7 +44,8 @@
             [strongSelf.tableView.mj_header endRefreshing];
         }];
         [self.tableView.mj_header endRefreshingWithCompletionBlock:^{
-            [weakSelf.navigationController popViewControllerAnimated:YES];
+            __strong id strongSelf = weakSelf;
+            strongSelf.block();
         }];
     }
     return _tableView;
