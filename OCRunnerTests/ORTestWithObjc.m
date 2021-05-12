@@ -640,6 +640,49 @@ int signatureBlockPtr(id object, int b){
     int result = [[ORTestReplaceClass new] testNoSignatureBlock: block];
     XCTAssert(result == 20);
 }
+- (void)testBlockCycleRefrence{
+    NSString * source =
+    @"int flag = 0;\
+    @implementation TestObject\
+    - (void)testNormalBlock{\
+        __weak id weakSelf = self;\
+        void(^block)(void) = ^{\
+            __strong id strongSelf = weakSelf;\
+            NSLog(@\"%@\",strongSelf);\
+        };\
+        block();\
+    }\
+    -(void)dealloc{ flag = 1; }\
+    @end\
+    [[TestObject new] testNormalBlock];";
+    AST *ast = [OCParser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    MFValue *flag = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:@"flag"];
+    XCTAssert(flag.intValue == 1);
+}
+- (void)testPropertyBlockCycleRefrenceWhileWithWeakVar{
+    NSString * source =
+    @"int flag = 0;\
+    @interface TestObject: NSObject\
+    @property(nonatomic, strong) void(^block)(void);\
+    @end\
+    @implementation TestObject\
+    - (void)testPropertyBlock{\
+        __weak id weakSelf = self;\
+        self.block = ^{\
+            __strong id strongSelf = weakSelf;\
+            NSLog(@\"%@\",strongSelf);\
+        };\
+        self.block();\
+    }\
+    -(void)dealloc{ flag = 1; }\
+    @end\
+    [[TestObject new] testPropertyBlock];";
+    AST *ast = [OCParser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    MFValue *flag = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:@"flag"];
+    XCTAssert(flag.intValue == 1);
+}
 - (void)testOCRecursiveFunctionPerformanceExample {
     [self measureBlock:^{
         fibonaccia(20);
