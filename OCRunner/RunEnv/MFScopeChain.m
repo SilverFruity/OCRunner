@@ -101,6 +101,10 @@ const void *mf_propKey(NSString *propName) {
             Ivar ivar = class_getInstanceVariable(object_getClass(instance),identifier.UTF8String);
             if(ivar){
                 const char *ivarEncoding = ivar_getTypeEncoding(ivar);
+                if (*ivarEncoding == OCTypeObject) {
+                    object_setIvar(instance, ivar, value.objectValue);
+                    return;
+                }
                 void *ptr = (__bridge void *)(instance) + ivar_getOffset(ivar);
                 [value writePointer:ptr typeEncode:ivarEncoding];
                 return;
