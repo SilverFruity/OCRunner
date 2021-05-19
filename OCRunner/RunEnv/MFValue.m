@@ -36,7 +36,6 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 @interface MFValue()
 @property (nonatomic,strong)id strongObjectValue;
-@property (nonatomic,weak)id weakObjectValue;
 @end
 
 @implementation MFValue
@@ -72,7 +71,6 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     realBaseValue.pointerValue = NULL;
     _pointer = NULL;
     _strongObjectValue = nil;
-    _weakObjectValue = nil;
 }
 - (void)setPointer:(void *)pointer{
     NSCAssert(_typeEncode != NULL, @"TypeEncode must exist");
@@ -160,9 +158,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
         
         case OCTypeObject:
             realBaseValue.pointerValue = *(void **)pointer;
-            if (realBaseValue.pointerValue != NULL) {
-                _strongObjectValue = (__bridge id)(realBaseValue.pointerValue);
-            }
+            [self setModifier:_modifier];
             _pointer = &realBaseValue.pointerValue;
         
         case OCTypeClass:
@@ -225,15 +221,18 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return strcmp(self.typeEncode, OCTypeStringBlock) == 0;
 }
 - (void)setModifier:(DeclarationModifier)modifier{
-    if (self.type == OCTypeObject || self.isBlockValue) {
-        if  (modifier & DeclarationModifierWeak
-            && (self.modifier & (DeclarationModifierNone | DeclarationModifierStrong))) {
-            self.weakObjectValue = self.strongObjectValue;
-            self.strongObjectValue = nil;
-        }else if (self.modifier & DeclarationModifierWeak
-                  && (modifier & (DeclarationModifierNone | DeclarationModifierStrong))){
-            self.strongObjectValue = self.weakObjectValue;
-            self.weakObjectValue = nil;
+    if (_type == OCTypeObject && realBaseValue.pointerValue != NULL) {
+        if  (modifier & DeclarationModifierWeak) {
+            /*
+             NOTE:
+             void * realBaseValue.pointerValue 其本身就相当于一个 weak 引用，区别仅为不会在被释放后置为nil
+             在之前的代码中，weakObjectValue也仅仅只是用于充当一个 weak 的作用，并没用其他的作用。
+             */
+            // 引用计数-1
+            _strongObjectValue = nil;
+        }else if (modifier & (DeclarationModifierNone | DeclarationModifierStrong)){
+            // 引用计数+1
+            _strongObjectValue = (__bridge id)(realBaseValue.pointerValue);
         }
     }
     _modifier = modifier;
@@ -701,14 +700,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 #if DEBUG
 - (NSString *)description{
-    return [NSString stringWithFormat:@"\
-            MFValue: %p \n\
-            type: %d \n\
-            typeName: %@ \n\
-            typeEncode: %s \n\
-            pointerValue: %p \n\
-            "
-            ,self,self.type,self.typeName,self.typeEncode,self->realBaseValue.pointerValue];
+    return [NSString stringWithFormat:@"[MFValue: %p, type: %d, typeName: %@, typeEncode: %s, pointerValue: %p, modifier:%d]"
+            ,self,self.type,self.typeName,self.typeEncode,self->realBaseValue.pointerValue,self.modifier];
 }
 #endif
 @end

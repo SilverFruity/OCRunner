@@ -14,6 +14,7 @@
 #import <objc/message.h>
 #import "ORWeakPropertyAndIvar.h"
 #import "ORTestReplaceClass.h"
+#import "ORTestClassIvar.h"
 @interface ORTestWithObjc : XCTestCase
 @property (nonatomic, strong)MFScopeChain *currentScope;
 @property (nonatomic, strong)MFScopeChain *topScope;
@@ -364,7 +365,6 @@ typedef struct MyStruct2 {
     XCTAssert(*(int *)d.pointer == 1);
 }
 - (void)testProtcolConfirm{
-    MFScopeChain *scope = self.currentScope;
     NSString * source =
     @"@protocol Protocol1 <NSObject>"
     @"@property (nonatomic,copy)NSString *name;"
@@ -374,10 +374,10 @@ typedef struct MyStruct2 {
     @"@protocol Protocol2 <Protocol1>"
     @"- (void)sleep;"
     @"@end"
-    @"@interface TestObject : NSObject <Protocol2>"
+    @"@interface TestProtocol : NSObject <Protocol2>"
     @"@property (nonatomic,copy)NSString *name;"
     @"@end"
-    @"@implementation TestObject"
+    @"@implementation TestProtocol"
     @"- (NSUInteger)getAge{"
     @"    return 100;"
     @"}"
@@ -387,13 +387,8 @@ typedef struct MyStruct2 {
     @"}"
     @"@end";
     AST *ast = [OCParser parseSource:source];
-    for (ORProtocol *protocol in ast.protcolCache.allValues) {
-        [protocol execute:scope];
-    }
-    for (ORClass *clas in ast.classCache.allValues) {
-        [clas execute:scope];
-    }
-    Class testClass = NSClassFromString(@"TestObject");
+    [ORInterpreter excuteNodes:ast.nodes];
+    Class testClass = NSClassFromString(@"TestProtocol");
     XCTAssert([testClass conformsToProtocol:NSProtocolFromString(@"Protocol1")]);
     XCTAssert([testClass conformsToProtocol:NSProtocolFromString(@"Protocol2")]);
     id object = [[testClass alloc] init];
@@ -620,7 +615,7 @@ typedef struct MyStruct2 {
     });";
     AST *ast = [OCParser parseSource:source];
     [ORInterpreter excuteNodes:ast.nodes];
-    MFValue *h = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:@"result"];
+    MFValue *h = [self.currentScope recursiveGetValueWithIdentifier:@"result"];
     XCTAssert([h.objectValue isEqual:@"123321"]);
 }
 int signatureBlockPtr(id object, int b){
@@ -641,6 +636,7 @@ int signatureBlockPtr(id object, int b){
     XCTAssert(result == 20);
 }
 - (void)testBlockCycleRefrence{
+    MFScopeChain *scope = self.currentScope;
     NSString * source =
     @"int flag = 0;\
     @implementation TestObject\
@@ -655,12 +651,15 @@ int signatureBlockPtr(id object, int b){
     -(void)dealloc{ flag = 1; }\
     @end\
     [[TestObject new] testNormalBlock];";
-    AST *ast = [OCParser parseSource:source];
-    [ORInterpreter excuteNodes:ast.nodes];
-    MFValue *flag = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:@"flag"];
+    @autoreleasepool {
+        AST *ast = [OCParser parseSource:source];
+        [ORInterpreter excuteNodes:ast.nodes];
+    }
+    MFValue *flag = [scope recursiveGetValueWithIdentifier:@"flag"];
     XCTAssert(flag.intValue == 1);
 }
 - (void)testPropertyBlockCycleRefrenceWhileWithWeakVar{
+    MFScopeChain *scope = self.currentScope;
     NSString * source =
     @"int flag = 0;\
     @interface TestObject: NSObject\
@@ -675,13 +674,34 @@ int signatureBlockPtr(id object, int b){
         };\
         self.block();\
     }\
-    -(void)dealloc{ flag = 1; }\
+    -(void)dealloc{ NSLog(@\"GG\"); flag = 1; }\
     @end\
     [[TestObject new] testPropertyBlock];";
-    AST *ast = [OCParser parseSource:source];
-    [ORInterpreter excuteNodes:ast.nodes];
-    MFValue *flag = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:@"flag"];
+    @autoreleasepool {
+        AST *ast = [OCParser parseSource:source];
+        [ORInterpreter excuteNodes:ast.nodes];
+    }
+    MFValue *flag = [scope recursiveGetValueWithIdentifier:@"flag"];
+    MFValue *result = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:@"flag"];
     XCTAssert(flag.intValue == 1);
+}
+- (void)testIvarRefrenceCount{
+    MFScopeChain *scope = self.currentScope;
+    NSString * source =
+    @"\
+    @implementation ORTestClassIvar\
+    - (void)ivarRefrenceCount:(id)object{\
+        _object = object;\
+    }\
+    @end";
+    ORTestClassIvar *test = [ORTestClassIvar new];
+    @autoreleasepool {
+        NSObject *object = [NSObject new];
+        AST *ast = [OCParser parseSource:source];
+        [ORInterpreter excuteNodes:ast.nodes];
+        [test ivarRefrenceCount:object];
+    }
+    XCTAssert(CFGetRetainCount((void *)(test->_object)) == 1);
 }
 - (void)testOCRecursiveFunctionPerformanceExample {
     [self measureBlock:^{

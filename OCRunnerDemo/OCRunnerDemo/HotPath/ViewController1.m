@@ -82,6 +82,12 @@
 }
 - (void)showNext:(UIBarButtonItem *)sender{
     HotFixController *vc = [HotFixController new];
+    __weak id weakVC = vc;
+    vc.block = ^{
+        __strong id strongSelf = weakVC;
+        [weakVC.navigationController popViewControllerAnimated:YES];
+        NSLog(@"%@",$curScope.vars[@"strongSelf"]);
+    };
     vc.view.backgroundColor = [UIColor whiteColor];
     [self.navigationController pushViewController:vc animated:YES];
     NSLog(@"xxxxxxx%@", sender);
