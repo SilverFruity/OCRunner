@@ -12,11 +12,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ORTestClassIvar : NSObject
 {
+    @public
     NSString *_objectIvar;
     int _intIvar;
     unsigned int _uintIvar;
     double _doubleIvar;
+    __strong id _object;
 }
+- (void)ivarRefrenceCount:(id)object;
 - (nullable NSString *)testObjectIvar;
 - (int)testIntIvar;
 - (unsigned int)testUIntIvar;

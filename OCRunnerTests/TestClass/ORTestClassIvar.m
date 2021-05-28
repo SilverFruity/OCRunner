@@ -9,6 +9,9 @@
 #import "ORTestClassIvar.h"
 
 @implementation ORTestClassIvar
+- (void)ivarRefrenceCount:(id)object{
+    _object = object;
+}
 - (id)testObjectIvar{
     return nil;
 }
