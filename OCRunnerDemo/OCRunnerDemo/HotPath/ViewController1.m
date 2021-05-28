@@ -8,7 +8,9 @@
 
 #import "ViewController.h"
 #import <Masonry/Masonry.h>
-
+void cfunctionCallBlock(void (^block)(NSString *)){
+    if (block) block(@"cfunctionCallBlock");
+}
 @interface ShareInstance: NSObject
 @property (nonatomic,copy)NSDictionary *cache;
 @end
@@ -79,6 +81,13 @@
     
     id vc = [[UIApplication sharedApplication].keyWindow.rootViewController childViewControllers].firstObject;
     [vc updateFrame];
+    [self receiveBlock:nil];
+    [self receiveBlock:^(NSString *str){ NSLog(@"%@",str); }];
+    cfunctionCallBlock(nil);
+    cfunctionCallBlock(^(NSString *str){ NSLog(@"%@",str); });
+}
+- (void)receiveBlock:(void (^)(NSString *))block{
+    if (block) block(@"receiveBlock:");
 }
 - (void)showNext:(UIBarButtonItem *)sender{
     HotFixController *vc = [HotFixController new];

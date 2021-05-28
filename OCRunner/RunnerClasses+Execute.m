@@ -46,7 +46,7 @@ void ORDebugFrameStackPop(void){
     [ORDebugFrameStack() removeLastObject];
 }
 NSString *OCRunnerFrameStackHistory(void){
-    NSMutableArray *frames = ORDebugMainFrameStack();
+    NSMutableArray *frames = ORDebugFrameStack();
     NSMutableString *log = [@"OCRunner Frames:\n\n" mutableCopy];
     for (NSArray *frame in frames) {
         if (frame.count == 2) {
@@ -67,6 +67,12 @@ NSString *OCRunnerFrameStackHistory(void){
 #endif
 
 static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
+#if DEBUG
+    if (blockValue.objectValue == nil) {
+        NSLog(@"%@",OCRunnerFrameStackHistory());
+    }
+#endif
+    assert(blockValue.objectValue != nil);
     const char *blockTypeEncoding = NSBlockGetSignature(blockValue.objectValue);
     NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:blockTypeEncoding];
     NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
