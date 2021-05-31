@@ -51,9 +51,12 @@
         NSLog(@"%@",weakSelf);
         NSLog(@"%@",str);
     }];
+    [self receiveStackBlock:^(NSString *str) {
+        NSLog(@"global block %@",str);
+    }];
 }
 - (void)receiveStackBlock:(void (^)(NSString *str))block{
-    if (block) {    
+    if (block) {
         block(@"123");
     }
 }
