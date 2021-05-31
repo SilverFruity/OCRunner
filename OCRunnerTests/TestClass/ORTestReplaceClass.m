@@ -33,4 +33,16 @@
 - (int)testNoSignatureBlock:(int(^)(int))arg{
     return 0;
 }
+- (NSString *)testInputStackBlock{
+    __block NSString *result = @"";
+    __weak typeof(self) weakSelf = self;
+    [self receiveStackBlock:^(NSString * _Nonnull str) {
+        result = str;
+        NSLog(@"%@",weakSelf);
+    }];
+    return result;
+}
+- (void)receiveStackBlock:(void (^)(NSString *str))block{
+    block(@"123");
+}
 @end

@@ -8,7 +8,7 @@
 
 #import "ViewController.h"
 #import <Masonry/Masonry.h>
-
+#import <OCRunner/MFBlock.h>
 @interface ShareInstance: NSObject
 @property (nonatomic,copy)NSDictionary *cache;
 @end
@@ -45,7 +45,18 @@
     [super viewDidLoad];
 
 }
-
+- (void)sendStackBlock{
+    __weak typeof(self) weakSelf = self;
+    [self receiveStackBlock:^(NSString *str) {
+        NSLog(@"%@",weakSelf);
+        NSLog(@"%@",str);
+    }];
+}
+- (void)receiveStackBlock:(void (^)(NSString *str))block{
+    if (block) {    
+        block(@"123");
+    }
+}
 - (void)showNext:(UIBarButtonItem *)sender{
     UIViewController *vc = [NSClassFromString(@"HotFixController") new];
     if (vc) {

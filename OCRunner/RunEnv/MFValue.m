@@ -11,7 +11,7 @@
 #import "util.h"
 #import "ORStructDeclare.h"
 #import "ORHandleTypeEncode.h"
-
+#import "MFBlock.h"
 #define MFValueBridge(target,resultType)\
 resultType result;\
 switch (*target->_typeEncode) {\
@@ -231,8 +231,15 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             // 引用计数-1
             _strongObjectValue = nil;
         }else if (modifier & (DeclarationModifierNone | DeclarationModifierStrong)){
-            // 引用计数+1
-            _strongObjectValue = (__bridge id)(realBaseValue.pointerValue);
+            do {
+                // 针对传入的全局block和栈block，不增加引用计数
+                if (self.isBlockValue && realBaseValue.pointerValue){
+                    struct MFSimulateBlock *bb = (void *)realBaseValue.pointerValue;
+                    if (bb->isa == &_NSConcreteGlobalBlock || bb->isa == &_NSConcreteStackBlock) break;
+                }
+                // 引用计数+1
+                _strongObjectValue = (__bridge id)(realBaseValue.pointerValue);
+            } while (0);
         }
     }
     _modifier = modifier;

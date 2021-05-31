@@ -658,6 +658,18 @@ int signatureBlockPtr(id object, int b){
     MFValue *flag = [scope recursiveGetValueWithIdentifier:@"flag"];
     XCTAssert(flag.intValue == 1);
 }
+- (void)testInputStackBlock{
+    NSString *source = @"\
+    @implementation ORTestReplaceClass\
+    - (void)receiveStackBlock:(void (^)(NSString *str))block{\
+        block(@\"receiveStackBlock\");\
+    }\
+    @end";
+    AST *ast = [OCParser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    ORTestReplaceClass *object = [ORTestReplaceClass new];
+    XCTAssert([[object testInputStackBlock] isEqualToString:@"receiveStackBlock"]);
+}
 - (void)testPropertyBlockCycleRefrenceWhileWithWeakVar{
     MFScopeChain *scope = self.currentScope;
     NSString * source =
