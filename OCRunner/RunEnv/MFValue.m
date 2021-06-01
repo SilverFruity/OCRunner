@@ -36,6 +36,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 @interface MFValue()
 @property (nonatomic,strong)id strongObjectValue;
+@property (nonatomic,weak)id weakObjectValue;
 @end
 
 @implementation MFValue
@@ -156,10 +157,10 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             _pointer = &realBaseValue.pointerValue;
             break;
         
-        case OCTypeObject:
-            realBaseValue.pointerValue = *(void **)pointer;
-            [self setModifier:_modifier];
-            _pointer = &realBaseValue.pointerValue;
+        case OCTypeObject:{
+            [self setObjectPointer:pointer withModifier:_modifier];
+            break;
+        }
         
         case OCTypeClass:
             realBaseValue.pointerValue = *(void **)pointer;
@@ -221,21 +222,23 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return strcmp(self.typeEncode, OCTypeStringBlock) == 0;
 }
 - (void)setModifier:(DeclarationModifier)modifier{
-    if (_type == OCTypeObject && realBaseValue.pointerValue != NULL) {
-        if  (modifier & DeclarationModifierWeak) {
-            /*
-             NOTE:
-             void * realBaseValue.pointerValue 其本身就相当于一个 weak 引用，区别仅为不会在被释放后置为nil
-             在之前的代码中，weakObjectValue也仅仅只是用于充当一个 weak 的作用，并没用其他的作用。
-             */
-            // 引用计数-1
-            _strongObjectValue = nil;
-        }else if (modifier & (DeclarationModifierNone | DeclarationModifierStrong)){
-            // 引用计数+1
-            _strongObjectValue = (__bridge id)(realBaseValue.pointerValue);
-        }
+    if (_type == OCTypeObject) {
+        [self setObjectPointer:_pointer withModifier:modifier];
     }
     _modifier = modifier;
+}
+- (void)setObjectPointer:(void **)pointer withModifier:(DeclarationModifier)modifier{
+    void *object = *(void **)pointer;
+    realBaseValue.pointerValue = object;
+    if (modifier & DeclarationModifierWeak) {
+        _weakObjectValue = (__bridge id)object;
+        _strongObjectValue = nil;
+        _pointer = &_weakObjectValue;
+    }else{
+        _strongObjectValue = (__bridge id)object;
+        _weakObjectValue = nil;
+        _pointer = &_strongObjectValue;
+    }
 }
 - (void)dealloc{
     [self deallocPointer];
@@ -626,7 +629,10 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return result;
 }
 - (id)objectValue{
-    return *(__strong id *)self.pointer;
+    void *value = *(void **)self.pointer;
+    if (value == NULL) return nil;
+    __autoreleasing id object = (__bridge id)value;
+    return object;
 }
 - (void *)classValue{
     return *(void **)self.pointer;
@@ -682,6 +688,17 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 + (instancetype)valueWithObject:(id)objValue{
     return [MFValue valueWithTypeEncode:OCTypeStringObject pointer:&objValue];
+}
++ (instancetype)valueWithUnownedObject:(id)objValue{
+    MFValue *value = [MFValue valueWithTypeEncode:OCTypeStringPointer pointer:&objValue];
+    value.typeEncode = OCTypeStringObject;
+    return value;
+}
++ (instancetype)valueWithWeakObject:(nullable id)objValue{
+    MFValue *value = [MFValue defaultValueWithTypeEncoding:OCTypeStringObject];
+    value.modifier = DeclarationModifierWeak;
+    value.pointer = &objValue;
+    return value;
 }
 + (instancetype)valueWithBlock:(id)blockValue{
     return [MFValue valueWithTypeEncode:OCTypeStringBlock pointer:&blockValue];

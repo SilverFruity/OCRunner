@@ -14,10 +14,8 @@ class SwiftViewController: UIViewController {
         super.viewDidLoad()
         self.view.backgroundColor = UIColor.white;
         if self.navigationController?.viewControllers.count ?? 1 == 1 {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                let vc = ViewController.init()
-                self.navigationController?.pushViewController(vc, animated: true)
-            }
+            let vc = ViewController.init()
+            self.navigationController?.pushViewController(vc, animated: true)
         }
     }
     @objc func updateFrame(){

@@ -658,18 +658,6 @@ int signatureBlockPtr(id object, int b){
     MFValue *flag = [scope recursiveGetValueWithIdentifier:@"flag"];
     XCTAssert(flag.intValue == 1);
 }
-- (void)testInputStackBlock{
-    NSString *source = @"\
-    @implementation ORTestReplaceClass\
-    - (void)receiveStackBlock:(void (^)(NSString *str))block{\
-        block(@\"receiveStackBlock\");\
-    }\
-    @end";
-    AST *ast = [OCParser parseSource:source];
-    [ORInterpreter excuteNodes:ast.nodes];
-    ORTestReplaceClass *object = [ORTestReplaceClass new];
-    XCTAssert([[object testInputStackBlock] isEqualToString:@"receiveStackBlock"]);
-}
 - (void)testPropertyBlockCycleRefrenceWhileWithWeakVar{
     MFScopeChain *scope = self.currentScope;
     NSString * source =
@@ -696,6 +684,43 @@ int signatureBlockPtr(id object, int b){
     MFValue *flag = [scope recursiveGetValueWithIdentifier:@"flag"];
     MFValue *result = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:@"flag"];
     XCTAssert(flag.intValue == 1);
+}
+- (void)testBlockUseWeakVarWhileIsNil{
+    NSString *source = @"\
+    @implementation TestObject\
+    - (void)runTest{\
+        __weak id object = [NSObject new];\
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{\
+            NSLog(@\"object: %@\",object);\
+        });\
+        __weak id weakSelf = self;\
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{\
+            NSLog(@\"object: %@\",weakSelf);\
+        });\
+    }\
+    - (void)dealloc{\
+        NSLog(@\"TestObject dealloc\");\
+    }\
+    @end\
+    [[TestObject new] runTest];\
+    ";
+    @autoreleasepool {
+        AST *ast = [OCParser parseSource:source];
+        [ORInterpreter excuteNodes:ast.nodes];
+    }
+    [NSThread sleepForTimeInterval:1.5f];
+}
+- (void)testInputStackBlock{
+    NSString *source = @"\
+    @implementation ORTestReplaceClass\
+    - (void)receiveStackBlock:(void (^)(NSString *str))block{\
+        block(@\"receiveStackBlock\");\
+    }\
+    @end";
+    AST *ast = [OCParser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    ORTestReplaceClass *object = [ORTestReplaceClass new];
+    XCTAssert([[object testInputStackBlock] isEqualToString:@"receiveStackBlock"]);
 }
 - (void)testIvarRefrenceCount{
     MFScopeChain *scope = self.currentScope;

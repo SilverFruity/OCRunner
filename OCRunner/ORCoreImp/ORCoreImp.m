@@ -47,7 +47,7 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
         scope.instance = [MFValue valueWithClass:target];
     }else{
         // 方法调用时不应该增加引用计数
-        scope.instance = [MFValue valueWithPointer:(__bridge void *)(target)];
+        scope.instance = [MFValue valueWithUnownedObject:target];
     }
     MFValue *value = nil;
     [ORArgsStack push:argValues];

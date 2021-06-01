@@ -325,6 +325,9 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 {
     @public
     MFRealBaseValue realBaseValue;
+    @protected
+    __strong id _strongObjectValue;
+    __weak id _weakObjectValue;
 }
 @property (assign, nonatomic)MFStatementResultType resultType;
 @property (assign,nonatomic)DeclarationModifier modifier;
@@ -423,6 +426,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 + (instancetype)valueWithFloat:(float)floatValue;
 + (instancetype)valueWithDouble:(double)doubleValue;
 + (instancetype)valueWithObject:(nullable id)objValue;
++ (instancetype)valueWithUnownedObject:(nullable id)objValue;
++ (instancetype)valueWithWeakObject:(nullable id)objValue;
 + (instancetype)valueWithBlock:(nullable id)blockValue;
 + (instancetype)valueWithClass:(nullable Class)clazzValue;
 + (instancetype)valueWithSEL:(SEL)selValue;
