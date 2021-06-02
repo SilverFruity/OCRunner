@@ -19,11 +19,9 @@
     strcpy(encode, typeEncoding);
     self.typeEncoding = encode;
     NSMutableArray *results = startStructDetect(typeEncoding);
-    NSString *nameElement = results[0];
-    NSString *structName = [nameElement substringWithRange:NSMakeRange(0, nameElement.length - 1)];
-    [results removeObjectAtIndex:0];
-    self.name = structName;
+    self.name = results[0];
     self.keys = keys;
+    [results removeObjectAtIndex:0];
     [self initialWithFieldTypeEncodes:[results copy]];
     return self;
 }
@@ -68,54 +66,40 @@
     }
 }
 @end
-
-
-@implementation ORStructDeclareTable{
-    NSMutableDictionary<NSString *, ORStructDeclare *> *_cache;
+@implementation ORUnionDeclare
++ (instancetype)unionDecalre:(const char *)encode keys:(NSArray *)keys{
+    return [[self alloc] initWithTypeEncode:encode keys:keys];
 }
-- (void)clear{
-    _cache = [NSMutableDictionary dictionary];
-}
-- (instancetype)init{
-    if (self = [super init]) {
-        _cache = [NSMutableDictionary dictionary];
-    }
+- (instancetype)initWithTypeEncode:(const char *)typeEncoding keys:(NSArray<NSString *> *)keys{
+    self = [super init];
+    char *encode = malloc(sizeof(char) * (strlen(typeEncoding) + 1) );
+    strcpy(encode, typeEncoding);
+    self.typeEncoding = encode;
+    NSMutableArray *results = startUnionDetect(typeEncoding);
+    self.name = results[0];
+    self.keys = keys;
+    [results removeObjectAtIndex:0];
+    NSMutableDictionary *keyTyeps = [NSMutableDictionary dictionary];
+    NSCAssert(self.keys.count == results.count, @"");
+    [results enumerateObjectsUsingBlock:^(NSString *elementEncode, NSUInteger idx, BOOL * _Nonnull stop) {
+        keyTyeps[self.keys[idx]] = elementEncode;
+    }];
+    self.keyTypeEncodes = keyTyeps;
     return self;
 }
-+ (instancetype)shareInstance{
-    static id st_instance;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        st_instance = [[ORStructDeclareTable alloc] init];
-    });
-    return st_instance;
-}
-- (void)addAlias:(NSString *)alias forTypeName:(NSString *)name{
-    id value = [_cache objectForKey:name];
-    if (value) {
-        _cache[name] = value;
+- (void)dealloc
+{
+    if (self.typeEncoding != NULL) {
+        void *encode = (void *)self.typeEncoding;
+        free(encode);
     }
-}
-- (void)addAlias:(NSString *)alias forStructTypeEncode:(const char *)typeEncode{
-    NSString *structName = startStructNameDetect(typeEncode);
-    [self addAlias:alias forTypeName:structName];
-}
-- (void)addStructDeclare:(ORStructDeclare *)structDeclare{
-    if (structDeclare && structDeclare.name) {
-        _cache[structDeclare.name] = structDeclare;
-    }
-}
-
-- (ORStructDeclare *)getStructDeclareWithName:(NSString *)name{
-    return _cache[name];
 }
 @end
-
 
 @implementation ORTypeVarPair (Struct)
 - (ORStructDeclare *)strcutDeclare{
     NSCAssert(self.type.type == TypeStruct, @"must be TypeStruct");
-    return [[ORStructDeclareTable shareInstance] getStructDeclareWithName:self.type.name];
+    return [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:self.type.name].declare;
 }
 @end
 
@@ -124,14 +108,20 @@
 - (NSString *)description{
     return [NSString stringWithFormat:@"ORSymbolItem:{ encode:%@ type: %@ }",self.typeEncode,self.typeName];
 }
+- (BOOL)isStruct{
+    return [self.typeEncode characterAtIndex:0] == OCTypeStruct;
+}
+- (BOOL)isUnion{
+    return [self.typeEncode characterAtIndex:0] == OCTypeUnion;
+}
+- (BOOL)isCArray{
+    return [self.typeEncode characterAtIndex:0] == OCTypeArray;
+}
 @end
 @implementation ORTypeSymbolTable{
-    NSMutableDictionary<NSString *, ORSymbolItem *> *_table;
-    NSLock *_lock;
+    NSMutableDictionary<id, ORSymbolItem *> *_table;
 }
-- (void)clear{
-    _table = [NSMutableDictionary dictionary];
-}
+
 - (instancetype)init{
     if (self = [super init]) {
         _table = [NSMutableDictionary dictionary];
@@ -146,11 +136,11 @@
     });
     return st_instance;
 }
-- (void)addTypePair:(ORTypeVarPair *)typePair{
+- (ORSymbolItem *)addTypePair:(ORTypeVarPair *)typePair{
     NSCAssert(typePair.var.varname != nil, @"");
-    [self addTypePair:typePair forAlias:typePair.var.varname];
+    return [self addTypePair:typePair forAlias:typePair.var.varname];
 }
-- (void)addTypePair:(ORTypeVarPair *)typePair forAlias:(NSString *)alias{
+- (ORSymbolItem *)addTypePair:(ORTypeVarPair *)typePair forAlias:(NSString *)alias{
     ORSymbolItem *item = [self symbolItemForTypeName:alias];
     if (item == nil) {
         item = [[ORSymbolItem alloc] init];
@@ -158,6 +148,35 @@
         item.typeName = typePair.type.name;
     }
     [self addSybolItem:item forAlias:alias];
+    return item;
+}
+- (ORSymbolItem *)addUnion:(ORUnionDeclare *)declare{
+    return [self addUnion:declare forAlias:declare.name];
+}
+- (ORSymbolItem *)addStruct:(ORStructDeclare *)declare{
+    return [self addStruct:declare forAlias:declare.name];
+}
+- (ORSymbolItem *)addStruct:(ORStructDeclare *)declare forAlias:(NSString *)alias{
+    ORSymbolItem *item = [self symbolItemForTypeName:alias];
+    if (item == nil) {
+        item = [[ORSymbolItem alloc] init];
+        item.typeEncode = [NSString stringWithUTF8String:declare.typeEncoding];
+        item.typeName = declare.name;
+    }
+    item.declare = declare;
+    [self addSybolItem:item forAlias:alias];
+    return item;
+}
+- (ORSymbolItem *)addUnion:(ORUnionDeclare *)declare forAlias:(NSString *)alias{
+    ORSymbolItem *item = [self symbolItemForTypeName:alias];
+    if (item == nil) {
+        item = [[ORSymbolItem alloc] init];
+        item.typeEncode = [NSString stringWithUTF8String:declare.typeEncoding];
+        item.typeName = declare.name;
+    }
+    item.declare = declare;
+    [self addSybolItem:item forAlias:alias];
+    return item;
 }
 - (void)addSybolItem:(ORSymbolItem *)item forAlias:(NSString *)alias{
     NSAssert(alias != nil, @"");
@@ -169,5 +188,21 @@
 - (ORSymbolItem *)symbolItemForTypeName:(NSString *)typeName{
     ORSymbolItem *item = _table[typeName];
     return item;
+}
+- (void)addCArray:(ORCArrayVariable *)cArray typeEncode:(const char *)typeEncode{
+    ORSymbolItem *item = [self symbolItemForNode:cArray];
+    if (item == nil) {
+        item = [[ORSymbolItem alloc] init];
+        item.typeEncode = [NSString stringWithUTF8String:typeEncode];
+        item.typeName = @"CArray";
+        item.declare = nil;
+    }
+    _table[[NSValue valueWithPointer:(__bridge void *)cArray]] = item;
+}
+- (ORSymbolItem *)symbolItemForNode:(ORNode *)node{
+    return _table[[NSValue valueWithPointer:(__bridge void *)node]];
+}
+- (void)clear{
+    _table = [NSMutableDictionary dictionary];
 }
 @end

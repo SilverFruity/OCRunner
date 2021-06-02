@@ -139,7 +139,6 @@
     if (clear) {
         [[MFScopeChain topScope] clear];
         [[MFStaticVarTable shareInstance] clear];
-        [[ORStructDeclareTable shareInstance] clear];
         [[ORTypeSymbolTable shareInstance] clear];
     }
     ORInterpreter.shared.currentNodes = [NSArray array];

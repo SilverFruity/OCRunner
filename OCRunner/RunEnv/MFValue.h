@@ -378,6 +378,16 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 - (void)enumerateStructFieldsUsingBlock:(void (^)(MFValue *field, NSUInteger idx, BOOL *stop))block;
 @end
 
+@interface MFValue (Union)
+- (void)setUnionFieldWithValue:(MFValue *)value forKey:(NSString *)key;
+- (MFValue *)unionFieldForKey:(NSString *)key;
+@end
+
+@interface MFValue  (CArray)
+- (MFValue *)cArraySubscriptGetValueWithIndex:(MFValue *)index;
+- (void)cArraySubscriptSetValue:(MFValue *)value index:(MFValue *)index;
+@end
+
 @interface MFValue (MFStatementResultType)
 @property (assign, nonatomic, readonly) BOOL isReturn;
 @property (assign, nonatomic, readonly) BOOL isContinue;
@@ -410,7 +420,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @property (nonatomic, nullable, readonly) void *classValue;
 @property (nonatomic, nullable, readonly) SEL selValue;
 @property (nonatomic, nullable, readonly) char *cStringValue;
-
++ (instancetype)nullValue;
 + (instancetype)voidValue;
 + (instancetype)valueWithBOOL:(BOOL)boolValue;
 + (instancetype)valueWithUChar:(unsigned char)uCharValue;

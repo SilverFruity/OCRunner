@@ -19,17 +19,15 @@ NS_ASSUME_NONNULL_BEGIN
 @property (strong, nonatomic) NSDictionary<NSString *,NSString *> *keyTypeEncodes;
 + (instancetype)structDecalre:(const char *)encode keys:(NSArray *)keys;
 - (instancetype)initWithTypeEncode:(const char *)typeEncoding keys:(NSArray<NSString *> *)keys;
-
-@end
-@interface ORStructDeclareTable : NSObject
-+ (instancetype)shareInstance;
-- (void)addAlias:(NSString *)alias forTypeName:(NSString *)name;
-- (void)addAlias:(NSString *)alias forStructTypeEncode:(const char *)typeEncode;
-- (void)addStructDeclare:(ORStructDeclare *)structDeclare;
-- (nullable ORStructDeclare *)getStructDeclareWithName:(NSString *)name;
-- (void)clear;
 @end
 
+@interface ORUnionDeclare : NSObject
+@property (copy, nonatomic) NSString *name;
+@property (assign, nonatomic)const char *typeEncoding;
+@property (strong, nonatomic) NSArray<NSString *> *keys;
+@property (strong, nonatomic) NSDictionary<NSString *,NSString *> *keyTypeEncodes;
++ (instancetype)unionDecalre:(const char *)encode keys:(NSArray *)keys;
+@end
 
 @interface ORTypeVarPair (Struct)
 - (ORStructDeclare *)strcutDeclare;
@@ -38,14 +36,26 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ORSymbolItem: NSObject
 @property (copy, nonatomic)NSString *typeEncode;
 @property (copy, nonatomic)NSString *typeName;
+@property (strong, nonatomic, nullable)id declare;
+- (BOOL)isStruct;
+- (BOOL)isUnion;
+- (BOOL)isCArray;
 @end
 
 @interface ORTypeSymbolTable: NSObject
 + (instancetype)shareInstance;
-- (void)addTypePair:(ORTypeVarPair *)typePair;
-- (void)addTypePair:(ORTypeVarPair *)item forAlias:(NSString *)alias;
+
+- (ORSymbolItem *)addTypePair:(ORTypeVarPair *)typePair;
+- (ORSymbolItem *)addTypePair:(ORTypeVarPair *)item forAlias:(NSString *)alias;
+
+- (ORSymbolItem *)addUnion:(ORUnionDeclare *)declare;
+- (ORSymbolItem *)addStruct:(ORStructDeclare *)declare;
+- (ORSymbolItem *)addUnion:(ORUnionDeclare *)declare forAlias:(NSString *)alias;
+- (ORSymbolItem *)addStruct:(ORStructDeclare *)declare forAlias:(NSString *)alias;
 - (void)addSybolItem:(ORSymbolItem *)item forAlias:(NSString *)alias;
 - (ORSymbolItem *)symbolItemForTypeName:(NSString *)typeName;
+- (void)addCArray:(ORCArrayVariable *)cArray typeEncode:(const char *)typeEncode;
+- (ORSymbolItem *)symbolItemForNode:(ORNode *)node;
 - (void)clear;
 @end
 NS_ASSUME_NONNULL_END

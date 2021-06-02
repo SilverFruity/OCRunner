@@ -363,7 +363,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
                                       @"Can't find object or class: %@\n"
                                       @"-----------------------------------", self.value);
 #endif
-                value = [MFValue valueWithPointer:NULL];
+                value = [MFValue nullValue];
             }
             return value;
         }
@@ -387,9 +387,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
                 ORNode *valueExp = kv.lastObject;
                 id key = [keyExp execute:scope].objectValue;
                 id value = [valueExp execute:scope].objectValue;
-                NSAssert(key != nil, @"the key of NSDictionary can't be nil");
-                NSAssert(value != nil, @"the vale of NSDictionary can't be nil");
-                dict[key] = value;
+                if (key && value){
+                    dict[key] = value;
+                }else{
+                    NSLog(@"the key %@ or value %@ of NSDictionary can't be nil", key?:@"", value?:@"");
+                }
             }
             return [MFValue valueWithObject:[dict copy]];
         }
@@ -398,8 +400,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             NSMutableArray *array = [NSMutableArray array];
             for (ORNode *exp in exps) {
                 id value = [exp execute:scope].objectValue;
-                NSAssert(value != nil, @"the vale of NSArray can't be nil");
-                [array addObject:value];
+                if (value) {
+                    [array addObject:value];
+                }else{
+                    NSLog(@"the value of NSArray can't be nil, %@", array);
+                }
             }
             return [MFValue valueWithObject:[array copy]];
         }
@@ -420,7 +425,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             return [MFValue valueWithObject:nil];
         }
         case OCValueNULL:{
-            return [MFValue valueWithPointer:NULL];
+            return [MFValue nullValue];
         }
         default:
             break;
@@ -458,7 +463,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         [(ORMethodCall *)self.caller setIsAssignedValue:self.isAssignedValue];
     }
     MFValue *variable = [self.caller execute:scope];
-    if (variable.type == OCTypeStruct) {
+    if (variable.type == OCTypeStruct || variable.type == OCTypeUnion) {
         if ([self.names.firstObject hasPrefix:@"set"]) {
             NSString *setterName = self.names.firstObject;
             ORNode *valueExp = self.values.firstObject;
@@ -466,13 +471,22 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             NSString *first = [[fieldKey substringToIndex:1] lowercaseString];
             NSString *other = setterName.length > 1 ? [fieldKey substringFromIndex:1] : @"";
             fieldKey = [NSString stringWithFormat:@"%@%@", first, other];
-            [variable setFieldWithValue:[valueExp execute:scope] forKey:fieldKey];
+            MFValue *value = [valueExp execute:scope];
+            if (variable.type == OCTypeStruct) {
+                [variable setFieldWithValue:value forKey:fieldKey];
+            }else{
+                [variable setUnionFieldWithValue:value forKey:fieldKey];
+            }
             return [MFValue voidValue];
         }else{
-            if (self.isAssignedValue) {
-                return [variable fieldNoCopyForKey:self.names.firstObject];
+            if (variable.type == OCTypeStruct) {
+                if (self.isAssignedValue) {
+                    return [variable fieldNoCopyForKey:self.names.firstObject];
+                }else{
+                    return [variable fieldForKey:self.names.firstObject];
+                }
             }else{
-                return [variable fieldForKey:self.names.firstObject];
+                return [variable unionFieldForKey:self.names.firstObject];;
             }
         }
     }
@@ -555,7 +569,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         NSCAssert(value != nil, @"value must be existed");
         [args addObject:value];
     }
-    if ([self.caller isKindOfClass:[ORMethodCall class]] && [(ORMethodCall *)self.caller isDot]){
+    if ([self.caller isKindOfClass:[ORMethodCall class]]
+        && [(ORMethodCall *)self.caller methodOperator] == MethodOpretorDot){
         // TODO: 调用block
         // make.left.equalTo(xxxx);
         MFValue *value = [(ORMethodCall *)self.caller execute:scope];
@@ -729,7 +744,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }
     }else if ([self.value isKindOfClass:[ORMethodCall class]]) {
         ORMethodCall *methodCall = (ORMethodCall *)self.value;
-        if (!methodCall.isDot) {
+        if (!methodCall.methodOperator) {
             NSCAssert(0, @"must dot grammar");
         }
         //调用对象setter方法
@@ -1308,23 +1323,13 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     for (ORDeclareExpression *exp in self.fields) {
         NSString *typeName = exp.pair.type.name;
         ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:typeName];
-        if (item) {
-            [typeEncode appendFormat:@"%s",item.typeEncode.UTF8String];
-        }else{
-            [typeEncode appendFormat:@"%s",exp.pair.typeEncode];
-        }
+        [typeEncode appendFormat:@"%s",item ? item.typeEncode.UTF8String : exp.pair.typeEncode];
         [keys addObject:exp.pair.var.varname];
     }
     [typeEncode appendString:@"}"];
-    ORStructDeclare *declare = [ORStructDeclare structDecalre:typeEncode.UTF8String keys:keys];
-    [[ORStructDeclareTable shareInstance] addStructDeclare:declare];
-    
-    ORTypeSpecial *special = [ORTypeSpecial specialWithType:TypeStruct name:self.sturctName];
-    ORTypeVarPair *pair = [[ORTypeVarPair alloc] init];
-    pair.type = special;
     // 类型表注册全局类型
-    [[ORTypeSymbolTable shareInstance] addTypePair:pair forAlias:self.sturctName];
-    
+    ORStructDeclare *declare = [ORStructDeclare structDecalre:typeEncode.UTF8String keys:keys];
+    [[ORTypeSymbolTable shareInstance] addStruct:declare forAlias:self.sturctName];
     return [MFValue voidValue];
 }
 @end
@@ -1381,6 +1386,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         ORTypeVarPair *pair = [[ORTypeVarPair alloc] init];
         pair.type = special;
         [[ORTypeSymbolTable shareInstance] addTypePair:pair forAlias:self.typeNewName];
+    }else if ([self.expression isKindOfClass:[ORUnionExpressoin class]]){
+        ORUnionExpressoin *unionExp = (ORUnionExpressoin *)self.expression;
+        [unionExp execute:scope];
+        ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:unionExp.unionName];
+        [[ORTypeSymbolTable shareInstance] addSybolItem:item forAlias:self.typeNewName];
     }else{
         NSCAssert(NO, @"must be ORTypeVarPair, ORStructExpressoin,  OREnumExpressoin");
     }
@@ -1414,6 +1424,32 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         protocol_addMethodDescription(protocol, NSSelectorFromString(declare.selectorName), typeEncoding, NO, !declare.isClassMethod);
     }
     objc_registerProtocol(protocol);
+    return [MFValue voidValue];
+}
+@end
+
+@implementation ORCArrayVariable (Execute)
+- (MFValue *)execute:(MFScopeChain *)scope{
+    return [MFValue voidValue];
+}
+@end
+
+@implementation ORUnionExpressoin (Execute)
+- (MFValue *)execute:(MFScopeChain *)scope{
+    NSMutableString *typeEncode = [@"(" mutableCopy];
+    NSMutableArray *keys = [NSMutableArray array];
+    [typeEncode appendString:self.unionName];
+    [typeEncode appendString:@"="];
+    for (ORDeclareExpression *exp in self.fields) {
+        NSString *typeName = exp.pair.type.name;
+        ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:typeName];
+        [typeEncode appendFormat:@"%s",item ?  item.typeEncode.UTF8String : exp.pair.typeEncode];
+        [keys addObject:exp.pair.var.varname];
+    }
+    [typeEncode appendString:@")"];
+    // 类型表注册全局类型
+    ORUnionDeclare *declare = [ORUnionDeclare unionDecalre:typeEncode.UTF8String keys:keys];;
+    [[ORTypeSymbolTable shareInstance] addUnion:declare forAlias:self.unionName];
     return [MFValue voidValue];
 }
 @end

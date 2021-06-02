@@ -48,11 +48,11 @@
         org_typeencode = reg_typeencode;
     }
     MFValue *returnValue = [MFValue defaultValueWithTypeEncoding:org_typeencode];
-    void *funcptr = self.pointer;
+    void *funcptr = self.pointer != NULL ? self.pointer : [ORSystemFunctionPointerTable pointerForFunctionName:self.name];
     if (funcptr == NULL) {
-        funcptr = [ORSystemFunctionPointerTable pointerForFunctionName:self.name];
+        NSLog(@"⚠️⚠️ Not found the pointer of function %@ !!!!", self.name);
+        return [MFValue voidValue];
     }
-    NSAssert(funcptr != NULL, @"not found function %@", self.name);
     if (!self.funVar.isMultiArgs) {
         invoke_functionPointer(funcptr, args, returnValue);
         //多参数

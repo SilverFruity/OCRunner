@@ -136,4 +136,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 
+@interface ORCArrayVariable (Execute) <OCExecute>
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
+@end
+
+@interface ORUnionExpressoin (Execute) <OCExecute>
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
+@end
+
 NS_ASSUME_NONNULL_END
