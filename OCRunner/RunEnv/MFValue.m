@@ -631,8 +631,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 - (id)objectValue{
     void *value = *(void **)self.pointer;
     if (value == NULL) return nil;
-    __autoreleasing id object = (__bridge id)value;
-    return object;
+    return (__bridge id)value;
 }
 - (void *)classValue{
     return *(void **)self.pointer;
