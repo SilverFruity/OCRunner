@@ -173,6 +173,20 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             break;
             
         case OCTypeArray:
+        {
+            if (pointer == &replace) {
+                _isAlloced = YES;
+                NSUInteger size = self.memerySize;
+                void *dst = malloc(size);
+                memset(dst, 0, size);
+                realBaseValue.pointerValue = dst;
+            }else{
+                _isAlloced = NO;
+                realBaseValue.pointerValue = pointer;
+            }
+            _pointer = realBaseValue.pointerValue;
+            break;
+        }
         case OCTypeUnion:
         case OCTypeStruct:
             _isAlloced = YES;
@@ -580,10 +594,21 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 
 @implementation MFValue  (CArray)
 - (MFValue *)cArraySubscriptGetValueWithIndex:(MFValue *)index{
-    return [MFValue nullValue];
+    NSArray *results = startArrayDetect(self.typeEncode);
+    const char *element_type_encode = [results[1] UTF8String];
+    NSInteger element_mem_size = (NSInteger)sizeOfTypeEncode(element_type_encode);
+    NSInteger offset = element_mem_size * index.longlongValue;
+    MFValue *result = [MFValue defaultValueWithTypeEncoding:element_type_encode];
+    result.pointer = (char *)self->realBaseValue.pointerValue + offset;
+    return result;
 }
 - (void)cArraySubscriptSetValue:(MFValue *)value index:(MFValue *)index{
-    
+    NSArray *results = startArrayDetect(self.typeEncode);
+    const char *element_type_encode = [results[1] UTF8String];
+    NSUInteger element_mem_size = sizeOfTypeEncode(element_type_encode);
+    NSInteger offset = element_mem_size * index.longlongValue;
+    void *pointer = (char *)self->realBaseValue.pointerValue + offset;
+    [value writePointer:pointer typeEncode:element_type_encode];
 }
 @end
 

@@ -84,8 +84,9 @@ static const char *typeEncode(ORTypeSpecial *typeSpecial, ORVariable *var){
         [[ORTypeSymbolTable shareInstance] addCArray:(ORCArrayVariable *)var typeEncode:result];
         return result;
     }
-    if ((type == TypeStruct || type == TypeUnion) && var.ptCount == 0) {
-        return [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:typeSpecial.name].typeEncode.UTF8String;
+    ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:typeSpecial.name];
+    if (item) {
+        return item.typeEncode.UTF8String;
     }
     if (var.ptCount == 0 && type == TypeObject){
         ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:typeSpecial.name];
@@ -96,6 +97,9 @@ static const char *typeEncode(ORTypeSpecial *typeSpecial, ORVariable *var){
     return baseTypeEncode(typeSpecial, var);
 }
 static const char *cArrayTypeEncode(ORTypeSpecial *typeSpecial, ORCArrayVariable *var){
+    if ([(ORIntegerValue *)var.capacity value] == 0) {
+        return [NSString stringWithFormat:@"^%s",typeEncode(typeSpecial, nil)].UTF8String;
+    }
     ORCArrayVariable *tmp = var;
     NSMutableArray *nodes = [NSMutableArray array];
     while (tmp) {

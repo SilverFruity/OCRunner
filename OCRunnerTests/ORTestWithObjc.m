@@ -756,7 +756,7 @@ int signatureBlockPtr(id object, int b){
     @end\
     [[TestObject new] testNormalBlock];";
     @autoreleasepool {
-        AST *ast = [_parser parseSource:source];
+        AST *ast = [OCParser parseSource:source];
         [ORInterpreter excuteNodes:ast.nodes];
     }
     MFValue *flag = [scope recursiveGetValueWithIdentifier:@"flag"];
@@ -782,24 +782,26 @@ int signatureBlockPtr(id object, int b){
     @end\
     [[TestObject new] testPropertyBlock];";
     @autoreleasepool {
-        AST *ast = [_parser parseSource:source];
+        AST *ast = [OCParser parseSource:source];
         [ORInterpreter excuteNodes:ast.nodes];
     }
     MFValue *flag = [scope recursiveGetValueWithIdentifier:@"flag"];
-    MFValue *result = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:@"flag"];
     XCTAssert(flag.intValue == 1);
 }
 - (void)testBlockUseWeakVarWhileIsNil{
+    MFScopeChain *scope = self.currentScope;
     NSString *source = @"\
+    id value1 = [NSObject new];\
+    id value2 = [NSObject new];\
     @implementation TestObject\
     - (void)runTest{\
         __weak id object = [NSObject new];\
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{\
-            NSLog(@\"object: %@\",object);\
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (1 * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{\
+            value1 = object;\
         });\
         __weak id weakSelf = self;\
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{\
-            NSLog(@\"object: %@\",weakSelf);\
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (1 * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{\
+            value2 = weakSelf;\
         });\
     }\
     - (void)dealloc{\
@@ -809,10 +811,14 @@ int signatureBlockPtr(id object, int b){
     [[TestObject new] runTest];\
     ";
     @autoreleasepool {
-        AST *ast = [_parser parseSource:source];
+        AST *ast = [OCParser parseSource:source];
         [ORInterpreter excuteNodes:ast.nodes];
     }
     [NSThread sleepForTimeInterval:1.5f];
+    MFValue *value1 = [scope recursiveGetValueWithIdentifier:@"value1"];
+    MFValue *value2 = [scope recursiveGetValueWithIdentifier:@"value2"];
+    XCTAssert(value1.objectValue == nil, @"%@",value1.objectValue);
+    XCTAssert(value2.objectValue == nil, @"%@",value2.objectValue);
 }
 - (void)testInputStackBlock{
     NSString *source = @"\
@@ -848,9 +854,14 @@ int signatureBlockPtr(id object, int b){
     MFScopeChain *scope = self.currentScope;
     NSString *source = @"\
     char c[100][10];\
+    c[0][0] = 1;\
+    int d = c[0][0];\
     char a[10]; \
     a[0] = 1;\
-    b = a[0];\
+    int b = a[0];\
+    CGPoint x[2][2];\
+    x[0][1] = CGPointMake(0,1);\
+    CGPoint y = x[0][1];\
     ";
     AST *ast = [_parser parseSource:source];
     [ORInterpreter excuteNodes:ast.nodes];
@@ -859,9 +870,14 @@ int signatureBlockPtr(id object, int b){
     XCTAssert(strcmp(a.typeEncode, @encode(char[10])) == 0);
     MFValue *b = [scope recursiveGetValueWithIdentifier:@"b"];
     XCTAssert(b.intValue == 1);
+    MFValue *d = [scope recursiveGetValueWithIdentifier:@"d"];
+    XCTAssert(d.intValue == 1);
     MFValue *c = [scope recursiveGetValueWithIdentifier:@"c"];
     XCTAssert(c.memerySize == 1000);
     XCTAssert(strcmp(c.typeEncode, @encode(char[100][10])) == 0, @"%s",c.typeEncode);
+    MFValue *y = [scope recursiveGetValueWithIdentifier:@"y"];
+    CGPoint point = *(CGPoint *)y.pointer;
+    XCTAssert(CGPointEqualToPoint(CGPointMake(0, 1), point));
 }
 - (void)testOCRecursiveFunctionPerformanceExample {
     [self measureBlock:^{

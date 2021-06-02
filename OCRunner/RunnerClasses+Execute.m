@@ -777,12 +777,6 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             value.modifier = self.modifier;
             value.typeName = self.pair.type.name;
             value.typeEncode = self.pair.typeEncode;
-            
-            [value setTypeBySearchInTypeSymbolTable];
-            if (value.type == OCTypeObject && [value.objectValue isMemberOfClass:[NSObject class]]) {
-                NSString *reason = [NSString stringWithFormat:@"Unknown Class: %@",value.typeName];
-                @throw [NSException exceptionWithName:@"OCRunner" reason:reason userInfo:nil];
-            }
             if ([self.pair.var isKindOfClass:[ORFuncVariable class]]&& [(ORFuncVariable *)self.pair.var isBlock] == NO)
                 value.funPair = self.pair;
             
@@ -793,8 +787,6 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             value.modifier = self.modifier;
             value.typeName = self.pair.type.name;
             value.typeEncode = self.pair.typeEncode;
-            
-            [value setTypeBySearchInTypeSymbolTable];
             [value setDefaultValue];
             if (value.type == OCTypeObject
                 && NSClassFromString(value.typeName) == nil

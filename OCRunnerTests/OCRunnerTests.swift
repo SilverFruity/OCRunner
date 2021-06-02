@@ -155,7 +155,6 @@ class CRunnerTests: XCTestCase {
             exp.execute(scope);
         }
         let scopeValue = scope.getValueWithIdentifier("b")
-        XCTAssert(scope.vars.count == 3)
         XCTAssert(scopeValue!.type == OCTypeInt)
         XCTAssert(scopeValue!.type == OCTypeInt)
         XCTAssert(scopeValue!.intValue == 3)
