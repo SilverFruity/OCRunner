@@ -21,7 +21,6 @@
 		EE480EB924794CDB003E4970 /* OCRunnerDemoUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = EE480EB824794CDB003E4970 /* OCRunnerDemoUITests.m */; };
 		EE48547F263ACB5D0080AE07 /* SwiftViewController1.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE48547D263ACB5D0080AE07 /* SwiftViewController1.swift */; };
 		EE485480263ACB5D0080AE07 /* SwiftViewController1.xib in Resources */ = {isa = PBXBuildFile; fileRef = EE48547E263ACB5D0080AE07 /* SwiftViewController1.xib */; };
-		EE66C0C024FEAA0B00C85B31 /* binarypatch in Resources */ = {isa = PBXBuildFile; fileRef = EE66C0BF24FEAA0B00C85B31 /* binarypatch */; };
 		EE66C0C224FEAC0F00C85B31 /* Scripts.bundle in Resources */ = {isa = PBXBuildFile; fileRef = EE66C0C124FEAC0F00C85B31 /* Scripts.bundle */; };
 		EEBF333E248E848100DDE2E9 /* OCRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEBF333D248E848100DDE2E9 /* OCRunnerTests.swift */; };
 		EEBF334C248E84AA00DDE2E9 /* ORCallOCPropertyBlockTest.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3340248E84A900DDE2E9 /* ORCallOCPropertyBlockTest.m */; };
@@ -31,6 +30,7 @@
 		EEBF3350248E84AA00DDE2E9 /* ORGCDTests.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3348248E84A900DDE2E9 /* ORGCDTests.m */; };
 		EEBF3351248E84AA00DDE2E9 /* ORTestReplaceClass.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF334A248E84A900DDE2E9 /* ORTestReplaceClass.m */; };
 		EEBF3353248E84D100DDE2E9 /* ORTestWithObjc.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3352248E84D100DDE2E9 /* ORTestWithObjc.m */; };
+		EEC088A62669213B00538E9A /* binarypatch.ocrr in Resources */ = {isa = PBXBuildFile; fileRef = EEC088A52669213B00538E9A /* binarypatch.ocrr */; };
 		EEF1527D24DE867400574FA7 /* ORCoreFunctionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = EEF1527C24DE867400574FA7 /* ORCoreFunctionTests.m */; };
 		EEF439342620030E0058B805 /* SwiftViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF439332620030E0058B805 /* SwiftViewController.swift */; };
 		FC281C0D85B4B7B6A9A7B598 /* Pods_OCRunnerDemoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A467A8D72C17536B47CC6E64 /* Pods_OCRunnerDemoTests.framework */; };
@@ -91,7 +91,6 @@
 		EE50145724890C9200B463BB /* oc2mangoLib.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = oc2mangoLib.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE66C09E24FE95D600C85B31 /* ViewController1.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController1.m; sourceTree = "<group>"; };
 		EE66C0BD24FEA97000C85B31 /* Scripts.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Scripts.bundle; sourceTree = "<group>"; };
-		EE66C0BF24FEAA0B00C85B31 /* binarypatch */ = {isa = PBXFileReference; lastKnownFileType = file; path = binarypatch; sourceTree = "<group>"; };
 		EE66C0C124FEAC0F00C85B31 /* Scripts.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = Scripts.bundle; path = OCRunnerDemo/Scripts.bundle; sourceTree = SOURCE_ROOT; };
 		EEBF3312248E61FC00DDE2E9 /* OCRunnerDemoTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OCRunnerDemoTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		EEBF333D248E848100DDE2E9 /* OCRunnerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = OCRunnerTests.swift; path = ../../OCRunnerTests/OCRunnerTests.swift; sourceTree = "<group>"; };
@@ -108,6 +107,7 @@
 		EEBF334A248E84A900DDE2E9 /* ORTestReplaceClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORTestReplaceClass.m; sourceTree = "<group>"; };
 		EEBF334B248E84A900DDE2E9 /* ORTestClassProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORTestClassProperty.h; sourceTree = "<group>"; };
 		EEBF3352248E84D100DDE2E9 /* ORTestWithObjc.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ORTestWithObjc.m; path = ../../OCRunnerTests/ORTestWithObjc.m; sourceTree = "<group>"; };
+		EEC088A52669213B00538E9A /* binarypatch.ocrr */ = {isa = PBXFileReference; lastKnownFileType = file; path = binarypatch.ocrr; sourceTree = "<group>"; };
 		EEF1527C24DE867400574FA7 /* ORCoreFunctionTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ORCoreFunctionTests.m; path = ../../OCRunnerTests/ORCoreFunctionTests.m; sourceTree = "<group>"; };
 		EEF439322620030D0058B805 /* OCRunnerDemo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OCRunnerDemo-Bridging-Header.h"; sourceTree = "<group>"; };
 		EEF439332620030E0058B805 /* SwiftViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftViewController.swift; sourceTree = "<group>"; };
@@ -196,7 +196,7 @@
 				EE48547D263ACB5D0080AE07 /* SwiftViewController1.swift */,
 				EE48547E263ACB5D0080AE07 /* SwiftViewController1.xib */,
 				3241B960254535F3000302CF /* HotPath */,
-				EE66C0BF24FEAA0B00C85B31 /* binarypatch */,
+				EEC088A52669213B00538E9A /* binarypatch.ocrr */,
 				32C54D1B256B4E6D00D067A2 /* jsonpatch */,
 				EE480E9724794CDA003E4970 /* ViewController.h */,
 				EE480E9824794CDA003E4970 /* ViewController.m */,
@@ -385,8 +385,8 @@
 				EE480EA124794CDB003E4970 /* LaunchScreen.storyboard in Resources */,
 				EE480E9E24794CDB003E4970 /* Assets.xcassets in Resources */,
 				EE485480263ACB5D0080AE07 /* SwiftViewController1.xib in Resources */,
-				EE66C0C024FEAA0B00C85B31 /* binarypatch in Resources */,
 				32C54D1C256B4E6D00D067A2 /* jsonpatch in Resources */,
+				EEC088A62669213B00538E9A /* binarypatch.ocrr in Resources */,
 				EE480E9C24794CDA003E4970 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -560,7 +560,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SRCROOT/OCRunnerDemo/PatchGenerator -files $SRCROOT/OCRunnerDemo/HotPath -refs  $SRCROOT/OCRunnerDemo/Scripts.bundle -output $SRCROOT/OCRunnerDemo/binarypatch\n";
+			shellScript = "$SRCROOT/OCRunnerDemo/PatchGenerator -files $SRCROOT/OCRunnerDemo/HotPath -refs  $SRCROOT/OCRunnerDemo/Scripts.bundle -output $SRCROOT/OCRunnerDemo/binarypatch.ocrr\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
