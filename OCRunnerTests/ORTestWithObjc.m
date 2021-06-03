@@ -723,7 +723,7 @@ int signatureBlockPtr(id object, int b){
     XCTAssert([[object testInputStackBlock] isEqualToString:@"receiveStackBlock"]);
 }
 - (void)testIvarRefrenceCount{
-    MFScopeChain *scope = self.currentScope;
+    
     NSString * source =
     @"\
     @implementation ORTestClassIvar\
@@ -739,6 +739,61 @@ int signatureBlockPtr(id object, int b){
         [test ivarRefrenceCount:object];
     }
     XCTAssert(CFGetRetainCount((void *)(test->_object)) == 1);
+}
+- (void)test6ArgsMethodCallInScript{
+    MFScopeChain *scope = self.currentScope;
+    NSString *source = @"\
+    int a,b,c,d,e,f;\
+    @implementation ORTestMethoCall\
+    - (void)test6ArgsMethoCall:(int)arg1 arg2:(int)arg2 arg3:(int)arg3 arg4:(int)arg4 arg5:(int)arg5 arg6:(int)arg6{\
+    a = arg1; b = arg2; c = arg3; d = arg4; e = arg5; f = arg6;\
+    }\
+    @end\
+    [[ORTestMethoCall new] test6ArgsMethoCall:1 arg2:2 arg3:3 arg4:4 arg5:5 arg6:6];\
+    ";
+    AST *ast = [OCParser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
+    MFValue *b = [scope recursiveGetValueWithIdentifier:@"b"];
+    MFValue *c = [scope recursiveGetValueWithIdentifier:@"c"];
+    MFValue *d = [scope recursiveGetValueWithIdentifier:@"d"];
+    MFValue *e = [scope recursiveGetValueWithIdentifier:@"e"];
+    MFValue *f = [scope recursiveGetValueWithIdentifier:@"f"];
+    
+    XCTAssert(a.intValue == 1, @"%d", a.intValue);
+    XCTAssert(b.intValue == 2, @"%d", b.intValue);
+    XCTAssert(c.intValue == 3, @"%d", c.intValue);
+    XCTAssert(d.intValue == 4, @"%d", d.intValue);
+    XCTAssert(e.intValue == 5, @"%d", e.intValue);
+    XCTAssert(f.intValue == 6, @"%d", f.intValue);
+    
+}
+- (void)test6ArgsMethodCallWithOC{
+    MFScopeChain *scope = self.currentScope;
+    NSString *source = @"\
+    int a,b,c,d,e,f;\
+    @implementation ORTestReplaceClass\
+    - (void)test6ArgsMethoCall:(int)arg1 arg2:(int)arg2 arg3:(int)arg3 arg4:(int)arg4 arg5:(int)arg5 arg6:(int)arg6{\
+        a = arg1; b = arg2; c = arg3; d = arg4; e = arg5; f = arg6;\
+    }\
+    @end\
+    ";
+    AST *ast = [OCParser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    [[ORTestReplaceClass new] test6ArgsMethoCall:1 arg2:2 arg3:3 arg4:4 arg5:5 arg6:6];
+    MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
+    MFValue *b = [scope recursiveGetValueWithIdentifier:@"b"];
+    MFValue *c = [scope recursiveGetValueWithIdentifier:@"c"];
+    MFValue *d = [scope recursiveGetValueWithIdentifier:@"d"];
+    MFValue *e = [scope recursiveGetValueWithIdentifier:@"e"];
+    MFValue *f = [scope recursiveGetValueWithIdentifier:@"f"];
+    
+    XCTAssert(a.intValue == 1, @"%d", a.intValue);
+    XCTAssert(b.intValue == 2, @"%d", b.intValue);
+    XCTAssert(c.intValue == 3, @"%d", c.intValue);
+    XCTAssert(d.intValue == 4, @"%d", d.intValue);
+    XCTAssert(e.intValue == 5, @"%d", e.intValue);
+    XCTAssert(f.intValue == 6, @"%d", f.intValue);
 }
 - (void)testOCRecursiveFunctionPerformanceExample {
     [self measureBlock:^{

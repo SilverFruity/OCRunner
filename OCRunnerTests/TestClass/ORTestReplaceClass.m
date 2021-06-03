@@ -45,4 +45,7 @@
 - (void)receiveStackBlock:(void (^)(NSString *str))block{
     block(@"123");
 }
+- (void)test6ArgsMethoCall:(int)arg1 arg2:(int)arg2  arg3:(int)arg3 arg4:(int)arg4 arg5:(int)arg5 arg6:(int)arg6{
+    
+}
 @end
