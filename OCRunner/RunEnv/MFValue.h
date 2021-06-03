@@ -350,7 +350,6 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 - (void)setTypeInfoWithValue:(MFValue *)value;
 
 - (void)assignFrom:(MFValue *)src;
-- (void)setTypeBySearchInTypeSymbolTable;
 
 - (BOOL)isPointer;
 - (BOOL)isSubtantial;

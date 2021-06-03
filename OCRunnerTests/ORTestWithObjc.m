@@ -913,10 +913,12 @@ int signatureBlockPtr(id object, int b){
     @"-(int)run:(int)n{"
     @"    if (n == 1 || n == 2)"
     @"        return 1;"
-    @"    return [self run:n - 1] + [self run:n - 2];"
+    @"    int a = [self run:n - 1];"
+    @"    int b = [self run:n - 2];"
+    @"    return a + b;"
     @"}"
     @"@end"
-    @"int a = [[Fibonaccia new] run:20];";
+    @"int a = [[Fibonaccia new] run:25];";
     AST *ast = [_parser parseSource:source];
     [self measureBlock:^{
         for (id <OCExecute> exp in ast.nodes) {

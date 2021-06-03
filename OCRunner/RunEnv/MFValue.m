@@ -385,15 +385,6 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 - (void)setDefaultValue{
     [self setPointer:NULL];
 }
-- (void)setTypeBySearchInTypeSymbolTable{
-    do {
-        if (!self.typeName) break;
-        ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:self.typeName];
-        if (!item) break;
-        self.typeName = item.typeName;
-        self.typeEncode = item.typeEncode.UTF8String;
-     } while (0);
-}
 
 - (void)writePointer:(void *)pointer typeEncode:(const char *)typeEncode{
     typeEncode = typeEncode == NULL ? OCTypeStringPointer : typeEncode;

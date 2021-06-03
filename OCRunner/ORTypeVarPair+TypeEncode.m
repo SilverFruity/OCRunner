@@ -84,10 +84,12 @@ static const char *typeEncode(ORTypeSpecial *typeSpecial, ORVariable *var){
         [[ORTypeSymbolTable shareInstance] addCArray:(ORCArrayVariable *)var typeEncode:result];
         return result;
     }
-    ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:typeSpecial.name];
-    if (item) {
+    do {
+        if (typeSpecial.name == nil) break;
+        ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:typeSpecial.name];
+        if (item == nil) break;
         return item.typeEncode.UTF8String;
-    }
+    } while (0);
     if (var.ptCount == 0 && type == TypeObject){
         ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:typeSpecial.name];
         if (item) {
