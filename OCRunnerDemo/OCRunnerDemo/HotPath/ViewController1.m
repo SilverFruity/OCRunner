@@ -60,7 +60,7 @@ void cfunctionCallBlock(void (^block)(NSString *)){
         make.width.equalTo(@(200));
         make.height.equalTo(@(200));
     }];
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [UIView animateWithDuration:0.25 animations:^{
             view.transform = CGAffineTransformScale(view.transform, 0.5, 0.5);
         }];

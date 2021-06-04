@@ -80,7 +80,7 @@ const void *mf_propKey(NSString *propName) {
 
 - (void)assignWithIdentifer:(NSString *)identifier value:(MFValue *)value{
 	for (MFScopeChain *pos = self; pos; pos = pos.next) {
-		if (pos.instance) {
+		if ([identifier characterAtIndex:0] == '_' && pos.instance) {
             id instance = [(MFValue *)pos.instance objectValue];
             Class clazz = object_getClass(instance);
             NSString *propName = [self propNameByIvarName:identifier];

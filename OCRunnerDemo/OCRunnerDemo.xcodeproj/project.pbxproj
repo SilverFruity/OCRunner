@@ -339,6 +339,7 @@
 		EE480E8624794CDA003E4970 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				CLASSPREFIX = OR;
 				LastUpgradeCheck = 1150;
 				ORGANIZATIONNAME = SilverFruity;
 				TargetAttributes = {

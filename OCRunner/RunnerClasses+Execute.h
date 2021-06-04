@@ -9,14 +9,7 @@
 #import <ORPatchFile/ORPatchFile.h>
 //#import <oc2mangoLib/oc2mangoLib.h>
 #import <objc/runtime.h>
-#if DEBUG
-extern NSString *OCRunnerFrameStackHistory(void);
-void ORDebugFrameStackPush(id value, NSObject *node);
-void ORDebugFrameStackPop(void);
-#else
-#define ORDebugFrameStackPop(value)
-#define ORDebugFrameStackPush(value1, value2)
-#endif
+
 
 @class MFValue;
 NS_ASSUME_NONNULL_BEGIN

@@ -17,10 +17,12 @@
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    NSString *binaryPatchFilePath = [[NSBundle mainBundle] pathForResource:@"binarypatch.ocrr" ofType:nil];
     NSString *jsonPatchFilePath = [[NSBundle mainBundle] pathForResource:@"jsonpatch" ofType:nil];
-    [ORInterpreter excuteBinaryPatchFile:binaryPatchFilePath];
     [ORInterpreter excuteJsonPatchFile:jsonPatchFilePath];
+    
+    NSString *binaryPatchFilePath = [[NSBundle mainBundle] pathForResource:@"binarypatch.ocrr" ofType:nil];
+    [ORInterpreter excuteBinaryPatchFile:binaryPatchFilePath];
+
 
 //    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 //        [ORInterpreter reverse];
