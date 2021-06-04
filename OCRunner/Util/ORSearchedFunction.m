@@ -41,17 +41,16 @@
 }
 - (nullable MFValue *)execute:(nonnull MFScopeChain *)scope {
     NSArray <MFValue *>*args = [ORArgsStack pop];
-    NSString *typeName = self.funPair.type.name;
-    const char *reg_typeencode = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:typeName].typeEncode.UTF8String;
     const char *org_typeencode = self.funPair.typeEncode;
-    if (reg_typeencode) {
-        org_typeencode = reg_typeencode;
+    if (org_typeencode == NULL) {
+        NSLog(@"OCRunner Error: Unknow return type of C function '%@'", self.name);
+        return [MFValue nullValue];
     }
     MFValue *returnValue = [MFValue defaultValueWithTypeEncoding:org_typeencode];
     void *funcptr = self.pointer != NULL ? self.pointer : [ORSystemFunctionPointerTable pointerForFunctionName:self.name];
     if (funcptr == NULL) {
-        NSLog(@"⚠️⚠️ Not found the pointer of function %@ !!!!", self.name);
-        return [MFValue voidValue];
+        NSLog(@"OCRunner Error: Not found the pointer of C function '%@'", self.name);
+        return [MFValue nullValue];
     }
     if (!self.funVar.isMultiArgs) {
         invoke_functionPointer(funcptr, args, returnValue);

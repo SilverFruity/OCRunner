@@ -23,16 +23,17 @@
 #import "ORffiResultCache.h"
 
 static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
+    id block = blockValue.objectValue;
 #if DEBUG
-    if (blockValue.objectValue == nil) {
+    if (block == nil) {
         NSLog(@"%@",[ORCallFrameStack history]);
     }
 #endif
-    assert(blockValue.objectValue != nil);
-    const char *blockTypeEncoding = NSBlockGetSignature(blockValue.objectValue);
+    assert(block != nil);
+    const char *blockTypeEncoding = NSBlockGetSignature(block);
     NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:blockTypeEncoding];
     NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
-    [invocation setTarget:blockValue.objectValue];
+    [invocation setTarget:block];
     NSUInteger numberOfArguments = [sig numberOfArguments];
     if (numberOfArguments - 1 != args.count) {
         return [MFValue valueWithObject:nil];
@@ -346,7 +347,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
                 if (key && value){
                     dict[key] = value;
                 }else{
-                    NSLog(@"the key %@ or value %@ of NSDictionary can't be nil", key?:@"", value?:@"");
+                    NSLog(@"OCRunner Error: the key %@ or value %@ of NSDictionary can't be nil", key?:@"", value?:@"");
                 }
             }
             return [MFValue valueWithObject:[dict copy]];
@@ -359,7 +360,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
                 if (value) {
                     [array addObject:value];
                 }else{
-                    NSLog(@"the value of NSArray can't be nil, %@", array);
+                    NSLog(@"OCRunner Error: the value of NSArray can't be nil, %@", array);
                 }
             }
             return [MFValue valueWithObject:[array copy]];
@@ -475,7 +476,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }
     NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
     if (sig == nil) {
-        NSLog(@"⚠️⚠️ Unrecognized Selector %@",self.selectorName);
+        NSLog(@"OCRunner Error: %@ Unrecognized Selector %@", instance, self.selectorName);
         return [MFValue voidValue];
     }
     NSUInteger argCount = [sig numberOfArguments];
