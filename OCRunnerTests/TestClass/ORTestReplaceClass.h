@@ -22,6 +22,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (int)testNoSignatureBlock:(int(^)(int))arg;
 - (NSString *)testInputStackBlock;
 - (void)receiveStackBlock:(void (^)(NSString *str))block;
+- (int)scriptReceiveCArray:(int *)array len:(int)len;
+- (int)receiveCArray:(int *)array len:(int)len;
 @end
 
 NS_ASSUME_NONNULL_END

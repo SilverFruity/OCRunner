@@ -879,6 +879,36 @@ int signatureBlockPtr(id object, int b){
     CGPoint point = *(CGPoint *)y.pointer;
     XCTAssert(CGPointEqualToPoint(CGPointMake(0, 1), point));
 }
+- (void)testCArrayBridge{
+    MFScopeChain *scope = self.currentScope;
+    NSString *source = @"\
+    int len = 10;\
+    int carray[len];\
+    for (int i = 0; i < len; i++) {\
+        carray[i] = i;\
+    }\
+    id object = [ORTestReplaceClass new];\
+    int result = [object receiveCArray:carray len:len];\
+    @implementation ORTestReplaceClass\
+    - (int)scriptReceiveCArray:(int *)array len:(int)len{\
+        int r = 0;\
+        for (int i = 0; i < len; i++) {\
+            r += array[i];\
+        }\
+        return r;\
+    }\
+    @end";
+    AST *ast = [_parser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    MFValue *result = [scope recursiveGetValueWithIdentifier:@"result"];
+    XCTAssert(result.intValue == 45, @"%d", result.intValue);
+    ORTestReplaceClass *obejct = [ORTestReplaceClass new];
+    int input[10];
+    for (int i = 0; i < 10; i++) {
+        input[i] = i;
+    }
+    XCTAssert([obejct scriptReceiveCArray:input len:10] == 45);
+}
 - (void)testOCRecursiveFunctionPerformanceExample {
     [self measureBlock:^{
         fibonaccia(20);

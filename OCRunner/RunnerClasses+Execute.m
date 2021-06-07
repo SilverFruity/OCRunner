@@ -717,6 +717,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @implementation ORDeclareExpression (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     BOOL staticVar = self.modifier & DeclarationModifierStatic;
+    if ([self.pair.var isKindOfClass:[ORCArrayVariable class]]) {
+        [self.pair.var execute:scope];
+    }
     MFValue *(^initializeBlock)(void) = ^MFValue *{
         if (self.expression) {
             MFValue *value = [[self.expression execute:scope] copy];
@@ -1377,6 +1380,13 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 
 @implementation ORCArrayVariable (Execute)
 - (MFValue *)execute:(MFScopeChain *)scope{
+    MFValue *value = [self.capacity execute:scope];
+    if (![self.capacity isKindOfClass:[ORIntegerValue class]]
+        && [self.capacity isKindOfClass:[ORCArrayVariable class]] == NO) {
+        ORIntegerValue *integerValue = [ORIntegerValue new];
+        integerValue.value = value.longlongValue;
+        self.capacity = integerValue;
+    }
     return [MFValue voidValue];
 }
 @end

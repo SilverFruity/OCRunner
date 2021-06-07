@@ -45,4 +45,16 @@
 - (void)receiveStackBlock:(void (^)(NSString *str))block{
     block(@"123");
 }
+
+
+- (int)scriptReceiveCArray:(int *)array len:(int)len{
+    return 0;
+}
+- (int)receiveCArray:(int *)array len:(int)len{
+    int r = 0;
+    for (int i = 0; i < len; i++) {
+        r += array[i];
+    }
+    return r;
+}
 @end

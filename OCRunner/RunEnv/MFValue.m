@@ -184,7 +184,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
                 _isAlloced = NO;
                 realBaseValue.pointerValue = pointer;
             }
-            _pointer = realBaseValue.pointerValue;
+            _pointer = &realBaseValue.pointerValue;
             break;
         }
         case OCTypeUnion:
@@ -434,10 +434,10 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return size;
 }
 - (MFValue *)subscriptGetWithIndex:(MFValue *)index{
-    if (self.type == OCTypeArray) {
+    if (_type != OCTypeObject && _type != OCTypeClass) {
         return [self cArraySubscriptGetValueWithIndex:index];
     }
-    if (index.type & TypeBaseMask) {
+    if (TypeEncodeCharIsBaseType(index.type)) {
         return [MFValue valueWithObject:self.objectValue[*(long long *)index.pointer]];
     }
     switch (index.type) {
@@ -454,11 +454,11 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return nil;
 }
 - (void)subscriptSetValue:(MFValue *)value index:(MFValue *)index{
-    if (self.type == OCTypeArray) {
+    if (_type != OCTypeObject && _type != OCTypeClass) {
         [self cArraySubscriptSetValue:value index:index];
         return;
     }
-    if (index.type & TypeBaseMask) {
+    if (TypeEncodeCharIsBaseType(index.type)) {
         self.objectValue[*(long long *)index.pointer] = value.objectValue;
     }
     switch (index.type) {
@@ -585,19 +585,31 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 
 @implementation MFValue  (CArray)
 - (MFValue *)cArraySubscriptGetValueWithIndex:(MFValue *)index{
-    NSArray *results = startArrayDetect(self.typeEncode);
-    const char *element_type_encode = [results[1] UTF8String];
+    const char *element_type_encode;
+    if (_type == OCTypeArray) {
+        NSArray *results = startArrayDetect(_typeEncode);
+        element_type_encode = [results[1] UTF8String];
+    }else{
+        //默认操作为减少一个指针: ^i
+        element_type_encode = _typeEncode + 1;
+    }
     NSInteger element_mem_size = (NSInteger)sizeOfTypeEncode(element_type_encode);
-    NSInteger offset = element_mem_size * index.longlongValue;
+    NSInteger offset = element_mem_size * (NSInteger)index.longlongValue;
     MFValue *result = [MFValue defaultValueWithTypeEncoding:element_type_encode];
     result.pointer = (char *)self->realBaseValue.pointerValue + offset;
     return result;
 }
 - (void)cArraySubscriptSetValue:(MFValue *)value index:(MFValue *)index{
-    NSArray *results = startArrayDetect(self.typeEncode);
-    const char *element_type_encode = [results[1] UTF8String];
+    const char *element_type_encode;
+    if (_type == OCTypeArray) {
+        NSArray *results = startArrayDetect(_typeEncode);
+        element_type_encode = [results[1] UTF8String];
+    }else{
+        //默认操作为减少一个指针
+        element_type_encode = _typeEncode + 1;
+    }
     NSUInteger element_mem_size = sizeOfTypeEncode(element_type_encode);
-    NSInteger offset = element_mem_size * index.longlongValue;
+    NSInteger offset = element_mem_size * (NSInteger)index.longlongValue;
     void *pointer = (char *)self->realBaseValue.pointerValue + offset;
     [value writePointer:pointer typeEncode:element_type_encode];
 }
