@@ -46,6 +46,15 @@
     block(@"123");
 }
 - (void)test6ArgsMethoCall:(int)arg1 arg2:(int)arg2  arg3:(int)arg3 arg4:(int)arg4 arg5:(int)arg5 arg6:(int)arg6{
-    
+}
+- (int)scriptReceiveCArray:(int *)array len:(int)len{
+    return 0;
+}
+- (int)receiveCArray:(int *)array len:(int)len{
+    int r = 0;
+    for (int i = 0; i < len; i++) {
+        r += array[i];
+    }
+    return r;
 }
 @end

@@ -28,7 +28,7 @@ static void add_gcd_build_in(MFScopeChain *scope){
     [scope setValue:[MFValue valueWithLongLong:DISPATCH_QUEUE_PRIORITY_BACKGROUND] withIndentifier:@"DISPATCH_QUEUE_PRIORITY_BACKGROUND"];
     
     [scope setValue:[MFValue valueWithObject:DISPATCH_QUEUE_CONCURRENT] withIndentifier:@"DISPATCH_QUEUE_CONCURRENT"];
-    [scope setValue:[MFValue valueWithPointer:NULL] withIndentifier:@"DISPATCH_QUEUE_SERIAL"];
+    [scope setValue:[MFValue nullValue] withIndentifier:@"DISPATCH_QUEUE_SERIAL"];
     
     /*dispatch_source*/
     [scope setValue:[MFValue valueWithPointer:(void *)DISPATCH_SOURCE_TYPE_PROC] withIndentifier:@"DISPATCH_SOURCE_TYPE_PROC"];

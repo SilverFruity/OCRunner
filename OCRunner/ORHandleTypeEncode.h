@@ -73,7 +73,8 @@ ExternOCTypeString(Unknown)
 
 
 //NOTE: ignore bit 'b'
-#define TypeEncodeIsBaseType(code) (('a'<= *code && *code <= 'z') || ('A'<= *code && *code <= 'Z'))
+#define TypeEncodeCharIsBaseType(chr) (('a'<= chr && chr <= 'z') || ('A'<= chr && chr <= 'Z'))
+#define TypeEncodeIsBaseType(code) TypeEncodeCharIsBaseType(*code)
 
 static const char *OCTypeStringBlock = "@?";
 
@@ -81,7 +82,10 @@ static const char *OCTypeStringBlock = "@?";
 NSString *startRemovePointerOfTypeEncode(const char *typeEncode);
 NSUInteger startDetectPointerCount(const char *typeEncode);
 NSString *startStructNameDetect(const char *typeEncode);
+NSString *startUnionNameDetect(const char *typeEncode);
 NSMutableArray * startStructDetect(const char *typeEncode);
+NSMutableArray * startUnionDetect(const char *typeEncode);
+NSMutableArray * startArrayDetect(const char *typeEncode);
 NSString * detectStructMemeryLayoutEncodeCode(const char *typeEncode);
 NSMutableArray *detectStructFieldTypeEncodes(const char *typeEncode);
 NSMutableArray *detectFieldTypeEncodes(const char *structMemeryLayoutEncodeCode);

@@ -9,26 +9,24 @@
 #import "ORTypeVarPair+TypeEncode.h"
 #import "ORHandleTypeEncode.h"
 #import "ORStructDeclare.h"
-
-@implementation ORTypeVarPair (TypeEncode)
-- (const char *)baseTypeEncode{
-    TypeKind type = self.type.type;
+static const char *baseTypeEncode(ORTypeSpecial *typeSpecial, ORVariable *var){
+    TypeKind type = typeSpecial.type;
     char encoding[128];
     memset(encoding, 0, 128);
 #define append(str) strcat(encoding,str)
-    NSInteger pointCount = self.var.ptCount;
-    while (pointCount > 0) {
+    NSInteger tmpPtCount = var.ptCount;
+    while (tmpPtCount > 0) {
         if (type == TypeBlock) {
             break;
         }
-        if (type == TypeChar && pointCount == 1) {
+        if (type == TypeChar && tmpPtCount == 1) {
             break;
         }
-        if (type == TypeObject && pointCount == 1) {
+        if (type == TypeObject && tmpPtCount == 1) {
             break;
         }
         append("^");
-        pointCount--;
+        tmpPtCount--;
     }
     
 #define CaseTypeEncoding(type,code)\
@@ -38,7 +36,7 @@ append(code); break;
     switch (type) {
         case TypeChar:
         {
-            if (self.var.ptCount > 0)
+            if (var.ptCount > 0)
                 append(OCTypeStringCString);
             else
                 append(OCTypeStringChar);
@@ -69,6 +67,70 @@ append(code); break;
     __autoreleasing NSString *resultValue = [NSString stringWithUTF8String:encoding];
     return resultValue.UTF8String;
 }
+static const char *cArrayTypeEncode(ORTypeSpecial *typeSpecial, ORCArrayVariable *var);
+static const char *typeEncode(ORTypeSpecial *typeSpecial, ORVariable *var){
+    TypeKind type = typeSpecial.type;
+    if ([var isKindOfClass:[ORFuncVariable class]]) {
+        // Block的typeEncode
+        if (var.isBlock) {
+            return @"@?".UTF8String;
+        }
+    }else if ([var isKindOfClass:[ORCArrayVariable class]]){
+        ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForNode:var];
+        if (item) {
+            return item.typeEncode.UTF8String;
+        }
+        const char *result = cArrayTypeEncode(typeSpecial, (ORCArrayVariable *)var);
+        [[ORTypeSymbolTable shareInstance] addCArray:(ORCArrayVariable *)var typeEncode:result];
+        return result;
+    }
+    do {
+        if (typeSpecial.name == nil) break;
+        ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:typeSpecial.name];
+        if (item == nil) break;
+        return item.typeEncode.UTF8String;
+    } while (0);
+    if (var.ptCount == 0 && type == TypeObject){
+        ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:typeSpecial.name];
+        if (item) {
+            return item.typeEncode.UTF8String;
+        }
+    }
+    return baseTypeEncode(typeSpecial, var);
+}
+static const char *cArrayTypeEncode(ORTypeSpecial *typeSpecial, ORCArrayVariable *var){
+    if ([(ORIntegerValue *)var.capacity value] == 0) {
+        return [NSString stringWithFormat:@"^%s",typeEncode(typeSpecial, nil)].UTF8String;
+    }
+    ORCArrayVariable *tmp = var;
+    NSMutableArray *nodes = [NSMutableArray array];
+    while (tmp) {
+        [nodes insertObject:tmp atIndex:0];
+        tmp = tmp.prev;
+    }
+    char result[100] = {0};
+    char buffer[50]  = {0};
+    char rights[20]  = {0};
+    for (int i = 0; i < nodes.count; i++) {
+        ORCArrayVariable *item = nodes[i];
+        sprintf(buffer, "[%lld", [(ORIntegerValue *)item.capacity value]);
+        strcat(result, buffer);
+        if (i != nodes.count - 1) {
+            strcat(rights, "]");
+        }else{
+            sprintf(buffer, "%s]", typeEncode(typeSpecial, nil));
+            strcat(result, buffer);
+        }
+    }
+    strcat(result, rights);
+    NSString *str = [NSString stringWithUTF8String:result];
+    return str.UTF8String;
+}
+
+@implementation ORTypeVarPair (TypeEncode)
+- (const char *)baseTypeEncode{
+    return baseTypeEncode(self.type, self.var);;
+}
 - (const char *)blockSignature{
     ORFuncVariable *var = (ORFuncVariable *)self.var;
     if ([var isKindOfClass:[ORFuncVariable class]] && var.isBlock) {
@@ -82,24 +144,7 @@ append(code); break;
     return [self typeEncode];
 }
 - (const char *)typeEncode{
-    TypeKind type = self.type.type;
-    if ([self.var isKindOfClass:[ORFuncVariable class]]) {
-        // Block的typeEncode
-        if (self.var.isBlock) {
-            return @"@?".UTF8String;
-        }
-    }
-    if (type == TypeStruct && self.var.ptCount == 0) {
-        ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:self.type.name];
-        return declare.typeEncoding;
-    }
-    if (self.var.ptCount == 0 && type == TypeObject){
-        ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:self.type.name];
-        if (item) {
-            return item.typeEncode.UTF8String;
-        }
-    }
-    return [self baseTypeEncode];
+    return typeEncode(self.type, self.var);
 }
 @end
 

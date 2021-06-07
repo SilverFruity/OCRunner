@@ -35,46 +35,113 @@ NSUInteger startDetectPointerCount(const char *typeEncode){
     detectPointerCount(typeEncode, &ptCount);
     return ptCount;
 }
-void structNameDetect(const char *chr, NSMutableString *buffer){
+void structNameDetect(const char *chr, char lf_chr, char rt_chr, NSMutableString *buffer){
     if (strlen(chr) == 0) return;
-    if (*chr == '=' || *chr == '}') {
+    if (*chr == '=' || *chr == rt_chr) {
         return;
     }
-    if (*chr != '{' && *chr != '^') {
+    if (*chr != lf_chr && *chr != '^') {
         [buffer appendFormat:@"%c",*chr];
     }
-    structNameDetect(++chr, buffer);
+    structNameDetect(++chr, lf_chr, rt_chr, buffer);
 }
 NSString *startStructNameDetect(const char *typeEncode){
     NSMutableString *buffer = [NSMutableString string];
-    structNameDetect(typeEncode,buffer);
+    structNameDetect(typeEncode, '{', '}', buffer);
     return buffer;
 }
-void structDetect(const char *chr, NSMutableString *buffer, NSMutableArray *results, NSUInteger lf, NSUInteger rt, BOOL needfirstAssign){
-    if (strlen(chr) == 0) return;
-    [buffer appendFormat:@"%c",*chr];
-    if (needfirstAssign) {
-        if (*chr == '=') {
-            needfirstAssign = NO;
+NSString *startUnionNameDetect(const char *typeEncode){
+    NSMutableString *buffer = [NSMutableString string];
+    structNameDetect(typeEncode, '(', ')', buffer);
+    return buffer;
+}
+typedef struct{
+    const char *chr;
+    BOOL isDetectName;
+    BOOL isNumberTogether;
+    char lf_chr;
+    char rt_chr;
+    char embed1_lf_chr;
+    char embed1_rt_chr;
+    char embed2_lf_chr;
+    char embed2_rt_chr;
+    int lf;
+    int rt;
+    int embed1_lf_count;
+    int embed1_rt_count;
+    int embed2_lf_count;
+    int embed2_rt_count;
+}StructDetectState;
+
+void structDetect(StructDetectState state, NSMutableString *buffer, NSMutableArray *results){
+    if (strlen(state.chr) == 0) return;
+    char chr = *state.chr;
+    char nextChr = *(state.chr + 1);
+    if (state.isDetectName) {
+        if (chr == '=') {
+            state.isDetectName = NO;
             [results addObject:buffer];
             buffer = [NSMutableString string];
+        }else{
+            [buffer appendFormat:@"%c",chr];
         }
-        structDetect(++chr,buffer, results, lf, rt, needfirstAssign);
+        state.chr++;
+        structDetect(state, buffer, results);
         return;
     }
-    if (*chr == '{'){
-        lf++;
+    [buffer appendFormat:@"%c",chr];
+    if (chr == state.lf_chr) {
+        state.lf++;
+    }else if (chr == state.rt_chr){
+        state.rt++;
+    }else if (chr == state.embed1_lf_chr){
+        state.embed1_lf_count = 1;
+        state.chr++;
+        while (state.embed1_lf_count != state.embed1_rt_count) {
+            chr = *state.chr;
+            [buffer appendFormat:@"%c",chr];
+            if (chr == state.embed1_lf_chr) {
+                state.embed1_lf_count++;
+            }else if (chr == state.embed1_rt_chr){
+                state.embed1_rt_count++;
+            }
+            state.chr++;
+        }
+        state.chr--;
+        state.embed1_lf_count = 0;
+        state.embed1_rt_count = 0;
+    }else if (chr == state.embed2_lf_chr){
+        state.embed2_lf_count = 1;
+        state.chr++;
+        while (state.embed2_lf_count != state.embed2_rt_count) {
+            chr = *state.chr;
+            [buffer appendFormat:@"%c",chr];
+            if (chr == state.embed2_lf_chr) {
+                state.embed2_lf_count++;
+            }else if (chr == state.embed2_rt_chr){
+                state.embed2_rt_count++;
+            }
+            state.chr++;
+        }
+        state.chr--;
+        state.embed2_lf_count = 0;
+        state.embed2_rt_count = 0;
     }
-    if (*chr == '}'){
-        rt++;
-    }
-    if (lf == rt && *chr != '^') {
+    
+    BOOL isNumber = chr >= '0' && chr <= '9';
+    BOOL nextIsNumber = nextChr >= '0' && nextChr <= '9';
+    BOOL seekNumber = state.isNumberTogether && isNumber && nextIsNumber;
+    if (state.lf == state.rt && chr != '^' && seekNumber == NO) {
         [results addObject:buffer];
         buffer = [NSMutableString string];
-        lf = 0;
-        rt = 0;
+        state.lf = 0;
+        state.rt = 0;
     }
-    structDetect(++chr,buffer, results, lf, rt, needfirstAssign);
+    if (strlen(state.chr) == 0) {
+        return;
+    }
+    state.chr++;
+    structDetect(state, buffer, results);
 }
 NSMutableArray * startStructDetect(const char *typeEncode){
     NSMutableString *buffer = [NSMutableString string];
@@ -87,7 +154,68 @@ NSMutableArray * startStructDetect(const char *typeEncode){
     }else{
         strlcpy(content, typeEncode, length);
     }
-    structDetect(content,buffer, results, 0, 0, YES);
+    StructDetectState state;
+    memset(&state, 0, sizeof(StructDetectState));
+    state.chr = content;
+    state.isDetectName = YES;
+    state.lf_chr = '{';
+    state.rt_chr = '}';
+    state.embed1_lf_chr = '(';
+    state.embed1_rt_chr = ')';
+    state.embed2_lf_chr = '[';
+    state.embed2_rt_chr = ']';
+    structDetect(state, buffer, results);
+    return results;
+}
+
+NSMutableArray * startUnionDetect(const char *typeEncode){
+    NSMutableString *buffer = [NSMutableString string];
+    NSMutableArray *results = [NSMutableArray array];
+    size_t length = strlen(typeEncode);
+    char content[length + 1];
+    if (*typeEncode == '(') {
+        // remove '{' '}'
+        strlcpy(content, typeEncode + 1, length - 1);
+    }else{
+        strlcpy(content, typeEncode, length);
+    }
+    StructDetectState state;
+    memset(&state, 0, sizeof(StructDetectState));
+    state.chr = content;
+    state.isDetectName = YES;
+    state.lf_chr = '(';
+    state.rt_chr = ')';
+    state.embed1_lf_chr = '{';
+    state.embed1_rt_chr = '}';
+    state.embed2_lf_chr = '[';
+    state.embed2_rt_chr = ']';
+    structDetect(state, buffer, results);
+    return results;
+}
+
+NSMutableArray * startArrayDetect(const char *typeEncode){
+    NSMutableString *buffer = [NSMutableString string];
+    NSMutableArray *results = [NSMutableArray array];
+    size_t length = strlen(typeEncode);
+    char content[length + 1];
+    if (*typeEncode == '[') {
+        // remove '{' '}'
+        strlcpy(content, typeEncode + 1, length - 1);
+    }else{
+        strlcpy(content, typeEncode, length);
+    }
+    StructDetectState state;
+    memset(&state, 0, sizeof(StructDetectState));
+    state.chr = content;
+    state.isDetectName = NO;
+    state.isNumberTogether = YES;
+    state.lf_chr = '[';
+    state.rt_chr = ']';
+    state.embed1_lf_chr = '{';
+    state.embed1_rt_chr = '}';
+    state.embed2_lf_chr = '(';
+    state.embed2_rt_chr = ')';
+    structDetect(state, buffer, results);
     return results;
 }
 

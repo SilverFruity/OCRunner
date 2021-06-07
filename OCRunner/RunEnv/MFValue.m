@@ -171,7 +171,23 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             realBaseValue.pointerValue = *(void **)pointer;
             _pointer = &realBaseValue.pointerValue;
             break;
-        
+            
+        case OCTypeArray:
+        {
+            if (pointer == &replace) {
+                _isAlloced = YES;
+                NSUInteger size = self.memerySize;
+                void *dst = malloc(size);
+                memset(dst, 0, size);
+                realBaseValue.pointerValue = dst;
+            }else{
+                _isAlloced = NO;
+                realBaseValue.pointerValue = pointer;
+            }
+            _pointer = &realBaseValue.pointerValue;
+            break;
+        }
+        case OCTypeUnion:
         case OCTypeStruct:
             _isAlloced = YES;
             NSUInteger size = self.memerySize;
@@ -273,6 +289,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
         self.typeName = @"Class";
     }else if(*typeEncode == OCTypeStruct){
         self.typeName = startStructNameDetect(typeEncode);
+    }else if(*typeEncode == OCTypeUnion){
+        self.typeName = startUnionNameDetect(typeEncode);
     }
 }
 - (void)convertValueWithTypeEncode:(const char *)typeEncode result:(void **)resultValue{
@@ -367,15 +385,6 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 - (void)setDefaultValue{
     [self setPointer:NULL];
 }
-- (void)setTypeBySearchInTypeSymbolTable{
-    do {
-        if (!self.typeName) break;
-        ORSymbolItem *item = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:self.typeName];
-        if (!item) break;
-        self.typeName = item.typeName;
-        self.typeEncode = item.typeEncode.UTF8String;
-     } while (0);
-}
 
 - (void)writePointer:(void *)pointer typeEncode:(const char *)typeEncode{
     typeEncode = typeEncode == NULL ? OCTypeStringPointer : typeEncode;
@@ -425,7 +434,10 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return size;
 }
 - (MFValue *)subscriptGetWithIndex:(MFValue *)index{
-    if (index.type & TypeBaseMask) {
+    if (_type != OCTypeObject && _type != OCTypeClass) {
+        return [self cArraySubscriptGetValueWithIndex:index];
+    }
+    if (TypeEncodeCharIsBaseType(index.type)) {
         return [MFValue valueWithObject:self.objectValue[*(long long *)index.pointer]];
     }
     switch (index.type) {
@@ -442,7 +454,11 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return nil;
 }
 - (void)subscriptSetValue:(MFValue *)value index:(MFValue *)index{
-    if (index.type & TypeBaseMask) {
+    if (_type != OCTypeObject && _type != OCTypeClass) {
+        [self cArraySubscriptSetValue:value index:index];
+        return;
+    }
+    if (TypeEncodeCharIsBaseType(index.type)) {
         self.objectValue[*(long long *)index.pointer] = value.objectValue;
     }
     switch (index.type) {
@@ -496,7 +512,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     if (*removedPointerTypeEncode == '{') {
         NSString *encode = [NSString stringWithUTF8String:removedPointerTypeEncode];
         NSString *structName = startStructNameDetect(encode.UTF8String);
-        ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
+        ORStructDeclare *declare = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:structName].declare;
         field.typeEncode = declare.typeEncoding;
         field.typeName = structName;
     }else{
@@ -508,7 +524,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 - (MFValue *)fieldForKey:(NSString *)key copied:(BOOL)copied{
     NSCAssert(self.type == OCTypeStruct, @"must be struct");
     NSString *structName = self.typeName;
-    ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
+    ORStructDeclare *declare = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:structName].declare;
     NSUInteger offset = declare.keyOffsets[key].unsignedIntegerValue;
     MFValue *result = [MFValue defaultValueWithTypeEncoding:declare.keyTypeEncodes[key].UTF8String];
     if (copied) {
@@ -527,7 +543,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 - (void)setFieldWithValue:(MFValue *)value forKey:(NSString *)key{
     NSCAssert(self.type == OCTypeStruct, @"must be struct");
     NSString *structName = self.typeName;
-    ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
+    ORStructDeclare *declare = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:structName].declare;
     NSUInteger offset = declare.keyOffsets[key].unsignedIntegerValue;
     void *pointer = realBaseValue.pointerValue;
     if (pointer != NULL) {
@@ -537,7 +553,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 - (void)enumerateStructFieldsUsingBlock:(void (^)(MFValue *field, NSUInteger idx, BOOL *stop))block{
     NSString *structName = self.typeName;
-    ORStructDeclare *declare = [[ORStructDeclareTable shareInstance] getStructDeclareWithName:structName];
+    ORStructDeclare *declare = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:structName].declare;
     for (int i = 0 ; i < declare.keys.count; i++) {
         MFValue *field = [self fieldForKey:declare.keys[i]];
         BOOL stop = NO;
@@ -546,6 +562,56 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             break;
         }
     }
+}
+@end
+
+@implementation MFValue (Union)
+
+- (void)setUnionFieldWithValue:(MFValue *)value forKey:(NSString *)key{
+    NSCAssert(self.type == OCTypeUnion, @"must be union");
+    ORUnionDeclare *declare = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:self.typeName].declare;
+    void *pointer = realBaseValue.pointerValue;
+    [value writePointer:pointer typeEncode:declare.keyTypeEncodes[key].UTF8String];
+}
+
+- (MFValue *)unionFieldForKey:(NSString *)key{
+    NSCAssert(self.type == OCTypeUnion, @"must be union");
+    ORUnionDeclare *declare = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:self.typeName].declare;
+    MFValue *result = [MFValue defaultValueWithTypeEncoding:declare.keyTypeEncodes[key].UTF8String];
+    result.pointer = realBaseValue.pointerValue;
+    return result;
+}
+@end
+
+@implementation MFValue  (CArray)
+- (MFValue *)cArraySubscriptGetValueWithIndex:(MFValue *)index{
+    const char *element_type_encode;
+    if (_type == OCTypeArray) {
+        NSArray *results = startArrayDetect(_typeEncode);
+        element_type_encode = [results[1] UTF8String];
+    }else{
+        //默认操作为减少一个指针: ^i
+        element_type_encode = _typeEncode + 1;
+    }
+    NSInteger element_mem_size = (NSInteger)sizeOfTypeEncode(element_type_encode);
+    NSInteger offset = element_mem_size * (NSInteger)index.longlongValue;
+    MFValue *result = [MFValue defaultValueWithTypeEncoding:element_type_encode];
+    result.pointer = (char *)self->realBaseValue.pointerValue + offset;
+    return result;
+}
+- (void)cArraySubscriptSetValue:(MFValue *)value index:(MFValue *)index{
+    const char *element_type_encode;
+    if (_type == OCTypeArray) {
+        NSArray *results = startArrayDetect(_typeEncode);
+        element_type_encode = [results[1] UTF8String];
+    }else{
+        //默认操作为减少一个指针
+        element_type_encode = _typeEncode + 1;
+    }
+    NSUInteger element_mem_size = sizeOfTypeEncode(element_type_encode);
+    NSInteger offset = element_mem_size * (NSInteger)index.longlongValue;
+    void *pointer = (char *)self->realBaseValue.pointerValue + offset;
+    [value writePointer:pointer typeEncode:element_type_encode];
 }
 @end
 
@@ -641,6 +707,9 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 - (char *)cStringValue{
     return *(char **)self.pointer;
+}
++ (instancetype)nullValue{
+    return [MFValue valueWithPointer:NULL];
 }
 + (instancetype)voidValue{
     return [MFValue valueWithTypeEncode:OCTypeStringVoid pointer:NULL];

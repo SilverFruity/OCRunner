@@ -155,7 +155,6 @@ class CRunnerTests: XCTestCase {
             exp.execute(scope);
         }
         let scopeValue = scope.getValueWithIdentifier("b")
-        XCTAssert(scope.vars.count == 3)
         XCTAssert(scopeValue!.type == OCTypeInt)
         XCTAssert(scopeValue!.type == OCTypeInt)
         XCTAssert(scopeValue!.intValue == 3)
@@ -940,8 +939,8 @@ class CRunnerTests: XCTestCase {
         for exp in exps {
             exp.execute(scope);
         }
-        let rect = ORStructDeclareTable.shareInstance().getStructDeclare(withName: "CGRect")
-        XCTAssert(NSString.init(utf8String: rect!.typeEncoding) == "{CGRect={CGPoint=dd}{CGSize=dd}}")
+        let rect = ORTypeSymbolTable.shareInstance().symbolItem(forTypeName: "CGRect")
+        XCTAssert(NSString.init(utf8String: rect.typeEncode) == "{CGRect={CGPoint=dd}{CGSize=dd}}")
     }
     func testTypedef(){
         source =

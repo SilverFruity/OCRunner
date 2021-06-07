@@ -9,7 +9,7 @@
 #import "ORSearchedFunction.h"
 #import "SymbolSearch.h"
 #import "RunnerClasses+Execute.h"
-#import "ORArgsStack.h"
+#import "ORThreadContext.h"
 #import "MFValue.h"
 #import "ORTypeVarPair+TypeEncode.h"
 #import "ORCoreImp.h"
@@ -41,18 +41,17 @@
 }
 - (nullable MFValue *)execute:(nonnull MFScopeChain *)scope {
     NSArray <MFValue *>*args = [ORArgsStack pop];
-    NSString *typeName = self.funPair.type.name;
-    const char *reg_typeencode = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:typeName].typeEncode.UTF8String;
     const char *org_typeencode = self.funPair.typeEncode;
-    if (reg_typeencode) {
-        org_typeencode = reg_typeencode;
+    if (org_typeencode == NULL) {
+        NSLog(@"OCRunner Error: Unknow return type of C function '%@'", self.name);
+        return [MFValue nullValue];
     }
     MFValue *returnValue = [MFValue defaultValueWithTypeEncoding:org_typeencode];
-    void *funcptr = self.pointer;
+    void *funcptr = self.pointer != NULL ? self.pointer : [ORSystemFunctionPointerTable pointerForFunctionName:self.name];
     if (funcptr == NULL) {
-        funcptr = [ORSystemFunctionPointerTable pointerForFunctionName:self.name];
+        NSLog(@"OCRunner Error: Not found the pointer of C function '%@'", self.name);
+        return [MFValue nullValue];
     }
-    NSAssert(funcptr != NULL, @"not found function %@", self.name);
     if (!self.funVar.isMultiArgs) {
         invoke_functionPointer(funcptr, args, returnValue);
         //多参数

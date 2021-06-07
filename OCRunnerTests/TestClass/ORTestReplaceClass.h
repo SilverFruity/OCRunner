@@ -24,6 +24,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)receiveStackBlock:(void (^)(NSString *str))block;
 
 - (void)test6ArgsMethoCall:(int)arg1 arg2:(int)arg2  arg3:(int)arg3 arg4:(int)arg4 arg5:(int)arg5 arg6:(int)arg6;
+- (int)scriptReceiveCArray:(int *)array len:(int)len;
+- (int)receiveCArray:(int *)array len:(int)len;
+
 @end
 
 NS_ASSUME_NONNULL_END
