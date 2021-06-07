@@ -28,6 +28,11 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)threadStack;
 @end
 
+@class ORNode;
+@interface ORExecuteState: NSObject
+@property (nonatomic, strong)ORNode *executingNode;
+@end
+
 @interface ORThreadContext : NSObject
 @property (nonatomic, strong)ORArgsStack *argsStack;
 @property (nonatomic, strong)ORCallFrameStack *callFrameStack;

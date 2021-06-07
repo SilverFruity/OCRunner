@@ -281,22 +281,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 
 @end
 @implementation ORFuncVariable (Execute)
-- (id)copy{
-    ORFuncVariable *var = [ORFuncVariable copyFromVar:self];
-    var.pairs = self.pairs;
-    return var;
-}
 - (MFValue *)execute:(MFScopeChain *)scope{
     return [MFValue voidValue];
 }
 @end
 @implementation ORFuncDeclare(Execute)
-- (instancetype)copy{
-    ORFuncDeclare *declare = [ORFuncDeclare new];
-    declare.funVar = [self.funVar copy];
-    declare.returnType = self.returnType;
-    return declare;
-}
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     NSMutableArray * parameters = [ORArgsStack  pop];
     [parameters enumerateObjectsUsingBlock:^(MFValue * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -596,7 +585,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         if(self.declare.isBlockDeclare){
             // xxx = ^void (int x){ }, block作为值
             MFBlock *manBlock = [[MFBlock alloc] init];
-            manBlock.func = [self normalFunctionImp];
+            manBlock.func = [self convertToNormalFunctionImp];
             MFScopeChain *blockScope = [MFScopeChain scopeChainWithNext:[MFScopeChain topScope]];
             copy_undef_var(self, [MFVarDeclareChain new], scope, blockScope);
             manBlock.outScope = blockScope;
@@ -842,6 +831,27 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 
 @implementation ORBinaryExpression(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
+    switch (self.operatorType) {
+        case BinaryOperatorLOGIC_AND:{
+            MFValue *leftValue = [self.left execute:scope];
+            if (leftValue.isSubtantial) {
+                MFValue *rightValue = [self.right execute:scope];
+                return [MFValue valueWithBOOL:rightValue.isSubtantial];
+            }
+            return [MFValue valueWithBOOL:NO];
+            break;
+        }
+        case BinaryOperatorLOGIC_OR:{
+            MFValue *leftValue = [self.left execute:scope];
+            if (leftValue.isSubtantial) {
+                return [MFValue valueWithBOOL:YES];
+            }
+            MFValue *rightValue = [self.right execute:scope];
+            return [MFValue valueWithBOOL:rightValue.isSubtantial];
+            break;
+        }
+        default: break;
+    }
     MFValue *rightValue = [self.right execute:scope];
     MFValue *leftValue = [self.left execute:scope];
     START_BOX;
@@ -919,18 +929,6 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }
         case BinaryOperatorEqual:{
             LogicBinaryOperatorExecute(leftValue, ==, rightValue);
-            cal_result.box.boolValue = logicResultValue;
-            cal_result.typeEncode = OCTypeStringBOOL;
-            break;
-        }
-        case BinaryOperatorLOGIC_AND:{
-            LogicBinaryOperatorExecute(leftValue, &&, rightValue);
-            cal_result.box.boolValue = logicResultValue;
-            cal_result.typeEncode = OCTypeStringBOOL;
-            break;
-        }
-        case BinaryOperatorLOGIC_OR:{
-            LogicBinaryOperatorExecute(leftValue, ||, rightValue);
             cal_result.box.boolValue = logicResultValue;
             cal_result.typeEncode = OCTypeStringBOOL;
             break;

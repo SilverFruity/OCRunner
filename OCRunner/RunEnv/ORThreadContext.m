@@ -56,6 +56,15 @@
                         }else if ([parent isKindOfClass:[ORMethodImplementation class]]){
                             ORMethodImplementation *imp = (ORMethodImplementation *)parent;
                             [log appendFormat:@"Block Code in Method: %@%@\n", imp.declare.isClassMethod ? @"+" : @"-", imp.declare.selectorName];
+                        }else if ([parent isKindOfClass:[ORCFuncCall class]]){
+                            ORCFuncCall *imp = (ORCFuncCall *)parent;
+                            [log appendFormat:@"Block Code in Function call: %@\n", imp.caller.value];
+                        }else if ([parent isKindOfClass:[ORMethodCall class]]){
+                            ORMethodCall *imp = (ORMethodCall *)parent;
+                            [log appendFormat:@"Block Code in Method call: %@\n", imp.selectorName];
+                        }else if ([parent isKindOfClass:[ORDeclareExpression class]]){
+                            ORDeclareExpression *imp = (ORDeclareExpression *)parent;
+                            [log appendFormat:@"Block Code in Decl: %@ %@\n", imp.pair.type.name, imp.pair.var.varname];
                         }
                         parent = parent.parentNode;
                     }
