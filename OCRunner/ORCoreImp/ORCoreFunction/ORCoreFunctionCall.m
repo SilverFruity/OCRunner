@@ -275,8 +275,10 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
     cif.nargs = (unsigned)argValues.count;
     cif.nfixedargs = (unsigned)needArgs;
     cif.flags =  (unsigned)resultFlagsForTypeEncode(cif.r_typeEncode, cif.arg_typeEncodes, cif.nargs);
-    void *ret = returnValue.pointer;
+    
+    void *ret = alloca(returnValue.memerySize);
     core_invoke_function_pointer(&cif, funptr, argvs, ret);
+    returnValue.pointer = ret;
 }
 #else
 #import "ORTypeVarPair+libffi.h"
