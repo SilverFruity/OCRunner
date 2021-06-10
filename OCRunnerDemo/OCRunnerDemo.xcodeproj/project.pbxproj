@@ -12,6 +12,7 @@
 		32C54D1C256B4E6D00D067A2 /* jsonpatch in Resources */ = {isa = PBXBuildFile; fileRef = 32C54D1B256B4E6D00D067A2 /* jsonpatch */; };
 		994370B6E6826AB9C293F686 /* Pods_OCRunnerDemo_OCRunnerDemoUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2566C827C6925E5FB35FC01D /* Pods_OCRunnerDemo_OCRunnerDemoUITests.framework */; };
 		D71B1056F7894677E4150783 /* Pods_OCRunnerDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A0001072323984F1566D9A7 /* Pods_OCRunnerDemo.framework */; };
+		EE3EDC2A26723EBE002ADC1E /* binarypatch in Resources */ = {isa = PBXBuildFile; fileRef = EE3EDC2926723EBE002ADC1E /* binarypatch */; };
 		EE480E9324794CDA003E4970 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = EE480E9224794CDA003E4970 /* AppDelegate.m */; };
 		EE480E9924794CDA003E4970 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EE480E9824794CDA003E4970 /* ViewController.m */; };
 		EE480E9C24794CDA003E4970 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EE480E9A24794CDA003E4970 /* Main.storyboard */; };
@@ -30,7 +31,6 @@
 		EEBF3350248E84AA00DDE2E9 /* ORGCDTests.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3348248E84A900DDE2E9 /* ORGCDTests.m */; };
 		EEBF3351248E84AA00DDE2E9 /* ORTestReplaceClass.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF334A248E84A900DDE2E9 /* ORTestReplaceClass.m */; };
 		EEBF3353248E84D100DDE2E9 /* ORTestWithObjc.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3352248E84D100DDE2E9 /* ORTestWithObjc.m */; };
-		EEC088A62669213B00538E9A /* binarypatch.ocrr in Resources */ = {isa = PBXBuildFile; fileRef = EEC088A52669213B00538E9A /* binarypatch.ocrr */; };
 		EEF1527D24DE867400574FA7 /* ORCoreFunctionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = EEF1527C24DE867400574FA7 /* ORCoreFunctionTests.m */; };
 		EEF439342620030E0058B805 /* SwiftViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF439332620030E0058B805 /* SwiftViewController.swift */; };
 		FC281C0D85B4B7B6A9A7B598 /* Pods_OCRunnerDemoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A467A8D72C17536B47CC6E64 /* Pods_OCRunnerDemoTests.framework */; };
@@ -71,6 +71,7 @@
 		8F8A43BAE2E8071D293A5DBF /* Pods-OCRunnerDemo-OCRunnerDemoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRunnerDemo-OCRunnerDemoTests.debug.xcconfig"; path = "Target Support Files/Pods-OCRunnerDemo-OCRunnerDemoTests/Pods-OCRunnerDemo-OCRunnerDemoTests.debug.xcconfig"; sourceTree = "<group>"; };
 		A467A8D72C17536B47CC6E64 /* Pods_OCRunnerDemoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OCRunnerDemoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D815354F6FF5505A909B20C9 /* Pods-OCRunnerDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRunnerDemo.release.xcconfig"; path = "Target Support Files/Pods-OCRunnerDemo/Pods-OCRunnerDemo.release.xcconfig"; sourceTree = "<group>"; };
+		EE3EDC2926723EBE002ADC1E /* binarypatch */ = {isa = PBXFileReference; lastKnownFileType = file; path = binarypatch; sourceTree = "<group>"; };
 		EE480E8E24794CDA003E4970 /* OCRunnerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OCRunnerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE480E9124794CDA003E4970 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		EE480E9224794CDA003E4970 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -107,7 +108,6 @@
 		EEBF334A248E84A900DDE2E9 /* ORTestReplaceClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORTestReplaceClass.m; sourceTree = "<group>"; };
 		EEBF334B248E84A900DDE2E9 /* ORTestClassProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORTestClassProperty.h; sourceTree = "<group>"; };
 		EEBF3352248E84D100DDE2E9 /* ORTestWithObjc.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ORTestWithObjc.m; path = ../../OCRunnerTests/ORTestWithObjc.m; sourceTree = "<group>"; };
-		EEC088A52669213B00538E9A /* binarypatch.ocrr */ = {isa = PBXFileReference; lastKnownFileType = file; path = binarypatch.ocrr; sourceTree = "<group>"; };
 		EEF1527C24DE867400574FA7 /* ORCoreFunctionTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ORCoreFunctionTests.m; path = ../../OCRunnerTests/ORCoreFunctionTests.m; sourceTree = "<group>"; };
 		EEF439322620030D0058B805 /* OCRunnerDemo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OCRunnerDemo-Bridging-Header.h"; sourceTree = "<group>"; };
 		EEF439332620030E0058B805 /* SwiftViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftViewController.swift; sourceTree = "<group>"; };
@@ -196,8 +196,8 @@
 				EE48547D263ACB5D0080AE07 /* SwiftViewController1.swift */,
 				EE48547E263ACB5D0080AE07 /* SwiftViewController1.xib */,
 				3241B960254535F3000302CF /* HotPath */,
-				EEC088A52669213B00538E9A /* binarypatch.ocrr */,
 				32C54D1B256B4E6D00D067A2 /* jsonpatch */,
+				EE3EDC2926723EBE002ADC1E /* binarypatch */,
 				EE480E9724794CDA003E4970 /* ViewController.h */,
 				EE480E9824794CDA003E4970 /* ViewController.m */,
 				EE66C0BD24FEA97000C85B31 /* Scripts.bundle */,
@@ -387,7 +387,7 @@
 				EE480E9E24794CDB003E4970 /* Assets.xcassets in Resources */,
 				EE485480263ACB5D0080AE07 /* SwiftViewController1.xib in Resources */,
 				32C54D1C256B4E6D00D067A2 /* jsonpatch in Resources */,
-				EEC088A62669213B00538E9A /* binarypatch.ocrr in Resources */,
+				EE3EDC2A26723EBE002ADC1E /* binarypatch in Resources */,
 				EE480E9C24794CDA003E4970 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -561,7 +561,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SRCROOT/OCRunnerDemo/PatchGenerator -files $SRCROOT/OCRunnerDemo/HotPath -refs  $SRCROOT/OCRunnerDemo/Scripts.bundle -output $SRCROOT/OCRunnerDemo/binarypatch.ocrr\n";
+			shellScript = "$SRCROOT/OCRunnerDemo/PatchGenerator -files $SRCROOT/OCRunnerDemo/HotPath -refs  $SRCROOT/OCRunnerDemo/Scripts.bundle -output $SRCROOT/OCRunnerDemo/binarypatch\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

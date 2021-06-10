@@ -20,7 +20,7 @@
     NSString *jsonPatchFilePath = [[NSBundle mainBundle] pathForResource:@"jsonpatch" ofType:nil];
     [ORInterpreter excuteJsonPatchFile:jsonPatchFilePath];
     
-    NSString *binaryPatchFilePath = [[NSBundle mainBundle] pathForResource:@"binarypatch.ocrr" ofType:nil];
+    NSString *binaryPatchFilePath = [[NSBundle mainBundle] pathForResource:@"binarypatch" ofType:nil];
     [ORInterpreter excuteBinaryPatchFile:binaryPatchFilePath];
 
 
