@@ -670,46 +670,62 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         default:
             break;
     }
-    
-
-    if ([self.value isKindOfClass:[ORValueExpression class]]) {
-        ORValueExpression *valueExp = (ORValueExpression *)self.value;
-        switch (valueExp.value_type) {
-            case OCValueSelf:{
-                MFValue *resultValue = [resultExp execute:scope];
-                scope.instance = resultValue;
-                break;
-            }
-            case OCValueVariable:{
-                MFValue *resultValue = [resultExp execute:scope];
-                [scope assignWithIdentifer:(NSString *)valueExp.value value:resultValue];
-                break;
-            }
-            default:
-                break;
+    switch (self.value.nodeType) {
+        case AstEnumUnaryExpression:
+        {
+            MFValue *left = [self.value execute:scope];
+            MFValue *right = [resultExp execute:scope];
+            [right writePointer:left.pointer typeEncode:left.typeEncode];
+            break;
         }
-    }else if ([self.value isKindOfClass:[ORMethodCall class]]) {
-        ORMethodCall *methodCall = (ORMethodCall *)self.value;
-        if (!methodCall.methodOperator) {
-            NSCAssert(0, @"must dot grammar");
+        case AstEnumValueExpression:
+        {
+            ORValueExpression *valueExp = (ORValueExpression *)self.value;
+            MFValue *resultValue = [resultExp execute:scope];
+            switch (valueExp.value_type) {
+                case OCValueSelf:{
+                    scope.instance = resultValue;
+                    break;
+                }
+                case OCValueVariable:{
+                    [scope assignWithIdentifer:(NSString *)valueExp.value value:resultValue];
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
         }
-        //调用对象setter方法
-        NSString *setterName = methodCall.names.firstObject;
-        NSString *first = [[setterName substringToIndex:1] uppercaseString];
-        NSString *other = setterName.length > 1 ? [setterName substringFromIndex:1] : @"";
-        setterName = [NSString stringWithFormat:@"set%@%@",first,other];
-        ORMethodCall *setCaller = [ORMethodCall new];
-        setCaller.caller = [(ORMethodCall *)self.value caller];
-        setCaller.names = [@[setterName] mutableCopy];
-        setCaller.values = [@[resultExp] mutableCopy];
-        setCaller.isAssignedValue = YES;
-        [setCaller execute:scope];
-    }else if([self.value isKindOfClass:[ORSubscriptExpression class]]){
-        MFValue *resultValue = [resultExp execute:scope];
-        ORSubscriptExpression *subExp = (ORSubscriptExpression *)self.value;
-        MFValue *caller = [subExp.caller execute:scope];
-        MFValue *indexValue = [subExp.keyExp execute:scope];
-        [caller subscriptSetValue:resultValue index:indexValue];
+        case AstEnumMethodCall:
+        {
+            ORMethodCall *methodCall = (ORMethodCall *)self.value;
+            if (!methodCall.methodOperator) {
+                NSCAssert(0, @"must dot grammar");
+            }
+            //调用对象setter方法
+            NSString *setterName = methodCall.names.firstObject;
+            NSString *first = [[setterName substringToIndex:1] uppercaseString];
+            NSString *other = setterName.length > 1 ? [setterName substringFromIndex:1] : @"";
+            setterName = [NSString stringWithFormat:@"set%@%@",first,other];
+            ORMethodCall *setCaller = [ORMethodCall new];
+            setCaller.nodeType = AstEnumMethodCall;
+            setCaller.caller = [(ORMethodCall *)self.value caller];
+            setCaller.names = [@[setterName] mutableCopy];
+            setCaller.values = [@[resultExp] mutableCopy];
+            setCaller.isAssignedValue = YES;
+            [setCaller execute:scope];
+            break;
+        }
+        case AstEnumSubscriptExpression:
+        {
+            MFValue *resultValue = [resultExp execute:scope];
+            ORSubscriptExpression *subExp = (ORSubscriptExpression *)self.value;
+            MFValue *caller = [subExp.caller execute:scope];
+            MFValue *indexValue = [subExp.keyExp execute:scope];
+            [caller subscriptSetValue:resultValue index:indexValue];
+        }
+        default:
+            break;
     }
     return [MFValue normalEnd];
 }
@@ -822,7 +838,11 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         case UnaryOperatorAdressValue:{
             MFValue *resultValue = [MFValue defaultValueWithTypeEncoding:currentValue.typeEncode];
             resultValue.pointerCount -= 1;
-            resultValue.pointer = *(void **)currentValue.pointer;
+            if (self.parentNode.nodeType == AstEnumAssignExpression) {
+                [resultValue setValuePointerWithNoCopy:*(void **)currentValue.pointer];
+            }else{
+                resultValue.pointer = *(void **)currentValue.pointer;
+            }
             return resultValue;
         }
         default:

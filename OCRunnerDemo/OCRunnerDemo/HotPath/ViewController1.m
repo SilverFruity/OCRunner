@@ -45,6 +45,15 @@ void cfunctionCallBlock(void (^block)(NSString *)){
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    int *a = malloc(4);
+    *a = 1;
+    NSLog(@"a: %ld",*a);
+    [@[@"1",@"2",@"3"] enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        *stop = YES;
+        NSLog(@"stop: %ld",*stop);
+        NSLog(@"obj: %@",obj);
+    }];
+    
     UIButton *swiftButton = [[UIButton alloc] initWithFrame:CGRectMake(150,150,200,40)];
     [swiftButton setTitle:@"SwiftViewController" forState:UIControlStateNormal];
     [swiftButton setTitleColor:UIColor.blueColor forState:UIControlStateNormal];

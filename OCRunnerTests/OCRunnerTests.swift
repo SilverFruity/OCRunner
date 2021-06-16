@@ -12,7 +12,7 @@ import oc2mangoLib
 var hasAddScripts = false
 class CRunnerTests: XCTestCase {
     var scope: MFScopeChain!
-    let ocparser = Parser.shared()
+    let ocparser = ORParserForTest()
     var source = ""
     override func setUp() {
         if !hasAddScripts{

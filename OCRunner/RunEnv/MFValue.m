@@ -225,7 +225,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
         self.typeEncode = typeencode;
     }
 }
-- (void)setStructPointerWithNoCopy:(void *)pointer{
+- (void)setValuePointerWithNoCopy:(void *)pointer{
     [self deallocPointer];
     realBaseValue.pointerValue = pointer;
     _pointer = pointer;
@@ -286,21 +286,21 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     _typeEncode = strdup(typeEncode);
     _pointerCount = startDetectPointerCount(typeEncode);
     if (*typeEncode == OCTypeClass) {
-        self.typeName = @"Class";
+        _typeName = @"Class";
     }else if(*typeEncode == OCTypeStruct){
-        self.typeName = startStructNameDetect(typeEncode);
+        _typeName = startStructNameDetect(typeEncode);
     }else if(*typeEncode == OCTypeUnion){
-        self.typeName = startUnionNameDetect(typeEncode);
+        _typeName = startUnionNameDetect(typeEncode);
     }
 }
 - (void)convertValueWithTypeEncode:(const char *)typeEncode result:(void **)resultValue{
-    if (self.typeEncode == NULL) {
+    if (_typeEncode == NULL) {
         return;
     }
     do {
         if ((TypeEncodeIsBaseType(typeEncode)) == 0) break;
-        if (*self.typeEncode == *typeEncode) break;
-        if (self.pointer == NULL) break;
+        if (*_typeEncode == *typeEncode) break;
+        if (_pointer == NULL) break;
         //基础类型转换
         switch (*typeEncode) {
             case OCTypeUChar:{
@@ -378,7 +378,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 
 
-- (void)assignFrom:(MFValue *)src{
+- (void)assignWithNewValue:(MFValue *)src{
     [self setTypeInfoWithValue:src];
     [self setPointer:src.pointer];
 }
@@ -426,11 +426,11 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return *self.typeEncode == '^';
 }
 - (NSUInteger)memerySize{
-    if (self.typeEncode == NULL) {
+    if (_typeEncode == NULL) {
         return 0;
     }
     NSUInteger size;
-    NSGetSizeAndAlignment(self.typeEncode, &size, NULL);
+    NSGetSizeAndAlignment(_typeEncode, &size, NULL);
     return size;
 }
 - (MFValue *)subscriptGetWithIndex:(MFValue *)index{
@@ -530,7 +530,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     if (copied) {
         result.pointer = realBaseValue.pointerValue + offset;
     }else{
-        [result setStructPointerWithNoCopy:realBaseValue.pointerValue + offset];
+        [result setValuePointerWithNoCopy:realBaseValue.pointerValue + offset];
     }
     return result;
 }

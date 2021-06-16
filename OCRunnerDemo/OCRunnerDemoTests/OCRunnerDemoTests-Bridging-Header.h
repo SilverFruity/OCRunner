@@ -9,3 +9,5 @@
 #import "ORCallSuperNoArgTest.h"
 #import "ORGCDTests.h"
 #import "ORWeakPropertyAndIvar.h"
+#import "ORParserForTest.h"
+

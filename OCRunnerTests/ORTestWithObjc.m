@@ -15,10 +15,11 @@
 #import "ORWeakPropertyAndIvar.h"
 #import "ORTestReplaceClass.h"
 #import "ORTestClassIvar.h"
+#import "ORParserForTest.h"
 @interface ORTestWithObjc : XCTestCase
 @property (nonatomic, strong)MFScopeChain *currentScope;
 @property (nonatomic, strong)MFScopeChain *topScope;
-@property (nonatomic, strong)Parser *parser;
+@property (nonatomic, strong)ORParserForTest *parser;
 @end
 
 @interface Fibonaccia: NSObject
@@ -38,10 +39,10 @@ int fibonaccia(int n) {
 
 @implementation ORTestWithObjc
 - (void)setUp {
-    _parser = [Parser new];
+    _parser = [ORParserForTest new];
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        Parser *parser = [Parser new];
+        ORParserForTest *parser = [ORParserForTest new];
         NSBundle *currentBundle = [NSBundle bundleForClass:[ORTestWithObjc class]];
         NSString *bundlePath = [currentBundle pathForResource:@"Scripts" ofType:@"bundle"];
         NSBundle *frameworkBundle = [NSBundle bundleWithPath:bundlePath];
@@ -284,7 +285,7 @@ Element2Struct *Element2StructMake(){
     MFScopeChain *scope = self.currentScope;
     CGRect rect1 = CGRectZero;
     MFValue *value = [MFValue defaultValueWithTypeEncoding:@encode(CGRect)];
-    [value setStructPointerWithNoCopy:&rect1];
+    [value setValuePointerWithNoCopy:&rect1];
     [[value fieldNoCopyForKey:@"origin"] setFieldWithValue:[MFValue valueWithDouble:1] forKey:@"x"];
     [[value fieldNoCopyForKey:@"origin"] setFieldWithValue:[MFValue valueWithDouble:2] forKey:@"y"];
     XCTAssert(rect1.origin.x == 1, @"origin.x %f", rect1.origin.x);
@@ -313,7 +314,7 @@ Element2Struct *Element2StructMake(){
     MFScopeChain *scope = self.currentScope;
     CGRect rect1 = CGRectZero;
     MFValue *value = [MFValue defaultValueWithTypeEncoding:@encode(CGRect)];
-    [value setStructPointerWithNoCopy:&rect1];
+    [value setValuePointerWithNoCopy:&rect1];
     [[value fieldForKey:@"origin"] setFieldWithValue:[MFValue valueWithDouble:1] forKey:@"x"];
     [[value fieldForKey:@"origin"] setFieldWithValue:[MFValue valueWithDouble:2] forKey:@"y"];
     XCTAssert(rect1.origin.x == 0, @"origin.x %f", rect1.origin.x);
@@ -964,6 +965,17 @@ int signatureBlockPtr(id object, int b){
         input[i] = i;
     }
     XCTAssert([obejct scriptReceiveCArray:input len:10] == 45);
+}
+- (void)testSetPointerValue{
+    MFScopeChain *scope = self.currentScope;
+    NSString *source = @"\
+    int *pointerValue = malloc(4);\
+    *pointerValue = 10;\
+    int result = *pointerValue;";
+    AST *ast = [_parser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    MFValue *a = [scope recursiveGetValueWithIdentifier:@"result"];
+    XCTAssert(a.intValue == 10, @"%d", a.intValue);
 }
 - (void)testOCRecursiveFunctionPerformanceExample {
     [self measureBlock:^{

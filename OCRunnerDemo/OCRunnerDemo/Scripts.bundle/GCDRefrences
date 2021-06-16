@@ -177,4 +177,4 @@ void
 dispatch_source_set_registration_handler(dispatch_source_t source,
     dispatch_block_t _Nullable handler);
     
-
+void * malloc(int __size);

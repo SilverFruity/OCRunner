@@ -337,7 +337,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @property (assign,nonatomic)NSInteger pointerCount;
 @property (nonatomic,assign)const char* typeEncode;
 @property (nonatomic,assign, nullable)void *pointer;
-- (void)setStructPointerWithNoCopy:(void *)pointer;
+- (void)setValuePointerWithNoCopy:(void *)pointer;
 - (void)setDefaultValue;
 - (BOOL)isBlockValue;
 
@@ -349,7 +349,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 - (void)writePointer:(void *)pointer typeEncode:(const char *)typeEncode;
 - (void)setTypeInfoWithValue:(MFValue *)value;
 
-- (void)assignFrom:(MFValue *)src;
+- (void)assignWithNewValue:(MFValue *)src;
 
 - (BOOL)isPointer;
 - (BOOL)isSubtantial;
