@@ -2,6 +2,13 @@
 #import <UIKit/UIKit.h>
 #import <MJRefresh/MJRefresh.h>
 
+@implementation OCRunnerDemo.SwiftViewController
+- (void)updateFrame{
+    [self ORGupdateFrame];
+    NSLog(@"OC updateFrame");
+}
+@end
+
 @interface HotFixController : UIViewController <UITableViewDelegate, UITableViewDataSource>
 @property (nonatomic, strong) UITableView *tableView;
 @property (nonatomic, copy) void (^block)(void);
