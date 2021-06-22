@@ -35,6 +35,9 @@
 #include <mach-o/dyld.h>
 #include <mach-o/loader.h>
 #include <mach-o/nlist.h>
+#include <sys/time.h>
+#include <stdio.h>
+#include <unistd.h>
 
 #ifdef __LP64__
 typedef struct mach_header_64 mach_header_t;
@@ -59,38 +62,31 @@ typedef struct nlist nlist_t;
 #endif
 
 struct rebindings_entry {
-  struct FunctionSearch *rebindings;
-  size_t rebindings_nel;
+  struct FunctionSearch search;
   struct rebindings_entry *next;
+  size_t link_list_len;
 };
 struct FunctionSearch makeFunctionSearch(const char *name, void *pointer){
-    size_t len = strlen(name);
-    char *str = malloc(len + 1);
-    strncpy(str, name, len);
-    str[len] = '\0';
     struct FunctionSearch search;
-    search.name = str;
+    search.name = strdup(name);
     search.pointer = pointer;
     return search;
 }
-static struct rebindings_entry *_rebindings_head;
 
+static struct rebindings_entry *_rebindings_head = NULL;
+static bool _is_first_search = true;
 static int prepend_search(struct rebindings_entry **rebindings_head,
                               struct FunctionSearch rebindings[],
                               size_t nel) {
-  struct rebindings_entry *new_entry = (struct rebindings_entry *) malloc(sizeof(struct rebindings_entry));
-  if (!new_entry) {
-    return -1;
-  }
-  new_entry->rebindings = (struct FunctionSearch *) malloc(sizeof(struct FunctionSearch) * nel);
-  if (!new_entry->rebindings) {
-    free(new_entry);
-    return -1;
-  }
-  memcpy(new_entry->rebindings, rebindings, sizeof(struct FunctionSearch) * nel);
-  new_entry->rebindings_nel = nel;
-  new_entry->next = *rebindings_head;
-  *rebindings_head = new_entry;
+    for (int i = 0; i < nel; i++) {
+        struct FunctionSearch search = rebindings[i];
+        struct rebindings_entry *new_entry = (struct rebindings_entry *) malloc(sizeof(struct rebindings_entry));
+        memcpy(&(new_entry->search), &search, sizeof(struct FunctionSearch));
+        new_entry->link_list_len = nel;
+        if (new_entry->search.name == NULL) continue;;
+        new_entry->next = *rebindings_head;
+        *rebindings_head = new_entry;
+    }
   return 0;
 }
 static void perform_search_with_section(struct rebindings_entry *rebindings,
@@ -101,6 +97,8 @@ static void perform_search_with_section(struct rebindings_entry *rebindings,
                                            uint32_t *indirect_symtab) {
   uint32_t *indirect_symbol_indices = indirect_symtab + section->reserved1;
   void **indirect_symbol_bindings = (void **)((uintptr_t)slide + section->addr);
+  void *free_list[rebindings->link_list_len];
+  size_t free_list_len = 0;
   for (uint i = 0; i < section->size / sizeof(void *); i++) {
     uint32_t symtab_index = indirect_symbol_indices[i];
     if (symtab_index == INDIRECT_SYMBOL_ABS || symtab_index == INDIRECT_SYMBOL_LOCAL ||
@@ -111,20 +109,26 @@ static void perform_search_with_section(struct rebindings_entry *rebindings,
     char *symbol_name = strtab + strtab_offset;
     bool symbol_name_longer_than_1 = symbol_name[0] && symbol_name[1];
     struct rebindings_entry *cur = rebindings;
-    while (cur) {
-      for (uint j = 0; j < cur->rebindings_nel; j++) {
-        if (symbol_name_longer_than_1 && strcmp(&symbol_name[1], cur->rebindings[j].name) == 0) {
-          if (cur->rebindings[j].pointer != NULL) {
-            *(cur->rebindings[j].pointer) = indirect_symbol_bindings[i];
+    struct rebindings_entry *prev = NULL;
+      while (cur) {
+          if (symbol_name_longer_than_1 && strcmp(&symbol_name[1], cur->search.name) == 0) {
+              if (cur->search.pointer != NULL) {
+                  *(cur->search.pointer) = indirect_symbol_bindings[i];
+                  if (prev) {
+                      prev->next = cur->next;
+                      free_list[free_list_len++] = cur;
+                  }
+              }
           }
-          goto symbol_loop;
-        }
+          prev = cur;
+          cur = cur->next;
       }
-      cur = cur->next;
-    }
-  symbol_loop:;
   }
-
+    for (int i = 0; i < free_list_len; i++) {
+        struct rebindings_entry *cur = free_list[i];
+        free((void *)cur->search.name);
+        free(cur);
+    }
 }
 
 static void search_symbols_for_image(struct rebindings_entry *rebindings,
@@ -202,8 +206,9 @@ int search_symbols(struct FunctionSearch rebindings[], size_t rebindings_nel) {
   }
   // If this was the first call, register callback for image additions (which is also invoked for
   // existing images, otherwise, just run on existing images
-  if (!_rebindings_head->next) {
+  if (!_is_first_search) {
     _dyld_register_func_for_add_image(_rebind_symbols_for_image);
+    _is_first_search = false;
   } else {
     uint32_t c = _dyld_image_count();
     for (uint32_t i = 0; i < c; i++) {
