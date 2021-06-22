@@ -206,7 +206,7 @@ int search_symbols(struct FunctionSearch rebindings[], size_t rebindings_nel) {
   }
   // If this was the first call, register callback for image additions (which is also invoked for
   // existing images, otherwise, just run on existing images
-  if (!_is_first_search) {
+  if (_is_first_search) {
     _dyld_register_func_for_add_image(_rebind_symbols_for_image);
     _is_first_search = false;
   } else {
