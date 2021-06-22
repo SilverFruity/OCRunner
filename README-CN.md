@@ -1,4 +1,6 @@
-# OCRunner
+**OCRunner QQ群: 860147790**
+
+[相关文章](https://github.com/SilverFruity/OCRunner/issues/11)
 
 ## Demo运行
 

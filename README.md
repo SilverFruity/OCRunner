@@ -1,6 +1,8 @@
-# OCRunner
+**OCRunner QQ群: 860147790**
 
 [中文介绍](https://github.com/SilverFruity/OCRunner/blob/master/README-CN.md)
+
+[相关文章](https://github.com/SilverFruity/OCRunner/issues/11)
 
 [Wiki](https://github.com/SilverFruity/OCRunner/wiki)
 
