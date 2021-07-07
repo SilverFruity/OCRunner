@@ -271,7 +271,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             return;
         }
         void *result = NULL;
-//        [self convertValueWithTypeEncode:typeEncode result:&result];
+        [self convertValueWithTypeEncode:typeEncode result:&result];
         _typeString.type = _type;
         _typeString.end = '\0';
         _typeEncode = (char *)&_typeString;

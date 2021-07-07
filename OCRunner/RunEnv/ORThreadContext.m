@@ -114,51 +114,43 @@
 @implementation ORThreadContext
 
 - (void)push:(NSArray *)vars{
-    [mem_array addObjectsFromArray:vars];
-    cursor += vars.count;
-//    for (id object in vars) {
-//        void *ptr = (__bridge void *)object;
-//        mem[sp + cursor] = ptr;
-//        cursor++;
-//    }
-//    assert(mem + sp + cursor < mem_end);
+    for (id object in vars) {
+        mem[sp + cursor] = (__bridge void *)object;
+        cursor++;
+    }
+    assert(mem + sp + cursor < mem_end);
 }
 - (id)seek:(mem_cursor)offset{
-//    void *ptr = (void *)mem[sp + offset];
-//    return (__bridge id)(ptr);
-    id result = mem_array[sp + offset];
-    NSAssert([result isKindOfClass:[MFValue class]], @"%d", sp + offset);
-    return result;
+    void *ptr = (void *)mem[sp + offset];
+    return (__bridge id)(ptr);
 }
 - (void)enter{
-//    mem[sp] = fp;
-    mem_array[sp + cursor] = @(fp);
-    fp = sp;
-    sp += 1;
+    fp = sp + cursor;
+    mem[fp] = sp;
+    sp = fp + 1;
     cursor = 0;
 }
 - (void)exit{
-//    sp = mem[fp];
-    sp = [mem_array[fp] unsignedIntValue];
-    fp = sp - 1;
-    cursor = 0;
+    mem_cursor before = fp;
+    sp = mem[fp];
+    if (sp == 0) {
+        fp = 0;
+        cursor = 0;
+    }else{
+        fp = sp - 1;
+        cursor = before - sp;
+    }
 }
+
 + (instancetype)threadContext{
-    static dispatch_once_t onceToken;
-    static ORThreadContext *ctx = nil;
-    dispatch_once(&onceToken, ^{
-        ctx = [ORThreadContext new];
-    });
+    //每一个线程拥有一个独立的上下文
+    NSMutableDictionary *threadInfo = [[NSThread currentThread] threadDictionary];
+    ORThreadContext *ctx = threadInfo[@"ORThreadContext"];
+    if (!ctx) {
+        ctx = [[ORThreadContext alloc] init];
+        threadInfo[@"ORThreadContext"] = ctx;
+    }
     return ctx;
-    
-//    //每一个线程拥有一个独立的上下文
-//    NSMutableDictionary *threadInfo = [[NSThread currentThread] threadDictionary];
-//    ORThreadContext *ctx = threadInfo[@"ORThreadContext"];
-//    if (!ctx) {
-//        ctx = [[ORThreadContext alloc] init];
-//        threadInfo[@"ORThreadContext"] = ctx;
-//    }
-//    return ctx;
 }
 - (instancetype)init
 {
@@ -170,7 +162,6 @@
         size_t mem_size = 1024 * 1024;
         mem = malloc(sizeof(UInt64) * mem_size);
         mem_end = mem + mem_size;
-        mem_array = [NSMutableArray array];
         self.argsStack = [[ORArgsStack alloc] init];
         self.callFrameStack = [[ORCallFrameStack alloc] init];
     }

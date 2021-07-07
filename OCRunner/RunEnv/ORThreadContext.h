@@ -42,7 +42,6 @@ typedef UInt64 * local_var_mem;
     mem_cursor cursor;
     local_var_mem mem;
     local_var_mem mem_end;
-    NSMutableArray *mem_array;
 }
 - (void)push:(NSArray *)vars;
 - (id)seek:(mem_cursor)offset;

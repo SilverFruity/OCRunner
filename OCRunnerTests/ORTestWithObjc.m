@@ -996,16 +996,15 @@ int signatureBlockPtr(id object, int b){
     @"        return 1;"
     @"    return fibonaccia(n - 1) + fibonaccia(n - 2);"
     @"}"
-    @"int a = fibonaccia(20);";
+    @"int a = fibonaccia(25);";
     AST *ast = [_parser parseSource:source];
     InitialSymbolTableVisitor *visitor = [InitialSymbolTableVisitor new];
     symbolTableRoot = [ocSymbolTable new];
     for (ORNode *node in ast.nodes) {
         [visitor visit:node];
     }
-    ast.scope = symbolTableRoot.scope;
-    
-    [self measureBlock:^{
+    [self measureBlock:^{   
+        ast.scope = symbolTableRoot.scope;
         for (id <OCExecute> exp in ast.globalStatements) {
             [exp execute:scope];
         }

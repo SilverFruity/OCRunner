@@ -742,19 +742,22 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     MFValue *(^initializeBlock)(void) = ^MFValue *{
         if (self.expression) {
             MFValue *value = [[self.expression execute:scope] copy];
-            value.modifier = self.declarator.type.modifier;
-            value.typeName = self.declarator.type.name;
-            value.typeEncode = self.declarator.symbol.decl.typeEncode;
+            ocDecl *decl = self.declarator.symbol.decl;
+            value.modifier = decl.declModifer;
+            value.typeName = decl.typeName;
+            value.typeEncode = decl.typeEncode;
             if ([self.declarator.var isKindOfClass:[ORFunctionDeclNode class]] && self.declarator.var.isBlock == NO)
                 value.funDecl = (ORFunctionDeclNode *)self.declarator;
             
+            [scope setValue:value withIndentifier:self.declarator.var.varname];
             [[ORThreadContext threadContext] push:@[value]];
             return value;
         }else{
             MFValue *value = [MFValue defaultValueWithTypeEncoding:self.declarator.typeEncode];
-            value.modifier = self.declarator.type.modifier;
-            value.typeName = self.declarator.type.name;
-            value.typeEncode = self.declarator.typeEncode;
+            ocDecl *decl = self.declarator.symbol.decl;
+            value.modifier = decl.declModifer;
+            value.typeName = decl.typeName;
+            value.typeEncode = decl.typeEncode;
             [value setDefaultValue];
             if (value.type == OCTypeObject
                 && NSClassFromString(value.typeName) == nil
@@ -766,6 +769,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             if ([self.declarator.var isKindOfClass:[ORFunctionDeclNode class]] && self.declarator.var.isBlock == NO)
                 value.funDecl = (ORFunctionDeclNode *)self.declarator;
             
+            [scope setValue:value withIndentifier:self.declarator.var.varname];
             [[ORThreadContext threadContext] push:@[value]];
             return value;
         }
