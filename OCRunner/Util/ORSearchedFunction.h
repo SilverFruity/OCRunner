@@ -9,11 +9,10 @@
 #import <Foundation/Foundation.h>
 #import "RunnerClasses+Execute.h"
 NS_ASSUME_NONNULL_BEGIN
-@class ORTypeVarPair;
-@class ORFuncVariable;
+
 @interface ORSearchedFunction : NSObject <OCExecute>
-@property (nonatomic,strong)ORTypeVarPair *funPair;
-@property (nonatomic,strong,readonly)ORFuncVariable *funVar;
+@property (nonatomic,strong)ORDeclaratorNode *funPair;
+@property (nonatomic,strong,readonly)ORFunctionDeclNode *funVar;
 @property (nonatomic,copy)NSString *name;
 @property (nonatomic,assign)void *pointer;
 + (instancetype)functionWithName:(NSString *)name;

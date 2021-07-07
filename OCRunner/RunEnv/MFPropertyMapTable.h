@@ -14,9 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MFPropertyMapTableItem:NSObject
 
 @property (strong, nonatomic) Class clazz;
-@property (strong, nonatomic) ORPropertyDeclare *property;
+@property (strong, nonatomic) ORPropertyNode *property;
 
-- (instancetype)initWithClass:(Class)clazz  property:(ORPropertyDeclare *)property;
+- (instancetype)initWithClass:(Class)clazz  property:(ORPropertyNode *)property;
 
 @end
 

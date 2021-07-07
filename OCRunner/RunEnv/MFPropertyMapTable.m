@@ -10,7 +10,7 @@
 
 @implementation MFPropertyMapTableItem
 
-- (instancetype)initWithClass:(Class)clazz property:(ORPropertyDeclare *)property{
+- (instancetype)initWithClass:(Class)clazz property:(ORPropertyNode *)property{
     if (self = [super init]) {
         _clazz = clazz;
         _property = property;

@@ -306,7 +306,6 @@
 				EE480EA524794CDB003E4970 /* Sources */,
 				EE480EA624794CDB003E4970 /* Frameworks */,
 				EE480EA724794CDB003E4970 /* Resources */,
-				A21BF2CE9641117E14698C8A /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -475,7 +474,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SRCROOT/OCRunnerDemo/PatchGenerator -files $SRCROOT/OCRunnerDemo/HotPath -refs  $SRCROOT/OCRunnerDemo/Scripts.bundle -output $SRCROOT/OCRunnerDemo/jsonpatch -type json\n";
+			shellScript = "# $SRCROOT/OCRunnerDemo/PatchGenerator -files $SRCROOT/OCRunnerDemo/HotPath -refs  $SRCROOT/OCRunnerDemo/Scripts.bundle -output $SRCROOT/OCRunnerDemo/jsonpatch -type json\n";
 		};
 		4FE3DD32E86F36371C142998 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -514,23 +513,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-OCRunnerDemo-OCRunnerDemoUITests/Pods-OCRunnerDemo-OCRunnerDemoUITests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		A21BF2CE9641117E14698C8A /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-OCRunnerDemoTests/Pods-OCRunnerDemoTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-OCRunnerDemoTests/Pods-OCRunnerDemoTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-OCRunnerDemoTests/Pods-OCRunnerDemoTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		ECC75E2B37FCA0D7E0C662E2 /* [CP] Embed Pods Frameworks */ = {

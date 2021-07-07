@@ -20,52 +20,50 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ORNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORTypeSpecial (Execute) <OCExecute>
+@interface ORTypeNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORVariable  (Execute) <OCExecute>
+@interface ORVariableNode  (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORTypeVarPair (Execute) <OCExecute>
+@interface ORDeclaratorNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORFuncVariable (Execute) <OCExecute>
+
+@interface ORFunctionDeclNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORFuncDeclare (Execute) <OCExecute>
-- (nullable MFValue *)execute:(MFScopeChain *)scope;
-@end
-@interface ORValueExpression  (Execute) <OCExecute>
+@interface ORValueNode  (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 @interface ORMethodCall (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORCFuncCall (Execute) <OCExecute>
+@interface ORFunctionCall (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORScopeImp (Execute) <OCExecute>
+@interface ORBlockNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORFunctionImp (Execute) <OCExecute>
+@interface ORFunctionNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORSubscriptExpression (Execute) <OCExecute>
+@interface ORSubscriptNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORAssignExpression  (Execute) <OCExecute>
+@interface ORAssignNode  (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORDeclareExpression  (Execute) <OCExecute>
+@interface ORInitDeclaratorNode  (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORUnaryExpression  (Execute) <OCExecute>
+@interface ORUnaryNode  (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORBinaryExpression (Execute) <OCExecute>
+@interface ORBinaryNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORTernaryExpression (Execute) <OCExecute>
+@interface ORTernaryNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 
@@ -90,50 +88,44 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ORForInStatement  (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORReturnStatement  (Execute) <OCExecute>
+@interface ORControlStatNode  (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORBreakStatement  (Execute) <OCExecute>
-- (nullable MFValue *)execute:(MFScopeChain *)scope;
-@end
-@interface ORContinueStatement  (Execute) <OCExecute>
-- (nullable MFValue *)execute:(MFScopeChain *)scope;
-@end
-@interface ORPropertyDeclare (Execute) <OCExecute>
+@interface ORPropertyNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @property (nonatomic, assign, readonly)  const objc_property_attribute_t * propertyAttributes;
 @end
-@interface ORMethodDeclare (Execute) <OCExecute>
+@interface ORMethodDeclNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORMethodImplementation (Execute) <OCExecute>
+@interface ORMethodNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
-@interface ORClass (Execute) <OCExecute>
-- (nullable MFValue *)execute:(MFScopeChain *)scope;
-@end
-
-@interface ORStructExpressoin (Execute) <OCExecute>
+@interface ORClassNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 
-@interface OREnumExpressoin (Execute) <OCExecute>
+@interface ORStructStatNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 
-@interface ORTypedefExpressoin (Execute) <OCExecute>
+@interface OREnumStatNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 
-@interface ORProtocol (Execute) <OCExecute>
+@interface ORTypedefStatNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 
-@interface ORCArrayVariable (Execute) <OCExecute>
+@interface ORProtocolNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 
-@interface ORUnionExpressoin (Execute) <OCExecute>
+@interface ORCArrayDeclNode (Execute) <OCExecute>
+- (nullable MFValue *)execute:(MFScopeChain *)scope;
+@end
+
+@interface ORUnionStatNode (Execute) <OCExecute>
 - (nullable MFValue *)execute:(MFScopeChain *)scope;
 @end
 

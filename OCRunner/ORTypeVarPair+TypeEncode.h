@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ORTypeVarPair (TypeEncode)
+@interface ORDeclaratorNode (TypeEncode)
 - (const char *)blockSignature;
 - (const char *)typeEncode;
 @end
@@ -18,11 +18,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 
-@interface ORTypeVarPair(Instance)
-+ (instancetype)typePairWithTypeKind:(TypeKind)type;
+@interface ORDeclaratorNode(Instance)
++ (instancetype)typePairWithTypeKind:(OCType)type;
 + (instancetype)objectTypePair;
 + (instancetype)pointerTypePair;
 @end
 
-ORTypeVarPair * ORTypeVarPairForTypeEncode(const char *typeEncode);
+ORDeclaratorNode * ORTypeVarPairForTypeEncode(const char *typeEncode);
 NS_ASSUME_NONNULL_END

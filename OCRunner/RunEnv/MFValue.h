@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "RunnerClasses+Execute.h"
-#import "ORHandleTypeEncode.h"
+#import <oc2mangoLib/ocHandleTypeEncode.h>
 
 #define START_BOX \
 ORCaculateValue cal_result;\
@@ -361,7 +361,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 - (void)subscriptSetValue:(MFValue *)value index:(MFValue *)index;
 
 ///  仅仅针对函数指针变量的调用，记录签名信息， int (*xxx)(int a ) = &x;  xxxx();
-@property (nonatomic,strong)ORTypeVarPair *funPair;
+@property (nonatomic,strong)ORFunctionDeclNode *funDecl;
 @end
 
 @interface MFValue (Struct)

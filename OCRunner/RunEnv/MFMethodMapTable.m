@@ -9,7 +9,7 @@
 #import "MFMethodMapTable.h"
 
 @implementation MFMethodMapTableItem
-- (instancetype)initWithClass:(Class)clazz method:(ORMethodImplementation *)method; {
+- (instancetype)initWithClass:(Class)clazz method:(ORMethodNode *)method; {
     if (self = [super init]) {
         _clazz = clazz;
         _methodImp = method;

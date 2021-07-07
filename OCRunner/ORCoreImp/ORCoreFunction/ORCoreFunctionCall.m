@@ -9,8 +9,8 @@
 #import "ORCoreFunctionCall.h"
 #import <Foundation/Foundation.h>
 #import "MFValue.h"
-#import "ORStructDeclare.h"
-#import "ORHandleTypeEncode.h"
+
+#import <oc2mangoLib/ocHandleTypeEncode.h>
 #import "ptrauth.h"
 #import "ORCoreFunction.h"
 #ifndef __libffi__

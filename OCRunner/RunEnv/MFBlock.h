@@ -56,12 +56,12 @@ BOOL NSBlockHasSignature(id block);
 void NSBlockSetSignature(id block, const char *typeencode);
 void *simulateNSBlock(const char* typeEncoding, void *imp, void *userdata);
 
-@class ORTypeVarPair;
+
 @interface MFBlock : NSObject
 
 @property (strong, nonatomic) MFScopeChain *outScope;
-@property (strong, nonatomic) ORFunctionImp *func;
-@property (strong, nonatomic) NSMutableArray <ORTypeVarPair *>*paramTypes;
-@property (strong, nonatomic) ORTypeVarPair *retType;
+@property (strong, nonatomic) ORFunctionNode *func;
+@property (strong, nonatomic) NSMutableArray <ORDeclaratorNode *>*paramTypes;
+@property (strong, nonatomic) ORDeclaratorNode *retType;
 - (id)ocBlock;
 @end

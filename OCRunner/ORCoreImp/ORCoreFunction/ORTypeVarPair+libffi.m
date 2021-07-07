@@ -8,8 +8,8 @@
 #if __has_include("ffi.h")
 #import "ORTypeVarPair+libffi.h"
 #import "ORTypeVarPair+TypeEncode.h"
-#import "ORHandleTypeEncode.h"
-#import "ORStructDeclare.h"
+#import <oc2mangoLib/ocHandleTypeEncode.h>
+
 ffi_type *typeEncode2ffi_type(const char *typeencode){
     //TypeEncode不能为空
     assert(typeencode != nil);
@@ -59,17 +59,17 @@ ffi_type *typeEncode2ffi_type(const char *typeencode){
         case OCTypeStruct:
         {
             ffi_type *type = malloc(sizeof(ffi_type));
-            type->type = FFI_TYPE_STRUCT;
-            type->alignment = 0;
-            NSString *structName = startStructNameDetect(typeencode);
-            assert(structName != nil);
-            ORStructDeclare *declare = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:structName].declare;
-            type->elements = malloc(sizeof(void *) * (declare.keys.count + 1));
-            type->size = sizeOfTypeEncode(declare.typeEncoding);
-            for (int i = 0; i < declare.keys.count; i++) {
-                type->elements[i] = typeEncode2ffi_type(declare.keyTypeEncodes[declare.keys[i]].UTF8String);
-            }
-            type->elements[declare.keys.count] = NULL;
+//            type->type = FFI_TYPE_STRUCT;
+//            type->alignment = 0;
+//            NSString *structName = startStructNameDetect(typeencode);
+//            assert(structName != nil);
+//            ORStructDeclare *declare = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:structName].declare;
+//            type->elements = malloc(sizeof(void *) * (declare.keys.count + 1));
+//            type->size = sizeOfTypeEncode(declare.typeEncoding);
+//            for (int i = 0; i < declare.keys.count; i++) {
+//                type->elements[i] = typeEncode2ffi_type(declare.keyTypeEncodes[declare.keys[i]].UTF8String);
+//            }
+//            type->elements[declare.keys.count] = NULL;
             return type;
         }
     }
@@ -77,7 +77,7 @@ ffi_type *typeEncode2ffi_type(const char *typeencode){
     assert(false);
     return NULL;
 }
-@implementation ORTypeVarPair (libffi)
+@implementation ORDeclaratorNode (libffi)
 - (ffi_type *)libffi_type{
     return typeEncode2ffi_type(self.typeEncode);
 }

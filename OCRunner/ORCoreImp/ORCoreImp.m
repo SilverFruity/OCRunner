@@ -14,11 +14,11 @@
 #import "MFPropertyMapTable.h"
 #import "ORTypeVarPair+TypeEncode.h"
 #import "util.h"
-#import "ORStructDeclare.h"
+
 #import "ORCoreFunctionCall.h"
 void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     MFScopeChain *scope = [MFScopeChain scopeChainWithNext:[MFScopeChain topScope]];
-    ORMethodImplementation *methodImp = (__bridge ORMethodImplementation *)userdata;
+    ORMethodNode *methodImp = (__bridge ORMethodNode *)userdata;
     __unsafe_unretained id target = *(__unsafe_unretained id *)args[0];
     SEL sel = *(SEL *)args[1];
     BOOL classMethod = object_isClass(target);
@@ -34,9 +34,10 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
                 id copied = (__bridge id)Block_copy(argValue->realBaseValue.pointerValue);
                 argValue.pointer = &copied;
             }
+            
             if (NSBlockHasSignature(argValue.objectValue) == NO) {
-                ORTypeVarPair *blockdecl = methodImp.declare.parameterTypes[i - 2];
-                if ([blockdecl.var isKindOfClass:[ORFuncVariable class]]) {
+                ORDeclaratorNode *blockdecl = methodImp.declare.parameters[i - 2];
+                if ([blockdecl isKindOfClass:[ORFunctionDeclNode class]]) {
                     NSBlockSetSignature(argValue.objectValue, blockdecl.blockSignature);
                 }
             }
@@ -57,7 +58,7 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
         void (*originalDealloc)(__unsafe_unretained id, SEL) = (__typeof__(originalDealloc))method_getImplementation(deallocMethod);
         originalDealloc(target, NSSelectorFromString(@"dealloc"));
     }
-    if (value.type != TypeVoid && value.pointer != NULL){
+    if (value.type != OCTypeVoid && value.pointer != NULL){
         // 类型转换
         [value writePointer:ret typeEncode:[sig methodReturnType]];
     }
@@ -75,7 +76,7 @@ void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
     MFValue *value = nil;
     [ORArgsStack push:argValues];
     value = [mangoBlock.func execute:mangoBlock.outScope];
-    if (value.type != TypeVoid && value.pointer != NULL){
+    if (value.type != OCTypeVoid && value.pointer != NULL){
         // 类型转换
         [value writePointer:ret typeEncode:[sig methodReturnType]];
     }
@@ -85,14 +86,14 @@ void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
 void getterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
     id target = *(__strong id *)args[0];
     SEL sel = *(SEL *)args[1];
-    ORPropertyDeclare *propDef = (__bridge ORPropertyDeclare *)userdata;
+    ORPropertyNode *propDef = (__bridge ORPropertyNode *)userdata;
     NSString *propName = propDef.var.var.varname;
     NSMethodSignature *sig = [target methodSignatureForSelector:sel];
     __autoreleasing MFValue *propValue = objc_getAssociatedObject(target, mf_propKey(propName));
     if (!propValue) {
         propValue = [MFValue defaultValueWithTypeEncoding:propDef.var.typeEncode];
     }
-    if (propValue.type != TypeVoid && propValue.pointer != NULL){
+    if (propValue.type != OCTypeVoid && propValue.pointer != NULL){
         [propValue writePointer:ret typeEncode:sig.methodReturnType];
     }
 }
@@ -102,7 +103,7 @@ void setterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
     SEL sel = *(SEL *)args[1];
     const char *argTypeEncode = [[target methodSignatureForSelector:sel] getArgumentTypeAtIndex:2];
     MFValue *value = [MFValue valueWithTypeEncode:argTypeEncode pointer:args[2]];
-    ORPropertyDeclare *propDef = (__bridge ORPropertyDeclare *)userdata;
+    ORPropertyNode *propDef = (__bridge ORPropertyNode *)userdata;
     NSString *propName = propDef.var.var.varname;
     MFPropertyModifier modifier = propDef.modifier;
     if (modifier & MFPropertyModifierMemWeak) {

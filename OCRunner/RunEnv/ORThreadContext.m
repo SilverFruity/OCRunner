@@ -20,10 +20,10 @@
     }
     return self;
 }
-+ (void)pushMethodCall:(ORMethodImplementation *)imp instance:(MFValue *)instance{
++ (void)pushMethodCall:(ORMethodNode *)imp instance:(MFValue *)instance{
     [[ORCallFrameStack threadStack].array addObject:@[instance, imp]];
 }
-+ (void)pushFunctionCall:(ORFunctionImp *)imp scope:(MFScopeChain *)scope{
++ (void)pushFunctionCall:(ORFunctionNode *)imp scope:(MFScopeChain *)scope{
     [[ORCallFrameStack threadStack].array addObject:@[scope, imp]];
 }
 + (void)pop{
@@ -39,38 +39,39 @@
         NSArray *frame = frames[i];
         if ([frame.firstObject isKindOfClass:[MFValue class]]) {
             MFValue *instance = frame.firstObject;
-            ORMethodImplementation *imp = frame.lastObject;
+            ORMethodNode *imp = frame.lastObject;
+            
             [log appendFormat:@"%@ %@ %@\n", imp.declare.isClassMethod ? @"+" : @"-", instance.objectValue, imp.declare.selectorName];
         }else{
             MFScopeChain *scope = frame.firstObject;
-            ORFunctionImp *imp = frame.lastObject;
-            if (imp.declare.funVar.varname == nil){
+            ORFunctionNode *imp = frame.lastObject;
+            if (imp.declare.var.varname == nil){
                 [log appendFormat:@"Block Call: Captured external variables '%@' \n",[scope.vars.allKeys componentsJoinedByString:@","]];
                 // 比如dispatch_after中的block，此时只会孤零零的提醒你一个Block Call
                 // 异步调用时，此时通过语法树回溯，可以定位到 block 所在的类以及方法名
                 if (i == 0) {
                     ORNode *parent = imp.parentNode;
                     while (parent != nil ) {
-                        if ([parent isKindOfClass:[ORClass class]]) {
-                            [log appendFormat:@"Block Code in Class: %@\n", [(ORClass *)parent className]];
-                        }else if ([parent isKindOfClass:[ORMethodImplementation class]]){
-                            ORMethodImplementation *imp = (ORMethodImplementation *)parent;
+                        if ([parent isKindOfClass:[ORClassNode class]]) {
+                            [log appendFormat:@"Block Code in Class: %@\n", [(ORClassNode *)parent className]];
+                        }else if ([parent isKindOfClass:[ORMethodNode class]]){
+                            ORMethodNode *imp = (ORMethodNode *)parent;
                             [log appendFormat:@"Block Code in Method: %@%@\n", imp.declare.isClassMethod ? @"+" : @"-", imp.declare.selectorName];
-                        }else if ([parent isKindOfClass:[ORCFuncCall class]]){
-                            ORCFuncCall *imp = (ORCFuncCall *)parent;
-                            [log appendFormat:@"Block Code in Function call: %@\n", imp.caller.value];
+                        }else if ([parent isKindOfClass:[ORFunctionCall class]]){
+                            ORFunctionCall *imp = (ORFunctionCall *)parent;
+                            [log appendFormat:@"Block Code in Function call: %@\n", [(ORValueNode *)imp.caller value]];
                         }else if ([parent isKindOfClass:[ORMethodCall class]]){
                             ORMethodCall *imp = (ORMethodCall *)parent;
                             [log appendFormat:@"Block Code in Method call: %@\n", imp.selectorName];
-                        }else if ([parent isKindOfClass:[ORDeclareExpression class]]){
-                            ORDeclareExpression *imp = (ORDeclareExpression *)parent;
-                            [log appendFormat:@"Block Code in Decl: %@ %@\n", imp.pair.type.name, imp.pair.var.varname];
+                        }else if ([parent isKindOfClass:[ORInitDeclaratorNode class]]){
+                            ORInitDeclaratorNode *imp = (ORInitDeclaratorNode *)parent;
+                            [log appendFormat:@"Block Code in Decl: %@ %@\n", imp.declarator.type.name, imp.declarator.var.varname];
                         }
                         parent = parent.parentNode;
                     }
                 }
             }else{
-                [log appendFormat:@" CFunction: %@\n", imp.declare.funVar.varname];
+                [log appendFormat:@" CFunction: %@\n", imp.declare.var.varname];
             }
         }
     }
@@ -111,20 +112,65 @@
 @end
 
 @implementation ORThreadContext
+
+- (void)push:(NSArray *)vars{
+    [mem_array addObjectsFromArray:vars];
+    cursor += vars.count;
+//    for (id object in vars) {
+//        void *ptr = (__bridge void *)object;
+//        mem[sp + cursor] = ptr;
+//        cursor++;
+//    }
+//    assert(mem + sp + cursor < mem_end);
+}
+- (id)seek:(mem_cursor)offset{
+//    void *ptr = (void *)mem[sp + offset];
+//    return (__bridge id)(ptr);
+    id result = mem_array[sp + offset];
+    NSAssert([result isKindOfClass:[MFValue class]], @"%d", sp + offset);
+    return result;
+}
+- (void)enter{
+//    mem[sp] = fp;
+    mem_array[sp + cursor] = @(fp);
+    fp = sp;
+    sp += 1;
+    cursor = 0;
+}
+- (void)exit{
+//    sp = mem[fp];
+    sp = [mem_array[fp] unsignedIntValue];
+    fp = sp - 1;
+    cursor = 0;
+}
 + (instancetype)threadContext{
-    //每一个线程拥有一个独立的上下文
-    NSMutableDictionary *threadInfo = [[NSThread currentThread] threadDictionary];
-    ORThreadContext *ctx = threadInfo[@"ORThreadContext"];
-    if (!ctx) {
-        ctx = [[ORThreadContext alloc] init];
-        threadInfo[@"ORThreadContext"] = ctx;
-    }
+    static dispatch_once_t onceToken;
+    static ORThreadContext *ctx = nil;
+    dispatch_once(&onceToken, ^{
+        ctx = [ORThreadContext new];
+    });
     return ctx;
+    
+//    //每一个线程拥有一个独立的上下文
+//    NSMutableDictionary *threadInfo = [[NSThread currentThread] threadDictionary];
+//    ORThreadContext *ctx = threadInfo[@"ORThreadContext"];
+//    if (!ctx) {
+//        ctx = [[ORThreadContext alloc] init];
+//        threadInfo[@"ORThreadContext"] = ctx;
+//    }
+//    return ctx;
 }
 - (instancetype)init
 {
     self = [super init];
     if (self) {
+        sp = 0;
+        fp = 0;
+        cursor = 0;
+        size_t mem_size = 1024 * 1024;
+        mem = malloc(sizeof(UInt64) * mem_size);
+        mem_end = mem + mem_size;
+        mem_array = [NSMutableArray array];
         self.argsStack = [[ORArgsStack alloc] init];
         self.callFrameStack = [[ORCallFrameStack alloc] init];
     }

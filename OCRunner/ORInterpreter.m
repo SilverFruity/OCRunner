@@ -12,7 +12,7 @@
 #import "MFScopeChain.h"
 #import "ORSearchedFunction.h"
 #import "MFValue.h"
-#import "ORStructDeclare.h"
+#import <oc2mangoLib/oc2mangoLib.h>
 #import "ORSystemFunctionPointerTable.h"
 #import "MFStaticVarTable.h"
 #import "ORffiResultCache.h"
@@ -55,6 +55,12 @@
 
 + (void)excuteNodes:(NSArray <ORNode *>*)nodes{
     
+    InitialSymbolTableVisitor *visitor = [InitialSymbolTableVisitor new];
+    symbolTableRoot = [ocSymbolTable new];
+    for (ORNode *node in nodes) {
+        [visitor visit:node];
+    }
+    
     ORInterpreter.shared.currentNodes = nodes;
     
     MFScopeChain *scope = [MFScopeChain topScope];
@@ -69,16 +75,18 @@
     for (ORNode *node in nodes) {
         [node execute:scope];
     }
+    
 }
 + (NSArray *)linkFunctions:(NSArray *)nodes scope:(MFScopeChain *)scope{
-    NSMutableArray <ORTypeVarPair *>*funcVars = [NSMutableArray array];
+    NSMutableArray <ORDeclaratorNode *>*funcVars = [NSMutableArray array];
     NSMutableArray *normalStatements = [NSMutableArray array];
     NSMutableArray *names = [NSMutableArray array];
     for (id <OCExecute> expression in nodes) {
-        if ([expression isKindOfClass:[ORDeclareExpression class]]) {
-            ORTypeVarPair *pair = [(ORDeclareExpression *)expression pair];
+        
+        if ([expression isKindOfClass:[ORInitDeclaratorNode class]]) {
+            ORDeclaratorNode *pair = [(ORInitDeclaratorNode *)expression declarator];
             NSString *name = pair.var.varname;
-            if ([pair.var isKindOfClass:[ORFuncVariable class]]) {
+            if ([pair isKindOfClass:[ORFunctionDeclNode class]]) {
                 if ([ORGlobalFunctionTable.shared getFunctionNodeWithName:name] == nil) {
                     [funcVars addObject:pair];
                     [names addObject:name];
@@ -91,7 +99,7 @@
     }
     //获取函数指针
     NSDictionary *table = [ORSearchedFunction functionTableForNames:names];
-    for (ORTypeVarPair *pair in funcVars) {
+    for (ORDeclaratorNode *pair in funcVars) {
         ORSearchedFunction *function = table[pair.var.varname];
         function.funPair = pair;
         // 将每个ORSearchedFunction都保存在ORGlobalFunctionTable中，保证不会被释放。
@@ -100,7 +108,7 @@
     }
     #if DEBUG
     NSMutableArray *functionNames = [NSMutableArray array];
-    for (ORTypeVarPair *pair in funcVars){
+    for (ORDeclaratorNode *pair in funcVars){
         NSString *functionName = pair.var.varname;
         ORSearchedFunction *function = table[functionName];
         if (function.pointer == NULL
@@ -139,7 +147,7 @@
     if (clear) {
         [[MFScopeChain topScope] clear];
         [[MFStaticVarTable shareInstance] clear];
-        [[ORTypeSymbolTable shareInstance] clear];
+//        [[ORTypeSymbolTable shareInstance] clear];
     }
     ORInterpreter.shared.currentNodes = [NSArray array];
 }

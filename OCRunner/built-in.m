@@ -8,7 +8,7 @@
 
 #import "MFValue.h"
 #import "MFScopeChain.h"
-#import "ORStructDeclare.h"
+
 #import <UIKit/UIKit.h>
 #import "ORSystemFunctionPointerTable.h"
 static void add_gcd_build_in(MFScopeChain *scope){

@@ -14,9 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MFMethodMapTableItem:NSObject
 
 @property (strong, nonatomic) Class clazz;
-@property (strong, nonatomic) ORMethodImplementation *methodImp;
+@property (strong, nonatomic) ORMethodNode *methodImp;
 
-- (instancetype)initWithClass:(Class)clazz method:(ORMethodImplementation *)method;
+- (instancetype)initWithClass:(Class)clazz method:(ORMethodNode *)method;
 
 @end
 

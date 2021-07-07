@@ -13,12 +13,12 @@
 #import "MFValue.h"
 #import "ORTypeVarPair+TypeEncode.h"
 #import "ORCoreImp.h"
-#import "ORHandleTypeEncode.h"
-#import "ORStructDeclare.h"
+#import <oc2mangoLib/ocHandleTypeEncode.h>
+
 #import "ORSystemFunctionPointerTable.h"
 @implementation ORSearchedFunction
-- (ORFuncVariable *)funVar{
-    return (ORFuncVariable *)self.funPair.var;
+- (ORFunctionDeclNode *)funVar{
+    return (ORFunctionDeclNode *)self.funPair.var;
 }
 + (instancetype)functionWithName:(NSString *)name{
     ORSearchedFunction *function = [ORSearchedFunction new];
@@ -56,7 +56,7 @@
         invoke_functionPointer(funcptr, args, returnValue);
         //多参数
     }else{
-        invoke_functionPointer(funcptr, args, returnValue, self.funVar.pairs.count);
+        invoke_functionPointer(funcptr, args, returnValue, self.funVar.params.count);
     }
     return returnValue;
 }

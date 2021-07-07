@@ -14,7 +14,7 @@
 #import "MFBlock.h"
 #import "MFValue.h"
 #import "MFStaticVarTable.h"
-#import "ORStructDeclare.h"
+
 #import <objc/message.h>
 #import "ORTypeVarPair+TypeEncode.h"
 #import "ORCoreImp.h"
@@ -43,7 +43,7 @@ void recover_method(BOOL isClassMethod, Class clazz, SEL sel){
 }
 @end
 
-@implementation ORClass (Reverse)
+@implementation ORClassNode (Reverse)
 - (void)deallocffiReusltForKey:(NSValue *)key{
     or_ffi_result *result = [[ORffiResultCache shared] ffiResultForKey:key];
     if (result) {
@@ -54,14 +54,14 @@ void recover_method(BOOL isClassMethod, Class clazz, SEL sel){
 - (void)recover{
     Class class = NSClassFromString(self.className);
     // Reverse时，释放ffi_closure和ffi_type
-    for (ORMethodImplementation *imp in self.methods) {
+    for (ORMethodNode *imp in self.methods) {
         SEL sel = NSSelectorFromString(imp.declare.selectorName);
         BOOL isClassMethod = imp.declare.isClassMethod;
         recover_method(isClassMethod, class, sel);
         [self deallocffiReusltForKey:[NSValue valueWithPointer:(__bridge void *)imp]];
         CFRelease((__bridge CFTypeRef)(imp));
     }
-    for (ORPropertyDeclare *prop in self.properties){
+    for (ORPropertyNode *prop in self.properties){
         NSString *name = prop.var.var.varname;
         NSString *str1 = [[name substringWithRange:NSMakeRange(0, 1)] uppercaseString];
         NSString *str2 = name.length > 1 ? [name substringFromIndex:1] : nil;

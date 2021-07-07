@@ -74,7 +74,7 @@ void or_ffi_result_free(or_ffi_result *result);
 
 @class NSArray;
 @class MFValue;
-@class ORTypeVarPair;
+@class ORDeclaratorNode;
 
 void core_invoke_function_pointer(ffi_cif *cif, void *funcptr, void **args, void *ret);
 __attribute__((overloadable))
@@ -85,21 +85,21 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
 
 
 or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
-                        NSArray <ORTypeVarPair *>*args,
-                        ORTypeVarPair *ret)  __attribute__((overloadable));
+                        NSArray <ORDeclaratorNode *>*args,
+                        ORDeclaratorNode *ret)  __attribute__((overloadable));
 
 or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
-                        NSArray <ORTypeVarPair *>*args,
-                        ORTypeVarPair *ret,
+                        NSArray <ORDeclaratorNode *>*args,
+                        ORDeclaratorNode *ret,
                         void *userdata);
 
 or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
-                      NSArray <ORTypeVarPair *>*args,
-                      ORTypeVarPair *ret) __attribute__((overloadable));
+                      NSArray <ORDeclaratorNode *>*args,
+                      ORDeclaratorNode *ret) __attribute__((overloadable));
 
 or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
-                      NSArray <ORTypeVarPair *>*args,
-                      ORTypeVarPair *ret,
+                      NSArray <ORDeclaratorNode *>*args,
+                      ORDeclaratorNode *ret,
                       void *userdata);
 
 #endif /* ORCoreFunction_h */

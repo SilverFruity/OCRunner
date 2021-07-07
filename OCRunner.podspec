@@ -16,6 +16,7 @@ s.pod_target_xcconfig = {
   }
 s.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
 s.vendored_libraries  = 'OCRunner/libffi/libffi.a'
+s.dependency "oc2mangoLib", "1.2.0"
 s.dependency "ORPatchFile", "1.2.0"
 end
 
