@@ -61,6 +61,9 @@
         [visitor visit:node];
     }
     
+    [ORInterpreter shared]->constants = symbolTableRoot->constants;
+    [ORInterpreter shared]->constants_size = symbolTableRoot->constants_size;
+    
     ORInterpreter.shared.currentNodes = nodes;
     
     MFScopeChain *scope = [MFScopeChain topScope];
@@ -73,7 +76,7 @@
     
     //注册Protcol 注册Class 全局函数声明等
     for (ORNode *node in nodes) {
-        [node execute:scope];
+        eval(self, [ORThreadContext current], scope, node);
     }
     
 }
@@ -81,7 +84,7 @@
     NSMutableArray <ORDeclaratorNode *>*funcVars = [NSMutableArray array];
     NSMutableArray *normalStatements = [NSMutableArray array];
     NSMutableArray *names = [NSMutableArray array];
-    for (id <OCExecute> expression in nodes) {
+    for (id expression in nodes) {
         
         if ([expression isKindOfClass:[ORInitDeclaratorNode class]]) {
             ORDeclaratorNode *pair = [(ORInitDeclaratorNode *)expression declarator];

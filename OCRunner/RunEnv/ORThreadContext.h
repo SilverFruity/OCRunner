@@ -34,23 +34,28 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 typedef UInt64 mem_cursor;
-typedef UInt64 * local_var_mem;
+typedef unichar * local_var_mem;
+typedef struct {
+    mem_cursor lr;
+    __unsafe_unretained ORNode *node;
+}or_vm_function_frame;
 @interface ORThreadContext : NSObject
 {
-    mem_cursor sp;
+    @public
     mem_cursor fp;
+    mem_cursor sp;
     mem_cursor cursor;
     local_var_mem mem;
     local_var_mem mem_end;
 }
-- (void)push:(NSArray *)vars;
-- (id)seek:(mem_cursor)offset;
+- (void)push:(void *)var size:(size_t)size;
+- (void *)seek:(mem_cursor)offset size:(size_t)size;
 - (void)enter;
 - (void)exit;
 
 @property (nonatomic, strong)ORArgsStack *argsStack;
 @property (nonatomic, strong)ORCallFrameStack *callFrameStack;
-+ (instancetype)threadContext;
++ (instancetype)current;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -30,7 +30,7 @@
     [[ORCallFrameStack threadStack].array removeLastObject];
 }
 + (instancetype)threadStack{
-    return ORThreadContext.threadContext.callFrameStack;
+    return ORThreadContext.current.callFrameStack;
 }
 + (NSString *)history{
     NSMutableArray *frames = [ORCallFrameStack threadStack].array;
@@ -90,7 +90,7 @@
     return self;
 }
 + (instancetype)threadStack{
-    return ORThreadContext.threadContext.argsStack;
+    return ORThreadContext.current.argsStack;
 }
 + (void)push:(NSMutableArray <MFValue *> *)value{
     NSAssert(value, @"value can not be nil");
@@ -113,21 +113,19 @@
 
 @implementation ORThreadContext
 
-- (void)push:(NSArray *)vars{
-    for (id object in vars) {
-        mem[sp + cursor] = (__bridge void *)object;
-        cursor++;
-    }
-    assert(mem + sp + cursor < mem_end);
+- (void)push:(void *)var size:(size_t)size{
+    memcpy(mem + sp + cursor, var , size);
+    cursor += size;
 }
-- (id)seek:(mem_cursor)offset{
-    void *ptr = (void *)mem[sp + offset];
-    return (__bridge id)(ptr);
+- (void *)seek:(mem_cursor)offset size:(size_t)size{
+    void *ptr = NULL;
+    memcpy(&ptr, mem + sp + offset, size);
+    return ptr;
 }
 - (void)enter{
     fp = sp + cursor;
     mem[fp] = sp;
-    sp = fp + 1;
+    sp = fp + 1 * 8;
     cursor = 0;
 }
 - (void)exit{
@@ -137,12 +135,12 @@
         fp = 0;
         cursor = 0;
     }else{
-        fp = sp - 1;
+        fp = sp - 1 * 8;
         cursor = before - sp;
     }
 }
 
-+ (instancetype)threadContext{
++ (instancetype)current{
     //每一个线程拥有一个独立的上下文
     NSMutableDictionary *threadInfo = [[NSThread currentThread] threadDictionary];
     ORThreadContext *ctx = threadInfo[@"ORThreadContext"];

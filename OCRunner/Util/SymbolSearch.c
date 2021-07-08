@@ -200,6 +200,9 @@ static void _rebind_symbols_for_image(const struct mach_header *header,
 }
 
 int search_symbols(struct FunctionSearch rebindings[], size_t rebindings_nel) {
+  if (rebindings_nel == 0) {
+    return 0;
+  }
   int retval = prepend_search(&_rebindings_head, rebindings, rebindings_nel);
   if (retval < 0) {
     return retval;

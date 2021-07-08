@@ -14,7 +14,7 @@
 #import "MFPropertyMapTable.h"
 #import "ORTypeVarPair+TypeEncode.h"
 #import "util.h"
-
+#import "ORInterpreter.h"
 #import "ORCoreFunctionCall.h"
 void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     MFScopeChain *scope = [MFScopeChain scopeChainWithNext:[MFScopeChain topScope]];
@@ -52,7 +52,9 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     }
     MFValue *value = nil;
     [ORArgsStack push:argValues];
-    value = [methodImp execute:scope];
+    
+    value = eval([ORInterpreter shared], [ORThreadContext current], scope, methodImp);
+    
     if (sel == NSSelectorFromString(@"dealloc")) {
         Method deallocMethod = class_getInstanceMethod(object_getClass(target), NSSelectorFromString(@"ORGdealloc"));
         void (*originalDealloc)(__unsafe_unretained id, SEL) = (__typeof__(originalDealloc))method_getImplementation(deallocMethod);
@@ -75,7 +77,7 @@ void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
     }
     MFValue *value = nil;
     [ORArgsStack push:argValues];
-    value = [mangoBlock.func execute:mangoBlock.outScope];
+    value = eval([ORInterpreter shared], [ORThreadContext current], mangoBlock.outScope, mangoBlock.func);
     if (value.type != OCTypeVoid && value.pointer != NULL){
         // 类型转换
         [value writePointer:ret typeEncode:[sig methodReturnType]];

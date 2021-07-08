@@ -10,6 +10,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 @interface ORInterpreter : NSObject
+{
+@public;
+    unichar *constants;
+    unsigned long constants_size;
+}
 + (instancetype)shared;
 + (void)excuteBinaryPatchFile:(NSString *)path;
 + (void)excuteJsonPatchFile:(NSString *)path;

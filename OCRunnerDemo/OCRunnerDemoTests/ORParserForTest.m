@@ -7,7 +7,7 @@
 //
 
 #import "ORParserForTest.h"
-
+#import <OCRunner/ORInterpreter.h>
 @implementation ORParserForTest
 - (AST *)parseCodeSource:(CodeSource *)source{
     [super parseCodeSource:source];
@@ -22,6 +22,14 @@
             [GlobalAst merge:newFile.nodes];
         }
     } while (0);
+    InitialSymbolTableVisitor *visitor = [InitialSymbolTableVisitor new];
+    symbolTableRoot = [ocSymbolTable new];
+    for (ORNode *node in GlobalAst.nodes) {
+        [visitor visit:node];
+    }
+    GlobalAst.scope = symbolTableRoot.scope;
+    [ORInterpreter shared]->constants = symbolTableRoot->constants;
+    [ORInterpreter shared]->constants_size = symbolTableRoot->constants_size;
     return GlobalAst;
 }
 @end

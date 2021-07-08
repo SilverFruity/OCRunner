@@ -9,7 +9,7 @@
 #import "AppDelegate.h"
 #import <OCRunner.h>
 #import <objc/message.h>
-
+#import <oc2mangoLib/oc2mangoLib.h>
 @interface AppDelegate ()
 
 @end
@@ -23,6 +23,27 @@
 //    NSString *binaryPatchFilePath = [[NSBundle mainBundle] pathForResource:@"binarypatch" ofType:nil];
 //    [ORInterpreter excuteBinaryPatchFile:binaryPatchFilePath];
 
+    NSString * source =
+    @"long long fibonaccia(long long n){"
+    @"    if (n == 1 || n == 2)"
+    @"        return 1;"
+    @"    long long a = fibonaccia(n - 1); long long b = fibonaccia(n - 2);"
+    @"    return a + b;"
+    @"}"
+    @"int a = fibonaccia(25);";
+    AST *ast = [[Parser new] parseSource:source];
+    InitialSymbolTableVisitor *visitor = [InitialSymbolTableVisitor new];
+    symbolTableRoot = [ocSymbolTable new];
+    for (ORNode *node in ast.nodes) {
+        [visitor visit:node];
+    }
+    ast.scope = symbolTableRoot.scope;
+    [ORInterpreter shared]->constants = symbolTableRoot->constants;
+    [ORInterpreter shared]->constants_size = symbolTableRoot->constants_size;
+    for (id exp in ast.globalStatements) {
+        eval([ORInterpreter shared], [ORThreadContext current], [MFScopeChain topScope], exp);
+    }
+    NSLog(@"%d",[[MFScopeChain topScope] getValueWithIdentifier:@"a"].uIntValue);
 
 //    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 //        [ORInterpreter reverse];

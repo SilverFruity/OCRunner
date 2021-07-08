@@ -20,6 +20,8 @@
 @property (nonatomic, strong)MFScopeChain *currentScope;
 @property (nonatomic, strong)MFScopeChain *topScope;
 @property (nonatomic, strong)ORParserForTest *parser;
+@property (nonatomic, strong)ORInterpreter *inter;
+@property (nonatomic, strong)ORThreadContext *ctx;
 @end
 
 @interface Fibonaccia: NSObject
@@ -40,6 +42,8 @@ int fibonaccia(int n) {
 @implementation ORTestWithObjc
 - (void)setUp {
     _parser = [ORParserForTest new];
+    _inter = [ORInterpreter shared];
+    _ctx = [ORThreadContext current];
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
 //        ORParserForTest *parser = [ORParserForTest new];
@@ -168,8 +172,8 @@ int fibonaccia(int n) {
 //    "TestUnion2 value;"
 //    "value.a = 2;";
 //    AST *ast = [_parser parseSource:source];
-//    for (id <OCExecute> exp in ast.nodes) {
-//        [exp execute:scope];
+//    for (id exp in ast.nodes) {
+//        eval(self.inter, self.ctx, scope, exp);
 //    }
 //    MFValue *value = [scope getValueWithIdentifier:@"value"];
 //    XCTAssert([value unionFieldForKey:@"b"].intValue == 2);
@@ -298,8 +302,8 @@ int fibonaccia(int n) {
 //    "rect.size.width = 100;"
 //    "rect.size.height = 100;";
 //    AST *ast = [_parser parseSource:source];
-//    for (id <OCExecute> exp in ast.globalStatements) {
-//        [exp execute:scope];
+//    for (id exp in ast.globalStatements) {
+//        eval(self.inter, self.ctx, scope, exp);
 //    }
 //    MFValue *rectValue = [scope recursiveGetValueWithIdentifier:@"rect"];
 //    CGRect rect = *(CGRect *) rectValue.pointer;
@@ -326,8 +330,8 @@ int fibonaccia(int n) {
 //    "size.width = 100;"
 //    "size.height = 100;";
 //    AST *ast = [_parser parseSource:source];
-//    for (id <OCExecute> exp in ast.globalStatements) {
-//        [exp execute:scope];
+//    for (id exp in ast.globalStatements) {
+//        eval(self.inter, self.ctx, scope, exp);
 //    }
 //    MFValue *rectValue = [scope recursiveGetValueWithIdentifier:@"frame"];
 //    CGRect rect = *(CGRect *) rectValue.pointer;
@@ -343,8 +347,8 @@ int fibonaccia(int n) {
 //    "CGRect frame = view.frame;"
 //    "CGFloat a = frame.size.height;";
 //    AST *ast = [_parser parseSource:source];
-//    for (id <OCExecute> exp in ast.globalStatements) {
-//        [exp execute:scope];
+//    for (id exp in ast.globalStatements) {
+//        eval(self.inter, self.ctx, scope, exp);
 //    }
 //    MFValue *frameValue = [scope recursiveGetValueWithIdentifier:@"frame"];
 //    CGRect rect = *(CGRect *) frameValue.pointer;
@@ -440,8 +444,8 @@ int fibonaccia(int n) {
     @"int *b = &a;"
     @"int **c = &b;";
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.globalStatements) {
-        [exp execute:scope];
+    for (id exp in ast.globalStatements) {
+        eval(self.inter, self.ctx, scope, exp);
     }
     MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
     XCTAssert(strcmp(a.typeEncode, "i") == 0);
@@ -462,8 +466,8 @@ int fibonaccia(int n) {
     @"int **c = &b;"
     @"int d = **c;";
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.globalStatements) {
-        [exp execute:scope];
+    for (id exp in ast.globalStatements) {
+        eval(self.inter, self.ctx, scope, exp);
     }
     MFValue *d = [scope recursiveGetValueWithIdentifier:@"d"];
     XCTAssert(strcmp(d.typeEncode, "i") == 0);
@@ -510,8 +514,8 @@ int fibonaccia(int n) {
     NSString * source =
     @"id object = @protocol(NSObject);";
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.globalStatements) {
-        [exp execute:scope];
+    for (id exp in ast.globalStatements) {
+        eval(self.inter, self.ctx, scope, exp);
     }
     MFValue *d = [scope recursiveGetValueWithIdentifier:@"object"];
     Protocol *protocol = d.objectValue;
@@ -527,8 +531,8 @@ int fibonaccia(int n) {
     @"}"
     @"int a = fibonaccia(20);";
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.globalStatements) {
-        [exp execute:scope];
+    for (id exp in ast.globalStatements) {
+        eval(self.inter, self.ctx, scope, exp);
     }
     MFValue *c = [scope recursiveGetValueWithIdentifier:@"a"];
     XCTAssert(c.intValue == fibonaccia(20));
@@ -545,8 +549,8 @@ int fibonaccia(int n) {
     @"@end"
     @"int a = [[Fibonaccia new] run:20];";
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.nodes) {
-        [exp execute:scope];
+    for (id exp in ast.nodes) {
+        eval(self.inter, self.ctx, scope, exp);
     }
     MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
     XCTAssert(a.intValue == fibonaccia(20));
@@ -560,8 +564,8 @@ int fibonaccia(int n) {
     @"id value = [ORTestReplaceClass new];"
     @"int a = imp(value, @selector(testOriginalMethod));";
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.nodes) {
-        [exp execute:scope];
+    for (id exp in ast.nodes) {
+        eval(self.inter, self.ctx, scope, exp);
     }
     MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
     XCTAssert(a.intValue == 2);
@@ -579,8 +583,8 @@ int fibonaccia(int n) {
     "double h = 0.25 - 1;"
     ;
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.nodes) {
-        [exp execute:scope];
+    for (id exp in ast.nodes) {
+        eval(self.inter, self.ctx, scope, exp);
     }
     MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
     MFValue *b = [scope recursiveGetValueWithIdentifier:@"b"];
@@ -649,8 +653,8 @@ int fibonaccia(int n) {
     "@end";
     
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.nodes) {
-        [exp execute:scope];
+    for (id exp in ast.nodes) {
+        eval(self.inter, self.ctx, scope, exp);
     }
     NSMutableString *propertyStrong = [NSMutableString string];
     @autoreleasepool {
@@ -989,26 +993,28 @@ int signatureBlockPtr(id object, int b){
     }];
 }
 - (void)testOCRunnerRecursiveFunctionPerformanceExample {
-    MFScopeChain *scope = self.currentScope;
     NSString * source =
-    @"int fibonaccia(int n){"
+    @"long long fibonaccia(long long n){"
     @"    if (n == 1 || n == 2)"
     @"        return 1;"
-    @"    return fibonaccia(n - 1) + fibonaccia(n - 2);"
+    @"    long long a = fibonaccia(n - 1); long long b = fibonaccia(n - 2);"
+    @"    return a + b;"
     @"}"
     @"int a = fibonaccia(25);";
-    AST *ast = [_parser parseSource:source];
+    AST *ast = [[Parser new] parseSource:source];
     InitialSymbolTableVisitor *visitor = [InitialSymbolTableVisitor new];
     symbolTableRoot = [ocSymbolTable new];
     for (ORNode *node in ast.nodes) {
         [visitor visit:node];
     }
-    [self measureBlock:^{   
-        ast.scope = symbolTableRoot.scope;
-        for (id <OCExecute> exp in ast.globalStatements) {
-            [exp execute:scope];
+    ast.scope = symbolTableRoot.scope;
+    [ORInterpreter shared]->constants = symbolTableRoot->constants;
+    [ORInterpreter shared]->constants_size = symbolTableRoot->constants_size;
+    [self measureBlock:^{
+        for (id exp in ast.globalStatements) {
+            eval([ORInterpreter shared], [ORThreadContext current], [MFScopeChain topScope], exp);
         }
-        NSLog(@"%d",[scope getValueWithIdentifier:@"a"].uIntValue);
+        NSLog(@"%d",[[MFScopeChain topScope] getValueWithIdentifier:@"a"].uIntValue);
     }];
 }
 - (void)testOCRunnerRecursiveMethodPerformanceExample {
@@ -1026,8 +1032,8 @@ int signatureBlockPtr(id object, int b){
     @"int a = [[Fibonaccia new] run:25];";
     AST *ast = [_parser parseSource:source];
     [self measureBlock:^{
-        for (id <OCExecute> exp in ast.nodes) {
-            [exp execute:scope];
+        for (id exp in ast.nodes) {
+            eval(self.inter, self.ctx, scope, exp);
         }
         NSLog(@"%d",[scope getValueWithIdentifier:@"a"].uIntValue);
     }];

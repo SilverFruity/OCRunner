@@ -39,9 +39,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 @end
 
 @implementation MFValue
-{
-    BOOL _isAlloced;
-}
+
 + (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncode{
     return [MFValue valueWithTypeEncode:typeEncode pointer:NULL];
 }
@@ -59,23 +57,15 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     self = [super init];
     typeEncoding = removeTypeEncodingPrefix((char *)typeEncoding);
     _modifier = DeclarationModifierStrong;
+//    _typeEncode = typeEncoding;
+//    _pointer = pointer;
     [self setTypeEncode:typeEncoding];
     [self setPointer:pointer];
     return self;
 }
-- (void)deallocPointer{
-    if (_pointer != NULL && _isAlloced) {
-        free(realBaseValue.pointerValue);
-        realBaseValue.pointerValue = NULL;
-    }
-    realBaseValue.pointerValue = NULL;
-    _pointer = NULL;
-    _strongObjectValue = nil;
-}
+
 - (void)setPointer:(void *)pointer{
     NSCAssert(_typeEncode != NULL, @"TypeEncode must exist");
-    [self deallocPointer];
-    _isAlloced = NO;
     void *replace = NULL;
     if (pointer == NULL) {
         pointer = &replace;
@@ -147,12 +137,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             break;
         
         case OCTypeCString:
-            _isAlloced = YES;
-            char *str = *(char **)pointer;
-            if (str != NULL) {
-                str = strdup(str);
-            }
-            realBaseValue.pointerValue = str;
+            realBaseValue.pointerValue = pointer;
             _pointer = &realBaseValue.pointerValue;
             break;
         
@@ -173,29 +158,13 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             
         case OCTypeArray:
         {
-            if (pointer == &replace) {
-                _isAlloced = YES;
-                NSUInteger size = self.memerySize;
-                void *dst = malloc(size);
-                memset(dst, 0, size);
-                realBaseValue.pointerValue = dst;
-            }else{
-                _isAlloced = NO;
-                realBaseValue.pointerValue = pointer;
-            }
+            realBaseValue.pointerValue = pointer;
             _pointer = &realBaseValue.pointerValue;
             break;
         }
         case OCTypeUnion:
         case OCTypeStruct:
-            _isAlloced = YES;
-            NSUInteger size = self.memerySize;
-            void *dst = malloc(size);
-            memset(dst, 0, size);
-            if (pointer != &replace) {
-                memcpy(dst, pointer, size);
-            }
-            realBaseValue.pointerValue = dst;
+            realBaseValue.pointerValue = pointer;
             _pointer = realBaseValue.pointerValue;
             break;
         case OCTypePointer:
@@ -225,10 +194,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     }
 }
 - (void)setValuePointerWithNoCopy:(void *)pointer{
-    [self deallocPointer];
     realBaseValue.pointerValue = pointer;
     _pointer = pointer;
-    _isAlloced = NO;
 }
 - (BOOL)isBlockValue{
     if (self.typeEncode == NULL) {
@@ -255,47 +222,32 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
         _pointer = &_strongObjectValue;
     }
 }
-- (void)dealloc{
-    [self deallocPointer];
-    if(_typeEncode != NULL && strlen(_typeEncode) > 1) free((void *)_typeEncode);
-}
 - (void)setTypeEncode:(const char *)typeEncode{
     if (typeEncode == NULL) {
         typeEncode = OCTypeStringULongLong;
     }
     _type = *typeEncode;
+    if (_typeEncode == NULL) {
+        _typeEncode = typeEncode;
+        return;
+    }
     //基础类型转换
     if (strlen(typeEncode) == 1) {
         //类型相同时，直接跳过
-        if (_typeEncode != NULL && *typeEncode == *_typeEncode) {
+        if (*typeEncode == *_typeEncode) {
             return;
         }
         void *result = NULL;
         [self convertValueWithTypeEncode:typeEncode result:&result];
-        _typeString.type = _type;
-        _typeString.end = '\0';
-        _typeEncode = (char *)&_typeString;
+        _typeEncode = typeEncode;
         if (result != NULL) {
             [self setPointer:&result];
         }
         return;
     }
-    if(_typeEncode != NULL && strlen(_typeEncode) > 1)
-        free((void *)_typeEncode);
-    _typeEncode = strdup(typeEncode);
-    _pointerCount = startDetectPointerCount(typeEncode);
-    if (*typeEncode == OCTypeClass) {
-        _typeName = @"Class";
-    }else if(*typeEncode == OCTypeStruct){
-        _typeName = startStructNameDetect(typeEncode);
-    }else if(*typeEncode == OCTypeUnion){
-        _typeName = startUnionNameDetect(typeEncode);
-    }
+    _typeEncode = typeEncode;
 }
 - (void)convertValueWithTypeEncode:(const char *)typeEncode result:(void **)resultValue{
-    if (_typeEncode == NULL) {
-        return;
-    }
     do {
         if ((TypeEncodeIsBaseType(typeEncode)) == 0) break;
         if (*_typeEncode == *typeEncode) break;

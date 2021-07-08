@@ -548,7 +548,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SRCROOT/OCRunnerDemo/PatchGenerator -files $SRCROOT/OCRunnerDemo/HotPath -refs  $SRCROOT/OCRunnerDemo/Scripts.bundle -output $SRCROOT/OCRunnerDemo/binarypatch\n";
+			shellScript = "$SRCROOT/OCRunnerDemo/PatchGenerator -files $SRCROOT/OCRunnerDemo/HotPath -output $SRCROOT/OCRunnerDemo/binarypatch\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
