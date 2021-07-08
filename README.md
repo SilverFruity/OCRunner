@@ -41,7 +41,7 @@ pod 'OCRunnerArm64' #Only supports arm64 and arm64e, does not include libffi.a
 
 ### Download [PatchGenerator](https://github.com/SilverFruity/oc2mango/releases)
 
-Unzip PatchGenerato.zip, then save **PatchGenerator** to /usr/bin/ or the project directory.
+Unzip PatchGenerato.zip, then save **PatchGenerator** to /usr/local/bin/ or the project directory.
 
 ### add `Run Script`  of PatchGenerator 
 
