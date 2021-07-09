@@ -381,8 +381,8 @@ or_value evalValueNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain 
         case OCValueSuper:
         case OCValueVariable:{
             if (node.symbol) {
-                void *result = [ctx seek:node.symbol.decl.offset size:node.symbol.decl.size];
-                return or_value_create(node.symbol.decl.typeEncode, &result);
+                void *result = [ctx seek:node.symbol.decl.offset];
+                return or_value_create(node.symbol.decl.typeEncode, result);
             }else{
                 Class class = NSClassFromString(node.value);
                 if (class) {

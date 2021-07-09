@@ -114,12 +114,10 @@
 @implementation ORThreadContext
 
 - (void)push:(void *)var size:(size_t)size{
-    memcpy(mem + sp + cursor, var , MAX(size, 8));
-    cursor += size;
+    memcpy(mem + sp + cursor, var , size);
+    cursor += MAX(size, 8);
 }
-- (void *)seek:(mem_cursor)offset size:(size_t)size{
-//    void *ptr = NULL;
-//    memcpy(&ptr, mem + sp + offset, size);
+- (void *)seek:(mem_cursor)offset{
     return mem + sp + offset;
 }
 - (void)enter{

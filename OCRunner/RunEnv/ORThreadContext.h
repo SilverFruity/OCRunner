@@ -67,7 +67,7 @@ typedef enum {
     ORControlFlowFlag flow_flag;
 }
 - (void)push:(void *)var size:(size_t)size;
-- (void *)seek:(mem_cursor)offset size:(size_t)size;
+- (void *)seek:(mem_cursor)offset;
 - (void)enter;
 - (void)exit;
 - (BOOL)isEmpty;
