@@ -1001,15 +1001,7 @@ int signatureBlockPtr(id object, int b){
     @"    return a + b;"
     @"}"
     @"int a = fibonaccia(25);";
-    AST *ast = [[Parser new] parseSource:source];
-    InitialSymbolTableVisitor *visitor = [InitialSymbolTableVisitor new];
-    symbolTableRoot = [ocSymbolTable new];
-    for (ORNode *node in ast.nodes) {
-        [visitor visit:node];
-    }
-    ast.scope = symbolTableRoot.scope;
-    [ORInterpreter shared]->constants = symbolTableRoot->constants;
-    [ORInterpreter shared]->constants_size = symbolTableRoot->constants_size;
+    AST *ast = [_parser parseSource:source];
     [self measureBlock:^{
         for (id exp in ast.globalStatements) {
             eval([ORInterpreter shared], [ORThreadContext current], [MFScopeChain topScope], exp);

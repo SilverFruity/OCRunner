@@ -52,6 +52,7 @@ typedef struct {
 - (void *)seek:(mem_cursor)offset size:(size_t)size;
 - (void)enter;
 - (void)exit;
+- (BOOL)isEmpty;
 
 @property (nonatomic, strong)ORArgsStack *argsStack;
 @property (nonatomic, strong)ORCallFrameStack *callFrameStack;

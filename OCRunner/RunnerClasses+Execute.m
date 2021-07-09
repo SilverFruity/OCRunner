@@ -632,7 +632,7 @@ MFValue *evalFunctionCall(ORInterpreter *inter, ORThreadContext *ctx, MFScopeCha
 }
 MFValue *evalFunctionNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORFunctionNode *node){
     // C函数声明执行, 向全局作用域注册函数
-     if (ctx->cursor == 0
+     if ([ctx isEmpty]
          && node.declare.var.varname
          && node.declare.var.ptCount == 0) {
          NSString *funcName = node.declare.var.varname;

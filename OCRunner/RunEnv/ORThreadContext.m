@@ -139,6 +139,9 @@
         cursor = before - sp;
     }
 }
+- (BOOL)isEmpty{
+    return fp == sp;
+}
 
 + (instancetype)current{
     //每一个线程拥有一个独立的上下文
