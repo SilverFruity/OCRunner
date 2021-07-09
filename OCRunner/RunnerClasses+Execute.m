@@ -788,39 +788,27 @@ MFValue *evalInitDeclaratorNode(ORInterpreter *inter, ORThreadContext *ctx, MFSc
         eval(inter, ctx, scope, node.declarator.var);
     }
     MFValue *(^initializeBlock)(void) = ^MFValue *{
+        ocDecl *decl = node.declarator.symbol.decl;
+        MFValue *value = nil;
         if (node.expression) {
-            MFValue *value = eval(inter, ctx, scope, node.expression);
-            ocDecl *decl = node.declarator.symbol.decl;
+            value = eval(inter, ctx, scope, node.expression);
             value.modifier = decl.declModifer;
-            value.typeName = decl.typeName;
             value.typeEncode = decl.typeEncode;
-            if ([node.declarator.var isKindOfClass:[ORFunctionDeclNode class]] && node.declarator.var.isBlock == NO)
-                value.funDecl = (ORFunctionDeclNode *)node.declarator;
-            
-            [scope setValue:value withIndentifier:node.declarator.var.varname];
-            [ctx push:value.pointer size:value.memerySize];
-            return value;
         }else{
-            MFValue *value = [MFValue defaultValueWithTypeEncoding:node.declarator.typeEncode];
-            ocDecl *decl = node.declarator.symbol.decl;
+            value = [MFValue defaultValueWithTypeEncoding:decl.typeEncode];
             value.modifier = decl.declModifer;
-            value.typeName = decl.typeName;
-            value.typeEncode = decl.typeEncode;
-            [value setDefaultValue];
             if (value.type == OCTypeObject
                 && NSClassFromString(value.typeName) == nil
                 && ![value.typeName isEqualToString:@"id"]) {
                 NSString *reason = [NSString stringWithFormat:@"Unknown Type Identifier: %@",value.typeName];
                 @throw [NSException exceptionWithName:@"OCRunner" reason:reason userInfo:nil];
             }
-            
-            if ([node.declarator.var isKindOfClass:[ORFunctionDeclNode class]] && node.declarator.var.isBlock == NO)
-                value.funDecl = (ORFunctionDeclNode *)node.declarator;
-            
-            [scope setValue:value withIndentifier:node.declarator.var.varname];
-            [ctx push:value.pointer size:value.memerySize];
-            return value;
         }
+        if (decl.isFunction)
+            value.funDecl = (ORFunctionDeclNode *)node.declarator;
+        [scope setValue:value withIndentifier:node.declarator.var.varname];
+        [ctx push:value.pointer size:value.memerySize];
+        return value;
     };
     if (staticVar) {
         NSString *key = [NSString stringWithFormat:@"%p",(void *)node];
