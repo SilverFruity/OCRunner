@@ -39,6 +39,14 @@ typedef struct {
     mem_cursor lr;
     __unsafe_unretained ORNode *node;
 }or_vm_function_frame;
+
+typedef enum {
+    ORControlFlowFlagNormal = 0x00,
+    ORControlFlowFlagBreak = 0x01,
+    ORControlFlowFlagContinue = 0x02,
+    ORControlFlowFlagReturn = 0x10 << 1,
+}ORControlFlowFlag;
+
 @interface ORThreadContext : NSObject
 {
     @public
@@ -47,6 +55,8 @@ typedef struct {
     mem_cursor cursor;
     local_var_mem mem;
     local_var_mem mem_end;
+    
+    ORControlFlowFlag flow_flag;
 }
 - (void)push:(void *)var size:(size_t)size;
 - (void *)seek:(mem_cursor)offset size:(size_t)size;

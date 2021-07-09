@@ -11,28 +11,26 @@
 #import "util.h"
 #import <oc2mangoLib/ocHandleTypeEncode.h>
 #import "MFBlock.h"
-#define MFValueBridge(target,resultType)\
+#define MFValueBridge(target, typeencode, resultType)\
 resultType result;\
-switch (*target->_typeEncode) {\
-    case OCTypeUChar: result = (resultType)target->realBaseValue.uCharValue; break;\
-    case OCTypeUInt: result = (resultType)target->realBaseValue.uIntValue; break;\
-    case OCTypeUShort: result = (resultType)target->realBaseValue.uShortValue; break;\
-    case OCTypeULong: result = (resultType)target->realBaseValue.uLongValue; break;\
-    case OCTypeULongLong: result = (resultType)target->realBaseValue.uLongLongValue; break;\
-    case OCTypeBOOL: result = (resultType)target->realBaseValue.boolValue; break;\
-    case OCTypeChar: result = (resultType)target->realBaseValue.charValue; break;\
-    case OCTypeShort: result = (resultType)target->realBaseValue.shortValue; break;\
-    case OCTypeInt: result = (resultType)target->realBaseValue.intValue; break;\
-    case OCTypeLong: result = (resultType)target->realBaseValue.longValue; break;\
-    case OCTypeLongLong: result = (resultType)target->realBaseValue.longlongValue; break;\
-    case OCTypeFloat: result = (resultType)target->realBaseValue.floatValue; break;\
-    case OCTypeDouble: result = (resultType)target->realBaseValue.doubleValue; break;\
+switch (*typeencode) {\
+    case OCTypeUChar: result = (resultType)target.uCharValue; break;\
+    case OCTypeUInt: result = (resultType)target.uIntValue; break;\
+    case OCTypeUShort: result = (resultType)target.uShortValue; break;\
+    case OCTypeULong: result = (resultType)target.uLongValue; break;\
+    case OCTypeULongLong: result = (resultType)target.uLongLongValue; break;\
+    case OCTypeBOOL: result = (resultType)target.boolValue; break;\
+    case OCTypeChar: result = (resultType)target.charValue; break;\
+    case OCTypeShort: result = (resultType)target.shortValue; break;\
+    case OCTypeInt: result = (resultType)target.intValue; break;\
+    case OCTypeLong: result = (resultType)target.longValue; break;\
+    case OCTypeLongLong: result = (resultType)target.longlongValue; break;\
+    case OCTypeFloat: result = (resultType)target.floatValue; break;\
+    case OCTypeDouble: result = (resultType)target.doubleValue; break;\
     default: result = 0;\
 }
 
-extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
-    return type & MFStatementResultTypeReturnMask;
-}
+
 @interface MFValue()
 @property (nonatomic,strong)id strongObjectValue;
 @property (nonatomic,weak)id weakObjectValue;
@@ -46,9 +44,9 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 + (instancetype)valueWithTypeEncode:(const char *)typeEncode pointer:(void *)pointer{
     return [[MFValue alloc]initTypeEncode:typeEncode pointer:pointer];
 }
-+ (instancetype)valueWithORCaculateValue:(ORCaculateValue)value{
++ (instancetype)valueWithORCaculateValue:(or_value)value{
     MFValue *result = [MFValue new];
-    result.typeEncode = value.typeEncode;
+    result.typeEncode = value.typeencode;
     result->realBaseValue = value.box;
     result->_pointer = &result->realBaseValue;
     return result;
@@ -255,67 +253,68 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
         //基础类型转换
         switch (*typeEncode) {
             case OCTypeUChar:{
-                MFValueBridge(self, unsigned char)
+                
+                MFValueBridge(self->realBaseValue, self->_typeEncode, unsigned char)
                 memcpy(resultValue, &result, sizeof(unsigned char));
                 break;
             }
             case OCTypeUInt:{
-                MFValueBridge(self, unsigned int)
+                MFValueBridge(self->realBaseValue, self->_typeEncode, unsigned int)
                 memcpy(resultValue, &result, sizeof(unsigned int));
                 break;
             }
             case OCTypeUShort:{
-                MFValueBridge(self, unsigned short)
+                MFValueBridge(self->realBaseValue, self->_typeEncode, unsigned short)
                 memcpy(resultValue, &result, sizeof(unsigned short));
                 break;
             }
             case OCTypeULong:{
-                MFValueBridge(self, unsigned long)
+                MFValueBridge(self->realBaseValue, self->_typeEncode, unsigned long)
                 memcpy(resultValue, &result, sizeof(unsigned long));
                 break;
             }
             case OCTypeULongLong:{
-                MFValueBridge(self, unsigned long long)
+                MFValueBridge(self->realBaseValue, self->_typeEncode, unsigned long long)
                 memcpy(resultValue, &result, sizeof(unsigned long long));
                 break;
             }
             case OCTypeBOOL:{
-                MFValueBridge(self, BOOL)
+                MFValueBridge(self->realBaseValue, self->_typeEncode, BOOL)
                 memcpy(resultValue, &result, sizeof(BOOL));
                 break;
             }
             case OCTypeChar:{
-                MFValueBridge(self, char)
+                MFValueBridge(self->realBaseValue, self->_typeEncode, char)
                 memcpy(resultValue, &result, sizeof(char));
                 break;
             }
             case OCTypeShort:{
-                MFValueBridge(self, short)
+                MFValueBridge(self->realBaseValue, self->_typeEncode, short)
                 memcpy(resultValue, &result, sizeof(short));
                 break;
             }
             case OCTypeInt:{
-                MFValueBridge(self, int)
+                MFValueBridge(self->realBaseValue, self->_typeEncode, int)
                 memcpy(resultValue, &result, sizeof(int));
                 break;
             }
             case OCTypeLong:{
-                MFValueBridge(self, long)
+                MFValueBridge(self->realBaseValue, self->_typeEncode, long)
                 memcpy(resultValue, &result, sizeof(long));
                 break;
             }
             case OCTypeLongLong:{
-                MFValueBridge(self, long long)
+                MFValueBridge(self->realBaseValue, self->_typeEncode, long long)
                 memcpy(resultValue, &result, sizeof(long long));
                 break;
             }
             case OCTypeFloat:{
-                MFValueBridge(self, float)
+                MFValueBridge(self->realBaseValue, self->_typeEncode, float)
                 memcpy(resultValue, &result, sizeof(float));
                 break;
             }
             case OCTypeDouble:{
-                MFValueBridge(self, double)
+                MFValueBridge(self->realBaseValue, self->_typeEncode, double)
                 memcpy(resultValue, &result, sizeof(double));
                 break;
             }
@@ -429,7 +428,6 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     value.pointer = self.pointer;
     value.typeName = self.typeName;
     value.modifier = self.modifier;
-    value.resultType = self.resultType;
     return value;
 }
 
@@ -569,23 +567,8 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 @end
 
 @implementation MFValue (MFStatementResultType)
-- (BOOL)isReturn{
-    return MFStatementResultTypeIsReturn(self.resultType);
-}
-- (BOOL)isContinue{
-    return self.resultType == MFStatementResultTypeContinue;
-}
-- (BOOL)isBreak{
-    return self.resultType == MFStatementResultTypeBreak;
-}
-- (BOOL)isNormal{
-    return self.resultType == MFStatementResultTypeNormal;
-}
-+ (instancetype)normalEnd{
-    MFValue *value = [MFValue voidValue];
-    value.resultType = MFStatementResultTypeNormal;
-    return value;
-}
+
+
 
 @end
 
@@ -595,56 +578,56 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 
 @implementation MFValue (ValueType)
 - (unsigned char)uCharValue{
-    MFValueBridge(self, unsigned char);
+    MFValueBridge(self->realBaseValue, self->_typeEncode, unsigned char);
     return result;
 }
 - (unsigned short)uShortValue{
-    MFValueBridge(self, unsigned short);
+    MFValueBridge(self->realBaseValue, self->_typeEncode, unsigned short);
     return result;
 }
 - (unsigned int)uIntValue{
-    MFValueBridge(self, unsigned int);
+    MFValueBridge(self->realBaseValue, self->_typeEncode, unsigned int);
     return result;
 }
 - (unsigned long)uLongValue{
-    MFValueBridge(self, unsigned long);
+    MFValueBridge(self->realBaseValue, self->_typeEncode, unsigned long);
     return result;
 }
 - (unsigned long long)uLongLongValue{
-    MFValueBridge(self, unsigned long long);
+    MFValueBridge(self->realBaseValue, self->_typeEncode, unsigned long long);
     return result;
 }
 - (char)charValue{
-    MFValueBridge(self, char);
+    MFValueBridge(self->realBaseValue, self->_typeEncode, char);
     return result;
 }
 - (short)shortValue{
-    MFValueBridge(self, short);
+    MFValueBridge(self->realBaseValue, self->_typeEncode, short);
     return result;
 }
 - (int)intValue{
-    MFValueBridge(self, int);
+    MFValueBridge(self->realBaseValue, self->_typeEncode, int);
     return result;
 }
 - (long)longValue{
     //NOTE: arm64下， NSGetSizeAndAlignment long 为4字节，sizeof(long)为8字节，当为负数时，会出现问题。所以将long改为int。
-    MFValueBridge(self, int);
+    MFValueBridge(self->realBaseValue, self->_typeEncode, int);
     return result;
 }
 - (long long)longlongValue{
-    MFValueBridge(self, long long);
+    MFValueBridge(self->realBaseValue, self->_typeEncode, long long);
     return result;
 }
 - (BOOL)boolValue{
-    MFValueBridge(self, BOOL);
+    MFValueBridge(self->realBaseValue, self->_typeEncode, BOOL);
     return result;
 }
 - (float)floatValue{
-    MFValueBridge(self, float);
+    MFValueBridge(self->realBaseValue, self->_typeEncode, float);
     return result;
 }
 - (double)doubleValue{
-    MFValueBridge(self, double);
+    MFValueBridge(self->realBaseValue, self->_typeEncode, double);
     return result;
 }
 - (id)objectValue{

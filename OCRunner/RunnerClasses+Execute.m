@@ -367,11 +367,11 @@ MFValue *evalBlockNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain 
     //{ }
     for (id statement in node.statements) {
         MFValue *result = eval(inter, ctx, scope, statement);
-        if (!result.isNormal) {
+        if (ctx->flow_flag != ORControlFlowFlagNormal) {
             return result;
         }
     }
-    return [MFValue normalEnd];
+    return nil;
 }
 MFValue *evalValueNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORValueNode *node){
     switch (node.value_type) {
@@ -638,7 +638,8 @@ MFValue *evalFunctionNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeCha
          NSString *funcName = node.declare.var.varname;
          // NOTE: 恢复后，再执行时，应该覆盖旧的实现
          [[ORGlobalFunctionTable shared] setFunctionNode:node WithName:funcName];
-         return [MFValue normalEnd];
+         ctx->flow_flag = ORControlFlowFlagNormal;
+         return nil;
      }
      MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
      if (node.declare && node.declare.var.isBlock) {
@@ -652,13 +653,13 @@ MFValue *evalFunctionNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeCha
          manBlock.paramTypes = manBlock.func.declare.params;
          __autoreleasing id ocBlock = [manBlock ocBlock];
          MFValue *value = [MFValue valueWithBlock:ocBlock];
-         value.resultType = MFStatementResultTypeNormal;
+         ctx->flow_flag = ORControlFlowFlagNormal;
          CFRelease((__bridge void *)ocBlock);
          return value;
      }
      [ORCallFrameStack pushFunctionCall:node scope:current];
      MFValue *value = eval(inter, ctx, current, node.scopeImp);
-     value.resultType = MFStatementResultTypeNormal;
+     ctx->flow_flag = ORControlFlowFlagNormal;
      [ORCallFrameStack pop];
      return value;
 }
@@ -779,7 +780,8 @@ MFValue *evalAssignNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain
         default:
             break;
     }
-    return [MFValue normalEnd];
+    ctx->flow_flag = ORControlFlowFlagNormal;
+    return nil;
 
 }
 MFValue *evalInitDeclaratorNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORInitDeclaratorNode *node){
@@ -822,12 +824,13 @@ MFValue *evalInitDeclaratorNode(ORInterpreter *inter, ORThreadContext *ctx, MFSc
     }else{
         initializeBlock();
     }
-    return [MFValue normalEnd];
+    ctx->flow_flag = ORControlFlowFlagNormal;
+    return nil;
 }
 MFValue *evalUnaryNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORUnaryNode *node){
     MFValue *currentValue = eval(inter, ctx, scope, node.value);
     START_BOX;
-    cal_result.typeEncode = currentValue.typeEncode;
+    cal_result.typeencode = currentValue.typeEncode;
     switch (node.operatorType) {
         case UnaryOperatorIncrementSuffix:{
             SuffixUnaryExecuteInt(++, currentValue);
@@ -851,14 +854,14 @@ MFValue *evalUnaryNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain 
         }
         case UnaryOperatorNot:{
             cal_result.box.boolValue = !currentValue.isSubtantial;
-            cal_result.typeEncode = OCTypeStringBOOL;
+            cal_result.typeencode = OCTypeStringBOOL;
             break;
         }
         case UnaryOperatorSizeOf:{
             size_t result = 0;
             UnaryExecute(result, sizeof, currentValue);
             cal_result.box.longlongValue = result;
-            cal_result.typeEncode = OCTypeStringLongLong;
+            cal_result.typeencode = OCTypeStringLongLong;
             break;
         }
         case UnaryOperatorBiteNot:{
@@ -917,7 +920,7 @@ MFValue *evalBinaryNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain
     MFValue *rightValue = eval(inter, ctx, scope, node.right);
     MFValue *leftValue = eval(inter, ctx, scope, node.left);
     START_BOX;
-    cal_result.typeEncode = leftValue.typeEncode;
+    cal_result.typeencode = leftValue.typeEncode;
     switch (node.operatorType) {
         case BinaryOperatorAdd:{
             CalculateExecute(leftValue, +, rightValue);
@@ -962,37 +965,37 @@ MFValue *evalBinaryNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain
         case BinaryOperatorLT:{
             LogicBinaryOperatorExecute(leftValue, <, rightValue);
             cal_result.box.boolValue = logicResultValue;
-            cal_result.typeEncode = OCTypeStringBOOL;
+            cal_result.typeencode = OCTypeStringBOOL;
             break;
         }
         case BinaryOperatorGT:{
             LogicBinaryOperatorExecute(leftValue, >, rightValue);
             cal_result.box.boolValue = logicResultValue;
-            cal_result.typeEncode = OCTypeStringBOOL;
+            cal_result.typeencode = OCTypeStringBOOL;
             break;
         }
         case BinaryOperatorLE:{
             LogicBinaryOperatorExecute(leftValue, <=, rightValue);
             cal_result.box.boolValue = logicResultValue;
-            cal_result.typeEncode = OCTypeStringBOOL;
+            cal_result.typeencode = OCTypeStringBOOL;
             break;
         }
         case BinaryOperatorGE:{
             LogicBinaryOperatorExecute(leftValue, >=, rightValue);
             cal_result.box.boolValue = logicResultValue;
-            cal_result.typeEncode = OCTypeStringBOOL;
+            cal_result.typeencode = OCTypeStringBOOL;
             break;
         }
         case BinaryOperatorNotEqual:{
             LogicBinaryOperatorExecute(leftValue, !=, rightValue);
             cal_result.box.boolValue = logicResultValue;
-            cal_result.typeEncode = OCTypeStringBOOL;
+            cal_result.typeencode = OCTypeStringBOOL;
             break;
         }
         case BinaryOperatorEqual:{
             LogicBinaryOperatorExecute(leftValue, ==, rightValue);
             cal_result.box.boolValue = logicResultValue;
-            cal_result.typeEncode = OCTypeStringBOOL;
+            cal_result.typeencode = OCTypeStringBOOL;
             break;
         }
         default:
@@ -1035,8 +1038,8 @@ MFValue *evalIfStatement(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChai
         MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
         return eval(inter, ctx, current, node.scopeImp);
     }
-    return [MFValue normalEnd];
-
+    ctx->flow_flag = ORControlFlowFlagNormal;
+    return nil;
 }
 MFValue *evalWhileStatement(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORWhileStatement *node){
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
@@ -1045,38 +1048,40 @@ MFValue *evalWhileStatement(ORInterpreter *inter, ORThreadContext *ctx, MFScopeC
             break;
         }
         MFValue *resultValue = eval(inter, ctx, current, node.scopeImp);
-        if (resultValue.isBreak) {
-            resultValue.resultType = MFStatementResultTypeNormal;
+        if (ctx->flow_flag == ORControlFlowFlagBreak) {
+            ctx->flow_flag = ORControlFlowFlagNormal;
             break;
-        }else if (resultValue.isContinue){
-            resultValue.resultType = MFStatementResultTypeNormal;
-        }else if (resultValue.isReturn){
+        }else if (ctx->flow_flag == ORControlFlowFlagContinue){
+            ctx->flow_flag = ORControlFlowFlagNormal;
+        }else if (ctx->flow_flag & ORControlFlowFlagReturn){
             return resultValue;
-        }else if (resultValue.isNormal){
+        }else if (ctx->flow_flag == ORControlFlowFlagNormal){
             
         }
     }
-    return [MFValue normalEnd];
+    ctx->flow_flag = ORControlFlowFlagNormal;
+    return nil;
 }
 MFValue *evalDoWhileStatement(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORDoWhileStatement *node){
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
     while (1) {
         MFValue *resultValue = eval(inter, ctx, current, node.scopeImp);
-        if (resultValue.isBreak) {
-            resultValue.resultType = MFStatementResultTypeNormal;
+        if (ctx->flow_flag == ORControlFlowFlagBreak) {
+            ctx->flow_flag = ORControlFlowFlagNormal;
             break;
-        }else if (resultValue.isContinue){
-            resultValue.resultType = MFStatementResultTypeNormal;
-        }else if (resultValue.isReturn){
+        }else if (ctx->flow_flag == ORControlFlowFlagContinue){
+            ctx->flow_flag = ORControlFlowFlagNormal;
+        }else if (ctx->flow_flag & ORControlFlowFlagReturn){
             return resultValue;
-        }else if (resultValue.isNormal){
+        }else if (ctx->flow_flag == ORControlFlowFlagNormal){
             
         }
         if (!eval(inter, ctx, scope, node.condition).isSubtantial) {
             break;
         }
     }
-    return [MFValue normalEnd];
+    ctx->flow_flag = ORControlFlowFlagNormal;
+    return nil;
 }
 MFValue *evalCaseStatement(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORCaseStatement *node){
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
@@ -1096,23 +1101,24 @@ MFValue *evalSwitchStatement(ORInterpreter *inter, ORThreadContext *ctx, MFScope
                 }
             }
             MFValue *result = eval(inter, ctx, scope, statement);
-            if (result.isBreak) {
-                result.resultType = MFStatementResultTypeNormal;
+            if (ctx->flow_flag == ORControlFlowFlagBreak) {
+                ctx->flow_flag = ORControlFlowFlagNormal;
                 return result;
-            }else if (result.isNormal){
+            }else if (ctx->flow_flag == ORControlFlowFlagNormal){
                 continue;
             }else{
                 return result;
             }
         }else{
-            MFValue *result = eval(inter, ctx, scope, statement);
-            if (result.isBreak) {
-                result.resultType = MFStatementResultTypeNormal;
+            eval(inter, ctx, scope, statement);
+            if (ctx->flow_flag == ORControlFlowFlagBreak) {
+                ctx->flow_flag = ORControlFlowFlagNormal;
                 return value;
             }
         }
     }
-    return [MFValue normalEnd];
+    ctx->flow_flag = ORControlFlowFlagNormal;
+    return nil;
 }
 MFValue *evalForStatement(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORForStatement *node){
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
@@ -1124,19 +1130,20 @@ MFValue *evalForStatement(ORInterpreter *inter, ORThreadContext *ctx, MFScopeCha
             break;
         }
         MFValue *result = eval(inter, ctx, current, node.scopeImp);
-        if (result.isReturn) {
+        if (ctx->flow_flag & ORControlFlowFlagReturn){
             return result;
-        }else if (result.isBreak){
-            result.resultType = MFStatementResultTypeNormal;
+        }else if (ctx->flow_flag == ORControlFlowFlagBreak) {
+            ctx->flow_flag = ORControlFlowFlagNormal;
             return result;
-        }else if (result.isContinue){
+        }else if (ctx->flow_flag == ORControlFlowFlagContinue){
             continue;
         }
         for (ORNode *exp in node.expressions) {
             eval(inter, ctx, (MFScopeChain *)current, exp);
         }
     }
-    return [MFValue normalEnd];
+    ctx->flow_flag = ORControlFlowFlagNormal;
+    return nil;
 }
 MFValue *evalForInStatement(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORForInStatement *node){
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
@@ -1145,38 +1152,36 @@ MFValue *evalForInStatement(ORInterpreter *inter, ORThreadContext *ctx, MFScopeC
         //TODO: 每执行一次，在作用域中重新设置一次
         [current setValue:[MFValue valueWithObject:element] withIndentifier:node.expression.var.varname];
         MFValue *result = eval(inter, ctx, current, node.scopeImp);
-        if (result.isBreak) {
-            result.resultType = MFStatementResultTypeNormal;
+        if (ctx->flow_flag & ORControlFlowFlagReturn){
             return result;
-        }else if(result.isContinue){
+        }else if (ctx->flow_flag == ORControlFlowFlagBreak) {
+            ctx->flow_flag = ORControlFlowFlagNormal;
+            return result;
+        }else if (ctx->flow_flag == ORControlFlowFlagContinue){
             continue;
-        }else if (result.isReturn){
-            return result;
         }
     }
-    return [MFValue normalEnd];
+    ctx->flow_flag = ORControlFlowFlagNormal;
+    return nil;
 }
 MFValue *evalControlStatNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORControlStatNode *node){
     MFValue *value = [MFValue voidValue];
     switch (node.type) {
         case ORControlStatBreak:
         {
-            value.resultType = MFStatementResultTypeBreak;
+            ctx->flow_flag = ORControlFlowFlagBreak;
             break;
         }
         case ORControlStatContinue:
         {
-            value.resultType = MFStatementResultTypeContinue;
+            ctx->flow_flag = ORControlFlowFlagContinue;
             break;
         }
         case ORControlStatReturn:
         {
+            ctx->flow_flag = ORControlFlowFlagReturn;
             if (node.expression) {
-                MFValue *value = eval(inter, ctx, scope, node.expression);
-                value.resultType = MFStatementResultTypeReturnValue;
-                return value;
-            }else{
-                value.resultType = MFStatementResultTypeReturnEmpty;
+                return eval(inter, ctx, scope, node.expression);
             }
             break;
         }
@@ -1208,7 +1213,7 @@ MFValue *evalMethodNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain
     [ORCallFrameStack pushMethodCall:node instance:scope.instance];
     eval(inter, ctx, current, node.declare);
     MFValue *result = eval(inter, ctx, current, node.scopeImp);
-    result.resultType = MFStatementResultTypeNormal;
+    ctx->flow_flag = ORControlFlowFlagNormal;
     [ORCallFrameStack pop];
     return result;
 }

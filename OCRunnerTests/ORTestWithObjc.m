@@ -994,10 +994,10 @@ int signatureBlockPtr(id object, int b){
 }
 - (void)testOCRunnerRecursiveFunctionPerformanceExample {
     NSString * source =
-    @"long long fibonaccia(long long n){"
+    @"int fibonaccia(int n){"
     @"    if (n == 1 || n == 2)"
     @"        return 1;"
-    @"    long long a = fibonaccia(n - 1); long long b = fibonaccia(n - 2);"
+    @"    int a = fibonaccia(n - 1); int b = fibonaccia(n - 2);"
     @"    return a + b;"
     @"}"
     @"int a = fibonaccia(25);";
