@@ -75,10 +75,10 @@ void recover_method(BOOL isClassMethod, Class clazz, SEL sel){
     [[MFMethodMapTable shareInstance] removeMethodsForClass:class];
     [[MFPropertyMapTable shareInstance] removePropertiesForClass:class];
     
-    Class classVar = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:self.className].classValue;
-    if (classVar != nil && classVar == class) {
-        objc_disposeClassPair(classVar);
-    }
+//    Class classVar = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:self.className].classValue;
+//    if (classVar != nil && classVar == class) {
+//        objc_disposeClassPair(classVar);
+//    }
 }
 
 @end

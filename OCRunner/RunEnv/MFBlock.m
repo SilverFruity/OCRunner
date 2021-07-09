@@ -56,8 +56,8 @@ void *simulateNSBlock(const char* typeEncoding, void *imp, void *userdata){
     }
     return Block_copy(&simulateBlock);
 }
-const char *NSBlockGetSignature(id block){
-    struct MFSimulateBlock *blockRef = (__bridge struct MFSimulateBlock *)block;
+const char *NSBlockGetSignature(void * block){
+    struct MFSimulateBlock *blockRef = (struct MFSimulateBlock *)block;
     int flags = blockRef->flags;
     if (flags & BLOCK_HAS_SIGNATURE) {
         void *signatureLocation = blockRef->descriptor;
@@ -74,13 +74,13 @@ const char *NSBlockGetSignature(id block){
     }
     return NULL;
 }
-BOOL NSBlockHasSignature(id block){
-    struct MFSimulateBlock *blockRef = (__bridge struct MFSimulateBlock *)block;
+BOOL NSBlockHasSignature(void *block){
+    struct MFSimulateBlock *blockRef = (struct MFSimulateBlock *)block;
     int flags = blockRef->flags;
     return flags & BLOCK_HAS_SIGNATURE;
 }
-void NSBlockSetSignature(id block, const char *typeencode){
-    struct MFSimulateBlock *blockRef = (__bridge struct MFSimulateBlock *)block;
+void NSBlockSetSignature(void * block, const char *typeencode){
+    struct MFSimulateBlock *blockRef = (struct MFSimulateBlock *)block;
     void *signatureLocation = blockRef->descriptor;
     signatureLocation += sizeof(unsigned long int);
     signatureLocation += sizeof(unsigned long int);

@@ -43,7 +43,7 @@
     for (id exp in ast.globalStatements) {
         eval([ORInterpreter shared], [ORThreadContext current], [MFScopeChain topScope], exp);
     }
-    NSLog(@"%d",[[MFScopeChain topScope] getValueWithIdentifier:@"a"].uIntValue);
+//    NSLog(@"%d",[[MFScopeChain topScope] getValueWithIdentifier:@"a"].uIntValue);
 
 //    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 //        [ORInterpreter reverse];

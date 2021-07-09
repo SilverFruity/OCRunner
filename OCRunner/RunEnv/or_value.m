@@ -134,7 +134,7 @@ void or_value_set_typeencode(or_value *value, const char *typeencode){
         or_value_convert(value, typeencode, &result);
         value->typeencode = typeencode;
         if (result != NULL) {
-//            [self setPointer:&result];
+            or_value_set_pointer(value, &result);
         }
         return;
     }
@@ -243,7 +243,33 @@ void or_value_set_pointer(or_value *value, void *pointer){
     }
 
 }
-
+void or_value_write_to(or_value value, void *dst, const char *aim_typeencode){
+    aim_typeencode = aim_typeencode == NULL ? OCTypeStringPointer : aim_typeencode;
+    if (dst == NULL) {
+        return;
+    }
+    NSUInteger resultSize;
+    NSGetSizeAndAlignment(aim_typeencode, &resultSize, NULL);
+    memset(dst, 0, resultSize);
+    NSUInteger currentSize;
+    NSGetSizeAndAlignment(value.typeencode, &currentSize, NULL);
+    void *copySource = value.pointer;
+    void *convertResult = NULL;
+    or_value_convert(&value, aim_typeencode, &convertResult);
+    if (convertResult != NULL) {
+        copySource = &convertResult;
+    }
+    if (currentSize < resultSize){
+        memcpy(dst, copySource, currentSize);
+    }else{
+        memcpy(dst, copySource, resultSize);
+    }
+}
+BOOL or_value_isSubtantial(or_value value){
+    BOOL result = NO;
+    UnaryExecute(result, !, value);
+    return !result;
+}
 
 or_value or_nullValue(void){
     return or_value_create(OCTypeStringPointer , NULL);

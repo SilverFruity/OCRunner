@@ -25,32 +25,37 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     NSMethodSignature *sig = [target methodSignatureForSelector:sel];
     NSMutableArray<MFValue *> *argValues = [NSMutableArray array];
     for (NSUInteger i = 2; i < sig.numberOfArguments; i++) {
-        MFValue *argValue = [[MFValue alloc] initTypeEncode:[sig getArgumentTypeAtIndex:i] pointer:args[i]];
+        or_value argValue = or_value_create([sig getArgumentTypeAtIndex:i], args[i]);
         //针对系统传入的block，检查一次签名，如果没有，将在结构体中添加签名信息.
-        if (argValue.isObject && argValue.isBlockValue && argValue.objectValue != nil) {
-            struct MFSimulateBlock *bb = (void *)argValue->realBaseValue.pointerValue;
+        
+        if (isObjectWithTypeEncode(argValue.typeencode)
+            && isBlockWithTypeEncode(argValue.typeencode)
+            && *argValue.pointer != NULL) {
+            struct MFSimulateBlock *bb = (void *)argValue.box.pointerValue;
             // 针对传入的block，如果为全局block或栈block，使用copy转换为堆block
             if (bb->isa == &_NSConcreteGlobalBlock || bb->isa == &_NSConcreteStackBlock){
-                id copied = (__bridge id)Block_copy(argValue->realBaseValue.pointerValue);
-                argValue.pointer = &copied;
+                id copied = (__bridge id)Block_copy(argValue.box.pointerValue);
+                or_value_set_pointer(&argValue, &copied);
             }
             
-            if (NSBlockHasSignature(argValue.objectValue) == NO) {
+            if (NSBlockHasSignature(*argValue.pointer) == NO) {
                 ORDeclaratorNode *blockdecl = methodImp.declare.parameters[i - 2];
                 if ([blockdecl isKindOfClass:[ORFunctionDeclNode class]]) {
-                    NSBlockSetSignature(argValue.objectValue, blockdecl.blockSignature);
+                    NSBlockSetSignature(*argValue.pointer, blockdecl.blockSignature);
                 }
             }
         }
-        [argValues addObject:argValue];
+//        [argValues addObject:argValue];
     }
     if (classMethod) {
-        scope.instance = [MFValue valueWithClass:target];
+        or_Class_value(target);
+//        scope.instance = [MFValue valueWithClass:target];
     }else{
         // 方法调用时不应该增加引用计数
-        scope.instance = [MFValue valueWithUnownedObject:target];
+        or_Object_value(target);
+//        scope.instance = [MFValue valueWithUnownedObject:target];
     }
-    MFValue *value = nil;
+    or_value value;
     [ORArgsStack push:argValues];
     
     value = eval([ORInterpreter shared], [ORThreadContext current], scope, methodImp);
@@ -60,76 +65,76 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
         void (*originalDealloc)(__unsafe_unretained id, SEL) = (__typeof__(originalDealloc))method_getImplementation(deallocMethod);
         originalDealloc(target, NSSelectorFromString(@"dealloc"));
     }
-    if (value.type != OCTypeVoid && value.pointer != NULL){
+    if (isVoidWithTypeEncode(value.typeencode) && *value.pointer != NULL){
         // 类型转换
-        [value writePointer:ret typeEncode:[sig methodReturnType]];
+        or_value_write_to(value, ret, [sig methodReturnType]);
     }
 }
 
 void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
     struct MFSimulateBlock *block = *(void **)args[0];
     MFBlock *mangoBlock =  (__bridge MFBlock *)(block->wrapper);
-    NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:NSBlockGetSignature(mangoBlock.ocBlock)];
+    NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:NSBlockGetSignature((__bridge  void *)mangoBlock.ocBlock)];
     NSMutableArray<MFValue *> *argValues = [NSMutableArray array];
     for (NSUInteger i = 1; i < cfi->nargs; i++) {
-        MFValue *argValue = [[MFValue alloc] initTypeEncode:[sig getArgumentTypeAtIndex:i] pointer:args[i]];
-        [argValues addObject:argValue];
+        or_value arg = or_value_create([sig getArgumentTypeAtIndex:i], args[i]);
+//        [argValues addObject:argValue];
     }
-    MFValue *value = nil;
+    or_value value;
     [ORArgsStack push:argValues];
     value = eval([ORInterpreter shared], [ORThreadContext current], mangoBlock.outScope, mangoBlock.func);
-    if (value.type != OCTypeVoid && value.pointer != NULL){
+    if (isVoidWithTypeEncode(value.typeencode) && *value.pointer != NULL){
         // 类型转换
-        [value writePointer:ret typeEncode:[sig methodReturnType]];
+        or_value_write_to(value, ret, [sig methodReturnType]);
     }
 }
 
 
-void getterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
-    id target = *(__strong id *)args[0];
-    SEL sel = *(SEL *)args[1];
-    ORPropertyNode *propDef = (__bridge ORPropertyNode *)userdata;
-    NSString *propName = propDef.var.var.varname;
-    NSMethodSignature *sig = [target methodSignatureForSelector:sel];
-    __autoreleasing MFValue *propValue = objc_getAssociatedObject(target, mf_propKey(propName));
-    if (!propValue) {
-        propValue = [MFValue defaultValueWithTypeEncoding:propDef.var.typeEncode];
-    }
-    if (propValue.type != OCTypeVoid && propValue.pointer != NULL){
-        [propValue writePointer:ret typeEncode:sig.methodReturnType];
-    }
-}
+//void getterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
+//    id target = *(__strong id *)args[0];
+//    SEL sel = *(SEL *)args[1];
+//    ORPropertyNode *propDef = (__bridge ORPropertyNode *)userdata;
+//    NSString *propName = propDef.var.var.varname;
+//    NSMethodSignature *sig = [target methodSignatureForSelector:sel];
+//    __autoreleasing MFValue *propValue = objc_getAssociatedObject(target, mf_propKey(propName));
+//    if (!propValue) {
+//        propValue = [MFValue defaultValueWithTypeEncoding:propDef.var.typeEncode];
+//    }
+//    if (propValue.type != OCTypeVoid && propValue.pointer != NULL){
+//        [propValue writePointer:ret typeEncode:sig.methodReturnType];
+//    }
+//}
 
-void setterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
-    id target = *(__strong id *)args[0];
-    SEL sel = *(SEL *)args[1];
-    const char *argTypeEncode = [[target methodSignatureForSelector:sel] getArgumentTypeAtIndex:2];
-    MFValue *value = [MFValue valueWithTypeEncode:argTypeEncode pointer:args[2]];
-    ORPropertyNode *propDef = (__bridge ORPropertyNode *)userdata;
-    NSString *propName = propDef.var.var.varname;
-    MFPropertyModifier modifier = propDef.modifier;
-    if (modifier & MFPropertyModifierMemWeak) {
-        value.modifier = DeclarationModifierWeak;
-    }
-    objc_AssociationPolicy associationPolicy = mf_AssociationPolicy_with_PropertyModifier(modifier);
-    objc_setAssociatedObject(target, mf_propKey(propName), value, associationPolicy);
-}
+//void setterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
+//    id target = *(__strong id *)args[0];
+//    SEL sel = *(SEL *)args[1];
+//    const char *argTypeEncode = [[target methodSignatureForSelector:sel] getArgumentTypeAtIndex:2];
+//    MFValue *value = [MFValue valueWithTypeEncode:argTypeEncode pointer:args[2]];
+//    ORPropertyNode *propDef = (__bridge ORPropertyNode *)userdata;
+//    NSString *propName = propDef.var.var.varname;
+//    MFPropertyModifier modifier = propDef.modifier;
+//    if (modifier & MFPropertyModifierMemWeak) {
+//        value.modifier = DeclarationModifierWeak;
+//    }
+//    objc_AssociationPolicy associationPolicy = mf_AssociationPolicy_with_PropertyModifier(modifier);
+//    objc_setAssociatedObject(target, mf_propKey(propName), value, associationPolicy);
+//}
 
 
-MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValues){
-    BOOL isClassMethod = object_isClass(instance);
-    Class superClass;
-    if (isClassMethod) {
-        superClass = class_getSuperclass(instance);
-    }else{
-        superClass = class_getSuperclass([instance class]);
-    }
-    struct objc_super *superPtr = &(struct objc_super){instance,superClass};
-    NSMutableArray *args = [@[[MFValue valueWithPointer:(void *)superPtr],[MFValue valueWithSEL:sel]] mutableCopy];
-    [args addObjectsFromArray:argValues];
-    NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
-    MFValue *retValue = [MFValue defaultValueWithTypeEncoding:sig.methodReturnType];
-    void *funcptr = &objc_msgSendSuper;
-    invoke_functionPointer(funcptr, args, retValue);
-    return retValue;
-}
+//MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValues){
+//    BOOL isClassMethod = object_isClass(instance);
+//    Class superClass;
+//    if (isClassMethod) {
+//        superClass = class_getSuperclass(instance);
+//    }else{
+//        superClass = class_getSuperclass([instance class]);
+//    }
+//    struct objc_super *superPtr = &(struct objc_super){instance,superClass};
+//    NSMutableArray *args = [@[[MFValue valueWithPointer:(void *)superPtr],[MFValue valueWithSEL:sel]] mutableCopy];
+//    [args addObjectsFromArray:argValues];
+//    NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
+//    MFValue *retValue = [MFValue defaultValueWithTypeEncoding:sig.methodReturnType];
+//    void *funcptr = &objc_msgSendSuper;
+//    invoke_functionPointer(funcptr, args, retValue);
+//    return retValue;
+//}

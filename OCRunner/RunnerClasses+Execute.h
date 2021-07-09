@@ -9,6 +9,7 @@
 #import <ORPatchFile/ORPatchFile.h>
 //#import <oc2mangoLib/oc2mangoLib.h>
 #import <objc/runtime.h>
+#import "or_value.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -17,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class ORInterpreter;
 @class ORThreadContext;
 
-MFValue *eval(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORNode *node);
+or_value eval(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORNode *node);
 
 
 NS_ASSUME_NONNULL_END
