@@ -47,7 +47,7 @@ switch (*typeencode) {\
 + (instancetype)valueWithORCaculateValue:(or_value)value{
     MFValue *result = [MFValue new];
     result.typeEncode = value.typeencode;
-    result->realBaseValue = value.box;
+    result->realBaseValue = *(or_value_box *)value.pointer;
     result->_pointer = &result->realBaseValue;
     return result;
 }

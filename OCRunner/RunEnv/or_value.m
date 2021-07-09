@@ -223,8 +223,7 @@ void or_value_set_pointer(or_value *value, void *pointer){
             value->box.uLongLongValue = 0;
             break;
     }
-    value->pointer = pointer;
-
+    value->pointer = (void *)&value->box;
 }
 void or_value_write_to(or_value value, void *dst, const char *aim_typeencode){
     aim_typeencode = aim_typeencode == NULL ? OCTypeStringPointer : aim_typeencode;

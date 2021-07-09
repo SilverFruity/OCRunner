@@ -22,8 +22,14 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     __unsafe_unretained id target = *(__unsafe_unretained id *)args[0];
     SEL sel = *(SEL *)args[1];
     BOOL classMethod = object_isClass(target);
+    ORThreadContext *ctx = [ORThreadContext current];
     NSMethodSignature *sig = [target methodSignatureForSelector:sel];
     NSMutableArray<MFValue *> *argValues = [NSMutableArray array];
+    
+    [ctx enter];
+    [ctx pushLocalVar:args size:sizeof(void *)];
+    [ctx pushLocalVar:args + 1 size:sizeof(SEL)];
+    
     for (NSUInteger i = 2; i < sig.numberOfArguments; i++) {
         or_value argValue = or_value_create([sig getArgumentTypeAtIndex:i], args[i]);
         //针对系统传入的block，检查一次签名，如果没有，将在结构体中添加签名信息.
@@ -58,7 +64,8 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     or_value value;
     [ORArgsStack push:argValues];
     
-    value = eval([ORInterpreter shared], [ORThreadContext current], scope, methodImp);
+    eval([ORInterpreter shared], ctx, scope, methodImp);
+    value = *[ctx opStackPop];
     
     if (sel == NSSelectorFromString(@"dealloc")) {
         Method deallocMethod = class_getInstanceMethod(object_getClass(target), NSSelectorFromString(@"ORGdealloc"));
@@ -72,6 +79,7 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
 }
 
 void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
+    ORThreadContext *ctx = [ORThreadContext current];
     struct MFSimulateBlock *block = *(void **)args[0];
     MFBlock *mangoBlock =  (__bridge MFBlock *)(block->wrapper);
     NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:NSBlockGetSignature((__bridge  void *)mangoBlock.ocBlock)];
@@ -82,7 +90,8 @@ void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
     }
     or_value value;
     [ORArgsStack push:argValues];
-    value = eval([ORInterpreter shared], [ORThreadContext current], mangoBlock.outScope, mangoBlock.func);
+    eval([ORInterpreter shared], [ORThreadContext current], mangoBlock.outScope, mangoBlock.func);
+    value = *[ctx opStackPop];
     if (isVoidWithTypeEncode(value.typeencode) && *value.pointer != NULL){
         // 类型转换
         or_value_write_to(value, ret, [sig methodReturnType]);

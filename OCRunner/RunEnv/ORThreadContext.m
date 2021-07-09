@@ -89,9 +89,7 @@
     }
     return self;
 }
-+ (instancetype)threadStack{
-    return ORThreadContext.current.argsStack;
-}
+
 + (void)push:(NSMutableArray <MFValue *> *)value{
     NSAssert(value, @"value can not be nil");
     [ORArgsStack.threadStack.array addObject:value];
@@ -113,17 +111,19 @@
 
 @implementation ORThreadContext
 
-- (void)push:(void *)var size:(size_t)size{
+- (void)pushLocalVar:(void *)var size:(size_t)size{
+    assert(mem + sp + cursor < mem_end);
     memcpy(mem + sp + cursor, var , size);
     cursor += MAX(size, 8);
 }
-- (void *)seek:(mem_cursor)offset{
+- (void *)seekLocalVar:(mem_cursor)offset{
     return mem + sp + offset;
 }
 - (void)enter{
     lr = sp + cursor;
     mem[lr] = sp;
-    sp = lr + 1 * 8;
+    sp = lr + sizeof(mem_cursor);
+    assert(mem + sp < mem_end);
     cursor = 0;
 }
 - (void)exit{
@@ -133,7 +133,7 @@
         lr = 0;
         cursor = 0;
     }else{
-        lr = sp - 1 * 8;
+        lr = sp - sizeof(mem_cursor);
         cursor = before - sp;
     }
 }
@@ -141,6 +141,45 @@
     return lr == sp;
 }
 
+- (void)tempStackPop{
+    op_temp_mem_top--;
+}
+- (or_value_box *)tempStackWriteTop:(or_value_box *)var{
+    op_temp_mem[op_temp_mem_top] = *var;
+    return op_temp_mem + op_temp_mem_top;
+}
+- (or_value_box *)tempStackPush:(or_value_box *)var{
+    op_temp_mem[op_temp_mem_top++] = *var;
+    assert(op_mem + op_temp_mem_top < op_mem_end);
+    return op_temp_mem + op_temp_mem_top - 1;
+}
+- (or_value_box *)tempStackTopVar{
+    return op_temp_mem + op_temp_mem_top;
+}
+- (or_value_box *)tempStackSeek:(mem_cursor)beforeTop{
+    return op_temp_mem + op_temp_mem_top - beforeTop;
+}
+
+- (or_value *)opStackPop{
+    [self tempStackPop];
+    op_mem_top--;
+    return op_mem + op_mem_top;
+}
+- (void)opStackWriteTop:(or_value)var{
+    var.pointer = (void *)[self tempStackWriteTop:&var.box];
+    op_mem[op_mem_top] = var;
+}
+- (void)opStackPush:(or_value)var{
+    var.pointer = (void *)[self tempStackPush:&var.box];
+    op_mem[op_mem_top++] = var;
+    assert(op_mem + op_mem_top < op_mem_end);
+}
+- (or_value *)opStackTopVar{
+    return op_mem + op_mem_top;
+}
+- (or_value *)opStackSeek:(mem_cursor)beforeTop{
+    return op_mem + op_mem_top - 1 - beforeTop;
+}
 + (instancetype)current{
     //每一个线程拥有一个独立的上下文
     NSMutableDictionary *threadInfo = [[NSThread currentThread] threadDictionary];
@@ -162,10 +201,12 @@
         mem = malloc(mem_size);
         mem_end = mem + mem_size;
         op_mem = malloc(mem_size);
-        op_mem_end = (or_value_box *)((unichar *)op_mem + mem_size);
+        op_mem_end = (or_value *)((unichar *)op_mem + mem_size);
         op_mem_top = 0;
+        op_temp_mem = malloc(mem_size);
+        op_temp_mem_end = (or_value_box *)((unichar *)op_temp_mem + mem_size);
+        op_temp_mem_top = 0;
         
-        self.argsStack = [[ORArgsStack alloc] init];
         self.callFrameStack = [[ORCallFrameStack alloc] init];
     }
     return self;

@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class ORInterpreter;
 @class ORThreadContext;
 
-or_value eval(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORNode *node);
+void eval(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORNode *node);
 
 
 NS_ASSUME_NONNULL_END
