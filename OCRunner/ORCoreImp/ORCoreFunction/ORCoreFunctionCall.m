@@ -283,11 +283,11 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
 #else
 #import "ORTypeVarPair+libffi.h"
 #import "ORTypeVarPair+TypeEncode.h"
-//void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue){
-//    invoke_functionPointer(funptr, argValues, returnValue, argValues.count);
-//}
-//__attribute__((overloadable))
-//void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue, NSUInteger needArgs){
+void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue){
+    invoke_functionPointer(funptr, argValues, returnValue, argValues.count);
+}
+__attribute__((overloadable))
+void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue, NSUInteger needArgs){
 //    ffi_cif cif;
 //    ffi_type *types[argValues.count];
 //    void *argvs[argValues.count];
@@ -306,6 +306,6 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
 //    }
 //    // 触发 setPointer
 //    returnValue.pointer = ret;
-//}
+}
 
 #endif/* __libffi__ */

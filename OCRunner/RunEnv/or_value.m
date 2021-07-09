@@ -35,7 +35,7 @@ size_t or_value_mem_size(or_value *value){
     return size;
 }
 or_value or_value_create(const char *typeencode, void *pointer){
-    or_value value;
+    or_value value =  { 0 };
     or_value_set_typeencode(&value, typeencode);
     or_value_set_pointer(&value, pointer);
     return value;
@@ -151,96 +151,79 @@ void or_value_set_pointer(or_value *value, void *pointer){
     switch (*value->typeencode) {
         case OCTypeUChar:
             value->box.uCharValue = *(unsigned char *)pointer;
-            value->pointer = &value->box.uCharValue;
             break;
         
         case OCTypeUInt:
             value->box.uIntValue = *(unsigned int *)pointer;
-            value->pointer = &value->box.uIntValue;
             break;
         
         case OCTypeUShort:
             value->box.uShortValue = *(unsigned short *)pointer;
-            value->pointer = &value->box.uShortValue;
             break;
         
         case OCTypeULong:
             value->box.uLongValue = *(unsigned long *)pointer;
-            value->pointer = &value->box.uLongValue;
             break;
         
         case OCTypeULongLong:
             value->box.uLongLongValue = *(unsigned long long *)pointer;
-            value->pointer = &value->box.uLongLongValue;
             break;
         
         case OCTypeBOOL:
             value->box.boolValue = *(BOOL *)pointer;
-            value->pointer = &value->box.boolValue;
             break;
         
         case OCTypeChar:
             value->box.charValue = *(char *)pointer;
-            value->pointer = &value->box.charValue;
             break;
         
         case OCTypeShort:
             value->box.shortValue = *(short *)pointer;
-            value->pointer = &value->box.shortValue;
             break;
         
         case OCTypeInt:
             value->box.intValue = *(int *)pointer;
-            value->pointer = &value->box.intValue;
             break;
         
         case OCTypeLong:
             value->box.longValue = *(long *)pointer;
-            value->pointer = &value->box.longValue;
             break;
         
         case OCTypeLongLong:
             value->box.longlongValue = *(long long *)pointer;
-            value->pointer = &value->box.longlongValue;
             break;
         
         case OCTypeFloat:
             value->box.floatValue = *(float *)pointer;
-            value->pointer = &value->box.floatValue;
             break;
         
         case OCTypeDouble:
             value->box.doubleValue = *(double *)pointer;
-            value->pointer = &value->box.doubleValue;
             break;
         
         case OCTypeCString:
             value->box.pointerValue = pointer;
-            value->pointer = &value->box.pointerValue;
             break;
         
         case OCTypeObject:
         case OCTypeClass:
         case OCTypeSEL:
             value->box.pointerValue = *(void **)pointer;
-            value->pointer = &value->box.pointerValue;
             break;
             
         case OCTypeArray:
         case OCTypeUnion:
         case OCTypeStruct:
             value->box.pointerValue = pointer;
-            value->pointer = value->box.pointerValue;
             break;
         case OCTypePointer:
             value->box.pointerValue = *(void **)pointer;
-            value->pointer = &value->box.pointerValue;
             break;
         default:
             value->box.uLongLongValue = 0;
-            value->pointer = &value->box.uLongLongValue;
             break;
     }
+    value->pointer = pointer;
 
 }
 void or_value_write_to(or_value value, void *dst, const char *aim_typeencode){

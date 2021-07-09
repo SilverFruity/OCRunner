@@ -6,6 +6,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "or_value.h"
 
 NS_ASSUME_NONNULL_BEGIN
 @class MFValue;
@@ -35,6 +36,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef UInt64 mem_cursor;
 typedef unichar * local_var_mem;
+typedef or_value_box * op_stack_mem;
+
 typedef struct {
     mem_cursor lr;
     __unsafe_unretained ORNode *node;
@@ -50,12 +53,17 @@ typedef enum {
 @interface ORThreadContext : NSObject
 {
     @public
-    mem_cursor fp;
+    mem_cursor lr;
     mem_cursor sp;
     mem_cursor cursor;
+    
     local_var_mem mem;
     local_var_mem mem_end;
     
+    op_stack_mem op_mem;
+    op_stack_mem op_mem_end;
+    mem_cursor op_mem_top;
+
     ORControlFlowFlag flow_flag;
 }
 - (void)push:(void *)var size:(size_t)size;

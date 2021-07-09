@@ -463,7 +463,8 @@ or_value evalValueNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain 
 or_value evalConstantValue(ORInterpreter *inter, ORNode *node){
     ocDecl *decl = node.symbol.decl;
     void *value = inter->constants + decl.offset;
-    return or_value_create(decl.typeEncode, value);
+    or_value result = or_value_create(decl.typeEncode, value);
+    return result;
 }
 or_value evalIntegerValue(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORIntegerValue *node){
     return evalConstantValue(inter, node);
@@ -732,29 +733,12 @@ or_value evalAssignNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain
             break;
     }
     switch (node.value.nodeType) {
+        case AstEnumValueNode:
         case AstEnumUnaryNode:
         {
             or_value left = eval(inter, ctx, scope, node.value);
             or_value right = eval(inter, ctx, scope, resultExp);
             or_value_write_to(right, left.pointer, left.typeencode);
-            break;
-        }
-        case AstEnumValueNode:
-        {
-            ORValueNode *valueExp = (ORValueNode *)node.value;
-            or_value resultValue = eval(inter, ctx, scope, resultExp);
-            switch (valueExp.value_type) {
-                case OCValueSelf:{
-//                    scope.instance = resultValue;
-                    break;
-                }
-                case OCValueVariable:{
-//                    [scope assignWithIdentifer:(NSString *)valueExp.value value:resultValue];
-                    break;
-                }
-                default:
-                    break;
-            }
             break;
         }
         case AstEnumMethodCall:
@@ -817,7 +801,11 @@ or_value evalInitDeclaratorNode(ORInterpreter *inter, ORThreadContext *ctx, MFSc
         }
 //        if (decl.isFunction)
 //            value.funDecl = (ORFunctionDeclNode *)node.declarator;
-//        [scope setValue:value withIndentifier:node.declarator.var.varname];
+        if (scope == [MFScopeChain topScope] || scope.next == [MFScopeChain topScope]) {
+            MFValue *val = [MFValue valueWithTypeEncode:value.typeencode pointer:value.pointer];
+            [scope setValue:val withIndentifier:node.declarator.var.varname];
+        }
+        
         [ctx push:value.pointer size:or_value_mem_size(&value)];
         return value;
     };
@@ -838,7 +826,7 @@ or_value evalInitDeclaratorNode(ORInterpreter *inter, ORThreadContext *ctx, MFSc
 }
 or_value evalUnaryNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORUnaryNode *node){
     or_value currentValue = eval(inter, ctx, scope, node.value);
-    START_BOX;
+    or_value cal_result;
     cal_result.typeencode = currentValue.typeencode;
     switch (node.operatorType) {
         case UnaryOperatorIncrementSuffix:{
@@ -862,8 +850,8 @@ or_value evalUnaryNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain 
             break;
         }
         case UnaryOperatorNot:{
-//            cal_result.box.boolValue = !currentValue.isSubtantial;
-//            cal_result.typeencode = OCTypeStringBOOL;
+            cal_result.box.boolValue = !or_value_isSubtantial(currentValue);
+            cal_result.typeencode = OCTypeStringBOOL;
             break;
         }
         case UnaryOperatorSizeOf:{
@@ -902,34 +890,37 @@ or_value evalUnaryNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain 
         default:
             break;
     }
+    cal_result.pointer = (void **)&cal_result.box;
     return cal_result;
 }
+BOOL OR_NO_VALUE = NO;
+BOOL OR_YES_VALUE = NO;
 or_value evalBinaryNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORBinaryNode *node){
     switch (node.operatorType) {
         case BinaryOperatorLOGIC_AND:{
             or_value leftValue = eval(inter, ctx, scope, node.left);
             if (or_value_isSubtantial(leftValue)) {
                 or_value rightValue = eval(inter, ctx, scope, node.right);
-                return or_BOOL_value(or_value_isSubtantial(rightValue));
+                return or_value_create(OCTypeStringBOOL, or_value_isSubtantial(rightValue) ? &OR_YES_VALUE : &OR_NO_VALUE);
             }
             
-            return or_BOOL_value(NO);;
+            return or_value_create(OCTypeStringBOOL, &OR_NO_VALUE);
             break;
         }
         case BinaryOperatorLOGIC_OR:{
             or_value leftValue = eval(inter, ctx, scope, node.left);
             if (or_value_isSubtantial(leftValue)) {
-                return or_BOOL_value(YES);;
+                return or_value_create(OCTypeStringBOOL, &OR_YES_VALUE);
             }
             or_value rightValue = eval(inter, ctx, scope, node.right);
-            return or_BOOL_value(or_value_isSubtantial(rightValue));
+            return or_value_create(OCTypeStringBOOL, or_value_isSubtantial(rightValue) ? &OR_YES_VALUE : &OR_NO_VALUE);
             break;
         }
         default: break;
     }
     or_value rightValue = eval(inter, ctx, scope, node.right);
     or_value leftValue = eval(inter, ctx, scope, node.left);
-    START_BOX;
+    or_value cal_result;
     cal_result.typeencode = leftValue.typeencode;
     switch (node.operatorType) {
         case BinaryOperatorAdd:{
@@ -1011,6 +1002,7 @@ or_value evalBinaryNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain
         default:
             break;
     }
+    cal_result.pointer = (void **)&cal_result.box;
     return cal_result;
 
 }

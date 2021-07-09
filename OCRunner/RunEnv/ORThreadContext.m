@@ -114,33 +114,33 @@
 @implementation ORThreadContext
 
 - (void)push:(void *)var size:(size_t)size{
-    memcpy(mem + sp + cursor, var , size);
+    memcpy(mem + sp + cursor, var , MAX(size, 8));
     cursor += size;
 }
 - (void *)seek:(mem_cursor)offset size:(size_t)size{
-    void *ptr = NULL;
-    memcpy(&ptr, mem + sp + offset, size);
-    return ptr;
+//    void *ptr = NULL;
+//    memcpy(&ptr, mem + sp + offset, size);
+    return mem + sp + offset;
 }
 - (void)enter{
-    fp = sp + cursor;
-    mem[fp] = sp;
-    sp = fp + 1 * 8;
+    lr = sp + cursor;
+    mem[lr] = sp;
+    sp = lr + 1 * 8;
     cursor = 0;
 }
 - (void)exit{
-    mem_cursor before = fp;
-    sp = mem[fp];
+    mem_cursor before = lr;
+    sp = mem[lr];
     if (sp == 0) {
-        fp = 0;
+        lr = 0;
         cursor = 0;
     }else{
-        fp = sp - 1 * 8;
+        lr = sp - 1 * 8;
         cursor = before - sp;
     }
 }
 - (BOOL)isEmpty{
-    return fp == sp;
+    return lr == sp;
 }
 
 + (instancetype)current{
@@ -158,11 +158,15 @@
     self = [super init];
     if (self) {
         sp = 0;
-        fp = 0;
+        lr = 0;
         cursor = 0;
-        size_t mem_size = 1024 * 1024;
-        mem = malloc(sizeof(UInt64) * mem_size);
+        size_t mem_size = 1024 * 1024 * sizeof(UInt64);
+        mem = malloc(mem_size);
         mem_end = mem + mem_size;
+        op_mem = malloc(mem_size);
+        op_mem_end = (or_value_box *)((unichar *)op_mem + mem_size);
+        op_mem_top = 0;
+        
         self.argsStack = [[ORArgsStack alloc] init];
         self.callFrameStack = [[ORCallFrameStack alloc] init];
     }

@@ -7,8 +7,6 @@
 
 #import <Foundation/Foundation.h>
 
-#define START_BOX \
-or_value cal_result;\
 
 #define END_BOX(result)\
 result.typeEncode = cal_result.typeencode;\
