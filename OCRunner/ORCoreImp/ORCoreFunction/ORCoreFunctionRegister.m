@@ -462,7 +462,7 @@ or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
 
 #else
 #import "ORTypeVarPair+libffi.h"
-#import "ORTypeVarPair+TypeEncode.h"
+
 char *mallocCopyStr(const char *source){
     NSUInteger sLen = strlen(source);
     char *result = malloc(sLen + 1);
@@ -471,16 +471,16 @@ char *mallocCopyStr(const char *source){
     return result;
 }
 or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
-                        NSArray <ORDeclaratorNode *>*args,
-                        ORDeclaratorNode *ret)  __attribute__((overloadable))
+                        NSArray <ocDecl *>*args,
+                                 ocDecl *ret)  __attribute__((overloadable))
 {
     return register_function(fun, args, ret, NULL);
 }
 
 
 or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
-                        NSArray <ORDeclaratorNode *>*args,
-                        ORDeclaratorNode *ret,
+                        NSArray <ocDecl *>*args,
+                                 ocDecl *ret,
                         void *userdata)
 {
     void *imp = NULL;
@@ -504,19 +504,19 @@ or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
 }
 
 or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
-                      NSArray <ORDeclaratorNode *>*args,
-                      ORDeclaratorNode *ret) __attribute__((overloadable))
+                      NSArray <ocDecl *>*args,
+                               ocDecl *ret) __attribute__((overloadable))
 {
     return register_method(fun, args, ret, NULL);
 }
 or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
-                      NSArray <ORDeclaratorNode *>*args,
-                      ORDeclaratorNode *ret,
+                      NSArray <ocDecl *>*args,
+                               ocDecl *ret,
                       void *userdata)
 {
     NSMutableArray *argTypes = [NSMutableArray array];
-    [argTypes addObject:[ORDeclaratorNode typePairWithTypeKind:OCTypeStringObject]];
-    [argTypes addObject:[ORDeclaratorNode typePairWithTypeKind:OCTypeStringSEL]];
+    [argTypes addObject:[ocDecl declWithTypeEncode:OCTypeStringObject]];
+    [argTypes addObject:[ocDecl declWithTypeEncode:OCTypeStringSEL]];
     [argTypes addObjectsFromArray:args];
     return register_function(fun, argTypes, ret, userdata);
 }

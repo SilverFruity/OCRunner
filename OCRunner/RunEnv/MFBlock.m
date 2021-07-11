@@ -11,7 +11,7 @@
 #import "RunnerClasses+Execute.h"
 #import "MFValue.h"
 #import "ORCoreImp.h"
-#import "ORTypeVarPair+TypeEncode.h"
+
 
 void copy_helper(struct MFSimulateBlock *dst, struct MFSimulateBlock *src)
 {
@@ -111,7 +111,7 @@ void NSBlockSetSignature(void * block, const char *typeencode){
     return [self blockPtr];
 }
 - (void)setParamTypes:(NSMutableArray<ORDeclaratorNode *> *)paramTypes{
-    NSMutableArray *types = [@[[ORDeclaratorNode typePairWithTypeKind:OCTypeStringBlock]] mutableCopy];
+    NSMutableArray *types = [@[[ocDecl declWithTypeEncode:OCTypeStringBlock]] mutableCopy];
     [types addObjectsFromArray:paramTypes];
     _paramTypes = types;
     
@@ -120,12 +120,12 @@ void NSBlockSetSignature(void * block, const char *typeencode){
     if (_blockPtr != NULL) {
         return _blockPtr;
     }
-    const char *typeEncoding = self.retType.typeEncode;
+    const char *typeEncoding = self.retType.symbol.decl.typeEncode;
     for (ORDeclaratorNode *param in self.paramTypes) {
-        const char *paramTypeEncoding = param.typeEncode;
+        const char *paramTypeEncoding = param.symbol.decl.typeEncode;
         typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
     }
-    _ffi_result = register_function(&blockInter, self.paramTypes, self.retType);
+    _ffi_result = register_function(&blockInter, self.paramTypes, self.retType.symbol.decl);
     _blockPtr = simulateNSBlock(typeEncoding, _ffi_result->function_imp, (__bridge  void *)self);
     return _blockPtr;
 }

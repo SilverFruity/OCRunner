@@ -41,6 +41,9 @@ switch (*typeencode) {\
 + (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncode{
     return [MFValue valueWithTypeEncode:typeEncode pointer:NULL];
 }
++ (instancetype)valueWithORValue:(or_value *)value{
+    return [MFValue valueWithTypeEncode:value->typeencode pointer:value->pointer];
+}
 + (instancetype)valueWithTypeEncode:(const char *)typeEncode pointer:(void *)pointer{
     return [[MFValue alloc]initTypeEncode:typeEncode pointer:pointer];
 }

@@ -8,7 +8,6 @@
 
 #import <XCTest/XCTest.h>
 #import <OCRunner.h>
-#import "ORTypeVarPair+TypeEncode.h"
 #import <oc2mangoLib/oc2mangoLib.h>
 #import "ORRecoverClass.h"
 #import <objc/message.h>
@@ -1001,7 +1000,7 @@ int signatureBlockPtr(id object, int b){
     @"    int a = fibonaccia(n - 1); int b = fibonaccia(n - 2);"
     @"    return a + b;"
     @"}"
-    @"int a = fibonaccia(25);";
+    @"int a = fibonaccia(30);";
     AST *ast = [_parser parseSource:source];
     [self measureBlock:^{
         for (id exp in ast.globalStatements) {

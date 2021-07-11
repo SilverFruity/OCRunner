@@ -8,6 +8,7 @@
 
 #ifndef ORCoreFunction_h
 #define ORCoreFunction_h
+#import <oc2mangoLib/InitialSymbolTableVisitor.h>
 
 #if __has_include("ffi.h")
 
@@ -85,21 +86,21 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
 
 
 or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
-                        NSArray <ORDeclaratorNode *>*args,
-                        ORDeclaratorNode *ret)  __attribute__((overloadable));
+                        NSArray <ocDecl *>*args,
+                                 ocDecl *ret)  __attribute__((overloadable));
 
 or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
-                        NSArray <ORDeclaratorNode *>*args,
-                        ORDeclaratorNode *ret,
+                        NSArray <ocDecl *>*args,
+                                 ocDecl *ret,
                         void *userdata);
 
 or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
-                      NSArray <ORDeclaratorNode *>*args,
-                      ORDeclaratorNode *ret) __attribute__((overloadable));
+                      NSArray <ocDecl *>*args,
+                               ocDecl *ret) __attribute__((overloadable));
 
 or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
-                      NSArray <ORDeclaratorNode *>*args,
-                      ORDeclaratorNode *ret,
+                      NSArray <ocDecl *>*args,
+                               ocDecl *ret,
                       void *userdata);
 
 #endif /* ORCoreFunction_h */

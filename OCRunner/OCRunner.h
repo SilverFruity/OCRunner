@@ -16,7 +16,6 @@ FOUNDATION_EXPORT const unsigned char OCRunnerVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <OCRunner/PublicHeader.h>
 #import "ORCoreImp.h"
-#import "ORTypeVarPair+TypeEncode.h"
 #import "MFBlock.h"
 #import "MFValue.h"
 #import "MFScopeChain.h"

@@ -37,6 +37,7 @@ ORTypeVarPair *typePairWithTypeEncode(const char *tyepEncode);
 - (void)setDefaultValue;
 - (BOOL)isBlockValue;
 
++ (instancetype)valueWithORValue:(or_value *)value;
 + (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncoding;
 + (instancetype)valueWithTypeEncode:(const char *)typeEncode pointer:(nullable void *)pointer;
 + (instancetype)valueWithORCaculateValue:(or_value)value;

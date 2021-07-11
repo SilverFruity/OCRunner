@@ -12,7 +12,7 @@
 #import "RunnerClasses+Execute.h"
 #import "MFMethodMapTable.h"
 #import "MFPropertyMapTable.h"
-#import "ORTypeVarPair+TypeEncode.h"
+
 #import "util.h"
 #import "ORInterpreter.h"
 #import "ORCoreFunctionCall.h"
@@ -21,58 +21,44 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     ORMethodNode *methodImp = (__bridge ORMethodNode *)userdata;
     __unsafe_unretained id target = *(__unsafe_unretained id *)args[0];
     SEL sel = *(SEL *)args[1];
-    BOOL classMethod = object_isClass(target);
+    ORInterpreter *inter = [ORInterpreter shared];
     ORThreadContext *ctx = [ORThreadContext current];
     NSMethodSignature *sig = [target methodSignatureForSelector:sel];
-    NSMutableArray<MFValue *> *argValues = [NSMutableArray array];
-    
     [ctx enter];
-    [ctx pushLocalVar:args size:sizeof(void *)];
-    [ctx pushLocalVar:args + 1 size:sizeof(SEL)];
-    
+    [ctx pushLocalVar:*args size:sizeof(void *)];
+    [ctx pushLocalVar:*(args + 1) size:sizeof(SEL)];
     for (NSUInteger i = 2; i < sig.numberOfArguments; i++) {
-        or_value argValue = or_value_create([sig getArgumentTypeAtIndex:i], args[i]);
+        const char *typeencode = [sig getArgumentTypeAtIndex:i];
+        void *arg = args[i];
         //针对系统传入的block，检查一次签名，如果没有，将在结构体中添加签名信息.
-        
-        if (isObjectWithTypeEncode(argValue.typeencode)
-            && isBlockWithTypeEncode(argValue.typeencode)
-            && *argValue.pointer != NULL) {
-            struct MFSimulateBlock *bb = (void *)argValue.box.pointerValue;
+        if (isObjectWithTypeEncode(typeencode)
+            && isBlockWithTypeEncode(typeencode)
+            && arg != NULL) {
+            struct MFSimulateBlock *bb = (void *)arg;
             // 针对传入的block，如果为全局block或栈block，使用copy转换为堆block
             if (bb->isa == &_NSConcreteGlobalBlock || bb->isa == &_NSConcreteStackBlock){
-                id copied = (__bridge id)Block_copy(argValue.box.pointerValue);
-                or_value_set_pointer(&argValue, &copied);
+                arg = Block_copy(arg);
             }
-            
-            if (NSBlockHasSignature(*argValue.pointer) == NO) {
+            if (NSBlockHasSignature(arg) == NO) {
                 ORDeclaratorNode *blockdecl = methodImp.declare.parameters[i - 2];
                 if ([blockdecl isKindOfClass:[ORFunctionDeclNode class]]) {
-                    NSBlockSetSignature(*argValue.pointer, blockdecl.blockSignature);
+                    NSBlockSetSignature(arg, blockdecl.symbol.decl.typeEncode);
                 }
             }
         }
-//        [argValues addObject:argValue];
+        [ctx pushLocalVar:arg size:sizeof(void *)];
     }
-    if (classMethod) {
-        or_Class_value(target);
-//        scope.instance = [MFValue valueWithClass:target];
-    }else{
-        // 方法调用时不应该增加引用计数
-        or_Object_value(target);
-//        scope.instance = [MFValue valueWithUnownedObject:target];
-    }
-    or_value value;
-    [ORArgsStack push:argValues];
+    eval(inter, ctx, scope, methodImp);
+    [ctx exit];
     
-    eval([ORInterpreter shared], ctx, scope, methodImp);
-    value = *[ctx opStackPop];
+    or_value value = *[ctx opStackPop];
     
     if (sel == NSSelectorFromString(@"dealloc")) {
         Method deallocMethod = class_getInstanceMethod(object_getClass(target), NSSelectorFromString(@"ORGdealloc"));
         void (*originalDealloc)(__unsafe_unretained id, SEL) = (__typeof__(originalDealloc))method_getImplementation(deallocMethod);
         originalDealloc(target, NSSelectorFromString(@"dealloc"));
     }
-    if (isVoidWithTypeEncode(value.typeencode) && *value.pointer != NULL){
+    if (isVoidWithTypeEncode(value.typeencode) == NO && *value.pointer != NULL){
         // 类型转换
         or_value_write_to(value, ret, [sig methodReturnType]);
     }
@@ -99,35 +85,33 @@ void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
 }
 
 
-//void getterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
-//    id target = *(__strong id *)args[0];
-//    SEL sel = *(SEL *)args[1];
-//    ORPropertyNode *propDef = (__bridge ORPropertyNode *)userdata;
-//    NSString *propName = propDef.var.var.varname;
-//    NSMethodSignature *sig = [target methodSignatureForSelector:sel];
-//    __autoreleasing MFValue *propValue = objc_getAssociatedObject(target, mf_propKey(propName));
-//    if (!propValue) {
-//        propValue = [MFValue defaultValueWithTypeEncoding:propDef.var.typeEncode];
-//    }
-//    if (propValue.type != OCTypeVoid && propValue.pointer != NULL){
-//        [propValue writePointer:ret typeEncode:sig.methodReturnType];
-//    }
-//}
+void getterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
+    id target = *(__strong id *)args[0];
+    SEL sel = *(SEL *)args[1];
+    ORPropertyNode *propDef = (__bridge ORPropertyNode *)userdata;
+    NSString *propName = propDef.var.var.varname;
+    NSMethodSignature *sig = [target methodSignatureForSelector:sel];
+    __autoreleasing MFValue *propValue = objc_getAssociatedObject(target, mf_propKey(propName));
+    or_value value = or_value_create(propValue.typeEncode, propValue.pointer);
+    if (propValue.type != OCTypeVoid && propValue.pointer != NULL){
+        or_value_write_to(value, ret, sig.methodReturnType);
+    }
+}
 
-//void setterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
-//    id target = *(__strong id *)args[0];
-//    SEL sel = *(SEL *)args[1];
-//    const char *argTypeEncode = [[target methodSignatureForSelector:sel] getArgumentTypeAtIndex:2];
-//    MFValue *value = [MFValue valueWithTypeEncode:argTypeEncode pointer:args[2]];
-//    ORPropertyNode *propDef = (__bridge ORPropertyNode *)userdata;
-//    NSString *propName = propDef.var.var.varname;
-//    MFPropertyModifier modifier = propDef.modifier;
-//    if (modifier & MFPropertyModifierMemWeak) {
-//        value.modifier = DeclarationModifierWeak;
-//    }
-//    objc_AssociationPolicy associationPolicy = mf_AssociationPolicy_with_PropertyModifier(modifier);
-//    objc_setAssociatedObject(target, mf_propKey(propName), value, associationPolicy);
-//}
+void setterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
+    id target = *(__strong id *)args[0];
+    SEL sel = *(SEL *)args[1];
+    const char *argTypeEncode = [[target methodSignatureForSelector:sel] getArgumentTypeAtIndex:2];
+    or_value orvalue = or_value_create(argTypeEncode, args[2]);
+    MFValue *value = [MFValue valueWithORValue:&orvalue];
+    ORPropertyNode *propDef = (__bridge ORPropertyNode *)userdata;
+    MFPropertyModifier modifier = propDef.symbol.decl.propModifer;
+    if (modifier & MFPropertyModifierMemWeak) {
+        value.modifier = DeclarationModifierWeak;
+    }
+    objc_AssociationPolicy associationPolicy = mf_AssociationPolicy_with_PropertyModifier(modifier);
+    objc_setAssociatedObject(target, mf_propKey(propDef.var.var.varname), value, associationPolicy);
+}
 
 
 //MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValues){

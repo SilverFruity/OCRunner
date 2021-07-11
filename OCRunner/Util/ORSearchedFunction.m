@@ -11,7 +11,7 @@
 #import "RunnerClasses+Execute.h"
 #import "ORThreadContext.h"
 #import "MFValue.h"
-#import "ORTypeVarPair+TypeEncode.h"
+
 #import "ORCoreImp.h"
 #import <oc2mangoLib/ocHandleTypeEncode.h>
 
@@ -41,7 +41,7 @@
 }
 - (or_value)execute:(nonnull MFScopeChain *)scope {
     NSArray <MFValue *>*args = [ORArgsStack pop];
-    const char *org_typeencode = self.funPair.typeEncode;
+    const char *org_typeencode = self.funPair.symbol.decl.typeEncode;
     if (org_typeencode == NULL) {
         NSLog(@"OCRunner Error: Unknow return type of C function '%@'", self.name);
         return or_nullValue();

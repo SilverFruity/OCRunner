@@ -16,7 +16,7 @@
 #import "MFStaticVarTable.h"
 
 #import <objc/message.h>
-#import "ORTypeVarPair+TypeEncode.h"
+
 #import "ORCoreImp.h"
 #import "ORSearchedFunction.h"
 #import "ORffiResultCache.h"

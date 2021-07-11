@@ -591,7 +591,8 @@ class CRunnerTests: XCTestCase {
             eval(self.inter, self.ctx, scope, classValue);
         }
         let test = ORTestReplaceClass.init()
-        XCTAssert(test.test() == 10)
+        let result = test.test()
+        XCTAssert(result == 10, "\(result)")
     }
     func testClassProperty(){
         let source =

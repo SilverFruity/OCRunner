@@ -13,7 +13,8 @@
 #import "MFPropertyMapTable.h"
 #import "util.h"
 #import "RunnerClasses+Execute.h"
-#import "ORTypeVarPair+TypeEncode.h"
+#import <oc2mangoLib/oc2mangoLib.h>
+
 const void *mf_propKey(NSString *propName) {
     static NSMutableDictionary *_propKeys;
     static dispatch_once_t onceToken;
@@ -90,7 +91,7 @@ static MFScopeChain *instance = nil;
                 MFPropertyMapTable *table = [MFPropertyMapTable shareInstance];
                 ORPropertyNode *propDef = [table getPropertyMapTableItemWith:clazz name:propName].property;
                 if (propDef) {
-                    MFValue *result = [[MFValue alloc] initTypeEncode:propDef.var.typeEncode pointer:value.pointer];
+                    MFValue *result = [[MFValue alloc] initTypeEncode:propDef.var.symbol.decl.typeEncode pointer:value.pointer];
                     MFPropertyModifier modifier = propDef.modifier;
                     if ((modifier & MFPropertyModifierMemMask) == MFPropertyModifierMemWeak) {
                         result.modifier = DeclarationModifierWeak;
@@ -134,7 +135,7 @@ static MFScopeChain *instance = nil;
                 if (propDef) {
                     MFValue *propValue = objc_getAssociatedObject(instance, mf_propKey(propName));
                     if (!propValue) {
-                        return [MFValue defaultValueWithTypeEncoding:propDef.var.typeEncode];
+                        return [MFValue defaultValueWithTypeEncoding:propDef.var.symbol.decl.typeEncode];
                     }
                     if (propValue.modifier & DeclarationModifierWeak) {
                         propValue = [propValue copy];

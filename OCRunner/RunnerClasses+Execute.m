@@ -17,11 +17,11 @@
 #import "MFStaticVarTable.h"
 #import <oc2mangoLib/oc2mangoLib.h>
 #import <objc/message.h>
-#import "ORTypeVarPair+TypeEncode.h"
 #import "ORCoreImp.h"
 #import "ORSearchedFunction.h"
 #import "ORffiResultCache.h"
 #import "ORInterpreter.h"
+#import <oc2mangoLib/InitialSymbolTableVisitor.h>
 static void invoke_MFBlockValue(ORThreadContext *ctx, or_value blockValue, or_value **args, NSUInteger argCount){
     id block = (__bridge id)*blockValue.pointer;
 #if DEBUG
@@ -84,19 +84,22 @@ static void replace_method(Class clazz, ORMethodNode *methodImp){
     MFMethodMapTableItem *item = [[MFMethodMapTableItem alloc] initWithClass:c2 method:methodImp];
     [[MFMethodMapTable shareInstance] addMethodMapTableItem:item];
     
-//    ORMethodDeclNode *declare = methodImp.declare;
-//    or_ffi_result *result = register_method(&methodIMP, declare.parameters, declare.returnType, (__bridge_retained void *)methodImp);
-//    [[ORffiResultCache shared] saveffiResult:result WithKey:[NSValue valueWithPointer:(__bridge void *)methodImp]];
-//    SEL sel = NSSelectorFromString(methodImp.declare.selectorName);
-//    or_method_replace(methodImp.declare.isClassMethod, clazz, sel, result->function_imp, typeEncoding);
-//    free((void *)typeEncoding);
+    ORMethodDeclNode *declare = methodImp.declare;
+    NSMutableArray *decls = [NSMutableArray array];
+    for (ORDeclaratorNode *param in declare.parameters) {
+        [decls addObject:param.symbol.decl];
+    }
+    or_ffi_result *result = register_method(&methodIMP, decls, declare.returnType.symbol.decl, (__bridge_retained void *)methodImp);
+    [[ORffiResultCache shared] saveffiResult:result WithKey:[NSValue valueWithPointer:(__bridge void *)methodImp]];
+    SEL sel = NSSelectorFromString(methodImp.declare.selectorName);
+    or_method_replace(methodImp.declare.isClassMethod, clazz, sel, result->function_imp, typeEncoding);
 }
 
 static void replace_getter_method(Class clazz, ORPropertyNode *prop){
     SEL getterSEL = NSSelectorFromString(prop.var.var.varname);
-    const char *retTypeEncoding  = prop.var.typeEncode;
+    const char *retTypeEncoding  = prop.var.symbol.decl.typeEncode;
     const char * typeEncoding = mf_str_append(retTypeEncoding, "@:");
-    or_ffi_result *result = register_method(&getterImp, @[], prop.var, (__bridge  void *)prop);
+    or_ffi_result *result = register_method(&getterImp, @[], prop.var.symbol.decl, (__bridge  void *)prop);
     [[ORffiResultCache shared] saveffiResult:result WithKey:[NSValue valueWithPointer:(__bridge void *)prop]];
     or_method_replace(NO, clazz, getterSEL, result->function_imp, typeEncoding);
     free((void *)typeEncoding);
@@ -107,9 +110,9 @@ static void replace_setter_method(Class clazz, ORPropertyNode *prop){
     NSString *str1 = [[name substringWithRange:NSMakeRange(0, 1)] uppercaseString];
     NSString *str2 = name.length > 1 ? [name substringFromIndex:1] : nil;
     SEL setterSEL = NSSelectorFromString([NSString stringWithFormat:@"set%@%@:",str1,str2]);
-    const char *prtTypeEncoding  = prop.var.typeEncode;
+    const char *prtTypeEncoding  = prop.var.symbol.decl.typeEncode;
     const char * typeEncoding = mf_str_append("v@:", prtTypeEncoding);
-    or_ffi_result *result = register_method(&setterImp, @[prop.var], [ORDeclaratorNode typePairWithTypeKind:OCTypeVoid],(__bridge_retained  void *)prop);
+    or_ffi_result *result = register_method(&setterImp, @[prop.var.symbol.decl], [ocDecl declWithTypeEncode:OCTypeStringVoid],(__bridge_retained  void *)prop);
     or_method_replace(NO, clazz, setterSEL, result->function_imp, typeEncoding);
     free((void *)typeEncoding);
 }
@@ -294,7 +297,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }
 }
 - (objc_property_attribute_t )typeAttribute{
-    objc_property_attribute_t type = {"T", self.var.typeEncode };
+    objc_property_attribute_t type = {"T", self.var.symbol.decl.typeEncode };
     return type;
 }
 - (objc_property_attribute_t )memeryAttribute{
@@ -1253,22 +1256,16 @@ void evalControlStatNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChai
     }
 }
 void evalPropertyNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORPropertyNode *node){
-//    NSString *propertyName = node.var.var.varname;
-//    [scope recursiveGetValueWithIdentifier:@"Class"];
-//    or_value classValue = *[ctx opStackPop];
-//    Class class = *(Class *)classValue.pointer;
-//    class_replaceProperty(class, [propertyName UTF8String], node.propertyAttributes, 3);
-//    MFPropertyMapTableItem *propItem = [[MFPropertyMapTableItem alloc] initWithClass:class property:node];
-//    [[MFPropertyMapTable shareInstance] addPropertyMapTableItem:propItem];
-//    replace_getter_method(class, node);
-//    replace_setter_method(class, node);
+    NSString *propertyName = node.var.var.varname;
+    Class class = NSClassFromString([(ORClassNode *)node.parentNode className]);
+    class_replaceProperty(class, [propertyName UTF8String], node.propertyAttributes, 3);
+    MFPropertyMapTableItem *propItem = [[MFPropertyMapTableItem alloc] initWithClass:class property:node];
+    [[MFPropertyMapTable shareInstance] addPropertyMapTableItem:propItem];
+    replace_getter_method(class, node);
+    replace_setter_method(class, node);
     return;
 }
 void evalMethodDeclNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORMethodDeclNode *node){
-//    NSMutableArray * parameters = [ORArgsStack pop];
-//    [parameters enumerateObjectsUsingBlock:^(or_value  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-//        [scope setValue:obj withIndentifier:node.parameters[idx].var.varname];
-//    }];
     return;
 }
 void evalMethodNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORMethodNode *node){
