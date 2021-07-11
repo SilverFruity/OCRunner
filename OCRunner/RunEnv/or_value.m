@@ -201,23 +201,20 @@ void or_value_set_pointer(or_value *value, void *pointer){
             value->box.doubleValue = *(double *)pointer;
             break;
         
-        case OCTypeCString:
-            value->box.pointerValue = pointer;
-            break;
         
         case OCTypeObject:
         case OCTypeClass:
+        case OCTypePointer:
+        case OCTypeCString:
         case OCTypeSEL:
             value->box.pointerValue = *(void **)pointer;
             break;
-            
+        
+        
         case OCTypeArray:
         case OCTypeUnion:
         case OCTypeStruct:
             value->box.pointerValue = pointer;
-            break;
-        case OCTypePointer:
-            value->box.pointerValue = *(void **)pointer;
             break;
         default:
             value->box.uLongLongValue = 0;

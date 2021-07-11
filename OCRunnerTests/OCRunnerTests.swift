@@ -102,9 +102,9 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scopeValue!.doubleValue == 0.5)
         scopeValue = scope.getValueWithIdentifier("str")
         XCTAssert(scopeValue!.type == OCTypeCString)
-        XCTAssert(String(utf8String: scopeValue!.cStringValue!) == "123")
+        XCTAssert(String(utf8String: scopeValue!.cStringValue!) == "123", "\(scopeValue!.cStringValue!)")
         scopeValue = scope.getValueWithIdentifier("sel")
-        XCTAssert(scopeValue!.selValue == Selector("test"))
+        XCTAssert(scopeValue!.selValue == Selector("test"), "\(scopeValue!.selValue)")
     }
     func testeDeclareBlock(){
         let source =
@@ -222,6 +222,8 @@ class CRunnerTests: XCTestCase {
         for exp in exps {
             eval(self.inter, self.ctx, scope, exp);
         }
+        XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 2)
+        XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 1)
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 3)
         XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 1)
         XCTAssert(scope.getValueWithIdentifier("e")!.intValue == 2)

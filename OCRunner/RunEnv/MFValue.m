@@ -135,7 +135,7 @@ switch (*typeencode) {\
             break;
         
         case OCTypeCString:
-            realBaseValue.pointerValue = pointer;
+            realBaseValue.pointerValue = *(void **)pointer;
             _pointer = &realBaseValue.pointerValue;
             break;
         

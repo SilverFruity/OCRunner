@@ -79,24 +79,17 @@ void or_method_replace(BOOL isClassMethod, Class clazz, SEL sel, IMP imp, const 
     class_replaceMethod(c2, sel, imp, typeEncode);
 }
 static void replace_method(Class clazz, ORMethodNode *methodImp){
-    const char *typeEncoding = methodImp.declare.returnType.typeEncode;
-    typeEncoding = mf_str_append(typeEncoding, "@:"); //add self and _cmd
-    for (ORDeclaratorNode *pair in methodImp.declare.parameters) {
-        const char *paramTypeEncoding = pair.typeEncode;
-        const char *beforeTypeEncoding = typeEncoding;
-        typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
-        free((void *)beforeTypeEncoding);
-    }
+    const char *typeEncoding = methodImp.symbol.decl.typeEncode;
     Class c2 = methodImp.declare.isClassMethod ? objc_getMetaClass(class_getName(clazz)) : clazz;
     MFMethodMapTableItem *item = [[MFMethodMapTableItem alloc] initWithClass:c2 method:methodImp];
     [[MFMethodMapTable shareInstance] addMethodMapTableItem:item];
     
-    ORMethodDeclNode *declare = methodImp.declare;
-    or_ffi_result *result = register_method(&methodIMP, declare.parameters, declare.returnType, (__bridge_retained void *)methodImp);
-    [[ORffiResultCache shared] saveffiResult:result WithKey:[NSValue valueWithPointer:(__bridge void *)methodImp]];
-    SEL sel = NSSelectorFromString(methodImp.declare.selectorName);
-    or_method_replace(methodImp.declare.isClassMethod, clazz, sel, result->function_imp, typeEncoding);
-    free((void *)typeEncoding);
+//    ORMethodDeclNode *declare = methodImp.declare;
+//    or_ffi_result *result = register_method(&methodIMP, declare.parameters, declare.returnType, (__bridge_retained void *)methodImp);
+//    [[ORffiResultCache shared] saveffiResult:result WithKey:[NSValue valueWithPointer:(__bridge void *)methodImp]];
+//    SEL sel = NSSelectorFromString(methodImp.declare.selectorName);
+//    or_method_replace(methodImp.declare.isClassMethod, clazz, sel, result->function_imp, typeEncoding);
+//    free((void *)typeEncoding);
 }
 
 static void replace_getter_method(Class clazz, ORPropertyNode *prop){
@@ -377,39 +370,67 @@ void evalBlockNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sco
     }
     return;
 }
+void evalConstantValue(ORInterpreter *inter, ORThreadContext *ctx, ORNode *node){
+    ocDecl *decl = node.symbol.decl;
+    void *value = inter->constants + decl.offset;
+    or_value result = or_value_create(decl.typeEncode, value);
+    [ctx opStackPush:result];
+    return;
+}
 void evalValueNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORValueNode *node){
     switch (node.value_type) {
+        case OCValueString:{
+            void *buffer = inter->constants + node.symbol.decl.offset;
+            [ctx opStackPush:or_Object_value([NSString stringWithUTF8String:buffer])];
+            return;
+        }
+        case OCValueCString:{
+            void *buffer = inter->constants + node.symbol.decl.offset;
+            or_value value = or_CString_value(buffer);
+            [ctx opStackPush:value];
+            return;
+        }
+        case OCValueSelector:{
+            void *buffer = inter->constants + node.symbol.decl.offset;
+            [ctx opStackPush:or_SEL_value(NSSelectorFromString([NSString stringWithUTF8String:buffer]))];
+            return;
+        }
+        case OCValueProtocol:{
+            void *buffer = inter->constants + node.symbol.decl.offset;
+            [ctx opStackPush:or_Object_value(NSProtocolFromString([NSString stringWithUTF8String:buffer]))];
+            return;
+        }
         case OCValueSelf:
+        {
+            void *result = [ctx seekLocalVar:node.symbol.decl.offset];
+            or_value value = or_value_create(node.symbol.decl.typeEncode, result);
+            [ctx opStackPush:value];
+            break;
+        }
         case OCValueSuper:
+        {
+            void *result = [ctx seekLocalVar:node.symbol.decl.offset];
+            or_value value = or_value_create(node.symbol.decl.typeEncode, result);
+            [ctx opStackPush:value];
+            break;
+        }
         case OCValueVariable:{
-            if (node.symbol) {
-                void *result = [ctx seekLocalVar:node.symbol.decl.offset];
-                or_value value = or_value_create(node.symbol.decl.typeEncode, result);
-                [ctx opStackPush:value];
-                return;
-            }else{
+            if (node.symbol.decl->isClassRef) {
                 Class class = NSClassFromString(node.value);
                 if (class) {
                     [ctx opStackPush:or_Class_value(class)];
                     return;
-                }else{
-    #if DEBUG
-                    if (node.value) NSLog(@"\n---------OCRunner Warning---------\n"
-                                          @"Can't find object or class: %@\n"
-                                          @"-----------------------------------", node.value);
-    #endif
-                    return;
                 }
+    #if DEBUG
+                if (node.value) NSLog(@"\n---------OCRunner Warning---------\n"
+                                      @"Can't find object or class: %@\n"
+                                      @"-----------------------------------", node.value);
+    #endif
+                return;
             }
-        }
-        case OCValueSelector:{
-            //SEL 作为参数时，在OC中，是以NSString传递的，1.0.4前的ORMethodCall只使用libffi调用objc_msgSend时，就会出现objc_retain的崩溃
-            NSString *value = node.value;
-            [ctx opStackPush:or_SEL_value(NSSelectorFromString(value))];
-            return;
-        }
-        case OCValueProtocol:{
-            [ctx opStackPush:or_Object_value(NSProtocolFromString(node.value))];
+            void *result = [ctx seekLocalVar:node.symbol.decl.offset];
+            or_value value = or_value_create(node.symbol.decl.typeEncode, result);
+            [ctx opStackPush:value];
             return;
         }
         case OCValueDictionary:{
@@ -451,19 +472,10 @@ void evalValueNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sco
         }
         case OCValueNSNumber:{
             eval(inter, ctx, scope, node.value);
-or_value value = *[ctx opStackPop];
+            or_value value = *[ctx opStackPop];
             NSNumber *result = nil;
             UnaryExecuteBaseType(result, @, value);
             [ctx opStackPush:or_Object_value(result)];
-            return;
-        }
-        case OCValueString:{
-            [ctx opStackPush:or_Object_value(node.value)];
-            return;
-        }
-        case OCValueCString:{
-            NSString *value = node.value;
-            [ctx opStackPush:or_CString_value((char *)value.UTF8String)];
             return;
         }
         case OCValueNil:{
@@ -478,12 +490,6 @@ or_value value = *[ctx opStackPop];
             break;
     }
 
-}
-void evalConstantValue(ORInterpreter *inter, ORThreadContext *ctx, ORNode *node){
-    ocDecl *decl = node.symbol.decl;
-    void *value = inter->constants + decl.offset;
-    [ctx opStackPush:or_value_create(decl.typeEncode, value)];
-    return;
 }
 void evalIntegerValue(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORIntegerValue *node){
     evalConstantValue(inter, ctx, node);
@@ -503,23 +509,23 @@ void evalMethodCall(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sc
     }
     eval(inter, ctx, scope, node.caller);
     or_value variable = *[ctx opStackPop];
-    if (*variable.typeencode == OCTypeStruct || *variable.typeencode == OCTypeUnion) {
-        if ([node.names.firstObject hasPrefix:@"set"]) {
-            NSString *setterName = node.names.firstObject;
-            ORNode *valueExp = node.values.firstObject;
-            NSString *fieldKey = [setterName substringFromIndex:3];
-            NSString *first = [[fieldKey substringToIndex:1] lowercaseString];
-            NSString *other = setterName.length > 1 ? [fieldKey substringFromIndex:1] : @"";
-            fieldKey = [NSString stringWithFormat:@"%@%@", first, other];
-            eval(inter, ctx, scope, valueExp);
-            or_value value = *[ctx opStackPop];
+//    if (*variable.typeencode == OCTypeStruct || *variable.typeencode == OCTypeUnion) {
+//        if ([node.names.firstObject hasPrefix:@"set"]) {
+//            NSString *setterName = node.names.firstObject;
+//            ORNode *valueExp = node.values.firstObject;
+//            NSString *fieldKey = [setterName substringFromIndex:3];
+//            NSString *first = [[fieldKey substringToIndex:1] lowercaseString];
+//            NSString *other = setterName.length > 1 ? [fieldKey substringFromIndex:1] : @"";
+//            fieldKey = [NSString stringWithFormat:@"%@%@", first, other];
+//            eval(inter, ctx, scope, valueExp);
+//            or_value value = *[ctx opStackPop];
 //            if (variable.type == OCTypeStruct) {
 //                [variable setFieldWithValue:value forKey:fieldKey];
 //            }else{
 //                [variable setUnionFieldWithValue:value forKey:fieldKey];
 //            }
-            return;
-        }else{
+//            return;
+//        }else{
 //            if (variable.type == OCTypeStruct) {
 //                if (node.isAssignedValue) {
 //                    return [variable fieldNoCopyForKey:node.names.firstObject];
@@ -529,28 +535,28 @@ void evalMethodCall(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sc
 //            }else{
 //                return [variable unionFieldForKey:node.names.firstObject];;
 //            }
-            return;
-        }
-    }
+//            return;
+//        }
+//    }
     id instance = (__bridge  id)*variable.pointer;
     SEL sel = NSSelectorFromString(node.selectorName);
     unichar argsMem[node.values.count * sizeof(or_value)];
-    void *args[node.values.count + 2];
-    or_SEL_value(sel);
-or_value sel_value = *[ctx opStackPop];
-    args[0] = &variable;
+    NSInteger inputArgCount = node.values.count + 2;
+    or_value *args[inputArgCount];
+    or_value self_value = or_Object_value(instance);
+    or_value sel_value = or_SEL_value(sel);
+    args[0] = &self_value;
     args[1] = &sel_value;
     for (int i = 0; i < node.values.count; i++) {
         eval(inter, ctx, scope, node.values[i]);
-or_value arg = *[ctx opStackPop];
+        or_value arg = *[ctx opStackPop];
         void *dst = argsMem + i * sizeof(or_value);
         memcpy(dst, &arg, sizeof(or_value));
-        args[i] = dst;
+        args[i + 2] = dst;
     }
     // instance为nil时，依然要执行参数相关的表达式
     if ([node.caller isKindOfClass:[ORValueNode class]]) {
-        ORValueNode *value = (ORValueNode *)node.caller;
-        if (value.value_type == OCValueSuper) {
+        if (node.caller.symbol.decl->isSuper) {
 //            return invoke_sueper_values(instance, sel, argValues);
         }
     }
@@ -563,10 +569,13 @@ or_value arg = *[ctx opStackPop];
     Class class = isClassMethod ? objc_getMetaClass(class_getName(instance)) : [instance class];
     MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:class classMethod:isClassMethod sel:sel];
     if (map) {
-        MFScopeChain *newScope = [MFScopeChain scopeChainWithNext:scope];
-//        newScope.instance = isClassMethod ? [MFValue valueWithClass:instance] : [MFValue valueWithObject:instance];
-//        [ORArgsStack push:argValues];
-        eval(inter, ctx, newScope, map.methodImp);
+        [ctx enter];
+        for (int i = 0; i < inputArgCount; i++) {
+            [ctx pushLocalVar:args[i]->pointer size:or_value_mem_size(args[i])];
+        }
+        eval(inter, ctx, scope, map.methodImp);
+        [ctx exit];
+        return;
     }
     NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
     if (sig == nil) {
@@ -575,9 +584,9 @@ or_value arg = *[ctx opStackPop];
     }
     NSUInteger argCount = [sig numberOfArguments];
     //解决多参数调用问题
-    if (node.values.count + 2 > argCount && sig != nil) {
+    if (inputArgCount > argCount && sig != nil) {
         or_value_create([sig methodReturnType], NULL);
-or_value result = *[ctx opStackPop];
+        or_value result = *[ctx opStackPop];
         void *msg_send = &objc_msgSend;
 //        invoke_functionPointer(msg_send, methodArgs, result, argCount);
         [ctx opStackPush:result];
@@ -600,15 +609,13 @@ or_value result = *[ctx opStackPop];
         if (*returnType == 'v') {
             return;
         }
-        [invocation getReturnValue:retValuePointer];
-        or_value_create(returnType, retValuePointer);
-or_value value = *[ctx opStackPop];
+        [invocation getReturnValue:retValuePointer];;
         // 针对一下方法调用，需要和CF一样，最终都要release. 与JSPatch和Mango中的__bridge_transfer效果相同
-        if (sel == @selector(alloc) || sel == @selector(new)||
-            sel == @selector(copy) || sel == @selector(mutableCopy)) {
-            CFRelease(*(void **)retValuePointer);
-        }
-        [ctx opStackPush:value];
+//        if (sel == @selector(alloc) || sel == @selector(new)||
+//            sel == @selector(copy) || sel == @selector(mutableCopy)) {
+//            CFRelease(*(void **)retValuePointer);
+//        }
+        [ctx opStackPush:or_value_create(returnType, retValuePointer)];
         return;
     }
 }
@@ -1248,7 +1255,7 @@ void evalControlStatNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChai
 void evalPropertyNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORPropertyNode *node){
 //    NSString *propertyName = node.var.var.varname;
 //    [scope recursiveGetValueWithIdentifier:@"Class"];
-or_value classValue = *[ctx opStackPop];
+//    or_value classValue = *[ctx opStackPop];
 //    Class class = *(Class *)classValue.pointer;
 //    class_replaceProperty(class, [propertyName UTF8String], node.propertyAttributes, 3);
 //    MFPropertyMapTableItem *propItem = [[MFPropertyMapTableItem alloc] initWithClass:class property:node];
@@ -1265,45 +1272,42 @@ void evalMethodDeclNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain
     return;
 }
 void evalMethodNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORMethodNode *node){
-//    MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
+    MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
 //    [ORCallFrameStack pushMethodCall:node instance:scope.instance];
-//    eval(inter, ctx, current, node.declare);
-//    eval(inter, ctx, current, node.scopeImp);
-or_value result = *[ctx opStackPop];
-//    ctx->flow_flag = ORControlFlowFlagNormal;
+    eval(inter, ctx, current, node.scopeImp);
+    ctx->flow_flag = ORControlFlowFlagNormal;
 //    [ORCallFrameStack pop];
     return;
 }
 void evalClassNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORClassNode *node){
-//    Class clazz = NSClassFromString(node.className);
-//    MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
-//    if (!clazz) {
-//        Class superClass = NSClassFromString(node.superClassName);
-//        if (!superClass) {
-//            // 针对仅实现 @implementation xxxx @end 的类, 默认继承NSObjectt
-//            superClass = [NSObject class];
-//        }
-//        clazz = objc_allocateClassPair(superClass, node.className.UTF8String, 0);
-//        //添加协议
-//        for (NSString *name in node.protocols) {
-//            Protocol *protcol = NSProtocolFromString(name);
-//            if (protcol) {
-//                class_addProtocol(clazz, protcol);
-//            }
-//        }
-//        objc_registerClassPair(clazz);
-//        [[MFScopeChain topScope] setValue:[MFValue valueWithClass:clazz] withIndentifier:node.className];
-//    }
-//    // 添加Class变量到作用域
-//    [current setValue:[MFValue valueWithClass:clazz] withIndentifier:@"Class"];
-//    // 先添加属性
-//    for (ORPropertyNode *property in node.properties) {
-//        eval(inter, ctx, current, property);
-//    }
-//    // 在添加方法，这样可以解决属性的懒加载不生效的问题
-//    for (ORMethodNode *method in node.methods) {
-//        replace_method(clazz, method);
-//    }
+    Class clazz = NSClassFromString(node.className);
+    MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
+    if (!clazz) {
+        Class superClass = NSClassFromString(node.superClassName);
+        if (!superClass) {
+            // 针对仅实现 @implementation xxxx @end 的类, 默认继承NSObjectt
+            superClass = [NSObject class];
+        }
+        clazz = objc_allocateClassPair(superClass, node.className.UTF8String, 0);
+        //添加协议
+        for (NSString *name in node.protocols) {
+            Protocol *protcol = NSProtocolFromString(name);
+            if (protcol) {
+                class_addProtocol(clazz, protcol);
+            }
+        }
+        objc_registerClassPair(clazz);
+    }
+    // 添加Class变量到作用域
+    [current setValue:[MFValue valueWithClass:clazz] withIndentifier:@"Class"];
+    // 先添加属性
+    for (ORPropertyNode *property in node.properties) {
+        eval(inter, ctx, current, property);
+    }
+    // 在添加方法，这样可以解决属性的懒加载不生效的问题
+    for (ORMethodNode *method in node.methods) {
+        replace_method(clazz, method);
+    }
     return;
 }
 void evalProtocolNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORProtocolNode *node){
