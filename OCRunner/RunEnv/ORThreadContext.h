@@ -50,7 +50,7 @@ typedef enum {
 
 
 typedef UInt64 mem_cursor;
-typedef unichar * machine_mem;
+typedef UInt8 * machine_mem;
 typedef or_value *op_stack_mem;
 typedef or_value_box *op_temp_value_mem;
 
@@ -74,7 +74,7 @@ typedef or_value_box *op_temp_value_mem;
 
     ORControlFlowFlag flow_flag;
 }
-- (void)pushLocalVar:(void *)var size:(size_t)size;
+- (machine_mem)pushLocalVar:(void *)var size:(size_t)size;
 - (void *)seekLocalVar:(mem_cursor)offset;
 - (void)enter;
 - (void)exit;

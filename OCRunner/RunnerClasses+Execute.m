@@ -946,10 +946,6 @@ void evalAssignNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sc
 void evalDeclaratorNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORDeclaratorNode *node){
     ocDecl *decl = node.symbol.decl;
     or_value value = or_value_create(decl.typeEncode, NULL);
-    if (scope == [MFScopeChain topScope] || scope.next == [MFScopeChain topScope]) {
-        MFValue *val = [MFValue valueWithTypeEncode:value.typeencode pointer:value.pointer];
-        [scope setValue:val withIndentifier:node.var.varname];
-    }
 //    value.modifier = decl.declModifer;
 //    if (isObjectWithTypeEncode(value.typeencode)
 //        && NSClassFromString(value.typeName) == nil
@@ -957,7 +953,11 @@ void evalDeclaratorNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain
 //        NSString *reason = [NSString stringWithFormat:@"Unknown Type Identifier: %@",value.typeName];
 //        @throw [NSException exceptionWithName:@"OCRunner" reason:reason userInfo:nil];
 //    }
-    [ctx pushLocalVar:value.pointer size:or_value_mem_size(&value)];
+    machine_mem dst = [ctx pushLocalVar:value.pointer size:or_value_mem_size(&value)];
+    if (scope == [MFScopeChain topScope] || scope.next == [MFScopeChain topScope]) {
+        MFValue *val = [MFValue valueWithTypeEncode:value.typeencode pointer:dst];
+        [scope setValue:val withIndentifier:node.var.varname];
+    }
     return;
 }
 void evalInitDeclaratorNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORInitDeclaratorNode *node){
@@ -974,11 +974,11 @@ void evalInitDeclaratorNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeC
 //        value.typeEncode = decl.typeEncode;
 //        if (decl.isFunction)
 //            value.funDecl = (ORFunctionDeclNode *)node.declarator;
+        machine_mem dst = [ctx pushLocalVar:value.pointer size:or_value_mem_size(&value)];
         if (scope == [MFScopeChain topScope] || scope.next == [MFScopeChain topScope]) {
-            MFValue *val = [MFValue valueWithTypeEncode:value.typeencode pointer:value.pointer];
+            MFValue *val = [MFValue valueWithTypeEncode:value.typeencode pointer:dst];
             [scope setValue:val withIndentifier:node.declarator.var.varname];
         }
-        [ctx pushLocalVar:value.pointer size:or_value_mem_size(&value)];
         return;
     };
     if (staticVar) {

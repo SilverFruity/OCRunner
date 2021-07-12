@@ -111,31 +111,33 @@
 
 @implementation ORThreadContext
 
-- (void)pushLocalVar:(void *)var size:(size_t)size{
-    assert(mem + sp + cursor < mem_end);
-    memcpy(mem + sp + cursor, var , size);
+- (machine_mem)pushLocalVar:(void *)var size:(size_t)size{
+    machine_mem dst = mem + sp + cursor;
+    assert(dst < mem_end);
+    memcpy(dst, var , size);
     cursor += MAX(size, 8);
+    return dst;
 }
 - (void *)seekLocalVar:(mem_cursor)offset{
     return mem + sp + offset;
 }
 - (void)enter{
     lr = sp + cursor;
-    mem[lr] = sp;
+    assert(mem + lr < mem_end);
+    memcpy(mem + lr, &sp, sizeof(mem_cursor));
     sp = lr + sizeof(mem_cursor);
-    assert(mem + sp < mem_end);
     cursor = 0;
 }
 - (void)exit{
     mem_cursor before = lr;
-    sp = mem[lr];
+    memcpy(&sp, mem + lr, sizeof(mem_cursor));
     if (sp == 0) {
         lr = 0;
         cursor = 0;
     }else{
         lr = sp - sizeof(mem_cursor);
-        cursor = before - sp;
     }
+    cursor = before - sp;
 }
 - (BOOL)isEmpty{
     return lr == sp;
@@ -197,14 +199,14 @@
         sp = 0;
         lr = 0;
         cursor = 0;
-        size_t mem_size = 1024 * 1024 * sizeof(UInt64);
+        size_t mem_size = 1024 * sizeof(machine_mem);
         mem = malloc(mem_size);
         mem_end = mem + mem_size;
         op_mem = malloc(mem_size);
-        op_mem_end = (or_value *)((unichar *)op_mem + mem_size);
+        op_mem_end = (or_value *)((char *)op_mem + mem_size);
         op_mem_top = 0;
         op_temp_mem = malloc(mem_size);
-        op_temp_mem_end = (or_value_box *)((unichar *)op_temp_mem + mem_size);
+        op_temp_mem_end = (or_value_box *)((char *)op_temp_mem + mem_size);
         op_temp_mem_top = 0;
         
         self.callFrameStack = [[ORCallFrameStack alloc] init];

@@ -633,20 +633,20 @@ switch (*typeencode) {\
     MFValueBridge(self->realBaseValue, self->_typeEncode, double);
     return result;
 }
-//- (id)objectValue{
-//    void *value = *(void **)self.pointer;
-//    if (value == NULL) return nil;
-//    return (__bridge id)value;
-//}
-//- (void *)classValue{
-//    return *(void **)self.pointer;
-//}
-//- (SEL)selValue{
-//    return *(SEL *)self.pointer;
-//}
-//- (char *)cStringValue{
-//    return *(char **)self.pointer;
-//}
+- (id)objectValue{
+    void *value = *(void **)self.pointer;
+    if (value == NULL) return nil;
+    return (__bridge id)value;
+}
+- (void *)classValue{
+    return *(void **)self.pointer;
+}
+- (SEL)selValue{
+    return *(SEL *)self.pointer;
+}
+- (char *)cStringValue{
+    return *(char **)self.pointer;
+}
 //+ (instancetype)nullValue{
 //    return [MFValue valueWithPointer:NULL];
 //}

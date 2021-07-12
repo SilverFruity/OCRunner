@@ -80,13 +80,13 @@ int fibonaccia(int n) {
 //    XCTAssert(a.size.height == 4);
 //}
 //
-//typedef union TestUnion1{
-//    int a;
-//    int b;
-//    CGFloat c;
-//    char *d;
-//    CGRect rect;
-//}TestUnion1;
+typedef union TestUnion1{
+    int a;
+    int b;
+    CGFloat c;
+    char *d;
+    CGRect rect;
+}TestUnion1;
 //
 //typedef struct Element1Struct{
 //    int **a;
@@ -158,28 +158,31 @@ int fibonaccia(int n) {
 //    XCTAssert(value2 == 1);
 //    ;
 //}
-//- (void)testUnionSetValue{
-//    MFScopeChain *scope = self.currentScope;
-//    NSString *source =
-//    @"union TestUnion2{"
-//    "    int a;"
-//    "    int b;"
-//    "    CGFloat c;"
-//    "    char *d;"
-//    "    CGRect rect;"
-//    "};"
-//    "TestUnion2 value;"
-//    "value.a = 2;";
-//    AST *ast = [_parser parseSource:source];
-//    for (id exp in ast.nodes) {
-//        eval(self.inter, self.ctx, scope, exp);
-//    }
-//    MFValue *value = [scope getValueWithIdentifier:@"value"];
-//    XCTAssert([value unionFieldForKey:@"b"].intValue == 2);
-//    TestUnion1 result = *(TestUnion1 *)value.pointer;
-//    XCTAssert(result.a == 2);
-//    XCTAssert(result.b == 2);
-//}
+- (void)testUnionSetValue{
+    MFScopeChain *scope = self.currentScope;
+    NSString *source =
+    @"union TestUnion2{"
+    "    int a;"
+    "    int b;"
+    "    CGFloat c;"
+    "    char *d;"
+    "    CGRect rect;"
+    "};"
+    "TestUnion2 value;"
+    "value.a = 2;"
+    "int c = value.a;";
+    AST *ast = [_parser parseSource:source];
+    for (id exp in ast.nodes) {
+        eval(self.inter, self.ctx, scope, exp);
+    }
+    MFValue *value = [scope getValueWithIdentifier:@"value"];
+    TestUnion1 result = *(TestUnion1 *)value.pointer;
+    XCTAssert(result.a == 2);
+    XCTAssert(result.b == 2);
+    XCTAssert(*(int *)&result == 2);
+    value = [scope getValueWithIdentifier:@"c"];
+    XCTAssert(value.intValue == 2);
+}
 //- (void)testStructValueGet{
 //    CGRect rect = CGRectMake(1, 2, 3, 4);
 //    ORStructDeclare *rectDecl = [ORStructDeclare structDecalre:@encode(CGRect) keys:@[@"origin",@"size"]];
@@ -286,13 +289,6 @@ int fibonaccia(int n) {
 //}
 - (void)testStructSetValueNoCopy{
     MFScopeChain *scope = [MFScopeChain topScope];
-//    CGRect rect1 = CGRectZero;
-//    MFValue *value = [MFValue defaultValueWithTypeEncoding:@encode(CGRect)];
-//    [value setValuePointerWithNoCopy:&rect1];
-//    [[value fieldNoCopyForKey:@"origin"] setFieldWithValue:[MFValue valueWithDouble:1] forKey:@"x"];
-//    [[value fieldNoCopyForKey:@"origin"] setFieldWithValue:[MFValue valueWithDouble:2] forKey:@"y"];
-//    XCTAssert(rect1.origin.x == 1, @"origin.x %f", rect1.origin.x);
-//    XCTAssert(rect1.origin.y == 2, @"origin.y %f", rect1.origin.y);
     NSString * source =
     @"struct CGPoint { CGFloat x; CGFloat y; };"
     "struct CGSize { CGFloat width; CGFloat height; };"
@@ -301,7 +297,8 @@ int fibonaccia(int n) {
     "rect.origin.x = 10;"
     "rect.origin.y = 10;"
     "rect.size.width = 100;"
-    "rect.size.height = 100;";
+    "rect.size.height = 100;"
+    "CGFloat a = rect.size.height;";
     AST *ast = [_parser parseSource:source];
     for (id exp in ast.globalStatements) {
         eval(self.inter, self.ctx, scope, exp);
@@ -313,6 +310,8 @@ int fibonaccia(int n) {
     XCTAssert(rect.origin.y == 10);
     XCTAssert(rect.size.width == 100);
     XCTAssert(rect.size.height == 100);
+    MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
+    XCTAssert(a.doubleValue == 100);
 }
 //- (void)testStructSetValueNeedCopy{
 //
@@ -869,7 +868,7 @@ int signatureBlockPtr(id object, int b){
     @end\
     [[ORTestMethoCall new] test6ArgsMethoCall:1 arg2:2 arg3:3 arg4:4 arg5:5 arg6:6];\
     ";
-    AST *ast = [OCParser parseSource:source];
+    AST *ast = [_parser parseSource:source];
     [ORInterpreter excuteNodes:ast.nodes];
     MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
     MFValue *b = [scope recursiveGetValueWithIdentifier:@"b"];
