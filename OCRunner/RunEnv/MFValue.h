@@ -109,28 +109,5 @@ ORTypeVarPair *typePairWithTypeEncode(const char *tyepEncode);
 @property (nonatomic, nullable, readonly) void *classValue;
 @property (nonatomic, nullable, readonly) SEL selValue;
 @property (nonatomic, nullable, readonly) char *cStringValue;
-+ (instancetype)nullValue;
-+ (instancetype)voidValue;
-+ (instancetype)valueWithBOOL:(BOOL)boolValue;
-+ (instancetype)valueWithUChar:(unsigned char)uCharValue;
-+ (instancetype)valueWithUShort:(unsigned short)uShortValue;
-+ (instancetype)valueWithUInt:(unsigned int)uIntValue;
-+ (instancetype)valueWithULong:(unsigned long)uLongValue;
-+ (instancetype)valueWithULongLong:(unsigned long long)uLongLongValue;
-+ (instancetype)valueWithChar:(char)charValue;
-+ (instancetype)valueWithShort:(short)shortValue;
-+ (instancetype)valueWithInt:(int)intValue;
-+ (instancetype)valueWithLong:(long)longValue;
-+ (instancetype)valueWithLongLong:(long long)longLongValue;
-+ (instancetype)valueWithFloat:(float)floatValue;
-+ (instancetype)valueWithDouble:(double)doubleValue;
-+ (instancetype)valueWithObject:(nullable id)objValue;
-+ (instancetype)valueWithUnownedObject:(nullable id)objValue;
-+ (instancetype)valueWithWeakObject:(nullable id)objValue;
-+ (instancetype)valueWithBlock:(nullable id)blockValue;
-+ (instancetype)valueWithClass:(nullable Class)clazzValue;
-+ (instancetype)valueWithSEL:(SEL)selValue;
-+ (instancetype)valueWithCString:(char *)pointerValue;
-+ (instancetype)valueWithPointer:(nullable void *)pointerValue;
 @end
 NS_ASSUME_NONNULL_END

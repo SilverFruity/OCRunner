@@ -324,3 +324,7 @@ or_value or_Class_value(Class clazzValue);
 or_value or_SEL_value(SEL selValue);
 or_value or_CString_value(char * pointerValue);
 or_value or_Pointer_value(void * pointerValue);
+
+void or_value_subscriptGet(or_value *dst, or_value value, or_value index);
+void or_value_subscriptSet(or_value target, or_value index, or_value value);
+

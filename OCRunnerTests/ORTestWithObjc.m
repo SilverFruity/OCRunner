@@ -284,8 +284,8 @@ int fibonaccia(int n) {
 //    XCTAssertEqualObjects(result[0], @"10");
 //    XCTAssertEqualObjects(result[1], @"{CGPoint=dd}");
 //}
-//- (void)testStructSetValueNoCopy{
-//    MFScopeChain *scope = self.currentScope;
+- (void)testStructSetValueNoCopy{
+    MFScopeChain *scope = [MFScopeChain topScope];
 //    CGRect rect1 = CGRectZero;
 //    MFValue *value = [MFValue defaultValueWithTypeEncoding:@encode(CGRect)];
 //    [value setValuePointerWithNoCopy:&rect1];
@@ -293,25 +293,27 @@ int fibonaccia(int n) {
 //    [[value fieldNoCopyForKey:@"origin"] setFieldWithValue:[MFValue valueWithDouble:2] forKey:@"y"];
 //    XCTAssert(rect1.origin.x == 1, @"origin.x %f", rect1.origin.x);
 //    XCTAssert(rect1.origin.y == 2, @"origin.y %f", rect1.origin.y);
-//
-//    NSString * source =
-//    @"CGRect rect;"
-//    "rect.origin.x = 10;"
-//    "rect.origin.y = 10;"
-//    "rect.size.width = 100;"
-//    "rect.size.height = 100;";
-//    AST *ast = [_parser parseSource:source];
-//    for (id exp in ast.globalStatements) {
-//        eval(self.inter, self.ctx, scope, exp);
-//    }
-//    MFValue *rectValue = [scope recursiveGetValueWithIdentifier:@"rect"];
-//    CGRect rect = *(CGRect *) rectValue.pointer;
-//    XCTAssert(rectValue.type == OCTypeStruct);
-//    XCTAssert(rect.origin.x == 10);
-//    XCTAssert(rect.origin.y == 10);
-//    XCTAssert(rect.size.width == 100);
-//    XCTAssert(rect.size.height == 100);
-//}
+    NSString * source =
+    @"struct CGPoint { CGFloat x; CGFloat y; };"
+    "struct CGSize { CGFloat width; CGFloat height; };"
+    "struct CGRect { CGPoint origin; CGSize size; };"
+    "CGRect rect;"
+    "rect.origin.x = 10;"
+    "rect.origin.y = 10;"
+    "rect.size.width = 100;"
+    "rect.size.height = 100;";
+    AST *ast = [_parser parseSource:source];
+    for (id exp in ast.globalStatements) {
+        eval(self.inter, self.ctx, scope, exp);
+    }
+    MFValue *rectValue = [scope recursiveGetValueWithIdentifier:@"rect"];
+    CGRect rect = *(CGRect *) rectValue.pointer;
+    XCTAssert(rectValue.type == OCTypeStruct);
+    XCTAssert(rect.origin.x == 10);
+    XCTAssert(rect.origin.y == 10);
+    XCTAssert(rect.size.width == 100);
+    XCTAssert(rect.size.height == 100);
+}
 //- (void)testStructSetValueNeedCopy{
 //
 //    MFScopeChain *scope = self.currentScope;
@@ -1000,7 +1002,7 @@ int signatureBlockPtr(id object, int b){
     @"    int a = fibonaccia(n - 1); int b = fibonaccia(n - 2);"
     @"    return a + b;"
     @"}"
-    @"int a = fibonaccia(30);";
+    @"int a = fibonaccia(25);";
     AST *ast = [_parser parseSource:source];
     [self measureBlock:^{
         for (id exp in ast.globalStatements) {

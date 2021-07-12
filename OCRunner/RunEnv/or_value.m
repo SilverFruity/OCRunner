@@ -313,3 +313,64 @@ or_value or_CString_value(char * pointerValue){
 or_value or_Pointer_value(void * pointerValue){
     return or_value_create(OCTypeStringPointer , &pointerValue);
 }
+
+
+void or_value_subscriptGet(or_value *dst, or_value value, or_value index){
+    if (*value.typeencode != OCTypeObject && *value.typeencode != OCTypeClass) {
+//        return [self cArraySubscriptGetValueWithIndex:index];
+    }
+    id object = (__bridge id)*(void **)value.pointer;
+    if (TypeEncodeCharIsBaseType(*index.typeencode)) {
+        long long key = *(long long *)index.pointer;
+        *dst = or_Object_value(object[key]);
+        
+    }
+    switch (*index.typeencode) {
+        case OCTypeObject:
+        {
+            id key = (__bridge id)*(void **)index.pointer;
+            *dst = or_Object_value(object[key]);
+            break;
+        }
+            
+        case OCTypeClass:
+        {
+            Class key = (__bridge Class)*(void **)index.pointer;
+            *dst = or_Object_value(object[key]);
+            break;
+        }
+        default:
+            // index operator can not use type: %@",expr.bottomExpr.lineNumber, bottomValue.type.typeName
+            assert(0);
+            break;
+    }
+}
+
+void or_value_subscriptSet(or_value target, or_value index, or_value value){
+    if (*target.typeencode != OCTypeObject && *target.typeencode != OCTypeClass) {
+//        return [self cArraySubscriptGetValueWithIndex:index];
+    }
+    id object = (__bridge id)*(void **)target.pointer;
+    id result = (__bridge id)*(void **)value.pointer;
+    if (TypeEncodeCharIsBaseType(*index.typeencode)) {
+        long long key = *(long long *)index.pointer;
+        object[key] = result;
+        return;
+    }
+    switch (*index.typeencode) {
+        case OCTypeObject:
+        {
+            id key = (__bridge id)*(void **)index.pointer;
+            object[key] = result;
+            break;
+        }
+        case OCTypeClass:
+        {
+            Class key = (__bridge Class)*(void **)index.pointer;
+            object[(id <NSCopying>)key] = result;
+        }
+        default:
+            //            NSCAssert(0, @"line:%zd, index operator can not use type: %@",expr.bottomExpr.lineNumber, bottomValue.type.typeName);
+            break;
+    }
+}

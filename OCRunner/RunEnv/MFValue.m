@@ -386,46 +386,46 @@ switch (*typeencode) {\
     NSGetSizeAndAlignment(_typeEncode, &size, NULL);
     return size;
 }
-- (MFValue *)subscriptGetWithIndex:(MFValue *)index{
-    if (_type != OCTypeObject && _type != OCTypeClass) {
-        return [self cArraySubscriptGetValueWithIndex:index];
-    }
-    if (TypeEncodeCharIsBaseType(index.type)) {
-        return [MFValue valueWithObject:self.objectValue[*(long long *)index.pointer]];
-    }
-    switch (index.type) {
-        case OCTypeObject:
-            return [MFValue valueWithObject:self.objectValue[index.objectValue]];
-            break;
-        case OCTypeClass:
-            return [MFValue valueWithObject:self.objectValue[*(Class *)index.pointer]];
-            break;
-        default:
-            //            NSCAssert(0, @"line:%zd, index operator can not use type: %@",expr.bottomExpr.lineNumber, bottomValue.type.typeName);
-            break;
-    }
-    return nil;
-}
-- (void)subscriptSetValue:(MFValue *)value index:(MFValue *)index{
-    if (_type != OCTypeObject && _type != OCTypeClass) {
-        [self cArraySubscriptSetValue:value index:index];
-        return;
-    }
-    if (TypeEncodeCharIsBaseType(index.type)) {
-        self.objectValue[*(long long *)index.pointer] = value.objectValue;
-    }
-    switch (index.type) {
-        case OCTypeObject:
-            self.objectValue[index.objectValue] = value.objectValue;
-            break;
-        case OCTypeClass:
-            self.objectValue[(id <NSCopying>)*(Class *)index.pointer] = value.objectValue;
-            break;
-        default:
-            //            NSCAssert(0, @"line:%zd, index operator can not use type: %@",expr.bottomExpr.lineNumber, bottomValue.type.typeName);
-            break;
-    }
-}
+//- (MFValue *)subscriptGetWithIndex:(MFValue *)index{
+//    if (_type != OCTypeObject && _type != OCTypeClass) {
+//        return [self cArraySubscriptGetValueWithIndex:index];
+//    }
+//    if (TypeEncodeCharIsBaseType(index.type)) {
+//        return [MFValue valueWithObject:self.objectValue[*(long long *)index.pointer]];
+//    }
+//    switch (index.type) {
+//        case OCTypeObject:
+//            return [MFValue valueWithObject:self.objectValue[index.objectValue]];
+//            break;
+//        case OCTypeClass:
+//            return [MFValue valueWithObject:self.objectValue[*(Class *)index.pointer]];
+//            break;
+//        default:
+//            //            NSCAssert(0, @"line:%zd, index operator can not use type: %@",expr.bottomExpr.lineNumber, bottomValue.type.typeName);
+//            break;
+//    }
+//    return nil;
+//}
+//- (void)subscriptSetValue:(MFValue *)value index:(MFValue *)index{
+//    if (_type != OCTypeObject && _type != OCTypeClass) {
+//        [self cArraySubscriptSetValue:value index:index];
+//        return;
+//    }
+//    if (TypeEncodeCharIsBaseType(index.type)) {
+//        self.objectValue[*(long long *)index.pointer] = value.objectValue;
+//    }
+//    switch (index.type) {
+//        case OCTypeObject:
+//            self.objectValue[index.objectValue] = value.objectValue;
+//            break;
+//        case OCTypeClass:
+//            self.objectValue[(id <NSCopying>)*(Class *)index.pointer] = value.objectValue;
+//            break;
+//        default:
+//            //            NSCAssert(0, @"line:%zd, index operator can not use type: %@",expr.bottomExpr.lineNumber, bottomValue.type.typeName);
+//            break;
+//    }
+//}
 - (nonnull id)copyWithZone:(nullable NSZone *)zone {
     MFValue *value = [MFValue defaultValueWithTypeEncoding:self.typeEncode];
     value.pointer = self.pointer;
@@ -633,95 +633,95 @@ switch (*typeencode) {\
     MFValueBridge(self->realBaseValue, self->_typeEncode, double);
     return result;
 }
-- (id)objectValue{
-    void *value = *(void **)self.pointer;
-    if (value == NULL) return nil;
-    return (__bridge id)value;
-}
-- (void *)classValue{
-    return *(void **)self.pointer;
-}
-- (SEL)selValue{
-    return *(SEL *)self.pointer;
-}
-- (char *)cStringValue{
-    return *(char **)self.pointer;
-}
-+ (instancetype)nullValue{
-    return [MFValue valueWithPointer:NULL];
-}
-+ (instancetype)voidValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringVoid pointer:NULL];
-}
-
-+ (instancetype)valueWithBOOL:(BOOL)boolValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringBOOL pointer:&boolValue];
-}
-+ (instancetype)valueWithUChar:(unsigned char)uCharValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringUChar pointer:&uCharValue];
-}
-+ (instancetype)valueWithUShort:(unsigned short)uShortValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringUShort pointer:&uShortValue];
-}
-+ (instancetype)valueWithUInt:(unsigned int)uIntValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringUInt pointer:&uIntValue];
-}
-+ (instancetype)valueWithULong:(unsigned long)uLongValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringULong pointer:&uLongValue];
-}
-+ (instancetype)valueWithULongLong:(unsigned long long)uLongLongValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringULongLong pointer:&uLongLongValue];
-}
-+ (instancetype)valueWithChar:(char)charValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringChar pointer:&charValue];
-}
-+ (instancetype)valueWithShort:(short)shortValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringShort pointer:&shortValue];
-}
-+ (instancetype)valueWithInt:(int)intValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringInt pointer:&intValue];
-}
-+ (instancetype)valueWithLong:(long)longValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringLong pointer:&longValue];
-}
-+ (instancetype)valueWithLongLong:(long long)longLongValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringLongLong pointer:&longLongValue];
-}
-+ (instancetype)valueWithFloat:(float)floatValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringFloat pointer:&floatValue];
-}
-+ (instancetype)valueWithDouble:(double)doubleValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringDouble pointer:&doubleValue];
-}
-+ (instancetype)valueWithObject:(id)objValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringObject pointer:&objValue];
-}
-+ (instancetype)valueWithUnownedObject:(id)objValue{
-    MFValue *value = [MFValue valueWithTypeEncode:OCTypeStringPointer pointer:&objValue];
-    value.typeEncode = OCTypeStringObject;
-    return value;
-}
-+ (instancetype)valueWithWeakObject:(nullable id)objValue{
-    MFValue *value = [MFValue defaultValueWithTypeEncoding:OCTypeStringObject];
-    value.modifier = DeclarationModifierWeak;
-    value.pointer = &objValue;
-    return value;
-}
-+ (instancetype)valueWithBlock:(id)blockValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringBlock pointer:&blockValue];
-}
-+ (instancetype)valueWithClass:(Class)clazzValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringClass pointer:&clazzValue];
-}
-+ (instancetype)valueWithSEL:(SEL)selValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringSEL pointer:&selValue];
-}
-+ (instancetype)valueWithCString:(char *)pointerValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringCString pointer:&pointerValue];
-}
-+ (instancetype)valueWithPointer:(void *)pointerValue{
-    return [MFValue valueWithTypeEncode:OCTypeStringPointer pointer:&pointerValue];
-}
+//- (id)objectValue{
+//    void *value = *(void **)self.pointer;
+//    if (value == NULL) return nil;
+//    return (__bridge id)value;
+//}
+//- (void *)classValue{
+//    return *(void **)self.pointer;
+//}
+//- (SEL)selValue{
+//    return *(SEL *)self.pointer;
+//}
+//- (char *)cStringValue{
+//    return *(char **)self.pointer;
+//}
+//+ (instancetype)nullValue{
+//    return [MFValue valueWithPointer:NULL];
+//}
+//+ (instancetype)voidValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringVoid pointer:NULL];
+//}
+//
+//+ (instancetype)valueWithBOOL:(BOOL)boolValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringBOOL pointer:&boolValue];
+//}
+//+ (instancetype)valueWithUChar:(unsigned char)uCharValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringUChar pointer:&uCharValue];
+//}
+//+ (instancetype)valueWithUShort:(unsigned short)uShortValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringUShort pointer:&uShortValue];
+//}
+//+ (instancetype)valueWithUInt:(unsigned int)uIntValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringUInt pointer:&uIntValue];
+//}
+//+ (instancetype)valueWithULong:(unsigned long)uLongValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringULong pointer:&uLongValue];
+//}
+//+ (instancetype)valueWithULongLong:(unsigned long long)uLongLongValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringULongLong pointer:&uLongLongValue];
+//}
+//+ (instancetype)valueWithChar:(char)charValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringChar pointer:&charValue];
+//}
+//+ (instancetype)valueWithShort:(short)shortValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringShort pointer:&shortValue];
+//}
+//+ (instancetype)valueWithInt:(int)intValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringInt pointer:&intValue];
+//}
+//+ (instancetype)valueWithLong:(long)longValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringLong pointer:&longValue];
+//}
+//+ (instancetype)valueWithLongLong:(long long)longLongValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringLongLong pointer:&longLongValue];
+//}
+//+ (instancetype)valueWithFloat:(float)floatValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringFloat pointer:&floatValue];
+//}
+//+ (instancetype)valueWithDouble:(double)doubleValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringDouble pointer:&doubleValue];
+//}
+//+ (instancetype)valueWithObject:(id)objValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringObject pointer:&objValue];
+//}
+//+ (instancetype)valueWithUnownedObject:(id)objValue{
+//    MFValue *value = [MFValue valueWithTypeEncode:OCTypeStringPointer pointer:&objValue];
+//    value.typeEncode = OCTypeStringObject;
+//    return value;
+//}
+//+ (instancetype)valueWithWeakObject:(nullable id)objValue{
+//    MFValue *value = [MFValue defaultValueWithTypeEncoding:OCTypeStringObject];
+//    value.modifier = DeclarationModifierWeak;
+//    value.pointer = &objValue;
+//    return value;
+//}
+//+ (instancetype)valueWithBlock:(id)blockValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringBlock pointer:&blockValue];
+//}
+//+ (instancetype)valueWithClass:(Class)clazzValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringClass pointer:&clazzValue];
+//}
+//+ (instancetype)valueWithSEL:(SEL)selValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringSEL pointer:&selValue];
+//}
+//+ (instancetype)valueWithCString:(char *)pointerValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringCString pointer:&pointerValue];
+//}
+//+ (instancetype)valueWithPointer:(void *)pointerValue{
+//    return [MFValue valueWithTypeEncode:OCTypeStringPointer pointer:&pointerValue];
+//}
 #if DEBUG
 - (NSString *)description{
     return [NSString stringWithFormat:@"[MFValue: %p, type: %d, typeName: %@, typeEncode: %s, pointerValue: %p, modifier:%d]"

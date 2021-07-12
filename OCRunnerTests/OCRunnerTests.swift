@@ -490,7 +490,8 @@ class CRunnerTests: XCTestCase {
         for exp in exps {
             eval(self.inter, self.ctx, scope, exp);
         }
-        XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 6)
+        let value = scope.getValueWithIdentifier("a")!
+        XCTAssert(value.intValue == 6, "\(value.intValue)")
     }
     func testClassMethodReplace(){
         let source =

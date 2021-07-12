@@ -22,6 +22,28 @@
 #import "ORffiResultCache.h"
 #import "ORInterpreter.h"
 #import <oc2mangoLib/InitialSymbolTableVisitor.h>
+void evalGetPropertyWithIvar(ORThreadContext *ctx, ocSymbol *symbol){
+    id instance = (__bridge id)*(void **)[ctx seekLocalVar:0];
+    NSString *propName = [symbol.name substringToIndex:1];
+    MFValue *propValue = objc_getAssociatedObject(instance, mf_propKey(propName));
+    if (!propValue) {
+        [ctx opStackPush:or_value_create(symbol.decl.typeEncode, NULL)];
+        return;
+    }
+    [ctx opStackPush:or_value_create(symbol.decl.typeEncode, propValue.pointer)];
+}
+void evalSetPropertyWithIvar(ORThreadContext *ctx, ocSymbol *symbol, or_value *value){
+    id instance = (__bridge id)*(void **)[ctx seekLocalVar:0];
+    NSString *propName = [symbol.name substringToIndex:1];
+    ocDecl *decl = symbol.decl;
+    MFValue *result = [[MFValue alloc] initTypeEncode:decl.typeEncode pointer:value->pointer];
+    if ((decl.propModifer & MFPropertyModifierMemMask) == MFPropertyModifierMemWeak) {
+        result.modifier = DeclarationModifierWeak;
+    }
+    objc_AssociationPolicy associationPolicy = mf_AssociationPolicy_with_PropertyModifier(decl.propModifer);
+    objc_setAssociatedObject(instance, mf_propKey(propName), result, associationPolicy);
+}
+
 static void invoke_MFBlockValue(ORThreadContext *ctx, or_value blockValue, or_value **args, NSUInteger argCount){
     id block = (__bridge id)*blockValue.pointer;
 #if DEBUG
@@ -346,9 +368,6 @@ void evalTypeNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scop
 void evalVariableNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORVariableNode *node){
     return;
 }
-void evalDeclaratorNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORDeclaratorNode *node){
-    return;
-}
 void evalFunctionDeclNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORFunctionDeclNode *node){
     return;
 }
@@ -384,7 +403,9 @@ void evalValueNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sco
     switch (node.value_type) {
         case OCValueString:{
             void *buffer = inter->constants + node.symbol.decl.offset;
-            [ctx opStackPush:or_Object_value([NSString stringWithUTF8String:buffer])];
+            NSString *result = [NSString stringWithUTF8String:buffer];
+            CFRetain((__bridge CFTypeRef)(result));
+            [ctx opStackPush:or_Object_value(result)];
             return;
         }
         case OCValueCString:{
@@ -430,6 +451,11 @@ void evalValueNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sco
                                       @"-----------------------------------", node.value);
     #endif
                 return;
+            }else if (node.symbol.decl->isIvar){
+                evalGetPropertyWithIvar(ctx, node.symbol);
+                return;
+            }else{
+                
             }
             void *result = [ctx seekLocalVar:node.symbol.decl.offset];
             or_value value = or_value_create(node.symbol.decl.typeEncode, result);
@@ -470,7 +496,9 @@ void evalValueNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sco
                     NSLog(@"OCRunner Error: the value of NSArray can't be nil, %@", array);
                 }
             }
-            [ctx opStackPush:or_Object_value([array copy])];
+            NSArray *result = [array copy];
+            CFRetain((__bridge CFTypeRef)(result));
+            [ctx opStackPush:or_Object_value(result)];
             return;
         }
         case OCValueNSNumber:{
@@ -507,8 +535,11 @@ void evalBoolValue(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sco
     evalConstantValue(inter, ctx, node);
 }
 void evalMethodCall(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORMethodCall *node){
-    if ([node.caller isKindOfClass:[ORMethodCall class]]) {
-        [(ORMethodCall *)node.caller setIsAssignedValue:node.isAssignedValue];
+    if (node.isStructRef) {
+        void *dst = [ctx seekLocalVar:node.symbol.decl.offset];
+        or_value value = or_value_create(node.symbol.decl.typeEncode, dst);
+        [ctx opStackPush:value];
+        return;
     }
     eval(inter, ctx, scope, node.caller);
     or_value variable = *[ctx opStackPop];
@@ -618,7 +649,8 @@ void evalMethodCall(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sc
 //            sel == @selector(copy) || sel == @selector(mutableCopy)) {
 //            CFRelease(*(void **)retValuePointer);
 //        }
-        [ctx opStackPush:or_value_create(returnType, retValuePointer)];
+        or_value result = or_value_create(returnType, retValuePointer);
+        [ctx opStackPush:result];
         return;
     }
 }
@@ -713,10 +745,15 @@ void evalFunctionNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *
      return;
 }
 void evalSubscriptNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORSubscriptNode *node){
-//    or_value bottomValue = eval(inter, ctx, scope, node.keyExp);
-//    or_value arrValue = eval(inter, ctx, scope, node.caller);
-//    return [arrValue subscriptGetWithIndex:bottomValue];
+    eval(inter, ctx, scope, node.keyExp);
+    or_value key = *[ctx opStackPop];
+    eval(inter, ctx, scope, node.caller);
+    or_value target = *[ctx opStackPop];
+    or_value result;
+    or_value_subscriptGet(&result, target, key);
+    [ctx opStackPush:result];
 }
+
 void evalAssignNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORAssignNode *node){
     ORNode *resultExp;
 #define SetResultExpWithBinaryOperator(type)\
@@ -772,20 +809,69 @@ void evalAssignNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sc
         default:
             break;
     }
+    ocDecl *decl = node.value.symbol.decl;
+    eval(inter, ctx, scope, resultExp);
+    or_value right = *[ctx opStackPop];
     switch (node.value.nodeType) {
         case AstEnumValueNode:
+        {
+            ORValueNode *valueNode = (ORValueNode *)node.value;
+            NSString *varname = valueNode.value;
+            if (decl->isIvar) {
+                //属性值设置
+                evalSetPropertyWithIvar(ctx, node.value.symbol, &right);
+                return;
+            }else if (decl->isInternalIvar){
+                //object ivar设置
+                id instance = [ctx seekLocalVar:0];
+                Ivar ivar = class_getInstanceVariable(object_getClass(instance),varname.UTF8String);
+                const char *ivarEncoding = ivar_getTypeEncoding(ivar);
+                if (*ivarEncoding == OCTypeObject) {
+                    object_setIvar(instance, ivar, (__bridge id _Nullable)(*(void **)right.pointer));
+                    return;
+                }
+                void *ptr = (__bridge void *)(instance) + ivar_getOffset(ivar);
+                or_value_write_to(right, ptr, ivarEncoding);
+                return;
+            }else if ([varname characterAtIndex:0] == '_'){
+                // ivar 检测，如果是ivar，设置decl的isInternalIvar为YES
+                id instance = [ctx seekLocalVar:0];
+                Ivar ivar = class_getInstanceVariable(object_getClass(instance),varname.UTF8String);
+                if (ivar) {
+                    decl->isInternalIvar = YES;
+                    id instance = [ctx seekLocalVar:0];
+                    Ivar ivar = class_getInstanceVariable(object_getClass(instance),varname.UTF8String);
+                    const char *ivarEncoding = ivar_getTypeEncoding(ivar);
+                    if (*ivarEncoding == OCTypeObject) {
+                        object_setIvar(instance, ivar, (__bridge id _Nullable)(*(void **)right.pointer));
+                        return;
+                    }
+                    void *ptr = (__bridge void *)(instance) + ivar_getOffset(ivar);
+                    or_value_write_to(right, ptr, ivarEncoding);
+                    return;
+                }
+            }
+            void *dst = [ctx seekLocalVar:valueNode.symbol.decl.offset];
+            or_value_write_to(right, dst, node.symbol.decl.typeEncode);
+            break;
+        }
         case AstEnumUnaryNode:
         {
             eval(inter, ctx, scope, node.value);
-or_value left = *[ctx opStackPop];
+            or_value left = *[ctx opStackPop];
             eval(inter, ctx, scope, resultExp);
-or_value right = *[ctx opStackPop];
+            or_value right = *[ctx opStackPop];
             or_value_write_to(right, left.pointer, left.typeencode);
             break;
         }
         case AstEnumMethodCall:
         {
             ORMethodCall *methodCall = (ORMethodCall *)node.value;
+            if (methodCall.isStructRef) {
+                void *dst = [ctx seekLocalVar:methodCall.symbol.decl.offset];
+                or_value_write_to(right, dst, methodCall.symbol.decl.typeEncode);
+                return;
+            }
             if (!methodCall.methodOperator) {
                 NSCAssert(0, @"must dot grammar");
             }
@@ -796,20 +882,59 @@ or_value right = *[ctx opStackPop];
             setterName = [NSString stringWithFormat:@"set%@%@",first,other];
             ORMethodCall *setCaller = [ORMethodCall new];
             setCaller.nodeType = AstEnumMethodCall;
-            setCaller.caller = [(ORMethodCall *)node.value caller];
+            setCaller.caller = methodCall.caller;
             setCaller.names = [@[setterName] mutableCopy];
             setCaller.values = [@[resultExp] mutableCopy];
-            setCaller.isAssignedValue = YES;
+            setCaller.isStructRef = YES;
             eval(inter, ctx, scope, setCaller);
             break;
         }
         case AstEnumSubscriptNode:
         {
-//            or_value resultValue = eval(inter, ctx, scope, resultExp);
-//            ORSubscriptNode *subExp = (ORSubscriptNode *)node.value;
-//            or_value caller = eval(inter, ctx, scope, subExp.caller);
-//            or_value indexValue = eval(inter, ctx, scope, subExp.keyExp);
-//            [caller subscriptSetValue:resultValue index:indexValue];
+            eval(inter, ctx, scope, resultExp);
+            or_value resultValue = *[ctx opStackPop];
+            
+            ORSubscriptNode *subExp = (ORSubscriptNode *)node.value;
+            
+            eval(inter, ctx, scope, subExp.caller);
+            or_value caller = *[ctx opStackPop];
+            
+            eval(inter, ctx, scope, subExp.keyExp);
+            or_value indexValue = *[ctx opStackPop];
+            
+            or_value_subscriptSet(caller, indexValue, resultValue);
+            break;
+        }
+        default:
+            break;
+    }
+    switch (node.value.nodeType) {
+        case AstEnumValueNode:
+        {
+            ORValueNode *valueNode = (ORValueNode *)node.value;
+            void *dst = [ctx seekLocalVar:valueNode.symbol.decl.offset];
+            eval(inter, ctx, scope, resultExp);
+            or_value right = *[ctx opStackPop];
+            or_value_write_to(right, dst, node.symbol.decl.typeEncode);
+            break;
+        }
+        case AstEnumUnaryNode:
+        {
+            eval(inter, ctx, scope, node.value);
+            or_value left = *[ctx opStackPop];
+            eval(inter, ctx, scope, resultExp);
+            or_value right = *[ctx opStackPop];
+            or_value_write_to(right, left.pointer, left.typeencode);
+            break;
+        }
+        case AstEnumMethodCall:
+        {
+
+            break;
+        }
+        case AstEnumSubscriptNode:
+        {
+
         }
         default:
             break;
@@ -818,6 +943,23 @@ or_value right = *[ctx opStackPop];
     return;
 
 }
+void evalDeclaratorNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORDeclaratorNode *node){
+    ocDecl *decl = node.symbol.decl;
+    or_value value = or_value_create(decl.typeEncode, NULL);
+    if (scope == [MFScopeChain topScope] || scope.next == [MFScopeChain topScope]) {
+        MFValue *val = [MFValue valueWithTypeEncode:value.typeencode pointer:value.pointer];
+        [scope setValue:val withIndentifier:node.var.varname];
+    }
+//    value.modifier = decl.declModifer;
+//    if (isObjectWithTypeEncode(value.typeencode)
+//        && NSClassFromString(value.typeName) == nil
+//        && ![value.typeName isEqualToString:@"id"]) {
+//        NSString *reason = [NSString stringWithFormat:@"Unknown Type Identifier: %@",value.typeName];
+//        @throw [NSException exceptionWithName:@"OCRunner" reason:reason userInfo:nil];
+//    }
+    [ctx pushLocalVar:value.pointer size:or_value_mem_size(&value)];
+    return;
+}
 void evalInitDeclaratorNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORInitDeclaratorNode *node){
     BOOL staticVar = node.declarator.type.modifier & DeclarationModifierStatic;
     if ([node.declarator.var isKindOfClass:[ORCArrayDeclNode class]]) {
@@ -825,23 +967,11 @@ void evalInitDeclaratorNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeC
     }
     void (^initializeBlock)(void) = ^void {
         ocDecl *decl = node.declarator.symbol.decl;
-        or_value value;
-        if (node.expression) {
-            eval(inter, ctx, scope, node.expression);
-            value = *[ctx opStackPop];
-//            value.modifier = decl.declModifer;
-            or_value_set_typeencode(&value, decl.typeEncode);
-//            value.typeEncode = decl.typeEncode;
-        }else{
-            value = or_value_create(decl.typeEncode, NULL);
-//            value.modifier = decl.declModifer;
-//            if (isObjectWithTypeEncode(value.typeencode)
-//                && NSClassFromString(value.typeName) == nil
-//                && ![value.typeName isEqualToString:@"id"]) {
-//                NSString *reason = [NSString stringWithFormat:@"Unknown Type Identifier: %@",value.typeName];
-//                @throw [NSException exceptionWithName:@"OCRunner" reason:reason userInfo:nil];
-//            }
-        }
+        eval(inter, ctx, scope, node.expression);
+        or_value value = *[ctx opStackPop];
+//        value.modifier = decl.declModifer;
+        or_value_set_typeencode(&value, decl.typeEncode);
+//        value.typeEncode = decl.typeEncode;
 //        if (decl.isFunction)
 //            value.funDecl = (ORFunctionDeclNode *)node.declarator;
         if (scope == [MFScopeChain topScope] || scope.next == [MFScopeChain topScope]) {
@@ -938,8 +1068,7 @@ void evalUnaryNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sco
     [ctx opStackPush:cal_result];
     return;
 }
-BOOL OR_NO_VALUE = NO;
-BOOL OR_YES_VALUE = NO;
+
 void evalBinaryNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORBinaryNode *node){
     switch (node.operatorType) {
         case BinaryOperatorLOGIC_AND:{
@@ -1087,16 +1216,17 @@ void evalIfStatement(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *s
         ifStatement = ifStatement.last;
     }
     for (ORIfStatement *statement in statements) {
-        eval(inter, ctx, scope, statement.condition);
-        if (or_value_isSubtantial(*[ctx opStackPop])) {
+        if (statement.condition) {
+            eval(inter, ctx, scope, statement.condition);
+            if (or_value_isSubtantial(*[ctx opStackPop])) {
+                MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
+                eval(inter, ctx, current, statement.scopeImp);
+                return;
+            }
+        }else{
             MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
-            eval(inter, ctx, current, statement.scopeImp);
-            return;
+            eval(inter, ctx, current, node.scopeImp);
         }
-    }
-    if (node.condition == nil) {
-        MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
-        eval(inter, ctx, current, node.scopeImp);
     }
     ctx->flow_flag = ORControlFlowFlagNormal;
     return;
@@ -1213,11 +1343,17 @@ void evalForStatement(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *
 void evalForInStatement(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORForInStatement *node){
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
     eval(inter, ctx, current, node.value);
-or_value arrayValue = *[ctx opStackPop];
-    for (id element in (__bridge id)*arrayValue.pointer) {
-        //TODO: 每执行一次，在作用域中重新设置一次
-        node.expression.symbol.decl;
-//        [current setValue:[MFValue valueWithObject:element] withIndentifier:node.expression.var.varname];
+    or_value arrayValue = *[ctx opStackPop];
+    id array = (__bridge id)*arrayValue.pointer;
+    for (id element in array) {
+        //TODO: 每执行一次，重新在内存中重新设置一次值
+        void *dst = [ctx seekLocalVar:node.expression.symbol.decl.offset];
+        memcpy(dst, (void *)&element, sizeof(void *));
+        
+//        or_value value = or_value_create(OCTypeStringObject, (void *)&element);
+//        void *dst = [ctx seekLocalVar:node.expression.symbol.decl.offset];
+//        or_value_write_to(value, dst, value.typeencode);
+    
         eval(inter, ctx, current, node.scopeImp);
         if (ctx->flow_flag & ORControlFlowFlagReturn){
             return;
@@ -1295,8 +1431,6 @@ void evalClassNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sco
         }
         objc_registerClassPair(clazz);
     }
-    // 添加Class变量到作用域
-    [current setValue:[MFValue valueWithClass:clazz] withIndentifier:@"Class"];
     // 先添加属性
     for (ORPropertyNode *property in node.properties) {
         eval(inter, ctx, current, property);

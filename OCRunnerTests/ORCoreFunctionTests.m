@@ -42,9 +42,9 @@ int functionCall1(){
 //                                      [MFValue valueWithDouble:0.5]], result);
 }
 - (void)testCallMultiFunctionPointer{
-    MFValue *result = [MFValue voidValue];
-    void *funcptr = &NSLog;
-    invoke_functionPointer(funcptr, @[[MFValue valueWithObject:@"%@"],[MFValue valueWithObject:@"123"]], result, 1);
+//    MFValue *result = [MFValue voidValue];
+//    void *funcptr = &NSLog;
+//    invoke_functionPointer(funcptr, @[[MFValue valueWithObject:@"%@"],[MFValue valueWithObject:@"123"]], result, 1);
 }
 
 - (void)testCallFunctionPointer{
