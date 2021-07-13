@@ -403,8 +403,7 @@ void evalValueNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sco
     switch (node.value_type) {
         case OCValueString:{
             void *buffer = inter->constants + node.symbol.decl.offset;
-            NSString *result = [NSString stringWithUTF8String:buffer];
-            CFRetain((__bridge CFTypeRef)(result));
+            __autoreleasing NSString *result = [NSString stringWithUTF8String:buffer];
             [ctx opStackPush:or_Object_value(result)];
             return;
         }
@@ -450,6 +449,7 @@ void evalValueNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sco
                                       @"Can't find object or class: %@\n"
                                       @"-----------------------------------", node.value);
     #endif
+                [ctx opStackPush:or_Object_value(nil)];
                 return;
             }else if (node.symbol.decl->isIvar){
                 evalGetPropertyWithIvar(ctx, node.symbol);
@@ -480,7 +480,8 @@ void evalValueNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sco
                     NSLog(@"OCRunner Error: the key %@ or value %@ of NSDictionary can't be nil", key?:@"", value?:@"");
                 }
             }
-            [ctx opStackPush:or_Object_value([dict copy])];
+            __autoreleasing NSDictionary *result = [dict copy];
+            [ctx opStackPush:or_Object_value(result)];
             return;
         }
         case OCValueArray:{
@@ -496,15 +497,14 @@ void evalValueNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sco
                     NSLog(@"OCRunner Error: the value of NSArray can't be nil, %@", array);
                 }
             }
-            NSArray *result = [array copy];
-            CFRetain((__bridge CFTypeRef)(result));
+            __autoreleasing NSArray *result = [array copy];
             [ctx opStackPush:or_Object_value(result)];
             return;
         }
         case OCValueNSNumber:{
             eval(inter, ctx, scope, node.value);
             or_value value = *[ctx opStackPop];
-            NSNumber *result = nil;
+            __autoreleasing NSNumber *result = nil;
             UnaryExecuteBaseType(result, @, value);
             [ctx opStackPush:or_Object_value(result)];
             return;
@@ -590,7 +590,7 @@ void evalMethodCall(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sc
     }
     // instance为nil时，依然要执行参数相关的表达式
     if ([node.caller isKindOfClass:[ORValueNode class]]) {
-        if (node.caller.symbol.decl->isSuper) {
+        if (instance && node.caller.symbol.decl->isSuper) {
 //            return invoke_sueper_values(instance, sel, argValues);
         }
     }
@@ -644,12 +644,14 @@ void evalMethodCall(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sc
             return;
         }
         [invocation getReturnValue:retValuePointer];;
+        __autoreleasing id object = nil;
         // 针对一下方法调用，需要和CF一样，最终都要release. 与JSPatch和Mango中的__bridge_transfer效果相同
-//        if (sel == @selector(alloc) || sel == @selector(new)||
-//            sel == @selector(copy) || sel == @selector(mutableCopy)) {
-//            CFRelease(*(void **)retValuePointer);
-//        }
-        or_value result = or_value_create(returnType, retValuePointer);
+        if (sel == @selector(alloc) || sel == @selector(new)||
+            sel == @selector(copy) || sel == @selector(mutableCopy)) {
+            object = (__bridge id)(*(void **)retValuePointer);
+            CFRelease(*(void **)retValuePointer);
+        }
+        or_value result = or_value_create(returnType, &object);
         [ctx opStackPush:result];
         return;
     }
@@ -810,11 +812,12 @@ void evalAssignNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sc
             break;
     }
     ocDecl *decl = node.value.symbol.decl;
-    eval(inter, ctx, scope, resultExp);
-    or_value right = *[ctx opStackPop];
     switch (node.value.nodeType) {
         case AstEnumValueNode:
         {
+            eval(inter, ctx, scope, resultExp);
+            or_value right = *[ctx opStackPop];
+            
             ORValueNode *valueNode = (ORValueNode *)node.value;
             NSString *varname = valueNode.value;
             if (decl->isIvar) {
@@ -868,6 +871,8 @@ void evalAssignNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sc
         {
             ORMethodCall *methodCall = (ORMethodCall *)node.value;
             if (methodCall.isStructRef) {
+                eval(inter, ctx, scope, resultExp);
+                or_value right = *[ctx opStackPop];
                 void *dst = [ctx seekLocalVar:methodCall.symbol.decl.offset];
                 or_value_write_to(right, dst, methodCall.symbol.decl.typeEncode);
                 return;
@@ -892,7 +897,7 @@ void evalAssignNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sc
         case AstEnumSubscriptNode:
         {
             eval(inter, ctx, scope, resultExp);
-            or_value resultValue = *[ctx opStackPop];
+            or_value right = *[ctx opStackPop];
             
             ORSubscriptNode *subExp = (ORSubscriptNode *)node.value;
             
@@ -902,43 +907,13 @@ void evalAssignNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *sc
             eval(inter, ctx, scope, subExp.keyExp);
             or_value indexValue = *[ctx opStackPop];
             
-            or_value_subscriptSet(caller, indexValue, resultValue);
+            or_value_subscriptSet(caller, indexValue, right);
             break;
         }
         default:
             break;
     }
-    switch (node.value.nodeType) {
-        case AstEnumValueNode:
-        {
-            ORValueNode *valueNode = (ORValueNode *)node.value;
-            void *dst = [ctx seekLocalVar:valueNode.symbol.decl.offset];
-            eval(inter, ctx, scope, resultExp);
-            or_value right = *[ctx opStackPop];
-            or_value_write_to(right, dst, node.symbol.decl.typeEncode);
-            break;
-        }
-        case AstEnumUnaryNode:
-        {
-            eval(inter, ctx, scope, node.value);
-            or_value left = *[ctx opStackPop];
-            eval(inter, ctx, scope, resultExp);
-            or_value right = *[ctx opStackPop];
-            or_value_write_to(right, left.pointer, left.typeencode);
-            break;
-        }
-        case AstEnumMethodCall:
-        {
 
-            break;
-        }
-        case AstEnumSubscriptNode:
-        {
-
-        }
-        default:
-            break;
-    }
     ctx->flow_flag = ORControlFlowFlagNormal;
     return;
 

@@ -114,7 +114,12 @@
 - (machine_mem)pushLocalVar:(void *)var size:(size_t)size{
     machine_mem dst = mem + sp + cursor;
     assert(dst < mem_end);
-    memcpy(dst, var , size);
+    assert(var != NULL);
+    if (*(void **)var != NULL) {
+        memcpy(dst, var , size);
+    }else{
+        memset(dst, 0, size);
+    }
     cursor += MAX(size, 8);
     return dst;
 }

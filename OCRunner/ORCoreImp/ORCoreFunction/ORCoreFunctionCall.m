@@ -289,23 +289,23 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
 __attribute__((overloadable))
 void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue, NSUInteger needArgs){
 //    ffi_cif cif;
-//    ffi_type *types[argValues.count];
-//    void *argvs[argValues.count];
-//    for (int i = 0; i < argValues.count; i++) {
-//        types[i] = typeEncode2ffi_type(argValues[i].typeEncode);
-//        argvs[i] = argValues[i].pointer;
+//    ffi_type *types[argCount];
+//    void *argvs[argCount];
+//    for (int i = 0; i < argCount; i++) {
+////        types[i] = typeEncode2ffi_type();
+//        argvs[i] = argValues[i]->pointer;
 //    }
-//    ffi_type *retType = typeEncode2ffi_type(returnValue.typeEncode);
-//    ffi_status ffi_status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, (unsigned int)argValues.count, retType, types);
+//    ffi_type *retType;// = typeEncode2ffi_type(returnValue.typeEncode);
+//    ffi_status ffi_status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, (unsigned int)argCount, retType, types);
 //    #ifdef __arm64__
-//        cif.aarch64_nfixedargs = (unsigned)needArgs;
+//        cif.aarch64_nfixedargs = (unsigned)signArgCount;
 //    #endif
-//    void *ret = alloca(returnValue.memerySize);
+//    void *ret = alloca(or_value_mem_size(returnValue));
 //    if (ffi_status == FFI_OK) {
 //        ffi_call(&cif, funptr, ret, argvs);
 //    }
 //    // 触发 setPointer
-//    returnValue.pointer = ret;
+//    or_value_set_pointer(returnValue, ret);
 }
 
 #endif/* __libffi__ */
