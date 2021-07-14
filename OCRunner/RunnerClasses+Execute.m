@@ -400,6 +400,10 @@ void evalConstantValue(ORInterpreter *inter, ORThreadContext *ctx, ORNode *node)
     return;
 }
 void evalValueNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORValueNode *node){
+    void *result = [ctx seekLocalVar:node->_symbol->_decl->_offset];
+    or_value value = or_value_create(node->_symbol->_decl->_typeEncode, result);
+    [ctx opStackPush:value];
+    return;
     switch (node.value_type) {
         case OCValueString:{
             void *buffer = inter->constants + node.symbol.decl.offset;
@@ -740,10 +744,10 @@ void evalFunctionNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *
          [ctx opStackPush:or_Object_value(ocBlock)];
          return;
      }
-     [ORCallFrameStack pushFunctionCall:node scope:current];
+//     [ORCallFrameStack pushFunctionCall:node scope:current];
      eval(inter, ctx, current, node.scopeImp);
      ctx->flow_flag = ORControlFlowFlagNormal;
-     [ORCallFrameStack pop];
+//     [ORCallFrameStack pop];
      return;
 }
 void evalSubscriptNode(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *scope, ORSubscriptNode *node){
@@ -1194,13 +1198,11 @@ void evalIfStatement(ORInterpreter *inter, ORThreadContext *ctx, MFScopeChain *s
         if (statement.condition) {
             eval(inter, ctx, scope, statement.condition);
             if (or_value_isSubtantial(*[ctx opStackPop])) {
-                MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
-                eval(inter, ctx, current, statement.scopeImp);
+                eval(inter, ctx, scope, statement.scopeImp);
                 return;
             }
         }else{
-            MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
-            eval(inter, ctx, current, node.scopeImp);
+            eval(inter, ctx, scope, node.scopeImp);
         }
     }
     ctx->flow_flag = ORControlFlowFlagNormal;

@@ -54,6 +54,46 @@ typedef UInt8 * machine_mem;
 typedef or_value *op_stack_mem;
 typedef or_value_box *op_temp_value_mem;
 
+typedef struct {
+    mem_cursor lr;
+    mem_cursor sp;
+    mem_cursor cursor;
+    
+    machine_mem mem;
+    machine_mem mem_end;
+    
+    op_stack_mem op_mem;
+    op_stack_mem op_mem_end;
+    mem_cursor op_mem_top;
+    
+    op_temp_value_mem op_temp_mem;
+    op_temp_value_mem op_temp_mem_end;
+    mem_cursor op_temp_mem_top;
+
+    ORControlFlowFlag flow_flag;
+}thread_context;
+
+thread_context *thread_ctx_create(void);
+thread_context *current_thread_context(void);
+
+machine_mem thread_ctx_push_localvar(thread_context *ctx, void *var, size_t size);
+void *thread_ctx_seek_localvar(thread_context *ctx, mem_cursor offset);
+void thread_ctx_enter_call(thread_context *ctx);
+void thread_ctx_exit_call(thread_context *ctx);
+bool thread_ctx_is_in_call(thread_context *ctx);
+
+void thread_ctx_temp_mem_pop(thread_context *ctx);
+or_value_box *thread_ctx_tempmem_write_top(thread_context *ctx, or_value_box *var);
+or_value_box *thread_ctx_tempmem_push(thread_context *ctx, or_value_box *var);
+or_value_box *thread_ctx_tempmem_top_var(thread_context *ctx);
+or_value_box *thread_ctx_tempmem_seek(thread_context *ctx, mem_cursor beforeTop);
+
+or_value * thread_ctx_op_stack_pop(thread_context *ctx);
+void thread_ctx_op_stack_write_top(thread_context *ctx, or_value var);
+void thread_ctx_op_stack_push(thread_context *ctx, or_value var);
+or_value * thread_ctx_op_stack_top_var(thread_context *ctx);
+or_value * thread_ctx_op_stack_seek(thread_context *ctx, mem_cursor beforeTop);
+
 @interface ORThreadContext : NSObject
 {
     @public
