@@ -20,7 +20,7 @@
 @property (nonatomic, strong)MFScopeChain *topScope;
 @property (nonatomic, strong)ORParserForTest *parser;
 @property (nonatomic, strong)ORInterpreter *inter;
-@property (nonatomic, strong)ORThreadContext *ctx;
+@property (nonatomic, assign)ORThreadContext *ctx;
 @end
 
 @interface Fibonaccia: NSObject
@@ -42,7 +42,7 @@ int fibonaccia(int n) {
 - (void)setUp {
     _parser = [ORParserForTest new];
     _inter = [ORInterpreter shared];
-    _ctx = [ORThreadContext current];
+    _ctx = current_thread_context();
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
 //        ORParserForTest *parser = [ORParserForTest new];
@@ -1001,7 +1001,7 @@ int signatureBlockPtr(id object, int b){
     @"    int a = fibonaccia(n - 1); int b = fibonaccia(n - 2);"
     @"    return a + b;"
     @"}"
-    @"int a = fibonaccia(25);";
+    @"int a = fibonaccia(30);";
     AST *ast = [_parser parseSource:source];
     [self measureBlock:^{
         for (id exp in ast.globalStatements) {

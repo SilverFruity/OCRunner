@@ -15,7 +15,7 @@ class CRunnerTests: XCTestCase {
     let ocparser = ORParserForTest()
     var source = ""
     var inter = ORInterpreter.shared()
-    var ctx  = ORThreadContext.current()
+    var ctx  = current_thread_context()
     override func setUp() {
 //        if !hasAddScripts{
 //            let current = Bundle.init(for: CRunnerTests.classForCoder())

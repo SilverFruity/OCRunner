@@ -73,10 +73,10 @@
     
     //链接函数指针，过滤一次
     nodes = [self linkFunctions:nodes scope:scope];
-    
+    ORThreadContext *ctx = current_thread_context();
     //注册Protcol 注册Class 全局函数声明等
     for (ORNode *node in nodes) {
-        eval(self, [ORThreadContext current], scope, node);
+        eval(self, ctx, scope, node);
     }
     
 }

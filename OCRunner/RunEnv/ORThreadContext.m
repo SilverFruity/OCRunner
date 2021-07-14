@@ -29,9 +29,7 @@
 + (void)pop{
     [[ORCallFrameStack threadStack].array removeLastObject];
 }
-+ (instancetype)threadStack{
-    return ORThreadContext.current.callFrameStack;
-}
+
 + (NSString *)history{
     NSMutableArray *frames = [ORCallFrameStack threadStack].array;
     NSMutableString *log = [@"OCRunner Frames:\n\n" mutableCopy];
@@ -108,8 +106,8 @@
     return ORArgsStack.threadStack.array.count;
 }
 @end
-thread_context *thread_ctx_create(void){
-    thread_context *ctx = malloc(sizeof(thread_context));
+ORThreadContext *thread_ctx_create(void){
+    ORThreadContext *ctx = malloc(sizeof(ORThreadContext));
     ctx->sp = 0;
     ctx->lr = 0;
     ctx->cursor = 0;
@@ -124,17 +122,17 @@ thread_context *thread_ctx_create(void){
     ctx->op_temp_mem_top = 0;
     return ctx;
 }
-thread_context *current_thread_context(void){
+ORThreadContext *current_thread_context(void){
     //每一个线程拥有一个独立的上下文
     NSMutableDictionary *threadInfo = [[NSThread currentThread] threadDictionary];
-    thread_context *ctx = [threadInfo[@"ORThreadContext"] pointerValue];
+    ORThreadContext *ctx = [threadInfo[@"ORThreadContext"] pointerValue];
     if (!ctx) {
         ctx = thread_ctx_create();
         threadInfo[@"ORThreadContext"] = [NSValue valueWithPointer:ctx];
     }
     return ctx;
 }
-machine_mem thread_ctx_push_localvar(thread_context *ctx, void *var, size_t size){
+machine_mem thread_ctx_push_localvar(ORThreadContext *ctx, void *var, size_t size){
     machine_mem dst = ctx->mem + ctx->sp + ctx->cursor;
     assert(dst < ctx->mem_end);
     assert(var != NULL);
@@ -146,17 +144,17 @@ machine_mem thread_ctx_push_localvar(thread_context *ctx, void *var, size_t size
     ctx->cursor += MAX(size, 8);
     return dst;
 }
-void *thread_ctx_seek_localvar(thread_context *ctx, mem_cursor offset){
+void *thread_ctx_seek_localvar(ORThreadContext *ctx, mem_cursor offset){
     return ctx->mem + ctx->sp + offset;
 }
-void thread_ctx_enter_call(thread_context *ctx){
+void thread_ctx_enter_call(ORThreadContext *ctx){
     ctx->lr = ctx->sp + ctx->cursor;
     assert(ctx->mem + ctx->lr < ctx->mem_end);
     memcpy(ctx->mem + ctx->lr, &ctx->sp, sizeof(mem_cursor));
     ctx->sp = ctx->lr + sizeof(mem_cursor);
     ctx->cursor = 0;
 }
-void thread_ctx_exit_call(thread_context *ctx){
+void thread_ctx_exit_call(ORThreadContext *ctx){
     mem_cursor before = ctx->lr;
     memcpy(&ctx->sp, ctx->mem + ctx->lr, sizeof(mem_cursor));
     if (ctx->sp == 0) {
@@ -167,157 +165,48 @@ void thread_ctx_exit_call(thread_context *ctx){
     }
     ctx->cursor = before - ctx->sp;
 }
-bool thread_ctx_is_in_call(thread_context *ctx){
+bool thread_ctx_is_calling(ORThreadContext *ctx){
     if (ctx->lr == ctx->sp) return false;
     return true;
 }
 
-void thread_ctx_temp_mem_pop(thread_context *ctx){
+void thread_ctx_temp_mem_pop(ORThreadContext *ctx){
     ctx->op_temp_mem_top--;
 }
-or_value_box *thread_ctx_tempmem_write_top(thread_context *ctx, or_value_box *var){
+or_value_box *thread_ctx_tempmem_write_top(ORThreadContext *ctx, or_value_box *var){
     ctx->op_temp_mem[ctx->op_temp_mem_top] = *var;
     return ctx->op_temp_mem + ctx->op_temp_mem_top;
 }
-or_value_box *thread_ctx_tempmem_push(thread_context *ctx, or_value_box *var){
+or_value_box *thread_ctx_tempmem_push(ORThreadContext *ctx, or_value_box *var){
     ctx->op_temp_mem[ctx->op_temp_mem_top++] = *var;
     assert(ctx->op_mem + ctx->op_temp_mem_top < ctx->op_mem_end);
     return ctx->op_temp_mem + ctx->op_temp_mem_top - 1;
 }
-or_value_box *thread_ctx_tempmem_top_var(thread_context *ctx){
+or_value_box *thread_ctx_tempmem_top_var(ORThreadContext *ctx){
     return ctx->op_temp_mem + ctx->op_temp_mem_top;
 }
-or_value_box *thread_ctx_tempmem_seek(thread_context *ctx, mem_cursor beforeTop){
+or_value_box *thread_ctx_tempmem_seek(ORThreadContext *ctx, mem_cursor beforeTop){
     return ctx->op_temp_mem + ctx->op_temp_mem_top - beforeTop;
 }
 
-or_value * thread_ctx_op_stack_pop(thread_context *ctx){
+or_value * thread_ctx_op_stack_pop(ORThreadContext *ctx){
     thread_ctx_temp_mem_pop(ctx);
     ctx->op_mem_top--;
     return ctx->op_mem + ctx->op_mem_top;
 }
-void thread_ctx_op_stack_write_top(thread_context *ctx, or_value var){
+void thread_ctx_op_stack_write_top(ORThreadContext *ctx, or_value var){
     var.pointer = (void *)thread_ctx_tempmem_write_top(ctx, &var.box);
     ctx->op_mem[ctx->op_mem_top] = var;
 }
-void thread_ctx_op_stack_push(thread_context *ctx, or_value var){
+void thread_ctx_op_stack_push(ORThreadContext *ctx, or_value var){
     var.pointer = (void *)thread_ctx_tempmem_push(ctx, &var.box);
     ctx->op_mem[ctx->op_mem_top++] = var;
     assert(ctx->op_mem + ctx->op_mem_top < ctx->op_mem_end);
 }
-or_value * thread_ctx_op_stack_top_var(thread_context *ctx){
+or_value * thread_ctx_op_stack_top_var(ORThreadContext *ctx){
     return ctx->op_mem + ctx->op_mem_top;
 }
-or_value * thread_ctx_op_stack_seek(thread_context *ctx, mem_cursor beforeTop){
+or_value * thread_ctx_op_stack_seek(ORThreadContext *ctx, mem_cursor beforeTop){
     return ctx->op_mem + ctx->op_mem_top - 1 - beforeTop;
 }
-@implementation ORThreadContext
 
-- (machine_mem)pushLocalVar:(void *)var size:(size_t)size{
-    machine_mem dst = mem + sp + cursor;
-    assert(dst < mem_end);
-    assert(var != NULL);
-    if (*(void **)var != NULL) {
-        memcpy(dst, var , size);
-    }else{
-        memset(dst, 0, size);
-    }
-    cursor += MAX(size, 8);
-    return dst;
-}
-- (void *)seekLocalVar:(mem_cursor)offset{
-    return mem + sp + offset;
-}
-- (void)enter{
-    lr = sp + cursor;
-    assert(mem + lr < mem_end);
-    memcpy(mem + lr, &sp, sizeof(mem_cursor));
-    sp = lr + sizeof(mem_cursor);
-    cursor = 0;
-}
-- (void)exit{
-    mem_cursor before = lr;
-    memcpy(&sp, mem + lr, sizeof(mem_cursor));
-    if (sp == 0) {
-        lr = 0;
-        cursor = 0;
-    }else{
-        lr = sp - sizeof(mem_cursor);
-    }
-    cursor = before - sp;
-}
-- (BOOL)isEmpty{
-    return lr == sp;
-}
-
-- (void)tempStackPop{
-    op_temp_mem_top--;
-}
-- (or_value_box *)tempStackWriteTop:(or_value_box *)var{
-    op_temp_mem[op_temp_mem_top] = *var;
-    return op_temp_mem + op_temp_mem_top;
-}
-- (or_value_box *)tempStackPush:(or_value_box *)var{
-    op_temp_mem[op_temp_mem_top++] = *var;
-    assert(op_mem + op_temp_mem_top < op_mem_end);
-    return op_temp_mem + op_temp_mem_top - 1;
-}
-- (or_value_box *)tempStackTopVar{
-    return op_temp_mem + op_temp_mem_top;
-}
-- (or_value_box *)tempStackSeek:(mem_cursor)beforeTop{
-    return op_temp_mem + op_temp_mem_top - beforeTop;
-}
-
-- (or_value *)opStackPop{
-    [self tempStackPop];
-    op_mem_top--;
-    return op_mem + op_mem_top;
-}
-- (void)opStackWriteTop:(or_value)var{
-    var.pointer = (void *)[self tempStackWriteTop:&var.box];
-    op_mem[op_mem_top] = var;
-}
-- (void)opStackPush:(or_value)var{
-    var.pointer = (void *)[self tempStackPush:&var.box];
-    op_mem[op_mem_top++] = var;
-    assert(op_mem + op_mem_top < op_mem_end);
-}
-- (or_value *)opStackTopVar{
-    return op_mem + op_mem_top;
-}
-- (or_value *)opStackSeek:(mem_cursor)beforeTop{
-    return op_mem + op_mem_top - 1 - beforeTop;
-}
-+ (instancetype)current{
-    //每一个线程拥有一个独立的上下文
-    NSMutableDictionary *threadInfo = [[NSThread currentThread] threadDictionary];
-    ORThreadContext *ctx = threadInfo[@"ORThreadContext"];
-    if (!ctx) {
-        ctx = [[ORThreadContext alloc] init];
-        threadInfo[@"ORThreadContext"] = ctx;
-    }
-    return ctx;
-}
-- (instancetype)init
-{
-    self = [super init];
-    if (self) {
-        sp = 0;
-        lr = 0;
-        cursor = 0;
-        size_t mem_size = 1024 * sizeof(machine_mem);
-        mem = malloc(mem_size);
-        mem_end = mem + mem_size;
-        op_mem = malloc(mem_size);
-        op_mem_end = (or_value *)((char *)op_mem + mem_size);
-        op_mem_top = 0;
-        op_temp_mem = malloc(mem_size);
-        op_temp_mem_end = (or_value_box *)((char *)op_temp_mem + mem_size);
-        op_temp_mem_top = 0;
-        
-        self.callFrameStack = [[ORCallFrameStack alloc] init];
-    }
-    return self;
-}
-@end

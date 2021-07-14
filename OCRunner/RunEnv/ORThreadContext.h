@@ -71,75 +71,28 @@ typedef struct {
     mem_cursor op_temp_mem_top;
 
     ORControlFlowFlag flow_flag;
-}thread_context;
+}ORThreadContext;
 
-thread_context *thread_ctx_create(void);
-thread_context *current_thread_context(void);
+ORThreadContext *thread_ctx_create(void);
+ORThreadContext *current_thread_context(void);
 
-machine_mem thread_ctx_push_localvar(thread_context *ctx, void *var, size_t size);
-void *thread_ctx_seek_localvar(thread_context *ctx, mem_cursor offset);
-void thread_ctx_enter_call(thread_context *ctx);
-void thread_ctx_exit_call(thread_context *ctx);
-bool thread_ctx_is_in_call(thread_context *ctx);
+machine_mem thread_ctx_push_localvar(ORThreadContext *ctx, void *var, size_t size);
+void *thread_ctx_seek_localvar(ORThreadContext *ctx, mem_cursor offset);
+void thread_ctx_enter_call(ORThreadContext *ctx);
+void thread_ctx_exit_call(ORThreadContext *ctx);
+bool thread_ctx_is_calling(ORThreadContext *ctx);
 
-void thread_ctx_temp_mem_pop(thread_context *ctx);
-or_value_box *thread_ctx_tempmem_write_top(thread_context *ctx, or_value_box *var);
-or_value_box *thread_ctx_tempmem_push(thread_context *ctx, or_value_box *var);
-or_value_box *thread_ctx_tempmem_top_var(thread_context *ctx);
-or_value_box *thread_ctx_tempmem_seek(thread_context *ctx, mem_cursor beforeTop);
+void thread_ctx_temp_mem_pop(ORThreadContext *ctx);
+or_value_box *thread_ctx_tempmem_write_top(ORThreadContext *ctx, or_value_box *var);
+or_value_box *thread_ctx_tempmem_push(ORThreadContext *ctx, or_value_box *var);
+or_value_box *thread_ctx_tempmem_top_var(ORThreadContext *ctx);
+or_value_box *thread_ctx_tempmem_seek(ORThreadContext *ctx, mem_cursor beforeTop);
 
-or_value * thread_ctx_op_stack_pop(thread_context *ctx);
-void thread_ctx_op_stack_write_top(thread_context *ctx, or_value var);
-void thread_ctx_op_stack_push(thread_context *ctx, or_value var);
-or_value * thread_ctx_op_stack_top_var(thread_context *ctx);
-or_value * thread_ctx_op_stack_seek(thread_context *ctx, mem_cursor beforeTop);
+or_value * thread_ctx_op_stack_pop(ORThreadContext *ctx);
+void thread_ctx_op_stack_write_top(ORThreadContext *ctx, or_value var);
+void thread_ctx_op_stack_push(ORThreadContext *ctx, or_value var);
+or_value * thread_ctx_op_stack_top_var(ORThreadContext *ctx);
+or_value * thread_ctx_op_stack_seek(ORThreadContext *ctx, mem_cursor beforeTop);
 
-@interface ORThreadContext : NSObject
-{
-    @public
-    mem_cursor lr;
-    mem_cursor sp;
-    mem_cursor cursor;
-    
-    machine_mem mem;
-    machine_mem mem_end;
-    
-    op_stack_mem op_mem;
-    op_stack_mem op_mem_end;
-    mem_cursor op_mem_top;
-    
-    op_temp_value_mem op_temp_mem;
-    op_temp_value_mem op_temp_mem_end;
-    mem_cursor op_temp_mem_top;
-
-    ORControlFlowFlag flow_flag;
-}
-- (machine_mem)pushLocalVar:(void *)var size:(size_t)size;
-- (void *)seekLocalVar:(mem_cursor)offset;
-- (void)enter;
-- (void)exit;
-- (BOOL)isEmpty;
-
-//- (void)opStackPop;
-//- (or_value_box *)opStackTopVar;
-//- (void)writeOpStackTop:(or_value_box)var;
-//- (void)pushOpStack:(or_value_box)var typeencode:(const char *)typeencode;
-//- (or_value_box *)seekOpStack:(mem_cursor)beforeTop typeencode:(const char *)typeencode;
-
-- (void)tempStackPop;
-- (or_value_box *)tempStackWriteTop:(or_value_box *)var;
-- (or_value_box *)tempStackPush:(or_value_box *)var;
-- (or_value_box *)tempStackTopVar;
-- (or_value_box *)tempStackSeek:(mem_cursor)beforeTop;
-
-- (or_value *)opStackPop;
-- (void)opStackWriteTop:(or_value)var;
-- (void)opStackPush:(or_value)var;
-- (or_value *)opStackTopVar;
-- (or_value *)opStackSeek:(mem_cursor)beforeTop;
-
-@property (nonatomic, strong)ORCallFrameStack *callFrameStack;
-+ (instancetype)current;
-@end
 
 NS_ASSUME_NONNULL_END

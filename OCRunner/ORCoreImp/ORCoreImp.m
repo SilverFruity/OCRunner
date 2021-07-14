@@ -22,11 +22,12 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     __unsafe_unretained id target = *(__unsafe_unretained id *)args[0];
     SEL sel = *(SEL *)args[1];
     ORInterpreter *inter = [ORInterpreter shared];
-    ORThreadContext *ctx = [ORThreadContext current];
+    ORThreadContext *ctx = current_thread_context();
     NSMethodSignature *sig = [target methodSignatureForSelector:sel];
-    [ctx enter];
-    [ctx pushLocalVar:*args size:sizeof(void *)];
-    [ctx pushLocalVar:*(args + 1) size:sizeof(SEL)];
+    
+    thread_ctx_enter_call(ctx);
+    thread_ctx_push_localvar(ctx, *args, sizeof(void *));
+    thread_ctx_push_localvar(ctx, *(args + 1), sizeof(SEL));
     for (NSUInteger i = 2; i < sig.numberOfArguments; i++) {
         const char *typeencode = [sig getArgumentTypeAtIndex:i];
         void *arg = args[i];
@@ -46,12 +47,12 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
                 }
             }
         }
-        [ctx pushLocalVar:arg size:sizeof(void *)];
+        thread_ctx_push_localvar(ctx, arg, sizeof(void *));
     }
     eval(inter, ctx, scope, methodImp);
-    [ctx exit];
+    thread_ctx_exit_call(ctx);
     
-    or_value value = *[ctx opStackPop];
+    or_value value = *thread_ctx_op_stack_pop(ctx);
     
     if (sel == NSSelectorFromString(@"dealloc")) {
         Method deallocMethod = class_getInstanceMethod(object_getClass(target), NSSelectorFromString(@"ORGdealloc"));
@@ -65,7 +66,7 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
 }
 
 void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
-    ORThreadContext *ctx = [ORThreadContext current];
+    ORThreadContext *ctx = current_thread_context();
     struct MFSimulateBlock *block = *(void **)args[0];
     MFBlock *mangoBlock =  (__bridge MFBlock *)(block->wrapper);
     NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:NSBlockGetSignature((__bridge  void *)mangoBlock.ocBlock)];
@@ -76,8 +77,8 @@ void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
     }
     or_value value;
     [ORArgsStack push:argValues];
-    eval([ORInterpreter shared], [ORThreadContext current], mangoBlock.outScope, mangoBlock.func);
-    value = *[ctx opStackPop];
+    eval([ORInterpreter shared], ctx, mangoBlock.outScope, mangoBlock.func);
+    value = *thread_ctx_op_stack_pop(ctx);
     if (isVoidWithTypeEncode(value.typeencode) && *value.pointer != NULL){
         // 类型转换
         or_value_write_to(value, ret, [sig methodReturnType]);
