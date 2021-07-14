@@ -220,7 +220,7 @@ void or_value_set_pointer(or_value *value, void *pointer){
             value->box.uLongLongValue = 0;
             break;
     }
-    value->pointer = (void *)&value->box;
+    value->pointer = (void **)&value->box;
 }
 void or_value_write_to(or_value value, void *dst, const char *aim_typeencode){
     aim_typeencode = aim_typeencode == NULL ? OCTypeStringPointer : aim_typeencode;
@@ -307,7 +307,7 @@ or_value or_Class_value(Class clazzValue){
 or_value or_SEL_value(SEL selValue){
     return or_value_create(OCTypeStringSEL , &selValue);
 }
-or_value or_CString_value(char * pointerValue){
+or_value or_CString_value(void * pointerValue){
     return or_value_create(OCTypeStringCString , &pointerValue);
 }
 or_value or_Pointer_value(void * pointerValue){

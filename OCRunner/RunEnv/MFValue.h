@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "RunnerClasses+Execute.h"
+#import <ORPatchFile/RunnerClasses.h>
 #import <oc2mangoLib/ocHandleTypeEncode.h>
 #import "or_value.h"
 

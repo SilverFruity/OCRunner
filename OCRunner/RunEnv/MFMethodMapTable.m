@@ -43,26 +43,26 @@
 - (void)addMethodMapTableItem:(MFMethodMapTableItem *)methodMapTableItem{
     if (!methodMapTableItem) return;
     
-    Class class = methodMapTableItem.clazz;
+    Class clazz = methodMapTableItem.clazz;
     
-    if (class == NULL) return;
+    if (clazz == NULL) return;
     
     NSString *sel = [methodMapTableItem.methodImp.declare selectorName];
     
     if (!sel) return;
     
     if (methodMapTableItem.methodImp.declare.isClassMethod){
-        CFMutableDictionaryRef classMap = (CFMutableDictionaryRef)CFDictionaryGetValue(classMethodCache, (__bridge const void *)(class));
+        CFMutableDictionaryRef classMap = (CFMutableDictionaryRef)CFDictionaryGetValue(classMethodCache, (__bridge const void *)(clazz));
         if (classMap == NULL){
             classMap = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-            CFDictionarySetValue(classMethodCache, (__bridge const void *)(class), classMap);
+            CFDictionarySetValue(classMethodCache, (__bridge const void *)(clazz), classMap);
         }
         CFDictionarySetValue(classMap, (__bridge CFStringRef)(sel), (__bridge const void *)(methodMapTableItem));
     }else{
-        CFMutableDictionaryRef classMap = (CFMutableDictionaryRef)CFDictionaryGetValue(instanceMethodCache, (__bridge const void *)(class));
+        CFMutableDictionaryRef classMap = (CFMutableDictionaryRef)CFDictionaryGetValue(instanceMethodCache, (__bridge const void *)(clazz));
         if (classMap == NULL){
             classMap = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-            CFDictionarySetValue(instanceMethodCache, (__bridge const void *)(class), classMap);
+            CFDictionarySetValue(instanceMethodCache, (__bridge const void *)(clazz), classMap);
         }
         CFDictionarySetValue(classMap, (__bridge CFStringRef)(sel), (__bridge const void *)(methodMapTableItem));
     }
@@ -88,13 +88,13 @@
     if (!selector) { return nil; }
     
     if (classMethod){
-        CFDictionaryRef classMap = CFDictionaryGetValue(classMethodCache, (__bridge const void *)(clazz));
+        CFDictionaryRef classMap = (CFDictionaryRef)CFDictionaryGetValue(classMethodCache, (__bridge const void *)(clazz));
         if (classMap == NULL) return nil;
-        return CFDictionaryGetValue(classMap, (__bridge CFStringRef)(selector));
+        return (MFMethodMapTableItem *)CFDictionaryGetValue(classMap, (__bridge CFStringRef)(selector));
     }else{
-        CFDictionaryRef classMap = CFDictionaryGetValue(instanceMethodCache, (__bridge const void *)(clazz));
+        CFDictionaryRef classMap = (CFDictionaryRef)CFDictionaryGetValue(instanceMethodCache, (__bridge const void *)(clazz));
         if (classMap == NULL) return nil;
-        return CFDictionaryGetValue(classMap, (__bridge CFStringRef)(selector));
+        return (MFMethodMapTableItem *)CFDictionaryGetValue(classMap, (__bridge CFStringRef)(selector));
     }
 }
 @end

@@ -26,7 +26,7 @@ cal_result.box.uLongValue = (operator *(unsigned long *)value.pointer); break;\
 case OCTypeULongLong:\
 cal_result.box.uLongLongValue = (operator *(unsigned long long *)value.pointer); break;\
 case OCTypeBOOL:\
-cal_result.box.boolValue = (operator *(BOOL *)value.pointer); break;\
+cal_result.box.boolValue = (operator *(char *)value.pointer); break;\
 case OCTypeChar:\
 cal_result.box.charValue = (operator *(char *)value.pointer); break;\
 case OCTypeShort:\
@@ -66,7 +66,7 @@ cal_result.box.uLongValue = ((*(unsigned long *)value.pointer) operator); break;
 case OCTypeULongLong:\
 cal_result.box.uLongLongValue = ((*(unsigned long long *)value.pointer) operator); break;\
 case OCTypeBOOL:\
-cal_result.box.boolValue = ((*(BOOL *)value.pointer) operator); break;\
+cal_result.box.boolValue = ((*(char *)value.pointer) operator); break;\
 case OCTypeChar:\
 cal_result.box.charValue = ((*(char *)value.pointer) operator); break;\
 case OCTypeShort:\
@@ -184,7 +184,7 @@ cal_result.box.value_type = leftValue.box.value_type operator rightValue.box.val
 leftValue.value_type operator rightValue.value_type
 
 #define CalculateExecute(leftValue,operator,rightValue)\
-OCType result_type = *leftValue.typeencode;\
+OCType result_type = (OCType)*leftValue.typeencode;\
 cal_result.typeencode = leftValue.typeencode;\
 if (*leftValue.typeencode != *rightValue.typeencode\
     && (*leftValue.typeencode == OCTypeFloat || *leftValue.typeencode == OCTypeDouble\
@@ -227,7 +227,7 @@ break;\
 #define LogicBinaryOperatorExecute(leftValue,operator,rightValue)\
 BOOL logicResultValue = NO;\
 do{\
-    OCType compare_type = *leftValue.typeencode;\
+    OCType compare_type = (OCType)*leftValue.typeencode;\
     if (*leftValue.typeencode != *rightValue.typeencode\
         && (*leftValue.typeencode == OCTypeFloat || *leftValue.typeencode == OCTypeDouble\
         || *rightValue.typeencode == OCTypeFloat || *rightValue.typeencode == OCTypeDouble )){\
@@ -322,7 +322,7 @@ or_value or_Object_value(id objValue);
 or_value or_Block_value(id blockValue);
 or_value or_Class_value(Class clazzValue);
 or_value or_SEL_value(SEL selValue);
-or_value or_CString_value(char * pointerValue);
+or_value or_CString_value(void * pointerValue);
 or_value or_Pointer_value(void * pointerValue);
 
 void or_value_subscriptGet(or_value *dst, or_value value, or_value index);

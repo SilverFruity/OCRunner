@@ -60,7 +60,7 @@ ffi_type *typeEncode2ffi_type(ocDecl *target){
         case OCTypeStruct:
         {
             ocComposeDecl *decl = (ocComposeDecl *)target;
-            ffi_type *type = malloc(sizeof(ffi_type));
+            ffi_type *type = (ffi_type *)malloc(sizeof(ffi_type));
             type->type = FFI_TYPE_STRUCT;
             type->alignment = 0;
             type->size = sizeOfTypeEncode(decl.typeEncode);

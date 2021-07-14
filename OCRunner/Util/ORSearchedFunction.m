@@ -9,7 +9,6 @@
 #import "ORSearchedFunction.h"
 #import "SymbolSearch.h"
 #import "RunnerClasses+Execute.h"
-#import "ORThreadContext.h"
 #import "MFValue.h"
 
 #import "ORCoreImp.h"
@@ -39,26 +38,26 @@
     search_symbols(searches, names.count);
     return table;
 }
-- (or_value)execute:(nonnull MFScopeChain *)scope {
-    NSArray <MFValue *>*args = [ORArgsStack pop];
-    const char *org_typeencode = self.funPair.symbol.decl.typeEncode;
-    if (org_typeencode == NULL) {
-        NSLog(@"OCRunner Error: Unknow return type of C function '%@'", self.name);
-        return or_nullValue();
-    }
-    or_value returnValue = or_value_create(org_typeencode, NULL);
-    void *funcptr = self.pointer != NULL ? self.pointer : [ORSystemFunctionPointerTable pointerForFunctionName:self.name];
-    if (funcptr == NULL) {
-        NSLog(@"OCRunner Error: Not found the pointer of C function '%@'", self.name);
-        return or_nullValue();
-    }
+- (void)execute:(nonnull MFScopeChain *)scope {
+//    NSArray <MFValue *>*args = [ORArgsStack pop];
+//    const char *org_typeencode = self.funPair.symbol.decl.typeEncode;
+//    if (org_typeencode == NULL) {
+//        NSLog(@"OCRunner Error: Unknow return type of C function '%@'", self.name);
+//        return or_nullValue();
+//    }
+//    or_value returnValue = or_value_create(org_typeencode, NULL);
+//    void *funcptr = self.pointer != NULL ? self.pointer : [ORSystemFunctionPointerTable pointerForFunctionName:self.name];
+//    if (funcptr == NULL) {
+//        NSLog(@"OCRunner Error: Not found the pointer of C function '%@'", self.name);
+//        return or_nullValue();
+//    }
 //    if (!self.funVar.isMultiArgs) {
 //        invoke_functionPointer(funcptr, args, returnValue);
 //        //多参数
 //    }else{
 //        invoke_functionPointer(funcptr, args, returnValue, self.funVar.params.count);
 //    }
-    return returnValue;
+//    return returnValue;
 }
 
 @end

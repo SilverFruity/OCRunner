@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic,assign)void *pointer;
 + (instancetype)functionWithName:(NSString *)name;
 + (NSDictionary <NSString *, ORSearchedFunction *>*)functionTableForNames:(NSArray *)names;
-- (nullable MFValue *)execute:(nonnull MFScopeChain *)scope;
+- (void)execute:(nonnull MFScopeChain *)scope;
 @end
 
 NS_ASSUME_NONNULL_END

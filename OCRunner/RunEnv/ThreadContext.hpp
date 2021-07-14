@@ -2,13 +2,14 @@
 //  ThreadContext.hpp
 //  OCRunner
 //
-//  Created by APPLE on 2021/7/14.
+//  Created by Jiang on 2021/7/14.
 //
 
 #ifndef ThreadContext_hpp
 #define ThreadContext_hpp
+#import <Foundation/Foundation.h>
+#import "or_value.h"
 
-#include <stdio.h>
 
 typedef enum {
     ORControlFlowFlagNormal = 0x00,
@@ -17,34 +18,12 @@ typedef enum {
     ORControlFlowFlagReturn = 0x10 << 1,
 }ORControlFlowFlag;
 
-typedef union{
-    bool boolValue;
-    char charValue;
-    short shortValue;
-    int intValue;
-    long longValue;
-    long long longlongValue;
-    unsigned char uCharValue;
-    unsigned short uShortValue;
-    unsigned int uIntValue;
-    unsigned long uLongValue;
-    unsigned long long uLongLongValue;
-    float floatValue;
-    double doubleValue;
-    void *pointerValue;
-}or_value_box;
 
-typedef struct{
-    or_value_box box;
-    void **pointer;
-    const char *typeencode;
-}or_value;
-
-
-typedef long long mem_cursor;
-typedef char * machine_mem;
+typedef UInt64 mem_cursor;
+typedef UInt8 * machine_mem;
 typedef or_value *op_stack_mem;
 typedef or_value_box *op_temp_value_mem;
+
 
 class ThreadContext {
 protected:
@@ -63,9 +42,13 @@ protected:
     op_temp_value_mem op_temp_mem_end;
     mem_cursor op_temp_mem_top;
 
+public:
     ORControlFlowFlag flow_flag;
     
-public:
+    static ThreadContext *current(void);
+    ThreadContext(void);
+    ~ThreadContext(void);
+    
     machine_mem push_localvar( void *var, size_t size);
     void *seek_localvar( mem_cursor offset);
     void enter_call(void);

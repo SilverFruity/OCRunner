@@ -40,8 +40,9 @@
     ast.scope = symbolTableRoot.scope;
     [ORInterpreter shared]->constants = symbolTableRoot->constants;
     [ORInterpreter shared]->constants_size = symbolTableRoot->constants_size;
+    void *ctx = thread_current_context();
     for (id exp in ast.globalStatements) {
-        eval([ORInterpreter shared], current_thread_context(), [MFScopeChain topScope], exp);
+        eval([ORInterpreter shared], ctx, [MFScopeChain topScope], exp);
     }
     NSLog(@"%d",[[MFScopeChain topScope] getValueWithIdentifier:@"a"].uIntValue);
 

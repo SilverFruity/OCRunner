@@ -2,15 +2,34 @@
 //  ThreadContext.cpp
 //  OCRunner
 //
-//  Created by APPLE on 2021/7/14.
+//  Created by Jiang on 2021/7/14.
 //
+#import "ThreadContext.hpp"
 
-#include "ThreadContext.hpp"
-#include <stdlib.h>
-#include <memory.h>
-#include <assert.h>
-#include <math.h>
+ThreadContext *ThreadContext::current(){
+    thread_local ThreadContext *ctx = new ThreadContext;
+    return ctx;
+}
 
+ThreadContext::ThreadContext(){
+    sp = 0;
+    lr = 0;
+    cursor = 0;
+    size_t mem_size = 1024 * sizeof(machine_mem);
+    mem = (machine_mem)malloc(mem_size);
+    mem_end = mem + mem_size;
+    op_mem = (op_stack_mem)malloc(mem_size);
+    op_mem_end = (or_value *)((char *)op_mem + mem_size);
+    op_mem_top = 0;
+    op_temp_mem = (op_temp_value_mem)malloc(mem_size);
+    op_temp_mem_end = (or_value_box *)((char *)op_temp_mem + mem_size);
+    op_temp_mem_top = 0;
+}
+ThreadContext::~ThreadContext(){
+    free(mem);
+    free(op_mem);
+    free(op_temp_mem);
+}
 machine_mem ThreadContext::push_localvar(void *var, size_t size){
     machine_mem dst = mem + sp + cursor;
     assert(dst < mem_end);

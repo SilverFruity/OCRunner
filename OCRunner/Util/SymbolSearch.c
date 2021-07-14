@@ -69,7 +69,7 @@ struct rebindings_entry {
 struct FunctionSearch makeFunctionSearch(const char *name, void *pointer){
     struct FunctionSearch search;
     search.name = strdup(name);
-    search.pointer = pointer;
+    search.pointer = (void **)pointer;
     return search;
 }
 
@@ -125,7 +125,7 @@ static void perform_search_with_section(struct rebindings_entry *rebindings,
       }
   }
     for (int i = 0; i < free_list_len; i++) {
-        struct rebindings_entry *cur = free_list[i];
+        struct rebindings_entry *cur = (struct rebindings_entry *)free_list[i];
         free((void *)cur->search.name);
         free(cur);
     }

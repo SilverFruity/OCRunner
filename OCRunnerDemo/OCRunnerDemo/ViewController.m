@@ -8,7 +8,7 @@
 
 #import "ViewController.h"
 #import <Masonry/Masonry.h>
-#import <OCRunner/MFBlock.h>
+
 @interface ShareInstance: NSObject
 @property (nonatomic,copy)NSDictionary *cache;
 @end

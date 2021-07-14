@@ -463,13 +463,7 @@ or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
 #else
 #import "ORTypeVarPair+libffi.h"
 
-char *mallocCopyStr(const char *source){
-    NSUInteger sLen = strlen(source);
-    char *result = malloc(sLen + 1);
-    memcpy(result, source, sLen);
-    result[sLen] = '\0';
-    return result;
-}
+
 or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
                         NSArray <ocDecl *>*args,
                                  ocDecl *ret)  __attribute__((overloadable))
@@ -484,10 +478,10 @@ or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
                         void *userdata)
 {
     void *imp = NULL;
-    ffi_cif *cif = malloc(sizeof(ffi_cif));//不可以free
-    ffi_closure *closure = ffi_closure_alloc(sizeof(ffi_closure), (void **)&imp);
+    ffi_cif *cif = (ffi_cif *)malloc(sizeof(ffi_cif));//不可以free
+    ffi_closure *closure = (ffi_closure *)ffi_closure_alloc(sizeof(ffi_closure), (void **)&imp);
     ffi_type *returnType = ret.libffi_type;
-    ffi_type **arg_types = malloc(sizeof(ffi_type *) * args.count);
+    ffi_type **arg_types = (ffi_type **)malloc(sizeof(ffi_type *) * args.count);
     for (int  i = 0 ; i < args.count; i++) {
         arg_types[i] = args[i].libffi_type;
     }
@@ -495,7 +489,7 @@ or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
     {
         ffi_prep_closure_loc(closure, cif, fun, userdata, imp);
     }
-    or_ffi_result *result = malloc(sizeof(or_ffi_result));
+    or_ffi_result *result = (or_ffi_result *)malloc(sizeof(or_ffi_result));
     result->cif = cif;
     result->arg_types = arg_types;
     result->closure = closure;

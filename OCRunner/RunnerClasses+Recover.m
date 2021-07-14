@@ -52,12 +52,12 @@ void recover_method(BOOL isClassMethod, Class clazz, SEL sel){
     }
 }
 - (void)recover{
-    Class class = NSClassFromString(self.className);
+    Class clazz = NSClassFromString(self.className);
     // Reverse时，释放ffi_closure和ffi_type
     for (ORMethodNode *imp in self.methods) {
         SEL sel = NSSelectorFromString(imp.declare.selectorName);
         BOOL isClassMethod = imp.declare.isClassMethod;
-        recover_method(isClassMethod, class, sel);
+        recover_method(isClassMethod, clazz, sel);
         [self deallocffiReusltForKey:[NSValue valueWithPointer:(__bridge void *)imp]];
         CFRelease((__bridge CFTypeRef)(imp));
     }
@@ -67,13 +67,13 @@ void recover_method(BOOL isClassMethod, Class clazz, SEL sel){
         NSString *str2 = name.length > 1 ? [name substringFromIndex:1] : nil;
         SEL getterSEL = NSSelectorFromString(name);
         SEL setterSEL = NSSelectorFromString([NSString stringWithFormat:@"set%@%@:",str1,str2]);
-        recover_method(NO, class, getterSEL);
-        recover_method(NO, class, setterSEL);
+        recover_method(NO, clazz, getterSEL);
+        recover_method(NO, clazz, setterSEL);
         [self deallocffiReusltForKey:[NSValue valueWithPointer:(__bridge void *)prop]];
         CFRelease((__bridge CFTypeRef)(prop));
     }
-    [[MFMethodMapTable shareInstance] removeMethodsForClass:class];
-    [[MFPropertyMapTable shareInstance] removePropertiesForClass:class];
+    [[MFMethodMapTable shareInstance] removeMethodsForClass:clazz];
+    [[MFPropertyMapTable shareInstance] removePropertiesForClass:clazz];
     
 //    Class classVar = [[MFScopeChain topScope] recursiveGetValueWithIdentifier:self.className].classValue;
 //    if (classVar != nil && classVar == class) {

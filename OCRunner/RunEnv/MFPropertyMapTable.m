@@ -46,14 +46,14 @@
     NSString *propertyName = propertyMapTableItem.property.var.var.varname;
     if (!propertyName.length) return;
     
-    Class class = propertyMapTableItem.clazz;
+    Class clazz = propertyMapTableItem.clazz;
     
-    if (class == NULL) return;
+    if (clazz == NULL) return;
     
-    CFMutableDictionaryRef propertyMap = (CFMutableDictionaryRef)CFDictionaryGetValue(_propertyCache, (__bridge const void *)(class));
+    CFMutableDictionaryRef propertyMap = (CFMutableDictionaryRef)CFDictionaryGetValue(_propertyCache, (__bridge const void *)(clazz));
     if (propertyMap == NULL){
         propertyMap = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-        CFDictionarySetValue(_propertyCache, (__bridge const void *)(class), propertyMap);
+        CFDictionarySetValue(_propertyCache, (__bridge const void *)(clazz), propertyMap);
     }
     if (propertyName == nil) return;
     CFDictionarySetValue(propertyMap, (__bridge CFStringRef)(propertyName), (__bridge const void *)(propertyMapTableItem));
@@ -63,10 +63,10 @@
     if (clazz == NULL) return nil;
     if (name == nil) return nil;
 
-    CFDictionaryRef propertyMap = CFDictionaryGetValue(_propertyCache, (__bridge const void *)(clazz));
+    CFDictionaryRef propertyMap = (CFDictionaryRef)CFDictionaryGetValue(_propertyCache, (__bridge const void *)(clazz));
     if (propertyMap == NULL) return nil;
     
-    return CFDictionaryGetValue(propertyMap, (__bridge CFStringRef)(name));
+    return (MFPropertyMapTableItem *)CFDictionaryGetValue(propertyMap, (__bridge CFStringRef)(name));
 }
 
 - (void)removePropertiesForClass:(Class)clazz{

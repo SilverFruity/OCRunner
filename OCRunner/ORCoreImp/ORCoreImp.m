@@ -16,18 +16,20 @@
 #import "util.h"
 #import "ORInterpreter.h"
 #import "ORCoreFunctionCall.h"
+#import "ThreadContext.hpp"
+
 void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     MFScopeChain *scope = [MFScopeChain scopeChainWithNext:[MFScopeChain topScope]];
     ORMethodNode *methodImp = (__bridge ORMethodNode *)userdata;
     __unsafe_unretained id target = *(__unsafe_unretained id *)args[0];
     SEL sel = *(SEL *)args[1];
     ORInterpreter *inter = [ORInterpreter shared];
-    ORThreadContext *ctx = current_thread_context();
     NSMethodSignature *sig = [target methodSignatureForSelector:sel];
     
-    thread_ctx_enter_call(ctx);
-    thread_ctx_push_localvar(ctx, *args, sizeof(void *));
-    thread_ctx_push_localvar(ctx, *(args + 1), sizeof(SEL));
+    ThreadContext *ctx = (ThreadContext *)thread_current_context();
+    ctx->enter_call();
+    ctx->push_localvar(*args, sizeof(void *));
+    ctx->push_localvar(*(args + 1), sizeof(SEL));
     for (NSUInteger i = 2; i < sig.numberOfArguments; i++) {
         const char *typeencode = [sig getArgumentTypeAtIndex:i];
         void *arg = args[i];
@@ -35,7 +37,7 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
         if (isObjectWithTypeEncode(typeencode)
             && isBlockWithTypeEncode(typeencode)
             && arg != NULL) {
-            struct MFSimulateBlock *bb = (void *)arg;
+            struct MFSimulateBlock *bb = (struct MFSimulateBlock *)arg;
             // 针对传入的block，如果为全局block或栈block，使用copy转换为堆block
             if (bb->isa == &_NSConcreteGlobalBlock || bb->isa == &_NSConcreteStackBlock){
                 arg = Block_copy(arg);
@@ -47,12 +49,12 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
                 }
             }
         }
-        thread_ctx_push_localvar(ctx, arg, sizeof(void *));
+        ctx->push_localvar(arg, sizeof(void *));
     }
     eval(inter, ctx, scope, methodImp);
-    thread_ctx_exit_call(ctx);
+    ctx->exit_call();
     
-    or_value value = *thread_ctx_op_stack_pop(ctx);
+    or_value value = *ctx->op_stack_pop();
     
     if (sel == NSSelectorFromString(@"dealloc")) {
         Method deallocMethod = class_getInstanceMethod(object_getClass(target), NSSelectorFromString(@"ORGdealloc"));
@@ -66,8 +68,8 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
 }
 
 void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
-    ORThreadContext *ctx = current_thread_context();
-    struct MFSimulateBlock *block = *(void **)args[0];
+    ThreadContext *ctx = (ThreadContext *)thread_current_context();
+    struct MFSimulateBlock *block = *(struct MFSimulateBlock **)args[0];
     MFBlock *mangoBlock =  (__bridge MFBlock *)(block->wrapper);
     NSMethodSignature *sig = [NSMethodSignature signatureWithObjCTypes:NSBlockGetSignature((__bridge  void *)mangoBlock.ocBlock)];
     NSMutableArray<MFValue *> *argValues = [NSMutableArray array];
@@ -75,10 +77,8 @@ void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
         or_value arg = or_value_create([sig getArgumentTypeAtIndex:i], args[i]);
 //        [argValues addObject:argValue];
     }
-    or_value value;
-    [ORArgsStack push:argValues];
     eval([ORInterpreter shared], ctx, mangoBlock.outScope, mangoBlock.func);
-    value = *thread_ctx_op_stack_pop(ctx);
+    or_value value = *ctx->op_stack_pop();
     if (isVoidWithTypeEncode(value.typeencode) && *value.pointer != NULL){
         // 类型转换
         or_value_write_to(value, ret, [sig methodReturnType]);

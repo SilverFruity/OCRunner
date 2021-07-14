@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ORInterpreter : NSObject
 {
 @public;
-    unichar *constants;
+    char *constants;
     unsigned long constants_size;
 }
 + (instancetype)shared;

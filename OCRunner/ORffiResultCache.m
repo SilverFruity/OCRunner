@@ -28,7 +28,7 @@
     self.cache[key] = [NSValue valueWithPointer:result];
 }
 - (or_ffi_result *)ffiResultForKey:(NSValue *)key{
-    return self.cache[key].pointerValue;
+    return (or_ffi_result *)self.cache[key].pointerValue;
 }
 - (void)removeForKey:(NSValue *)key{
     [self.cache removeObjectForKey:key];

@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "RunnerClasses+Execute.h"
+#import <ORPatchFile/RunnerClasses.h>
 #import "MFScopeChain.h"
 enum {
 	BLOCK_DEALLOCATING =      (0x0001),
@@ -51,10 +51,18 @@ struct MFGOSimulateBlockDescriptor {
 		const char *signature;
 	};
 };
+
+#ifdef __cplusplus
+extern "C" {
+#endif //__cplusplus
+
 const char *NSBlockGetSignature(void * block);
 BOOL NSBlockHasSignature(void * block);
 void NSBlockSetSignature(void * block, const char *typeencode);
 void *simulateNSBlock(const char* typeEncoding, void *imp, void *userdata);
+#ifdef __cplusplus
+}
+#endif //__cplusplus
 
 
 @interface MFBlock : NSObject

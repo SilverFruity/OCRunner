@@ -41,7 +41,7 @@ void *simulateNSBlock(const char* typeEncoding, void *imp, void *userdata){
         (void (*)(const void *src))dispose_helper,
         typeEncoding
     };
-    struct MFGOSimulateBlockDescriptor *_descriptor = malloc(sizeof(struct MFGOSimulateBlockDescriptor));
+    struct MFGOSimulateBlockDescriptor *_descriptor = (struct MFGOSimulateBlockDescriptor *)malloc(sizeof(struct MFGOSimulateBlockDescriptor));
     memcpy(_descriptor, &descriptor, sizeof(struct MFGOSimulateBlockDescriptor));
     struct MFSimulateBlock simulateBlock = {
         &_NSConcreteStackBlock,
@@ -60,9 +60,9 @@ const char *NSBlockGetSignature(void * block){
     struct MFSimulateBlock *blockRef = (struct MFSimulateBlock *)block;
     int flags = blockRef->flags;
     if (flags & BLOCK_HAS_SIGNATURE) {
-        void *signatureLocation = blockRef->descriptor;
-        signatureLocation += sizeof(unsigned long int);
-        signatureLocation += sizeof(unsigned long int);
+        char *signatureLocation = (char *)blockRef->descriptor;
+        signatureLocation += sizeof(size_t);
+        signatureLocation += sizeof(size_t);
         
         if (flags & BLOCK_HAS_COPY_DISPOSE) {
             signatureLocation += sizeof(void(*)(void *dst, void *src));
@@ -81,9 +81,9 @@ BOOL NSBlockHasSignature(void *block){
 }
 void NSBlockSetSignature(void * block, const char *typeencode){
     struct MFSimulateBlock *blockRef = (struct MFSimulateBlock *)block;
-    void *signatureLocation = blockRef->descriptor;
-    signatureLocation += sizeof(unsigned long int);
-    signatureLocation += sizeof(unsigned long int);
+    char *signatureLocation = (char *)blockRef->descriptor;
+    signatureLocation += sizeof(size_t);
+    signatureLocation += sizeof(size_t);
     int flags = blockRef->flags;
     if (flags & BLOCK_HAS_COPY_DISPOSE) {
         signatureLocation += sizeof(void(*)(void *dst, void *src));
@@ -108,7 +108,7 @@ void NSBlockSetSignature(void * block, const char *typeencode){
     return self;
 }
 - (id)ocBlock{
-    return [self blockPtr];
+    return (__bridge id)[self blockPtr];
 }
 - (void)setParamTypes:(NSMutableArray<ORDeclaratorNode *> *)paramTypes{
     NSMutableArray *types = [@[[ocDecl declWithTypeEncode:OCTypeStringBlock]] mutableCopy];
@@ -125,7 +125,7 @@ void NSBlockSetSignature(void * block, const char *typeencode){
         const char *paramTypeEncoding = param.symbol.decl.typeEncode;
         typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
     }
-    _ffi_result = register_function(&blockInter, self.paramTypes, self.retType.symbol.decl);
+    _ffi_result = register_function(&blockInter, (NSArray <ocDecl *>*)self.paramTypes, self.retType.symbol.decl);
     _blockPtr = simulateNSBlock(typeEncoding, _ffi_result->function_imp, (__bridge  void *)self);
     return _blockPtr;
 }

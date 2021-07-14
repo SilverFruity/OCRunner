@@ -63,6 +63,10 @@ NSUInteger resultFlagsForTypeEncode(const char *retTypeEncode, char **argTypeEnc
 void ffi_closure_free(void *ptr);
 #endif /* __has_include  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif //__cplusplus
+
 typedef struct {
     ffi_cif *cif;
     ffi_closure *closure;
@@ -102,5 +106,9 @@ or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
                       NSArray <ocDecl *>*args,
                                ocDecl *ret,
                       void *userdata);
+
+#ifdef __cplusplus
+}
+#endif //__cplusplus
 
 #endif /* ORCoreFunction_h */

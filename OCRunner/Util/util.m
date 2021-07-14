@@ -13,7 +13,7 @@
 
 const char * mf_str_append(const char *str1, const char *str2){
 	size_t len = strlen(str1) + strlen(str2);
-	char *ret = malloc(sizeof(char) * (len + 1));
+	char *ret = (char *)malloc(sizeof(char) * (len + 1));
 	strcpy(ret, str1);
 	strcat(ret, str2);
 	return ret;
