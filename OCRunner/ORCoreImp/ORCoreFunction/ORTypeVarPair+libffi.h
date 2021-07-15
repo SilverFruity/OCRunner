@@ -13,7 +13,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 @class ocDecl;
-ffi_type *typeEncode2ffi_type(ocDecl *decl);
+ffi_type *ocDecl2ffi_type(ocDecl *decl);
+ffi_type *typeEncode2ffi_type(const char *typeencode);
 
 @interface ocDecl (libffi)
 - (ffi_type *)libffi_type;

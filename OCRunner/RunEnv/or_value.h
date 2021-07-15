@@ -294,6 +294,9 @@ typedef struct{
     const char *typeencode;
 }or_value;
 
+#ifdef __cplusplus
+extern "C" {
+#endif //__cplusplus
 
 or_value or_value_create(const char *typeencode, void *pointer);
 size_t or_value_mem_size(or_value *value);
@@ -328,3 +331,6 @@ or_value or_Pointer_value(void * pointerValue);
 void or_value_subscriptGet(or_value *dst, or_value value, or_value index);
 void or_value_subscriptSet(or_value target, or_value index, or_value value);
 
+#ifdef __cplusplus
+}
+#endif //__cplusplus

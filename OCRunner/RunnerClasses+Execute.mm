@@ -455,7 +455,7 @@ void evalValueNode(ORInterpreter *inter, ThreadContext *ctx, MFScopeChain *scope
                                       @"Can't find object or class: %@\n"
                                       @"-----------------------------------", node.value);
     #endif
-                ctx->op_stack_push( or_Object_value(nil));
+                ctx->op_stack_push(or_nullValue());
                 return;
             }else if (node->_symbol->_decl->isIvar){
                 evalGetPropertyWithIvar(ctx, node.symbol);
@@ -547,45 +547,22 @@ void evalMethodCall(ORInterpreter *inter, ThreadContext *ctx, MFScopeChain *scop
     }
     eval(inter, ctx, scope, node.caller);
     or_value variable = *ctx->op_stack_pop();
-//    if (*variable.typeencode == OCTypeStruct || *variable.typeencode == OCTypeUnion) {
-//        if ([node.names.firstObject hasPrefix:@"set"]) {
-//            NSString *setterName = node.names.firstObject;
-//            ORNode *valueExp = node.values.firstObject;
-//            NSString *fieldKey = [setterName substringFromIndex:3];
-//            NSString *first = [[fieldKey substringToIndex:1] lowercaseString];
-//            NSString *other = setterName.length > 1 ? [fieldKey substringFromIndex:1] : @"";
-//            fieldKey = [NSString stringWithFormat:@"%@%@", first, other];
-//            eval(inter, ctx, scope, valueExp);
-//            or_value value = *ctx->op_stack_pop();
-//            if (variable.type == OCTypeStruct) {
-//                [variable setFieldWithValue:value forKey:fieldKey];
-//            }else{
-//                [variable setUnionFieldWithValue:value forKey:fieldKey];
-//            }
-//            return;
-//        }else{
-//            if (variable.type == OCTypeStruct) {
-//                if (node.isAssignedValue) {
-//                    return [variable fieldNoCopyForKey:node.names.firstObject];
-//                }else{
-//                    return [variable fieldForKey:node.names.firstObject];
-//                }
-//            }else{
-//                return [variable unionFieldForKey:node.names.firstObject];;
-//            }
-//            return;
-//        }
-//    }
-    id instance = (__bridge  id)*variable.pointer;
+    void *dst = *variable.pointer;
+    if (dst == NULL) {
+        ctx->op_stack_push(or_nullValue());
+        return;
+    }
+    id instance = (__bridge id)dst;
     SEL sel = NSSelectorFromString(node.selectorName);
-    unichar argsMem[node.values.count * sizeof(or_value)];
-    NSInteger inputArgCount = node.values.count + 2;
-    or_value *args[inputArgCount];
+    NSInteger argCount = node.values.count;
+    NSInteger totalArgCount = argCount + 2;
+    unichar argsMem[argCount * sizeof(or_value)];
+    or_value *args[totalArgCount];
     or_value self_value = or_Object_value(instance);
     or_value sel_value = or_SEL_value(sel);
     args[0] = &self_value;
     args[1] = &sel_value;
-    for (int i = 0; i < node.values.count; i++) {
+    for (int i = 0; i < argCount; i++) {
         eval(inter, ctx, scope, node.values[i]);
         or_value arg = *ctx->op_stack_pop();
         void *dst = argsMem + i * sizeof(or_value);
@@ -593,7 +570,7 @@ void evalMethodCall(ORInterpreter *inter, ThreadContext *ctx, MFScopeChain *scop
         args[i + 2] = (or_value *)dst;
     }
     // instance为nil时，依然要执行参数相关的表达式
-    if ([node.caller isKindOfClass:[ORValueNode class]]) {
+    if (node.caller.nodeType == AstEnumValueNode) {
         if (instance && node.caller.symbol.decl->isSuper) {
 //            return invoke_sueper_values(instance, sel, argValues);
         }
@@ -608,7 +585,7 @@ void evalMethodCall(ORInterpreter *inter, ThreadContext *ctx, MFScopeChain *scop
     MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:clazz classMethod:isClassMethod sel:sel];
     if (map) {
         ctx->enter_call();
-        for (int i = 0; i < inputArgCount; i++) {
+        for (int i = 0; i < totalArgCount; i++) {
             ctx->push_localvar(args[i]->pointer, or_value_mem_size(args[i]));
         }
         eval(inter, ctx, scope, map.methodImp);
@@ -620,45 +597,71 @@ void evalMethodCall(ORInterpreter *inter, ThreadContext *ctx, MFScopeChain *scop
         NSLog(@"OCRunner Error: %@ Unrecognized Selector %@", instance, node.selectorName);
         return;
     }
-    NSUInteger argCount = [sig numberOfArguments];
-    //解决多参数调用问题
-    if (inputArgCount > argCount && sig != nil) {
-        or_value_create([sig methodReturnType], NULL);
-        or_value result = *ctx->op_stack_pop();
-        void *msg_send = (void *)&objc_msgSend;
-//        invoke_functionPointer(msg_send, methodArgs, result, argCount);
-        ctx->op_stack_push( result);
-        return;
-    }else{
-        void *retValuePointer = alloca([sig methodReturnLength]);
-        char *returnType = (char *)[sig methodReturnType];
-        NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
-        invocation.target = instance;
-        invocation.selector = sel;
-        for (NSUInteger i = 2; i < argCount; i++) {
-            or_value *value = args[i];
-            // 基础类型转换
-            or_value_set_typeencode(value, [sig getArgumentTypeAtIndex:i]);
-            [invocation setArgument:value->pointer atIndex:i];
-        }
-        // func replaceIMP execute
-        [invocation invoke];
-        returnType = removeTypeEncodingPrefix(returnType);
-        if (*returnType == 'v') {
-            return;
-        }
-        [invocation getReturnValue:retValuePointer];;
-        __autoreleasing id object = nil;
-        // 针对一下方法调用，需要和CF一样，最终都要release. 与JSPatch和Mango中的__bridge_transfer效果相同
-        if (sel == @selector(alloc) || sel == @selector(new)||
-            sel == @selector(copy) || sel == @selector(mutableCopy)) {
-            object = (__bridge id)(*(void **)retValuePointer);
-            CFRelease(*(void **)retValuePointer);
-        }
-        or_value result = or_value_create(returnType, &object);
-        ctx->op_stack_push( result);
+    NSUInteger methodSignArgCount = [sig numberOfArguments];
+    const char *retunrType = [sig methodReturnType];
+    // 基础类型转换
+    for (NSUInteger i = 2; i < methodSignArgCount; i++) {
+        or_value_set_typeencode(args[i], [sig getArgumentTypeAtIndex:i]);
+    }
+    or_value ret = or_value_create(retunrType, NULL);
+    invoke_functionPointer((void *)&objc_msgSend, args, totalArgCount, &ret, methodSignArgCount);
+    if (*retunrType == OCTypeVoid) {
         return;
     }
+    if (*retunrType == OCTypeObject) {
+        void *value = *(void **)ret.pointer;
+        __autoreleasing id object = (__bridge id)value;
+        value = (__bridge void *)object;
+        or_value_set_pointer(&ret, &value);
+    }
+    ctx->op_stack_push(ret);
+    return;
+//    //解决多参数调用问题
+//    if (totalArgCount > methodSignArgCount && sig != nil) {
+//        or_value ret = or_value_create(retunrType, NULL);
+//        ctx->op_stack_push(ret);
+//        void *msg_send = (void *)&objc_msgSend;
+//        invoke_functionPointer(msg_send, args, argCount, &ret);
+//        if (*retunrType == OCTypeObject) {
+//            void *value = *(void **)ret.pointer;
+//            __autoreleasing id object = (__bridge id)value;
+//            value = (__bridge void *)object;
+//            or_value_set_pointer(&ret, &value);
+//        }
+//        return;
+//    }else{
+//        void *retValuePointer = alloca([sig methodReturnLength]);
+//        char *returnType = (char *)[sig methodReturnType];
+//        NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:sig];
+//        invocation.target = instance;
+//        invocation.selector = sel;
+//        for (NSUInteger i = 2; i < argCount; i++) {
+//            or_value *value = args[i];
+//            // 基础类型转换
+//            or_value_set_typeencode(args[i], [sig getArgumentTypeAtIndex:i]);
+//            [invocation setArgument:value->pointer atIndex:i];
+//        }
+//        // func replaceIMP execute
+//        [invocation invoke];
+//        returnType = removeTypeEncodingPrefix(returnType);
+//        if (*returnType == OCTypeVoid) {
+//            return;
+//        }
+//        [invocation getReturnValue:retValuePointer];;
+//        // 针对一下方法调用，需要和CF一样，最终都要release. 与JSPatch和Mango中的__bridge_transfer效果相同
+//        if (sel == @selector(alloc) || sel == @selector(new)||
+//            sel == @selector(copy) || sel == @selector(mutableCopy)) {
+//            void *value = *(void **)retValuePointer;
+//            __autoreleasing id object = (__bridge id)value;
+//            CFRelease(value);
+//            or_value result = or_value_create(returnType, &object);
+//            ctx->op_stack_push(result);
+//            return;
+//        }
+//        or_value result = or_value_create(returnType, retValuePointer);
+//        ctx->op_stack_push( result);
+//        return;
+//    }
 }
 void evalFunctionCall(ORInterpreter *inter, ThreadContext *ctx, MFScopeChain *scope, ORFunctionCall *node){
     NSUInteger argCount = node.expressions.count;
@@ -874,14 +877,14 @@ void evalAssignNode(ORInterpreter *inter, ThreadContext *ctx, MFScopeChain *scop
                 NSCAssert(0, @"must dot grammar");
             }
             //调用对象setter方法
-            NSString *setterName = methodCall.names.firstObject;
+            NSString *setterName = methodCall.selectorName;
             NSString *first = [[setterName substringToIndex:1] uppercaseString];
             NSString *other = setterName.length > 1 ? [setterName substringFromIndex:1] : @"";
             setterName = [NSString stringWithFormat:@"set%@%@",first,other];
             ORMethodCall *setCaller = [ORMethodCall new];
             setCaller.nodeType = AstEnumMethodCall;
             setCaller.caller = methodCall.caller;
-            setCaller.names = [@[setterName] mutableCopy];
+            setCaller.selectorName = setterName;
             setCaller.values = [@[resultExp] mutableCopy];
             setCaller.isStructRef = YES;
             eval(inter, ctx, scope, setCaller);

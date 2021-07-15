@@ -9,6 +9,11 @@
 #ifndef ORCoreFunction_h
 #define ORCoreFunction_h
 #import <oc2mangoLib/InitialSymbolTableVisitor.h>
+#import "or_value.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif //__cplusplus
 
 #if __has_include("ffi.h")
 
@@ -82,11 +87,10 @@ void or_ffi_result_free(or_ffi_result *result);
 @class ORDeclaratorNode;
 
 void core_invoke_function_pointer(ffi_cif *cif, void *funcptr, void **args, void *ret);
+
+void invoke_functionPointer(void *funptr, or_value **argValues, NSInteger argCount, or_value *returnValue);
 __attribute__((overloadable))
-void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue, NSUInteger needArgs);
-void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue);
-
-
+void invoke_functionPointer(void *funptr, or_value **argValues, NSInteger argCount, or_value *returnValue, NSInteger signArgCount);
 
 
 or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
@@ -106,6 +110,10 @@ or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
                       NSArray <ocDecl *>*args,
                                ocDecl *ret,
                       void *userdata);
+
+#ifdef __cplusplus
+}
+#endif //__cplusplus
 
 #ifdef __cplusplus
 }
