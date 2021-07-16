@@ -69,7 +69,5 @@ void *simulateNSBlock(const char* typeEncoding, void *imp, void *userdata);
 
 @property (strong, nonatomic) MFScopeChain *outScope;
 @property (strong, nonatomic) ORFunctionNode *func;
-@property (strong, nonatomic) NSMutableArray <ORDeclaratorNode *>*paramTypes;
-@property (strong, nonatomic) ORDeclaratorNode *retType;
 - (id)ocBlock;
 @end

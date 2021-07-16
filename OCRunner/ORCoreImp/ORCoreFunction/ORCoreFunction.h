@@ -92,24 +92,12 @@ void invoke_functionPointer(void *funptr, or_value **argValues, NSInteger argCou
 __attribute__((overloadable))
 void invoke_functionPointer(void *funptr, or_value **argValues, NSInteger argCount, or_value *returnValue, NSInteger signArgCount);
 
+__attribute__((overloadable))
+or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*), const char *signature);
 
-or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
-                        NSArray <ocDecl *>*args,
-                                 ocDecl *ret)  __attribute__((overloadable));
+or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*), const char *signature, void *userdata);
 
-or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
-                        NSArray <ocDecl *>*args,
-                                 ocDecl *ret,
-                        void *userdata);
 
-or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
-                      NSArray <ocDecl *>*args,
-                               ocDecl *ret) __attribute__((overloadable));
-
-or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
-                      NSArray <ocDecl *>*args,
-                               ocDecl *ret,
-                      void *userdata);
 
 #ifdef __cplusplus
 }

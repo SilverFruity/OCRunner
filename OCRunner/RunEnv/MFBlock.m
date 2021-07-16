@@ -110,22 +110,12 @@ void NSBlockSetSignature(void * block, const char *typeencode){
 - (id)ocBlock{
     return (__bridge id)[self blockPtr];
 }
-- (void)setParamTypes:(NSMutableArray<ORDeclaratorNode *> *)paramTypes{
-    NSMutableArray *types = [@[[ocDecl declWithTypeEncode:OCTypeStringBlock]] mutableCopy];
-    [types addObjectsFromArray:paramTypes];
-    _paramTypes = types;
-    
-}
 - (void *)blockPtr{
     if (_blockPtr != NULL) {
         return _blockPtr;
     }
-    const char *typeEncoding = self.retType.symbol.decl.typeEncode;
-    for (ORDeclaratorNode *param in self.paramTypes) {
-        const char *paramTypeEncoding = param.symbol.decl.typeEncode;
-        typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
-    }
-    _ffi_result = register_function(&blockInter, (NSArray <ocDecl *>*)self.paramTypes, self.retType.symbol.decl);
+    const char *typeEncoding = self.func.symbol.decl.typeEncode;
+    _ffi_result = register_function(&blockInter, typeEncoding);
     _blockPtr = simulateNSBlock(typeEncoding, _ffi_result->function_imp, (__bridge  void *)self);
     return _blockPtr;
 }

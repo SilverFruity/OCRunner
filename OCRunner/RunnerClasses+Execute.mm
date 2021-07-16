@@ -111,13 +111,7 @@ static void replace_method(Class clazz, ORMethodNode *methodImp){
     Class c2 = methodImp.declare.isClassMethod ? objc_getMetaClass(class_getName(clazz)) : clazz;
     MFMethodMapTableItem *item = [[MFMethodMapTableItem alloc] initWithClass:c2 method:methodImp];
     [[MFMethodMapTable shareInstance] addMethodMapTableItem:item];
-    
-    ORMethodDeclNode *declare = methodImp.declare;
-    NSMutableArray *decls = [NSMutableArray array];
-    for (ORDeclaratorNode *param in declare.parameters) {
-        [decls addObject:param.symbol.decl];
-    }
-    or_ffi_result *result = register_method(&methodIMP, decls, declare.returnType.symbol.decl, (__bridge_retained void *)methodImp);
+    or_ffi_result *result = register_function(&methodIMP, methodImp.symbol.decl.typeEncode, (__bridge_retained void *)methodImp);
     [[ORffiResultCache shared] saveffiResult:result WithKey:[NSValue valueWithPointer:(__bridge void *)methodImp]];
     SEL sel = NSSelectorFromString(methodImp.declare.selectorName);
     or_method_replace(methodImp.declare.isClassMethod, clazz, sel, result->function_imp, typeEncoding);
@@ -125,9 +119,9 @@ static void replace_method(Class clazz, ORMethodNode *methodImp){
 
 static void replace_getter_method(Class clazz, ORPropertyNode *prop){
     SEL getterSEL = NSSelectorFromString(prop.var.var.varname);
-    const char *retTypeEncoding  = prop.var.symbol.decl.typeEncode;
-    const char * typeEncoding = mf_str_append(retTypeEncoding, "@:");
-    or_ffi_result *result = register_method(&getterImp, @[], prop.var.symbol.decl, (__bridge  void *)prop);
+    const char *retTypeEncoding = prop.var.symbol.decl.typeEncode;
+    const char *typeEncoding = mf_str_append(retTypeEncoding, "@:");
+    or_ffi_result *result = register_function(&getterImp, typeEncoding, (__bridge void *)prop);
     [[ORffiResultCache shared] saveffiResult:result WithKey:[NSValue valueWithPointer:(__bridge void *)prop]];
     or_method_replace(NO, clazz, getterSEL, result->function_imp, typeEncoding);
     free((void *)typeEncoding);
@@ -138,9 +132,9 @@ static void replace_setter_method(Class clazz, ORPropertyNode *prop){
     NSString *str1 = [[name substringWithRange:NSMakeRange(0, 1)] uppercaseString];
     NSString *str2 = name.length > 1 ? [name substringFromIndex:1] : nil;
     SEL setterSEL = NSSelectorFromString([NSString stringWithFormat:@"set%@%@:",str1,str2]);
-    const char *prtTypeEncoding  = prop.var.symbol.decl.typeEncode;
-    const char * typeEncoding = mf_str_append("v@:", prtTypeEncoding);
-    or_ffi_result *result = register_method(&setterImp, @[prop.var.symbol.decl], [ocDecl declWithTypeEncode:OCTypeStringVoid],(__bridge_retained  void *)prop);
+    const char *paramEncoding = prop.var.symbol.decl.typeEncode;
+    const char *typeEncoding = mf_str_append("v@:", paramEncoding);
+    or_ffi_result *result = register_function(&setterImp, typeEncoding, (__bridge  void *)prop);
     or_method_replace(NO, clazz, setterSEL, result->function_imp, typeEncoding);
     free((void *)typeEncoding);
 }
@@ -723,21 +717,19 @@ void evalFunctionNode(ORInterpreter *inter, ThreadContext *ctx, MFScopeChain *sc
     // C函数声明执行, 向全局作用域注册函数
     if (!ctx->is_calling()) return;
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
-//     if (node.declare && node.declare.var.isBlock) {
-//         // xxx = ^void (int x){ }, block作为值
-//         MFBlock *manBlock = [[MFBlock alloc] init];
-//         manBlock.func = [node convertToNormalFunctionImp];
-//         MFScopeChain *blockScope = [MFScopeChain scopeChainWithNext:[MFScopeChain topScope]];
-//         copy_undef_var(node, [MFVarDeclareChain new], scope, blockScope);
-//         manBlock.outScope = blockScope;
-//         manBlock.retType = manBlock.func.declare;
-//         manBlock.paramTypes = manBlock.func.declare.params;
-//         __autoreleasing id ocBlock = [manBlock ocBlock];
-//         ctx->flow_flag = ORControlFlowFlagNormal;
-//         CFRelease((__bridge void *)ocBlock);
-//         ctx->op_stack_push( or_Object_value(ocBlock));
-//         return;
-//     }
+     if (node.declare && node.declare.var.isBlock) {
+         // xxx = ^void (int x){ }, block作为值
+         MFBlock *manBlock = [[MFBlock alloc] init];
+         manBlock.func = [node convertToNormalFunctionImp];
+         MFScopeChain *blockScope = [MFScopeChain scopeChainWithNext:[MFScopeChain topScope]];
+         copy_undef_var(node, [MFVarDeclareChain new], scope, blockScope);
+         manBlock.outScope = blockScope;
+         __autoreleasing id ocBlock = [manBlock ocBlock];
+         ctx->flow_flag = ORControlFlowFlagNormal;
+         CFRelease((__bridge void *)ocBlock);
+         ctx->op_stack_push( or_Object_value(ocBlock));
+         return;
+     }
      eval(inter, ctx, current, node.scopeImp);
      ctx->flow_flag = ORControlFlowFlagNormal;
      return;
@@ -880,13 +872,12 @@ void evalAssignNode(ORInterpreter *inter, ThreadContext *ctx, MFScopeChain *scop
             NSString *setterName = methodCall.selectorName;
             NSString *first = [[setterName substringToIndex:1] uppercaseString];
             NSString *other = setterName.length > 1 ? [setterName substringFromIndex:1] : @"";
-            setterName = [NSString stringWithFormat:@"set%@%@",first,other];
+            setterName = [NSString stringWithFormat:@"set%@%@:",first,other];
             ORMethodCall *setCaller = [ORMethodCall new];
             setCaller.nodeType = AstEnumMethodCall;
             setCaller.caller = methodCall.caller;
             setCaller.selectorName = setterName;
             setCaller.values = [@[resultExp] mutableCopy];
-            setCaller.isStructRef = YES;
             eval(inter, ctx, scope, setCaller);
             break;
         }

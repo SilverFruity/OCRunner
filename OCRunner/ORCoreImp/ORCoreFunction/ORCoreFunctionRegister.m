@@ -463,29 +463,27 @@ or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
 #else
 #import "ORTypeVarPair+libffi.h"
 
-
-or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
-                        NSArray <ocDecl *>*args,
-                                 ocDecl *ret)  __attribute__((overloadable))
+__attribute__((overloadable))
+or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*), const char *signature)
 {
-    return register_function(fun, args, ret, NULL);
+    return register_function(fun, signature, NULL);
 }
 
 
-or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
-                        NSArray <ocDecl *>*args,
-                                 ocDecl *ret,
-                        void *userdata)
+or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*), const char *signature, void *userdata)
 {
     void *imp = NULL;
     ffi_cif *cif = (ffi_cif *)malloc(sizeof(ffi_cif));//不可以free
     ffi_closure *closure = (ffi_closure *)ffi_closure_alloc(sizeof(ffi_closure), (void **)&imp);
-    ffi_type *returnType = ret.libffi_type;
-    ffi_type **arg_types = (ffi_type **)malloc(sizeof(ffi_type *) * args.count);
-    for (int  i = 0 ; i < args.count; i++) {
-        arg_types[i] = args[i].libffi_type;
+    NSMethodSignature *sign = [NSMethodSignature signatureWithObjCTypes:signature];
+    
+    ffi_type *returnType = typeEncode2ffi_type([sign methodReturnType]);
+    NSInteger argCount = [sign numberOfArguments];
+    ffi_type **arg_types = (ffi_type **)malloc(sizeof(ffi_type *) * argCount);
+    for (int  i = 0 ; i < argCount; i++) {
+        arg_types[i] = typeEncode2ffi_type([sign getArgumentTypeAtIndex:i]);
     }
-    if(ffi_prep_cif(cif, FFI_DEFAULT_ABI, (unsigned int)args.count, returnType, arg_types) == FFI_OK)
+    if(ffi_prep_cif(cif, FFI_DEFAULT_ABI, (unsigned int)argCount, returnType, arg_types) == FFI_OK)
     {
         ffi_prep_closure_loc(closure, cif, fun, userdata, imp);
     }
@@ -497,23 +495,7 @@ or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
     return result;
 }
 
-or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
-                      NSArray <ocDecl *>*args,
-                               ocDecl *ret) __attribute__((overloadable))
-{
-    return register_method(fun, args, ret, NULL);
-}
-or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
-                      NSArray <ocDecl *>*args,
-                               ocDecl *ret,
-                      void *userdata)
-{
-    NSMutableArray *argTypes = [NSMutableArray array];
-    [argTypes addObject:[ocDecl declWithTypeEncode:OCTypeStringObject]];
-    [argTypes addObject:[ocDecl declWithTypeEncode:OCTypeStringSEL]];
-    [argTypes addObjectsFromArray:args];
-    return register_function(fun, argTypes, ret, userdata);
-}
+
 #endif/* __libffi__ */
 
 void or_ffi_result_free(or_ffi_result *result){
