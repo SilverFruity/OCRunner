@@ -9,6 +9,8 @@
 #import "ViewController.h"
 #import <Masonry/Masonry.h>
 #import <OCRunner/MFBlock.h>
+#import <WebKit/WebKit.h>
+
 @interface ShareInstance: NSObject
 @property (nonatomic,copy)NSDictionary *cache;
 @end
@@ -34,8 +36,8 @@
 @end
 
 
-@interface ViewController ()
-
+@interface ViewController () <WKNavigationDelegate>
+@property (nonatomic, strong)WKWebView *webView;
 @end
 
 @implementation ViewController
@@ -43,7 +45,18 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
+    WKWebView *webView = [WKWebView new];
+    webView.navigationDelegate = self;
+    [self.view addSubview:webView];
+    [webView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.height.equalTo(@(150));
+        make.right.equalTo(self.view);
+        make.bottom.equalTo(self.view.mas_safeAreaLayoutGuideBottom);
+    }];
+    [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"https://www.baidu.com"]]];
+}
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler{
+    decisionHandler(WKNavigationActionPolicyAllow);
 }
 - (void)sendStackBlock{
     __weak typeof(self) weakSelf = self;

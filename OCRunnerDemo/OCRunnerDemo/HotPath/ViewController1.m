@@ -8,6 +8,11 @@
 
 #import "ViewController.h"
 #import <Masonry/Masonry.h>
+typedef NS_ENUM(NSInteger, WKNavigationActionPolicy) {
+    WKNavigationActionPolicyCancel,
+    WKNavigationActionPolicyAllow,
+    WKNavigationActionPolicyDownload
+};
 void cfunctionCallBlock(void (^block)(NSString *)){
     if (block) block(@"cfunctionCallBlock");
 }
@@ -95,6 +100,10 @@ void cfunctionCallBlock(void (^block)(NSString *)){
     [self receiveStackBlock:^(NSString *str){ NSLog(@"%@",str); }];
     cfunctionCallBlock(nil);
     cfunctionCallBlock(^(NSString *str){ NSLog(@"%@",str); });
+    [self ORGviewDidLoad];
+}
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler{
+    decisionHandler(WKNavigationActionPolicyAllow);
 }
 - (void)receiveStackBlock:(void (^)(NSString *))block{
     if (block) block(@"receiveStackBlock:");

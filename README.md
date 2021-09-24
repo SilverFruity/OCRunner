@@ -10,7 +10,7 @@
 
 ### The work flow of using [OCRunner](https://github.com/SilverFruity/OCRunner) to generate a patch 
 
-![image](https://raw.githubusercontent.com/SilverFruity/silverfruity.github.io/server/source/_posts/OCRunner/OCRunner_EN_0.jpeg)
+![image](https://www.sayhelloworld.blog/2020/09/04/OCRunner/OCRunner_EN_0.jpeg)
 
 ### Responsibilities of all parties
 
