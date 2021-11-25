@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0480FEE82580A77F00D6D914 /* ORWeakPropertyAndIvar.m in Sources */ = {isa = PBXBuildFile; fileRef = 0480FEE72580A77F00D6D914 /* ORWeakPropertyAndIvar.m */; };
 		04A634D125E4AB5A00DB31A6 /* ORRecoverClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 04A634C925E4A79300DB31A6 /* ORRecoverClass.m */; };
+		17C0530A274F338300EB0BB2 /* TestFakeModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 17C05309274F338300EB0BB2 /* TestFakeModel.m */; };
 		18C746632679EFB700317C75 /* ORParserForTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 18C746622679EFB700317C75 /* ORParserForTest.m */; };
 		32C54D1C256B4E6D00D067A2 /* jsonpatch in Resources */ = {isa = PBXBuildFile; fileRef = 32C54D1B256B4E6D00D067A2 /* jsonpatch */; };
 		994370B6E6826AB9C293F686 /* Pods_OCRunnerDemo_OCRunnerDemoUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2566C827C6925E5FB35FC01D /* Pods_OCRunnerDemo_OCRunnerDemoUITests.framework */; };
@@ -61,6 +62,8 @@
 		04A634C825E4A79300DB31A6 /* ORRecoverClass.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORRecoverClass.h; sourceTree = "<group>"; };
 		04A634C925E4A79300DB31A6 /* ORRecoverClass.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORRecoverClass.m; sourceTree = "<group>"; };
 		0EA667C064BFFB79847D34F5 /* Pods-OCRunnerDemoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRunnerDemoTests.release.xcconfig"; path = "Target Support Files/Pods-OCRunnerDemoTests/Pods-OCRunnerDemoTests.release.xcconfig"; sourceTree = "<group>"; };
+		17C05308274F338300EB0BB2 /* TestFakeModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestFakeModel.h; sourceTree = "<group>"; };
+		17C05309274F338300EB0BB2 /* TestFakeModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestFakeModel.m; sourceTree = "<group>"; };
 		18C746612679EFB700317C75 /* ORParserForTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORParserForTest.h; sourceTree = "<group>"; };
 		18C746622679EFB700317C75 /* ORParserForTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORParserForTest.m; sourceTree = "<group>"; };
 		1C9D422B1CDEE6B7B4FBECF4 /* Pods-OCRunnerDemo-OCRunnerDemoUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRunnerDemo-OCRunnerDemoUITests.release.xcconfig"; path = "Target Support Files/Pods-OCRunnerDemo-OCRunnerDemoUITests/Pods-OCRunnerDemo-OCRunnerDemoUITests.release.xcconfig"; sourceTree = "<group>"; };
@@ -74,7 +77,7 @@
 		8F8A43BAE2E8071D293A5DBF /* Pods-OCRunnerDemo-OCRunnerDemoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRunnerDemo-OCRunnerDemoTests.debug.xcconfig"; path = "Target Support Files/Pods-OCRunnerDemo-OCRunnerDemoTests/Pods-OCRunnerDemo-OCRunnerDemoTests.debug.xcconfig"; sourceTree = "<group>"; };
 		A467A8D72C17536B47CC6E64 /* Pods_OCRunnerDemoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OCRunnerDemoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D815354F6FF5505A909B20C9 /* Pods-OCRunnerDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OCRunnerDemo.release.xcconfig"; path = "Target Support Files/Pods-OCRunnerDemo/Pods-OCRunnerDemo.release.xcconfig"; sourceTree = "<group>"; };
-		EE3EDC2926723EBE002ADC1E /* binarypatch */ = {isa = PBXFileReference; lastKnownFileType = file; path = binarypatch; sourceTree = "<group>"; };
+		EE3EDC2926723EBE002ADC1E /* binarypatch */ = {isa = PBXFileReference; lastKnownFileType = text; path = binarypatch; sourceTree = "<group>"; };
 		EE480E8E24794CDA003E4970 /* OCRunnerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OCRunnerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE480E9124794CDA003E4970 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		EE480E9224794CDA003E4970 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -269,6 +272,8 @@
 				EEBF334A248E84A900DDE2E9 /* ORTestReplaceClass.m */,
 				04A634C825E4A79300DB31A6 /* ORRecoverClass.h */,
 				04A634C925E4A79300DB31A6 /* ORRecoverClass.m */,
+				17C05308274F338300EB0BB2 /* TestFakeModel.h */,
+				17C05309274F338300EB0BB2 /* TestFakeModel.m */,
 			);
 			name = TestClass;
 			path = ../../OCRunnerTests/TestClass;
@@ -596,6 +601,7 @@
 				04A634D125E4AB5A00DB31A6 /* ORRecoverClass.m in Sources */,
 				EEBF334F248E84AA00DDE2E9 /* ORTestClassIvar.m in Sources */,
 				EEBF334C248E84AA00DDE2E9 /* ORCallOCPropertyBlockTest.m in Sources */,
+				17C0530A274F338300EB0BB2 /* TestFakeModel.m in Sources */,
 				EEBF333E248E848100DDE2E9 /* OCRunnerTests.swift in Sources */,
 				EEF1527D24DE867400574FA7 /* ORCoreFunctionTests.m in Sources */,
 				0480FEE82580A77F00D6D914 /* ORWeakPropertyAndIvar.m in Sources */,
