@@ -16,6 +16,8 @@
 #import "ORTestReplaceClass.h"
 #import "ORTestClassIvar.h"
 #import "ORParserForTest.h"
+#import "TestFakeModel.h"
+
 @interface ORTestWithObjc : XCTestCase
 @property (nonatomic, strong)MFScopeChain *currentScope;
 @property (nonatomic, strong)MFScopeChain *topScope;
@@ -1024,5 +1026,31 @@ int signatureBlockPtr(id object, int b){
         }
         NSLog(@"%d",[scope getValueWithIdentifier:@"a"].uIntValue);
     }];
+}
+- (void)testMJExtension {
+    MFScopeChain *scope = self.currentScope;
+    NSString * source =
+    @"@interface SubModel : NSObject\
+    @property (nonatomic, copy) NSString *name;\
+    @end\
+    @implementation SubModel\
+    @end\
+    @interface TestModel : NSObject\
+    @property (nonatomic, copy) NSString *count;\
+    @property (nonatomic, strong) SubModel *sub;\
+    @end\
+    @implementation TestModel\
+    @end\
+    \
+    NSDictionary *data = @{@\"count\": @(10), @\"sub\": @{@\"name\": @\"abc\"}};\
+    id model = [TestModel mj_objectWithKeyValues:data];"
+    ;
+    AST *ast = [_parser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    MFValue *model = [scope recursiveGetValueWithIdentifier:@"model"];
+    TestFakeModel *fakeModel = model.objectValue;
+    NSLog(@"%@", fakeModel.sub);
+    XCTAssert([fakeModel.count isKindOfClass:NSNumber.class]);
+    XCTAssert([fakeModel.sub isKindOfClass:NSDictionary.class]);
 }
 @end
