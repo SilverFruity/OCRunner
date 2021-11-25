@@ -17,7 +17,7 @@
 #import "ORTestClassIvar.h"
 #import "ORParserForTest.h"
 #import "TestFakeModel.h"
-@import MJExtension;
+
 @interface ORTestWithObjc : XCTestCase
 @property (nonatomic, strong)MFScopeChain *currentScope;
 @property (nonatomic, strong)MFScopeChain *topScope;
