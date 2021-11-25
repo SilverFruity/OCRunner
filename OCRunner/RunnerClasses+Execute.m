@@ -1183,13 +1183,20 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 }
 -(void)dealloc{
     NSValue *value = objc_getAssociatedObject(self, mf_propKey(@"propertyAttributes"));
-    objc_property_attribute_t **attributes = [value pointerValue];
+    objc_property_attribute_t *attributes = [value pointerValue];
     if (attributes != NULL) {
+        free((void *)attributes->value);
         free(attributes);
     }
 }
 - (objc_property_attribute_t )typeAttribute{
-    objc_property_attribute_t type = {"T", self.var.typeEncode };
+    const char *typeencode = self.var.typeEncode;
+    NSString *typeName = self.var.type.name;
+    char buffer[256] = { 0 };
+    if (*typeencode == OCTypeObject && NSClassFromString(typeName)) {
+        snprintf(buffer, 256, "%s\"%s\"",typeencode,typeName.UTF8String);
+    }
+    objc_property_attribute_t type = {"T", strdup(buffer) };
     return type;
 }
 - (objc_property_attribute_t )memeryAttribute{

@@ -13,6 +13,7 @@ target 'OCRunnerDemo' do
   target 'OCRunnerDemoTests' do
     inherit! :search_paths
     pod 'oc2mangoLib', :path => '../oc2mango'
+    pod 'MJExtension'
   end
 
   target 'OCRunnerDemoUITests' do

@@ -87,13 +87,14 @@ void NSBlockSetSignature(id block, const char *typeencode){
     // ios 15 下直接写入 signatureLocation 内存会导致 EXC_BAD_ACCESS 错误，同时此 block 是一个堆 block，使用内存地址直接写入按理说应该是没有问题。不知是对此内存做了内存保护🤔？可是当在调试的时候，使用 lldb 调试器写入该地址，却完全没有问题。
     // 目前为了规避崩溃问题，既然不能操作 signature 的地址内存，那就直接覆盖 descriptor 的内存
     // ⚠️ 此处存在的问题为：使用 malloc 开辟的内存空间，存在内存泄漏的问题。
-    struct MFGOSimulateBlockDescriptor *des = malloc(sizeof(struct MFGOSimulateBlockDescriptor));
-    memcpy(des, blockRef->descriptor, sizeof(struct MFGOSimulateBlockDescriptor));
-    // 直接 free 原本的 descriptor 的内存会崩溃
-//    void *before = blockRef->descriptor;
-    blockRef->descriptor = des;
-//    free(before);
-    // ----
+    
+    // NOTE: 2021.11.25
+    // 如果 BLOCK_HAS_SIGNATURE 为 false，descriptor 中是不会有 signature 字段的
+    if (NSBlockHasSignature(block) == false) {
+        struct MFGOSimulateBlockDescriptor *des = malloc(sizeof(struct MFGOSimulateBlockDescriptor));
+        memcpy(des, blockRef->descriptor, sizeof(struct MFGOSimulateBlockDescriptor));
+        blockRef->descriptor = des;
+    }
     
     void *signatureLocation = blockRef->descriptor;
     signatureLocation += sizeof(unsigned long int);

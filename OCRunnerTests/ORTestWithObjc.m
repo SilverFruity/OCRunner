@@ -17,6 +17,19 @@
 #import "ORTestClassIvar.h"
 #import "ORParserForTest.h"
 #import "TestFakeModel.h"
+#import <MJExtension/MJExtension.h>
+
+@interface SubModel1 : NSObject
+@property (nonatomic, copy) NSString *name;
+@end
+@implementation SubModel1
+@end
+@interface TestModel1 : NSObject
+@property (nonatomic, copy) NSString *count;
+@property (nonatomic, strong) SubModel1 *sub;
+@end
+@implementation TestModel1
+@end
 
 @interface ORTestWithObjc : XCTestCase
 @property (nonatomic, strong)MFScopeChain *currentScope;
@@ -1049,8 +1062,13 @@ int signatureBlockPtr(id object, int b){
     [ORInterpreter excuteNodes:ast.nodes];
     MFValue *model = [scope recursiveGetValueWithIdentifier:@"model"];
     TestFakeModel *fakeModel = model.objectValue;
-    NSLog(@"%@", fakeModel.sub);
-    XCTAssert([fakeModel.count isKindOfClass:NSNumber.class]);
-    XCTAssert([fakeModel.sub isKindOfClass:NSDictionary.class]);
+    NSDictionary *data = @{@"count": @(10), @"sub": @{@"name": @"abc"}};
+    TestModel1 *model1 = [TestModel1 mj_objectWithKeyValues:data];
+    XCTAssert([fakeModel.count isKindOfClass:model1.count.class]);
+    XCTAssert([fakeModel.count isEqual:model1.count]);
+    XCTAssert([fakeModel.sub isKindOfClass:NSClassFromString(@"SubModel")]);
+    XCTAssert([[fakeModel.sub valueForKey:@"name"] isEqual:@"abc"]);
+    XCTAssert([model1.sub isKindOfClass:[SubModel1 class]], @"%@", model1.sub.class);
+    
 }
 @end
