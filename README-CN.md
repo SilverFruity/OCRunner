@@ -14,7 +14,7 @@ git clone --recursive https://github.com/SilverFruity/OCRunner.git
 
 ### [OCRunner](https://github.com/SilverFruity/OCRunner)开发补丁的工作流
 
-![0](https://silverfruity.github.io/2020/09/04/OCRunner/OCRunner_0.jpeg)
+![0](https://www.sayhelloworld.blog/2020/09/04/OCRunner/OCRunner_0.jpeg)
 
 ### 初衷
 
