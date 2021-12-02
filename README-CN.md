@@ -1,5 +1,7 @@
 **OCRunner QQ群: 860147790**
 
+[集成 OCRunner 的视频](https://www.bilibili.com/video/BV1QU4y1T7cC/)
+
 [相关文章](https://github.com/SilverFruity/OCRunner/issues/11)
 
 ## Demo运行
