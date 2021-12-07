@@ -20,12 +20,15 @@
 #import <MJExtension/MJExtension.h>
 
 @interface SubModel1 : NSObject
-@property (nonatomic, copy) NSString *name;
+@property (nonatomic, assign) CGFloat numberToFloat;
+@property (nonatomic, copy) NSString *numberToString;
+@property (nonatomic, assign) NSInteger stringToInteger;
 @end
 @implementation SubModel1
 @end
 @interface TestModel1 : NSObject
-@property (nonatomic, copy) NSString *count;
+@property (nonatomic, assign) NSInteger numberToInteger;
+@property (nonatomic, copy) NSString *numberToString;
 @property (nonatomic, strong) SubModel1 *sub;
 @end
 @implementation TestModel1
@@ -1044,31 +1047,37 @@ int signatureBlockPtr(id object, int b){
     MFScopeChain *scope = self.currentScope;
     NSString * source =
     @"@interface SubModel : NSObject\
-    @property (nonatomic, copy) NSString *name;\
+    @property (nonatomic, assign) CGFloat numberToFloat;\
+    @property (nonatomic, copy) NSString *numberToString;\
+    @property (nonatomic, assign) NSInteger stringToInteger;\
     @end\
     @implementation SubModel\
     @end\
     @interface TestModel : NSObject\
-    @property (nonatomic, copy) NSString *count;\
+    @property (nonatomic, assign) NSInteger numberToInteger;\
+    @property (nonatomic, copy) NSString *numberToString;\
     @property (nonatomic, strong) SubModel *sub;\
     @end\
     @implementation TestModel\
     @end\
     \
-    NSDictionary *data = @{@\"count\": @(10), @\"sub\": @{@\"name\": @\"abc\"}};\
+    NSDictionary *data = @{@\"numberToInteger\": @(111), @\"numberToString\": @(222), @\"sub\": @{@\"numberToFloat\": @(3.33), @\"numberToString\": @(4.44), @\"stringToInteger\": @\"555\"}};\
     id model = [TestModel mj_objectWithKeyValues:data];"
     ;
     AST *ast = [_parser parseSource:source];
     [ORInterpreter excuteNodes:ast.nodes];
     MFValue *model = [scope recursiveGetValueWithIdentifier:@"model"];
     TestFakeModel *fakeModel = model.objectValue;
-    NSDictionary *data = @{@"count": @(10), @"sub": @{@"name": @"abc"}};
+    NSDictionary *data = @{@"numberToInteger": @(111), @"numberToString": @(222), @"sub": @{@"numberToFloat": @(3.33), @"numberToString": @(4.44), @"stringToInteger": @"555"}};
     TestModel1 *model1 = [TestModel1 mj_objectWithKeyValues:data];
-    XCTAssert([fakeModel.count isKindOfClass:model1.count.class]);
-    XCTAssert([fakeModel.count isEqual:model1.count]);
+    XCTAssert(fakeModel.numberToInteger == model1.numberToInteger);
+    XCTAssert([fakeModel.numberToString isKindOfClass:model1.numberToString.class]);
+    XCTAssert([fakeModel.numberToString isEqual:model1.numberToString]);
     XCTAssert([fakeModel.sub isKindOfClass:NSClassFromString(@"SubModel")]);
-    XCTAssert([[fakeModel.sub valueForKey:@"name"] isEqual:@"abc"]);
+    XCTAssert(fakeModel.sub.numberToFloat == model1.sub.numberToFloat);
+    XCTAssert([fakeModel.sub.numberToString isKindOfClass:model1.sub.numberToString.class]);
+    XCTAssert([fakeModel.sub.numberToString isEqual:model1.sub.numberToString]);
+    XCTAssert(fakeModel.sub.stringToInteger == model1.sub.stringToInteger);
     XCTAssert([model1.sub isKindOfClass:[SubModel1 class]], @"%@", model1.sub.class);
-    
 }
 @end
