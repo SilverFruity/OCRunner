@@ -8,6 +8,10 @@
 
 #import "TestFakeModel.h"
 
+@implementation TestFakeSubModel
+
+@end
+
 @implementation TestFakeModel
 
 @end

@@ -6,13 +6,22 @@
 //  Copyright © 2021 SilverFruity. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
+@interface TestFakeSubModel : NSObject
+
+@property (nonatomic, assign) CGFloat numberToFloat;
+@property (nonatomic, copy) NSString *numberToString;
+@property (nonatomic, assign) NSInteger stringToInteger;
+
+@end
+
 @interface TestFakeModel : NSObject
-@property (nonatomic, copy) id count;
-@property (nonatomic, strong) id sub;
+@property (nonatomic, assign) NSInteger numberToInteger;
+@property (nonatomic, copy) NSString *numberToString;
+@property (nonatomic, strong) TestFakeSubModel *sub;
 @end
 
 NS_ASSUME_NONNULL_END
