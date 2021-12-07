@@ -1195,10 +1195,10 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     char buffer[256] = { 0 };
     if (*typeencode == OCTypeObject && NSClassFromString(typeName)) {
         snprintf(buffer, 256, "%s\"%s\"",typeencode,typeName.UTF8String);
-        objc_property_attribute_t type = {"T", strdup(buffer) };
-        return type;
+    }else{
+        snprintf(buffer, 256, "%s",typeencode);
     }
-    objc_property_attribute_t type = {"T", self.var.typeEncode };
+    objc_property_attribute_t type = {"T", strdup(buffer) };
     return type;
 }
 - (objc_property_attribute_t )memeryAttribute{
