@@ -3,9 +3,9 @@
 #import <MJRefresh/MJRefresh.h>
 
 @implementation OCRunnerDemo.SwiftViewController
-- (void)updateFrame{
-    [self ORGupdateFrame];
-    NSLog(@"OC updateFrame");
+- (void)updateFrame:(NSObject *)arg arg1:(NSNumber *)arg1{
+    [self ORGupdateFrame:arg arg1:arg1];
+    NSLog(@"OC updateFrame %@ %@",arg,arg1);
 }
 @end
 

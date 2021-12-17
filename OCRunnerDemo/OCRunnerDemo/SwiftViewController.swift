@@ -18,8 +18,8 @@ class SwiftViewController: UIViewController {
             self.navigationController?.pushViewController(vc, animated: true)
         }
     }
-    @objc func updateFrame(){
-        print("call swift @objc updateFrame")
+    @objc dynamic func updateFrame(_ arg: NSObject, arg1: NSNumber){
+        print("\(self): call swift @objc updateFrame arg:\(arg) arg1: \(arg1)")
     }
 
     /*

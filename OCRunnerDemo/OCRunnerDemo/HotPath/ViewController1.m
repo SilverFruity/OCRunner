@@ -94,7 +94,7 @@ void cfunctionCallBlock(void (^block)(NSString *)){
     NSLog(@"%@",@(-1));
     
     id vc = [[UIApplication sharedApplication].keyWindow.rootViewController childViewControllers].firstObject;
-    [vc updateFrame];
+    [vc updateFrame:[NSObject new] arg1:@(10)];
     [self sendStackBlock];
     [self receiveStackBlock:nil];
     [self receiveStackBlock:^(NSString *str){ NSLog(@"%@",str); }];
