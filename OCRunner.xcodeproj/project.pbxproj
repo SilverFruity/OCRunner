@@ -8,9 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		04033491252331180029C575 /* ORSystemFunctionPointerTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 04033488252331180029C575 /* ORSystemFunctionPointerTable.m */; };
-		04033492252331180029C575 /* ORSystemFunctionPointerTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 04033490252331180029C575 /* ORSystemFunctionPointerTable.h */; };
+		04033492252331180029C575 /* ORSystemFunctionPointerTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 04033490252331180029C575 /* ORSystemFunctionPointerTable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04033495252331270029C575 /* ORGlobalFunctionTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 04033493252331260029C575 /* ORGlobalFunctionTable.m */; };
-		04033496252331270029C575 /* ORGlobalFunctionTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 04033494252331270029C575 /* ORGlobalFunctionTable.h */; };
+		04033496252331270029C575 /* ORGlobalFunctionTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 04033494252331270029C575 /* ORGlobalFunctionTable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0408F01B247D027B004F703D /* ORTypeVarPair+TypeEncode.h in Headers */ = {isa = PBXBuildFile; fileRef = 0408F019247D027B004F703D /* ORTypeVarPair+TypeEncode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0408F01C247D027B004F703D /* ORTypeVarPair+TypeEncode.m in Sources */ = {isa = PBXBuildFile; fileRef = 0408F01A247D027B004F703D /* ORTypeVarPair+TypeEncode.m */; };
 		042AC258246D453700070814 /* MFBlock.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC256246D453700070814 /* MFBlock.m */; };
@@ -21,8 +21,6 @@
 		042AC26A246E557200070814 /* ORCallSuperNoArgTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 042AC269246E557200070814 /* ORCallSuperNoArgTest.m */; };
 		047EF859246BF68D0071F9D3 /* OCRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */; };
 		048FAA3E247FA4820036F5EE /* built-in.h in Headers */ = {isa = PBXBuildFile; fileRef = 048FAA3B247FA47C0036F5EE /* built-in.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		048FAA85247FB6CA0036F5EE /* oc2mangoLib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 048FAA79247FB6180036F5EE /* oc2mangoLib.framework */; };
-		048FAA86247FB6CA0036F5EE /* oc2mangoLib.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 048FAA79247FB6180036F5EE /* oc2mangoLib.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		04A531B7248F8AD600D83A48 /* SymbolSearch.c in Sources */ = {isa = PBXBuildFile; fileRef = 04A531B5248F8AD600D83A48 /* SymbolSearch.c */; };
 		04A531B8248F8AD600D83A48 /* SymbolSearch.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A531B6248F8AD600D83A48 /* SymbolSearch.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04A531BE248F972500D83A48 /* ORSearchedFunction.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A531BC248F972500D83A48 /* ORSearchedFunction.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -46,7 +44,6 @@
 		04AEF9AB24DD5414008EB64F /* ffi_x86_64.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF9A024DD5414008EB64F /* ffi_x86_64.h */; };
 		04AEF9AC24DD5414008EB64F /* ffitarget_arm.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF9A124DD5414008EB64F /* ffitarget_arm.h */; };
 		04AEF9AD24DD5414008EB64F /* ffitarget_i386.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF9A224DD5414008EB64F /* ffitarget_i386.h */; };
-		04AEF9AE24DD5414008EB64F /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04AEF9A324DD5414008EB64F /* libffi.a */; };
 		04AEF9AF24DD5414008EB64F /* ffi.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF9A424DD5414008EB64F /* ffi.h */; };
 		04AEF9B024DD5414008EB64F /* ffi_arm64.h in Headers */ = {isa = PBXBuildFile; fileRef = 04AEF9A524DD5414008EB64F /* ffi_arm64.h */; };
 		04E6659D2473C76D008DB08E /* ORTestWithObjc.m in Sources */ = {isa = PBXBuildFile; fileRef = 04E6659C2473C76D008DB08E /* ORTestWithObjc.m */; };
@@ -65,13 +62,11 @@
 		EE98998C24658DB800ACF2C1 /* RunnerClasses+Execute.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98998824658DB800ACF2C1 /* RunnerClasses+Execute.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE9899A424658F8900ACF2C1 /* MFPropertyMapTable.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98998E24658F8900ACF2C1 /* MFPropertyMapTable.h */; };
 		EE9899A524658F8900ACF2C1 /* MFStaticVarTable.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98998F24658F8900ACF2C1 /* MFStaticVarTable.h */; };
-		EE9899A624658F8900ACF2C1 /* MFWeakPropertyBox.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98999024658F8900ACF2C1 /* MFWeakPropertyBox.h */; };
 		EE9899A724658F8900ACF2C1 /* runenv.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98999124658F8900ACF2C1 /* runenv.h */; };
 		EE9899A924658F8900ACF2C1 /* MFVarDeclareChain.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98999324658F8900ACF2C1 /* MFVarDeclareChain.h */; };
 		EE9899AC24658F8900ACF2C1 /* MFValue.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98999624658F8900ACF2C1 /* MFValue.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE9899AD24658F8900ACF2C1 /* MFScopeChain.h in Headers */ = {isa = PBXBuildFile; fileRef = EE98999724658F8900ACF2C1 /* MFScopeChain.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EE9899AE24658F8900ACF2C1 /* MFMethodMapTable.m in Sources */ = {isa = PBXBuildFile; fileRef = EE98999824658F8900ACF2C1 /* MFMethodMapTable.m */; };
-		EE9899AF24658F8900ACF2C1 /* MFWeakPropertyBox.m in Sources */ = {isa = PBXBuildFile; fileRef = EE98999924658F8900ACF2C1 /* MFWeakPropertyBox.m */; };
 		EE9899B024658F8900ACF2C1 /* MFStaticVarTable.m in Sources */ = {isa = PBXBuildFile; fileRef = EE98999A24658F8900ACF2C1 /* MFStaticVarTable.m */; };
 		EE9899B124658F8900ACF2C1 /* MFPropertyMapTable.m in Sources */ = {isa = PBXBuildFile; fileRef = EE98999B24658F8900ACF2C1 /* MFPropertyMapTable.m */; };
 		EE9899B324658F8900ACF2C1 /* MFVarDeclareChain.m in Sources */ = {isa = PBXBuildFile; fileRef = EE98999D24658F8900ACF2C1 /* MFVarDeclareChain.m */; };
@@ -80,62 +75,27 @@
 		EE9899B824658F8900ACF2C1 /* MFValue.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899A224658F8900ACF2C1 /* MFValue.m */; };
 		EE9899C42465923900ACF2C1 /* util.m in Sources */ = {isa = PBXBuildFile; fileRef = EE9899BE2465923800ACF2C1 /* util.m */; };
 		EE9899C62465923900ACF2C1 /* util.h in Headers */ = {isa = PBXBuildFile; fileRef = EE9899C02465923800ACF2C1 /* util.h */; };
-		EEA2AC82246855F100B08407 /* ORArgsStack.m in Sources */ = {isa = PBXBuildFile; fileRef = EEA2AC80246855F100B08407 /* ORArgsStack.m */; };
-		EEA2AC83246855F100B08407 /* ORArgsStack.h in Headers */ = {isa = PBXBuildFile; fileRef = EEA2AC81246855F100B08407 /* ORArgsStack.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EEDD5CC32771FFA200081E11 /* ORThreadContext.m in Sources */ = {isa = PBXBuildFile; fileRef = EEDD5CC12771FFA200081E11 /* ORThreadContext.m */; };
+		EEDD5CC42771FFA200081E11 /* ORThreadContext.h in Headers */ = {isa = PBXBuildFile; fileRef = EEDD5CC22771FFA200081E11 /* ORThreadContext.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EEDD5CCA2772006C00081E11 /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04AEF9A324DD5414008EB64F /* libffi.a */; };
+		EEDD5CDF277200FA00081E11 /* ORffiResultCache.m in Sources */ = {isa = PBXBuildFile; fileRef = EEDD5CDD277200FA00081E11 /* ORffiResultCache.m */; };
+		EEDD5CE0277200FA00081E11 /* ORffiResultCache.h in Headers */ = {isa = PBXBuildFile; fileRef = EEDD5CDE277200FA00081E11 /* ORffiResultCache.h */; };
+		EEDD5D042772016400081E11 /* ORPatchFile.h in Headers */ = {isa = PBXBuildFile; fileRef = EEDD5CFB2772016400081E11 /* ORPatchFile.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EEDD5D052772016400081E11 /* BinaryPatchHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = EEDD5CFC2772016400081E11 /* BinaryPatchHelper.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EEDD5D062772016400081E11 /* JSONPatchHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = EEDD5CFD2772016400081E11 /* JSONPatchHelper.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EEDD5D072772016400081E11 /* JSONPatchHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = EEDD5CFE2772016400081E11 /* JSONPatchHelper.m */; };
+		EEDD5D082772016400081E11 /* BinaryPatchHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = EEDD5CFF2772016400081E11 /* BinaryPatchHelper.m */; };
+		EEDD5D092772016400081E11 /* ClassSecretKeyMap.h in Headers */ = {isa = PBXBuildFile; fileRef = EEDD5D002772016400081E11 /* ClassSecretKeyMap.h */; };
+		EEDD5D0A2772016400081E11 /* ORPatchFile.m in Sources */ = {isa = PBXBuildFile; fileRef = EEDD5D012772016400081E11 /* ORPatchFile.m */; };
+		EEDD5D0B2772016400081E11 /* RunnerClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = EEDD5D022772016400081E11 /* RunnerClasses.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EEDD5D0C2772016400081E11 /* RunnerClasses.m in Sources */ = {isa = PBXBuildFile; fileRef = EEDD5D032772016400081E11 /* RunnerClasses.m */; };
+		EEDD5DFF27721AF000081E11 /* RunnerClasses+Recover.h in Headers */ = {isa = PBXBuildFile; fileRef = EEDD5DFD27721AF000081E11 /* RunnerClasses+Recover.h */; };
+		EEDD5E0027721AF000081E11 /* RunnerClasses+Recover.m in Sources */ = {isa = PBXBuildFile; fileRef = EEDD5DFE27721AF000081E11 /* RunnerClasses+Recover.m */; };
 		EEF1527724DE6DB600574FA7 /* Scripts.bundle in Resources */ = {isa = PBXBuildFile; fileRef = EEF1527324DE6B5200574FA7 /* Scripts.bundle */; };
 		EEF1527924DE709300574FA7 /* ORCoreFunctionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = EEF1527824DE709300574FA7 /* ORCoreFunctionTests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		0403348E252331180029C575 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = EE66C15624FEB61300C85B31;
-			remoteInfo = ORPatchFile;
-		};
-		048FAA76247FB6180036F5EE /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = EE6E6CCF225E488000616C7E;
-			remoteInfo = oc2mango;
-		};
-		048FAA78247FB6180036F5EE /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = EED67A6E2270AE0E0015AC02;
-			remoteInfo = oc2mangoLib;
-		};
-		048FAA7A247FB6180036F5EE /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = EED67A762270AE0F0015AC02;
-			remoteInfo = oc2mangoLibTests;
-		};
-		048FAA88247FB6D40036F5EE /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = EED67A6D2270AE0E0015AC02;
-			remoteInfo = oc2mangoLib;
-		};
-		EE66C0D124FEAF4B00C85B31 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = EE4F367924F9251C00F685AF;
-			remoteInfo = BinaryPatchCodeGenerator;
-		};
-		EE66C0D324FEAF4B00C85B31 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = EE66C0A324FE97D500C85B31;
-			remoteInfo = PatchGenerator;
-		};
 		EE98997624658DA600ACF2C1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = EE98996224658DA600ACF2C1 /* Project object */;
@@ -146,13 +106,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		048FAA87247FB6CA0036F5EE /* Embed Frameworks */ = {
+		EEDD5CC72772002E00081E11 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				048FAA86247FB6CA0036F5EE /* oc2mangoLib.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -179,7 +138,6 @@
 		047EF857246BF68D0071F9D3 /* OCRunnerTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OCRunnerTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		047EF858246BF68D0071F9D3 /* OCRunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRunnerTests.swift; sourceTree = "<group>"; };
 		048FAA3B247FA47C0036F5EE /* built-in.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "built-in.h"; sourceTree = "<group>"; };
-		048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = oc2mango.xcodeproj; path = oc2mango/oc2mango.xcodeproj; sourceTree = SOURCE_ROOT; };
 		04A531B5248F8AD600D83A48 /* SymbolSearch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SymbolSearch.c; sourceTree = "<group>"; };
 		04A531B6248F8AD600D83A48 /* SymbolSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SymbolSearch.h; sourceTree = "<group>"; };
 		04A531BC248F972500D83A48 /* ORSearchedFunction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORSearchedFunction.h; sourceTree = "<group>"; };
@@ -227,13 +185,11 @@
 		EE98998824658DB800ACF2C1 /* RunnerClasses+Execute.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RunnerClasses+Execute.h"; sourceTree = "<group>"; };
 		EE98998E24658F8900ACF2C1 /* MFPropertyMapTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFPropertyMapTable.h; sourceTree = "<group>"; };
 		EE98998F24658F8900ACF2C1 /* MFStaticVarTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFStaticVarTable.h; sourceTree = "<group>"; };
-		EE98999024658F8900ACF2C1 /* MFWeakPropertyBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFWeakPropertyBox.h; sourceTree = "<group>"; };
 		EE98999124658F8900ACF2C1 /* runenv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = runenv.h; sourceTree = "<group>"; };
 		EE98999324658F8900ACF2C1 /* MFVarDeclareChain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFVarDeclareChain.h; sourceTree = "<group>"; };
 		EE98999624658F8900ACF2C1 /* MFValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFValue.h; sourceTree = "<group>"; };
 		EE98999724658F8900ACF2C1 /* MFScopeChain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFScopeChain.h; sourceTree = "<group>"; };
 		EE98999824658F8900ACF2C1 /* MFMethodMapTable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFMethodMapTable.m; sourceTree = "<group>"; };
-		EE98999924658F8900ACF2C1 /* MFWeakPropertyBox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFWeakPropertyBox.m; sourceTree = "<group>"; };
 		EE98999A24658F8900ACF2C1 /* MFStaticVarTable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFStaticVarTable.m; sourceTree = "<group>"; };
 		EE98999B24658F8900ACF2C1 /* MFPropertyMapTable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFPropertyMapTable.m; sourceTree = "<group>"; };
 		EE98999D24658F8900ACF2C1 /* MFVarDeclareChain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFVarDeclareChain.m; sourceTree = "<group>"; };
@@ -242,8 +198,21 @@
 		EE9899A224658F8900ACF2C1 /* MFValue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MFValue.m; sourceTree = "<group>"; };
 		EE9899BE2465923800ACF2C1 /* util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = util.m; sourceTree = "<group>"; };
 		EE9899C02465923800ACF2C1 /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
-		EEA2AC80246855F100B08407 /* ORArgsStack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORArgsStack.m; sourceTree = "<group>"; };
-		EEA2AC81246855F100B08407 /* ORArgsStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORArgsStack.h; sourceTree = "<group>"; };
+		EEDD5CC12771FFA200081E11 /* ORThreadContext.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORThreadContext.m; sourceTree = "<group>"; };
+		EEDD5CC22771FFA200081E11 /* ORThreadContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORThreadContext.h; sourceTree = "<group>"; };
+		EEDD5CDD277200FA00081E11 /* ORffiResultCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORffiResultCache.m; sourceTree = "<group>"; };
+		EEDD5CDE277200FA00081E11 /* ORffiResultCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORffiResultCache.h; sourceTree = "<group>"; };
+		EEDD5CFB2772016400081E11 /* ORPatchFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ORPatchFile.h; path = oc2mango/oc2mangoLib/PatchFile/ORPatchFile.h; sourceTree = SOURCE_ROOT; };
+		EEDD5CFC2772016400081E11 /* BinaryPatchHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BinaryPatchHelper.h; path = oc2mango/oc2mangoLib/PatchFile/BinaryPatchHelper.h; sourceTree = SOURCE_ROOT; };
+		EEDD5CFD2772016400081E11 /* JSONPatchHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JSONPatchHelper.h; path = oc2mango/oc2mangoLib/PatchFile/JSONPatchHelper.h; sourceTree = SOURCE_ROOT; };
+		EEDD5CFE2772016400081E11 /* JSONPatchHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JSONPatchHelper.m; path = oc2mango/oc2mangoLib/PatchFile/JSONPatchHelper.m; sourceTree = SOURCE_ROOT; };
+		EEDD5CFF2772016400081E11 /* BinaryPatchHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BinaryPatchHelper.m; path = oc2mango/oc2mangoLib/PatchFile/BinaryPatchHelper.m; sourceTree = SOURCE_ROOT; };
+		EEDD5D002772016400081E11 /* ClassSecretKeyMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ClassSecretKeyMap.h; path = oc2mango/oc2mangoLib/PatchFile/ClassSecretKeyMap.h; sourceTree = SOURCE_ROOT; };
+		EEDD5D012772016400081E11 /* ORPatchFile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ORPatchFile.m; path = oc2mango/oc2mangoLib/PatchFile/ORPatchFile.m; sourceTree = SOURCE_ROOT; };
+		EEDD5D022772016400081E11 /* RunnerClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RunnerClasses.h; path = oc2mango/oc2mangoLib/PatchFile/RunnerClasses.h; sourceTree = SOURCE_ROOT; };
+		EEDD5D032772016400081E11 /* RunnerClasses.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RunnerClasses.m; path = oc2mango/oc2mangoLib/PatchFile/RunnerClasses.m; sourceTree = SOURCE_ROOT; };
+		EEDD5DFD27721AF000081E11 /* RunnerClasses+Recover.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RunnerClasses+Recover.h"; sourceTree = "<group>"; };
+		EEDD5DFE27721AF000081E11 /* RunnerClasses+Recover.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RunnerClasses+Recover.m"; sourceTree = "<group>"; };
 		EEF1527324DE6B5200574FA7 /* Scripts.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Scripts.bundle; sourceTree = "<group>"; };
 		EEF1527824DE709300574FA7 /* ORCoreFunctionTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORCoreFunctionTests.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -253,8 +222,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				048FAA85247FB6CA0036F5EE /* oc2mangoLib.framework in Frameworks */,
-				04AEF9AE24DD5414008EB64F /* libffi.a in Frameworks */,
+				EEDD5CCA2772006C00081E11 /* libffi.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -269,19 +237,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		048FAA71247FB6180036F5EE /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				048FAA77247FB6180036F5EE /* oc2mango */,
-				048FAA79247FB6180036F5EE /* oc2mangoLib.framework */,
-				048FAA7B247FB6180036F5EE /* oc2mangoLibTests.xctest */,
-				EE66C0D224FEAF4B00C85B31 /* BinaryPatchCodeGenerator */,
-				EE66C0D424FEAF4B00C85B31 /* PatchGenerator */,
-				0403348F252331180029C575 /* ORPatchFile.framework */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		04AEF93424DD4FF1008EB64F /* ORCoreImp */ = {
 			isa = PBXGroup;
 			children = (
@@ -374,15 +329,19 @@
 		EE98996D24658DA600ACF2C1 /* OCRunner */ = {
 			isa = PBXGroup;
 			children = (
-				048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */,
+				EEDD5CFA2772014700081E11 /* ORPatchFile */,
 				EE98998824658DB800ACF2C1 /* RunnerClasses+Execute.h */,
 				EE98998624658DB700ACF2C1 /* RunnerClasses+Execute.m */,
+				EEDD5DFD27721AF000081E11 /* RunnerClasses+Recover.h */,
+				EEDD5DFE27721AF000081E11 /* RunnerClasses+Recover.m */,
 				EE197B832478DD190049CFDA /* ORInterpreter.h */,
 				EE197B842478DD190049CFDA /* ORInterpreter.m */,
 				04AEF99A24DD5414008EB64F /* libffi */,
 				04AEF93424DD4FF1008EB64F /* ORCoreImp */,
 				048FAA3B247FA47C0036F5EE /* built-in.h */,
 				04E665A02474D284008DB08E /* built-in.m */,
+				EEDD5CDE277200FA00081E11 /* ORffiResultCache.h */,
+				EEDD5CDD277200FA00081E11 /* ORffiResultCache.m */,
 				0408F019247D027B004F703D /* ORTypeVarPair+TypeEncode.h */,
 				0408F01A247D027B004F703D /* ORTypeVarPair+TypeEncode.m */,
 				EE1C6FA124BF364A00430A51 /* ORHandleTypeEncode.h */,
@@ -422,18 +381,16 @@
 				EE98999B24658F8900ACF2C1 /* MFPropertyMapTable.m */,
 				EE98999724658F8900ACF2C1 /* MFScopeChain.h */,
 				EE9899A124658F8900ACF2C1 /* MFScopeChain.m */,
-				EEA2AC81246855F100B08407 /* ORArgsStack.h */,
-				EEA2AC80246855F100B08407 /* ORArgsStack.m */,
 				EE98998F24658F8900ACF2C1 /* MFStaticVarTable.h */,
 				EE98999A24658F8900ACF2C1 /* MFStaticVarTable.m */,
 				EE98999624658F8900ACF2C1 /* MFValue.h */,
 				EE9899A224658F8900ACF2C1 /* MFValue.m */,
 				EE98999324658F8900ACF2C1 /* MFVarDeclareChain.h */,
 				EE98999D24658F8900ACF2C1 /* MFVarDeclareChain.m */,
+				EEDD5CC22771FFA200081E11 /* ORThreadContext.h */,
+				EEDD5CC12771FFA200081E11 /* ORThreadContext.m */,
 				04033494252331270029C575 /* ORGlobalFunctionTable.h */,
 				04033493252331260029C575 /* ORGlobalFunctionTable.m */,
-				EE98999024658F8900ACF2C1 /* MFWeakPropertyBox.h */,
-				EE98999924658F8900ACF2C1 /* MFWeakPropertyBox.m */,
 				EE98999124658F8900ACF2C1 /* runenv.h */,
 			);
 			path = RunEnv;
@@ -454,6 +411,22 @@
 			path = Util;
 			sourceTree = "<group>";
 		};
+		EEDD5CFA2772014700081E11 /* ORPatchFile */ = {
+			isa = PBXGroup;
+			children = (
+				EEDD5CFC2772016400081E11 /* BinaryPatchHelper.h */,
+				EEDD5CFF2772016400081E11 /* BinaryPatchHelper.m */,
+				EEDD5D002772016400081E11 /* ClassSecretKeyMap.h */,
+				EEDD5CFD2772016400081E11 /* JSONPatchHelper.h */,
+				EEDD5CFE2772016400081E11 /* JSONPatchHelper.m */,
+				EEDD5CFB2772016400081E11 /* ORPatchFile.h */,
+				EEDD5D012772016400081E11 /* ORPatchFile.m */,
+				EEDD5D022772016400081E11 /* RunnerClasses.h */,
+				EEDD5D032772016400081E11 /* RunnerClasses.m */,
+			);
+			name = ORPatchFile;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -462,17 +435,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				EE9899A924658F8900ACF2C1 /* MFVarDeclareChain.h in Headers */,
+				EEDD5CC42771FFA200081E11 /* ORThreadContext.h in Headers */,
 				048FAA3E247FA4820036F5EE /* built-in.h in Headers */,
+				EEDD5D0B2772016400081E11 /* RunnerClasses.h in Headers */,
+				EEDD5CE0277200FA00081E11 /* ORffiResultCache.h in Headers */,
 				04AEF9A724DD5414008EB64F /* ffitarget.h in Headers */,
 				04A531B8248F8AD600D83A48 /* SymbolSearch.h in Headers */,
 				04033496252331270029C575 /* ORGlobalFunctionTable.h in Headers */,
-				EE9899A624658F8900ACF2C1 /* MFWeakPropertyBox.h in Headers */,
 				EE9899A424658F8900ACF2C1 /* MFPropertyMapTable.h in Headers */,
 				EE9899B624658F8900ACF2C1 /* MFMethodMapTable.h in Headers */,
 				04AEF95324DD4FF1008EB64F /* ORCoreFunctionRegister.h in Headers */,
 				042AC259246D453700070814 /* MFBlock.h in Headers */,
 				EE9899AD24658F8900ACF2C1 /* MFScopeChain.h in Headers */,
 				EE197B852478DD190049CFDA /* ORInterpreter.h in Headers */,
+				EEDD5D052772016400081E11 /* BinaryPatchHelper.h in Headers */,
 				04AEF9A624DD5414008EB64F /* ffitarget_arm64.h in Headers */,
 				EE1C6FA324BF364A00430A51 /* ORHandleTypeEncode.h in Headers */,
 				04AEF9A924DD5414008EB64F /* ffi_i386.h in Headers */,
@@ -482,22 +458,25 @@
 				04AEF9B024DD5414008EB64F /* ffi_arm64.h in Headers */,
 				04AEF95024DD4FF1008EB64F /* ORCoreFunctionCall.h in Headers */,
 				04AEF9AC24DD5414008EB64F /* ffitarget_arm.h in Headers */,
-				EEA2AC83246855F100B08407 /* ORArgsStack.h in Headers */,
 				04AEF9AD24DD5414008EB64F /* ffitarget_i386.h in Headers */,
 				EE9899AC24658F8900ACF2C1 /* MFValue.h in Headers */,
 				04AEF9AF24DD5414008EB64F /* ffi.h in Headers */,
 				04033492252331180029C575 /* ORSystemFunctionPointerTable.h in Headers */,
+				EEDD5D042772016400081E11 /* ORPatchFile.h in Headers */,
 				04AEF9AB24DD5414008EB64F /* ffi_x86_64.h in Headers */,
 				04AEF97C24DD5091008EB64F /* ORCoreFunction.h in Headers */,
 				04AEF94C24DD4FF1008EB64F /* ORCoreImp.h in Headers */,
 				0408F01B247D027B004F703D /* ORTypeVarPair+TypeEncode.h in Headers */,
 				EE98998C24658DB800ACF2C1 /* RunnerClasses+Execute.h in Headers */,
+				EEDD5D062772016400081E11 /* JSONPatchHelper.h in Headers */,
 				04A531BE248F972500D83A48 /* ORSearchedFunction.h in Headers */,
+				EEDD5DFF27721AF000081E11 /* RunnerClasses+Recover.h in Headers */,
 				04AEF95124DD4FF1008EB64F /* ORTypeVarPair+libffi.h in Headers */,
 				EE9899A724658F8900ACF2C1 /* runenv.h in Headers */,
 				04AEF9A824DD5414008EB64F /* ffi_arm.h in Headers */,
 				04E665B824763090008DB08E /* ORStructDeclare.h in Headers */,
 				EE9899A524658F8900ACF2C1 /* MFStaticVarTable.h in Headers */,
+				EEDD5D092772016400081E11 /* ClassSecretKeyMap.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -512,12 +491,11 @@
 				EE98996724658DA600ACF2C1 /* Sources */,
 				EE98996824658DA600ACF2C1 /* Frameworks */,
 				EE98996924658DA600ACF2C1 /* Resources */,
-				048FAA87247FB6CA0036F5EE /* Embed Frameworks */,
+				EEDD5CC72772002E00081E11 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				048FAA89247FB6D40036F5EE /* PBXTargetDependency */,
 			);
 			name = OCRunner;
 			productName = OCRunner;
@@ -572,12 +550,6 @@
 			mainGroup = EE98996124658DA600ACF2C1;
 			productRefGroup = EE98996C24658DA600ACF2C1 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 048FAA71247FB6180036F5EE /* Products */;
-					ProjectRef = 048FAA70247FB6180036F5EE /* oc2mango.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				EE98996A24658DA600ACF2C1 /* OCRunner */,
@@ -585,51 +557,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		0403348F252331180029C575 /* ORPatchFile.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = ORPatchFile.framework;
-			remoteRef = 0403348E252331180029C575 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		048FAA77247FB6180036F5EE /* oc2mango */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = oc2mango;
-			remoteRef = 048FAA76247FB6180036F5EE /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		048FAA79247FB6180036F5EE /* oc2mangoLib.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = oc2mangoLib.framework;
-			remoteRef = 048FAA78247FB6180036F5EE /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		048FAA7B247FB6180036F5EE /* oc2mangoLibTests.xctest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = oc2mangoLibTests.xctest;
-			remoteRef = 048FAA7A247FB6180036F5EE /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		EE66C0D224FEAF4B00C85B31 /* BinaryPatchCodeGenerator */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = BinaryPatchCodeGenerator;
-			remoteRef = EE66C0D124FEAF4B00C85B31 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		EE66C0D424FEAF4B00C85B31 /* PatchGenerator */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = PatchGenerator;
-			remoteRef = EE66C0D324FEAF4B00C85B31 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		EE98996924658DA600ACF2C1 /* Resources */ = {
@@ -657,29 +584,34 @@
 				EE9899B024658F8900ACF2C1 /* MFStaticVarTable.m in Sources */,
 				04A531B7248F8AD600D83A48 /* SymbolSearch.c in Sources */,
 				EE9899B724658F8900ACF2C1 /* MFScopeChain.m in Sources */,
+				EEDD5D082772016400081E11 /* BinaryPatchHelper.m in Sources */,
 				EE98998A24658DB800ACF2C1 /* RunnerClasses+Execute.m in Sources */,
 				04E665B924763090008DB08E /* ORStructDeclare.m in Sources */,
-				EE9899AF24658F8900ACF2C1 /* MFWeakPropertyBox.m in Sources */,
+				EEDD5D0C2772016400081E11 /* RunnerClasses.m in Sources */,
 				04AEF95424DD4FF1008EB64F /* ORCoreFunctionRegister.s in Sources */,
 				04E665A12474D284008DB08E /* built-in.m in Sources */,
 				042AC258246D453700070814 /* MFBlock.m in Sources */,
 				EE9899C42465923900ACF2C1 /* util.m in Sources */,
 				EE9899B824658F8900ACF2C1 /* MFValue.m in Sources */,
+				EEDD5D0A2772016400081E11 /* ORPatchFile.m in Sources */,
+				EEDD5CDF277200FA00081E11 /* ORffiResultCache.m in Sources */,
+				EEDD5E0027721AF000081E11 /* RunnerClasses+Recover.m in Sources */,
 				EE9899B124658F8900ACF2C1 /* MFPropertyMapTable.m in Sources */,
 				04AEF94F24DD4FF1008EB64F /* ORCoreFunctionRegister.m in Sources */,
 				04A531BF248F972500D83A48 /* ORSearchedFunction.m in Sources */,
 				04AEF95224DD4FF1008EB64F /* ORCoreFunctionCall.m in Sources */,
 				EE9899AE24658F8900ACF2C1 /* MFMethodMapTable.m in Sources */,
 				04AEF94D24DD4FF1008EB64F /* ORCoreImp.m in Sources */,
-				EEA2AC82246855F100B08407 /* ORArgsStack.m in Sources */,
 				0408F01C247D027B004F703D /* ORTypeVarPair+TypeEncode.m in Sources */,
 				04033491252331180029C575 /* ORSystemFunctionPointerTable.m in Sources */,
 				EE9899B324658F8900ACF2C1 /* MFVarDeclareChain.m in Sources */,
 				04AEF95524DD4FF1008EB64F /* ORTypeVarPair+libffi.m in Sources */,
+				EEDD5D072772016400081E11 /* JSONPatchHelper.m in Sources */,
 				04AEF94E24DD4FF1008EB64F /* ORCoreFunctionCall.s in Sources */,
 				EE197B862478DD190049CFDA /* ORInterpreter.m in Sources */,
 				04033495252331270029C575 /* ORGlobalFunctionTable.m in Sources */,
 				EE1C6FA424BF364A00430A51 /* ORHandleTypeEncode.m in Sources */,
+				EEDD5CC32771FFA200081E11 /* ORThreadContext.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -702,11 +634,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		048FAA89247FB6D40036F5EE /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = oc2mangoLib;
-			targetProxy = 048FAA88247FB6D40036F5EE /* PBXContainerItemProxy */;
-		};
 		EE98997724658DA600ACF2C1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = EE98996A24658DA600ACF2C1 /* OCRunner */;
@@ -836,15 +763,23 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = SH4YVD7HDL;
+				DEVELOPMENT_TEAM = Y24269T3LX;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_INPUT_FILETYPE = automatic;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					"COMPILE_AS_STATIC_LIB=1",
+				);
+				GENERATE_MASTER_OBJECT_FILE = YES;
 				INFOPLIST_FILE = OCRunner/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 13.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -852,9 +787,10 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/OCRunner/libffi",
-					"$(PROJECT_DIR)/OCRunner/ORCoreImp/ORCoreFunction/libffi",
+					$PROJECT_DIR/$PROJECT_NAME/libffi,
 				);
+				MACH_O_TYPE = staticlib;
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = silverfruity.OCRunner;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -867,15 +803,19 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = SH4YVD7HDL;
+				DEVELOPMENT_TEAM = Y24269T3LX;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_INPUT_FILETYPE = automatic;
+				GCC_PREPROCESSOR_DEFINITIONS = "COMPILE_AS_STATIC_LIB=1";
+				GENERATE_MASTER_OBJECT_FILE = YES;
 				INFOPLIST_FILE = OCRunner/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 13.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -883,9 +823,10 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/OCRunner/libffi",
-					"$(PROJECT_DIR)/OCRunner/ORCoreImp/ORCoreFunction/libffi",
+					$PROJECT_DIR/$PROJECT_NAME/libffi,
 				);
+				MACH_O_TYPE = staticlib;
+				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = silverfruity.OCRunner;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;

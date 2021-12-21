@@ -6,7 +6,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <ORPatchFile/ORPatchFile.h>
+#import "RunnerClasses+Execute.h"
+
 NS_ASSUME_NONNULL_BEGIN
 @protocol OCRecover <NSObject>
 - (void)recover;

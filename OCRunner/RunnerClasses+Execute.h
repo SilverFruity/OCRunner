@@ -6,8 +6,10 @@
 //  Copyright © 2020 yongpengliang. All rights reserved.
 //
 
+// Cocoapods
 #import <ORPatchFile/ORPatchFile.h>
-//#import <oc2mangoLib/oc2mangoLib.h>
+// While need compile static framework
+//#import "ORPatchFile.h"
 #import <objc/runtime.h>
 
 
