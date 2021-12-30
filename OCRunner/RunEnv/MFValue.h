@@ -41,6 +41,7 @@ cal_result.box.intValue = (operator *(int *)value.pointer); break;\
 case OCTypeLong:\
 cal_result.box.longValue = (operator *(long *)value.pointer); break;\
 case OCTypeLongLong:\
+case OCTypePointer:\
 cal_result.box.longlongValue = (operator *(long long *)value.pointer); break;\
 default:\
 break;\
@@ -121,6 +122,7 @@ resultName = operator (*(int *)value.pointer); break;\
 case OCTypeLong:\
 resultName = operator (*(long *)value.pointer); break;\
 case OCTypeLongLong:\
+case OCTypePointer:\
 resultName = operator (*(long long *)value.pointer); break;\
 case OCTypeFloat:\
 resultName = operator (*(float *)value.pointer); break;\
@@ -177,6 +179,7 @@ cal_result.box.intValue = BinaryExecute(int,leftValue,operator,rightValue)\
 case OCTypeLong:\
 cal_result.box.longValue = BinaryExecute(long,leftValue,operator,rightValue)\
 case OCTypeLongLong:\
+case OCTypePointer:\
 cal_result.box.longlongValue = BinaryExecute(long long,leftValue,operator,rightValue)\
 default:\
 break;\
@@ -190,6 +193,7 @@ leftValue.value_type operator rightValue.value_type
 
 #define CalculateExecute(leftValue,operator,rightValue)\
 OCType result_type = leftValue.type;\
+result_type = result_type == OCTypePointer ? OCTypeLongLong : result_type;\
 cal_result.typeEncode = leftValue.typeEncode;\
 if (leftValue.type != rightValue.type\
     && (leftValue.type == OCTypeFloat || leftValue.type == OCTypeDouble\
@@ -233,6 +237,7 @@ break;\
 BOOL logicResultValue = NO;\
 do{\
     OCType compare_type = leftValue.type;\
+    compare_type = compare_type == OCTypePointer ? OCTypeLongLong : compare_type;\
     if (leftValue.type != rightValue.type\
         && (leftValue.type == OCTypeFloat || leftValue.type == OCTypeDouble\
         || rightValue.type == OCTypeFloat || rightValue.type == OCTypeDouble )){\

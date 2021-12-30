@@ -450,7 +450,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         }
     }
     if (instance == nil) {
-        return [MFValue voidValue];
+        return [MFValue nullValue];
     }
     
     //如果在方法缓存表的中已经找到相关方法，直接调用，省去一次中间类型转换问题。优化性能，在方法递归时，调用耗时减少33%，0.15s -> 0.10s
@@ -466,7 +466,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
     if (sig == nil) {
         NSLog(@"OCRunner Error: %@ Unrecognized Selector %@", instance, self.selectorName);
-        return [MFValue voidValue];
+        return [MFValue nullValue];
     }
     NSUInteger argCount = [sig numberOfArguments];
     //解决多参数调用问题

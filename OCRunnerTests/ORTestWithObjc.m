@@ -995,6 +995,24 @@ int signatureBlockPtr(id object, int b){
     MFValue *a = [scope recursiveGetValueWithIdentifier:@"result"];
     XCTAssert(a.intValue == 10, @"%d", a.intValue);
 }
+- (void)testNullPointerBinaryOperator {
+    MFScopeChain *scope = self.currentScope;
+    NSString *source = @"\
+    NSString *string = nil;\
+    NSString *result = @\"\";\
+    if (string.length < 1) result = @\"123\";\
+    int a = string.length - 2;\
+    double b = string.length + 2.0;\
+    ";
+    AST *ast = [_parser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    MFValue *result = [scope recursiveGetValueWithIdentifier:@"result"];
+    XCTAssertEqualObjects(result.objectValue, @"123");
+    MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
+    XCTAssert(a.intValue == -2);
+    MFValue *b = [scope recursiveGetValueWithIdentifier:@"b"];
+    XCTAssert(b.doubleValue == 2.0);
+}
 - (void)testOCRecursiveFunctionPerformanceExample {
     [self measureBlock:^{
         fibonaccia(20);
