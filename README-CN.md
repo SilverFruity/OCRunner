@@ -237,7 +237,7 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 
 ### 如何确定补丁中是否包含源文件
 
-![1](https://raw.githubusercontent.com/SilverFruity/silverfruity.github.io/server/source/_posts/OCRunner/OCRunner_2.jpeg)
+![1](https://www.sayhelloworld.blog/2020/09/04/OCRunner/OCRunner_2.jpeg)
 
 查看Run Script打印的 **InputFiles** 中是否包含源文件.
 
@@ -248,7 +248,7 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 
 ### 加载时间
 
-![2](https://silverfruity.github.io/2020/09/04/OCRunner/OCRunner_1.jpeg)
+![2](https://www.sayhelloworld.blog/2020/09/04/OCRunner/OCRunner_1.jpeg)
 
 ### 执行速度和内存占用
 
