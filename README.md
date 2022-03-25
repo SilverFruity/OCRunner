@@ -27,9 +27,13 @@
 
 * Complete Objective-C syntax support, but does not support pre-compilation and partial syntax.
 
-## Run patches locally using OCRunner
-
+## Run patches locally using OCRunnerDemo
 [OCRunnerDemo](https://github.com/SilverFruity/OCRunner/tree/master/OCRunnerDemo) can be used as a reference for the entire process.
+
+You can't run it successlly with downloading zip file. You must using the below shell commands to tour OCRunnerDemo.
+```
+git clone --recursive https://github.com/SilverFruity/OCRunner.git
+```
 
 ###  Cocoapods
 
