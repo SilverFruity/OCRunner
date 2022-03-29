@@ -51,6 +51,31 @@ struct MFGOSimulateBlockDescriptor {
 		const char *signature;
 	};
 };
+
+struct ORFixedBlockDescriptor {
+    //Block_descriptor_1
+    struct {
+        unsigned long int reserved;
+        unsigned long int size;
+    };
+    
+    //Block_descriptor_2
+    struct {
+        // requires BLOCK_HAS_COPY_DISPOSE
+        void (*copy)(void *dst, const void *src);
+        void (*dispose)(const void *);
+    };
+    
+    //Block_descriptor_3
+    struct {
+        // requires BLOCK_HAS_SIGNATURE
+        const char *signature;
+    };
+
+    //FixedBlock dispose
+    void (*orignalDispose)(const void *);
+};
+
 const char *NSBlockGetSignature(id block);
 BOOL NSBlockHasSignature(id block);
 void NSBlockSetSignature(id block, const char *typeencode);

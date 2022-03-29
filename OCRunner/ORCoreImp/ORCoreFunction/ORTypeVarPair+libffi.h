@@ -9,12 +9,19 @@
 #import "RunnerClasses+Execute.h"
 #if __has_include("ffi.h")
 #import "ffi.h"
+
+struct ORFuncCallFFiTypeFreeList {
+    void *_Nullable *_Nonnull list;
+    int maxLength;
+    int cursor;
+};
+
 NS_ASSUME_NONNULL_BEGIN
 
- ffi_type *_Nullable typeEncode2ffi_type(const char *typeencode);
+__attribute__((overloadable))
+ffi_type *_Nullable typeEncode2ffi_type(const char *typeencode);
 
-@interface ORTypeVarPair (libffi)
-- (ffi_type *)libffi_type;
-@end
+ffi_type *_Nullable typeEncode2ffi_type(const char *typeencode,
+                              struct ORFuncCallFFiTypeFreeList *_Nullable destroyList);
 NS_ASSUME_NONNULL_END
 #endif

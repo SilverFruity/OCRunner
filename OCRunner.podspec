@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name         = "OCRunner"
-s.version      = "1.2.4"
+s.version      = "1.2.5"
 s.summary      = "OCRunner"
 s.description  = <<-DESC
 Execute Objective-C code Dynamically. iOS hotfix SDK.
@@ -16,6 +16,6 @@ s.pod_target_xcconfig = {
   }
 s.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
 s.vendored_libraries  = 'OCRunner/libffi/libffi.a'
-s.dependency "ORPatchFile", "1.2.0"
+s.dependency "ORPatchFile", "1.2.1"
 end
 

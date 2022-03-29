@@ -10,7 +10,15 @@
 #import "ORTypeVarPair+TypeEncode.h"
 #import "ORHandleTypeEncode.h"
 #import "ORStructDeclare.h"
-ffi_type *typeEncode2ffi_type(const char *typeencode){
+
+__attribute__((overloadable))
+ffi_type *typeEncode2ffi_type(const char *typeencode) {
+    return typeEncode2ffi_type(typeencode, NULL);
+}
+
+ffi_type *typeEncode2ffi_type(const char *typeencode,
+                              struct ORFuncCallFFiTypeFreeList *destroyList) {
+    bool isRegister = destroyList == NULL;
     //TypeEncode不能为空
     assert(typeencode != nil);
     switch (*typeencode) {
@@ -59,15 +67,24 @@ ffi_type *typeEncode2ffi_type(const char *typeencode){
         case OCTypeStruct:
         {
             ffi_type *type = malloc(sizeof(ffi_type));
+            if (isRegister == false && destroyList->cursor < destroyList->maxLength) {
+                destroyList->list[destroyList->cursor] = type;
+                destroyList->cursor++;
+            }
             type->type = FFI_TYPE_STRUCT;
             type->alignment = 0;
             NSString *structName = startStructNameDetect(typeencode);
             assert(structName != nil);
             ORStructDeclare *declare = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:structName].declare;
             type->elements = malloc(sizeof(void *) * (declare.keys.count + 1));
+            if (isRegister == false && destroyList->cursor < destroyList->maxLength) {
+                destroyList->list[destroyList->cursor] = type->elements;
+                destroyList->cursor++;
+            }
             type->size = sizeOfTypeEncode(declare.typeEncoding);
             for (int i = 0; i < declare.keys.count; i++) {
-                type->elements[i] = typeEncode2ffi_type(declare.keyTypeEncodes[declare.keys[i]].UTF8String);
+                type->elements[i] = typeEncode2ffi_type(declare.keyTypeEncodes[declare.keys[i]].UTF8String,
+                                                        destroyList);
             }
             type->elements[declare.keys.count] = NULL;
             return type;
@@ -77,11 +94,7 @@ ffi_type *typeEncode2ffi_type(const char *typeencode){
     assert(false);
     return NULL;
 }
-@implementation ORTypeVarPair (libffi)
-- (ffi_type *)libffi_type{
-    return typeEncode2ffi_type(self.typeEncode);
-}
-@end
+
 
 #endif
 

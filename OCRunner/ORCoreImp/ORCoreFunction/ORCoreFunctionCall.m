@@ -290,12 +290,20 @@ __attribute__((overloadable))
 void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue, NSUInteger needArgs){
     ffi_cif cif;
     ffi_type *types[argValues.count];
+    
+    void *buffer[128];
+    struct ORFuncCallFFiTypeFreeList freeList = {
+        .list = (void *)&buffer,
+        .maxLength = sizeof(buffer) / sizeof(void *),
+        .cursor = 0,
+    };
+
     void *argvs[argValues.count];
     for (int i = 0; i < argValues.count; i++) {
-        types[i] = typeEncode2ffi_type(argValues[i].typeEncode);
+        types[i] = typeEncode2ffi_type(argValues[i].typeEncode, &freeList);
         argvs[i] = argValues[i].pointer;
     }
-    ffi_type *retType = typeEncode2ffi_type(returnValue.typeEncode);
+    ffi_type *retType = typeEncode2ffi_type(returnValue.typeEncode, &freeList);
     ffi_status ffi_status = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, (unsigned int)argValues.count, retType, types);
     #ifdef __arm64__
         cif.aarch64_nfixedargs = (unsigned)needArgs;
@@ -306,6 +314,10 @@ void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue
     }
     // 触发 setPointer
     returnValue.pointer = ret;
+
+    for (int i = 0; i < freeList.cursor; i++) {
+        free(freeList.list[i]);
+    }
 }
 
 #endif/* __libffi__ */

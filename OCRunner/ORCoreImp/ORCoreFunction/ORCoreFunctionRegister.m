@@ -486,10 +486,11 @@ or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
     void *imp = NULL;
     ffi_cif *cif = malloc(sizeof(ffi_cif));//不可以free
     ffi_closure *closure = ffi_closure_alloc(sizeof(ffi_closure), (void **)&imp);
-    ffi_type *returnType = ret.libffi_type;
+    
+    ffi_type *returnType = typeEncode2ffi_type(ret.typeEncode);
     ffi_type **arg_types = malloc(sizeof(ffi_type *) * args.count);
     for (int  i = 0 ; i < args.count; i++) {
-        arg_types[i] = args[i].libffi_type;
+        arg_types[i] = typeEncode2ffi_type(args[i].typeEncode);
     }
     if(ffi_prep_cif(cif, FFI_DEFAULT_ABI, (unsigned int)args.count, returnType, arg_types) == FFI_OK)
     {

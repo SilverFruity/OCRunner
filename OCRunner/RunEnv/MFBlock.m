@@ -34,6 +34,9 @@ void dispose_helper(struct MFSimulateBlock *src)
     }
 }
 void *simulateNSBlock(const char* typeEncoding, void *imp, void *userdata){
+    if (typeEncoding != NULL) {
+        typeEncoding = strdup(typeEncoding);
+    }
     struct MFGOSimulateBlockDescriptor descriptor = {
         0,
         sizeof(struct MFSimulateBlock),
@@ -79,6 +82,19 @@ BOOL NSBlockHasSignature(id block){
     int flags = blockRef->flags;
     return flags & BLOCK_HAS_SIGNATURE;
 }
+
+static void fixedBlockDispose(struct MFSimulateBlock *src) {
+    struct ORFixedBlockDescriptor *descriptor = (void *)src->descriptor;
+    if (src->descriptor->signature) {
+        free((void *)src->descriptor->signature);
+    }
+    if (src->descriptor) {
+        free(src->descriptor);
+    }
+    if (descriptor->orignalDispose) {
+        descriptor->orignalDispose(src);
+    }
+}
 void NSBlockSetSignature(id block, const char *typeencode){
     struct MFSimulateBlock *blockRef = (__bridge struct MFSimulateBlock *)block;
     // ---- 2021.9.24 TODO:
@@ -90,12 +106,14 @@ void NSBlockSetSignature(id block, const char *typeencode){
     
     // NOTE: 2021.11.25
     // 如果 BLOCK_HAS_SIGNATURE 为 false，descriptor 中是不会有 signature 字段的
+    bool isFixedBlock = false;
     if (NSBlockHasSignature(block) == false) {
-        struct MFGOSimulateBlockDescriptor *des = malloc(sizeof(struct MFGOSimulateBlockDescriptor));
+        struct ORFixedBlockDescriptor *des = malloc(sizeof(struct ORFixedBlockDescriptor));
         memcpy(des, blockRef->descriptor, sizeof(struct MFGOSimulateBlockDescriptor));
-        blockRef->descriptor = des;
+        blockRef->descriptor = (void *)des;
+        isFixedBlock = true;
     }
-    
+
     void *signatureLocation = blockRef->descriptor;
     signatureLocation += sizeof(unsigned long int);
     signatureLocation += sizeof(unsigned long int);
@@ -107,6 +125,11 @@ void NSBlockSetSignature(id block, const char *typeencode){
     char *copied = strdup(typeencode);
     *(char **)signatureLocation = copied;
     blockRef->flags |= BLOCK_HAS_SIGNATURE;
+    if (isFixedBlock) {
+        struct ORFixedBlockDescriptor *descriptor = (void *)blockRef->descriptor;
+        descriptor->orignalDispose = blockRef->descriptor->dispose;
+        blockRef->descriptor->dispose = (void *)&fixedBlockDispose;
+    }
 }
 
 @implementation MFBlock{
@@ -135,12 +158,14 @@ void NSBlockSetSignature(id block, const char *typeencode){
         return _blockPtr;
     }
     const char *typeEncoding = self.retType.typeEncode;
+    char typeEncodeBuffer[256] = {0};
+    strcat(typeEncodeBuffer, typeEncoding);
     for (ORTypeVarPair *param in self.paramTypes) {
         const char *paramTypeEncoding = param.typeEncode;
-        typeEncoding = mf_str_append(typeEncoding, paramTypeEncoding);
+        strcat(typeEncodeBuffer, paramTypeEncoding);
     }
     _ffi_result = register_function(&blockInter, self.paramTypes, self.retType);
-    _blockPtr = simulateNSBlock(typeEncoding, _ffi_result->function_imp, (__bridge  void *)self);
+    _blockPtr = simulateNSBlock(typeEncodeBuffer, _ffi_result->function_imp, (__bridge  void *)self);
     return _blockPtr;
 }
 
