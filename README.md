@@ -305,7 +305,7 @@ Take the classic Fibonacci sequence function as an example, find the test result
 9. Variable static keyword
 10. NSArray: @[value1, value2]，NSDictionary: @{ key: value },  NSNumer:  @(value)
 11. NSArray, NSDictionary value and assignment syntax: id value = a[var];  a[var] = value;
-12. [Operator, except for'->' all have been implemented](https://baike.baidu.com/item/%E8%BF%90%E7%AE%97%E7%AC%A6%E4%BC%98%E5%85%88%E7%BA%A7/4752611?fr=aladdin)
+12. [Operator, except for'->' all have been implemented](https://en.cppreference.com/w/c/language/operator_precedence)
 
 etc.
 
