@@ -831,6 +831,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
         case UnaryOperatorAdressPoint:{
             MFValue *resultValue = [MFValue defaultValueWithTypeEncoding:currentValue.typeEncode];
             void *pointer = currentValue.pointer;
+            if ([currentValue isObject]) {
+                pointer = currentValue.weakPointer;
+            }
             resultValue.pointerCount += 1;
             resultValue.pointer = &pointer;
             return resultValue;

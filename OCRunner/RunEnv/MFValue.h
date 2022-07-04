@@ -361,6 +361,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 - (BOOL)isInteger;
 - (BOOL)isFloat;
 - (BOOL)isObject;
+- (void *)weakPointer;
 - (NSUInteger)memerySize;
 - (MFValue *)subscriptGetWithIndex:(MFValue *)index;
 - (void)subscriptSetValue:(MFValue *)value index:(MFValue *)index;

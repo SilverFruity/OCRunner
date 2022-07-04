@@ -1009,4 +1009,31 @@ class CRunnerTests: XCTestCase {
             (classValue as! OCExecute).execute(scope);
         }
     }
+    
+    func testStrongObjectBeWritenThenAutoRelease(){
+        let source =
+        """
+        @implementation NSString (JSON)
+        - (NSDictionary *)js_JSONValue {
+            if (self.length == 0) {
+                return nil;
+            }
+            NSData *jsonData = [self dataUsingEncoding:NSUTF8StringEncoding];
+            NSError *err;
+            NSDictionary *dic = [NSJSONSerialization JSONObjectWithData:jsonData
+                                                                options:NSJSONReadingMutableContainers
+                                                                  error:&err];
+            NSLog(@"%@", err);
+            return dic;
+        }
+        @end
+        NSString *jsonString = @"{open:: true}";
+        NSDictionary *dict = [jsonString js_JSONValue];
+        NSLog(@"json: %@", dict);
+        """
+        let ast = ocparser.parseSource(source)
+        for classValue in ast.nodes {
+            (classValue as! OCExecute).execute(scope);
+        }
+    }
 }

@@ -41,7 +41,9 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 
 @implementation MFValue
 {
+    void *_pointer;
     BOOL _isAlloced;
+    BOOL _usedWeakPointer;
 }
 + (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncode{
     return [MFValue valueWithTypeEncode:typeEncode pointer:NULL];
@@ -255,6 +257,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
         _weakObjectValue = nil;
         _pointer = &_strongObjectValue;
     }
+    _usedWeakPointer = false;
 }
 - (void)dealloc{
     [self deallocPointer];
@@ -292,6 +295,16 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     }else if(*typeEncode == OCTypeUnion){
         _typeName = startUnionNameDetect(typeEncode);
     }
+}
+- (void *)pointer {
+    if (_usedWeakPointer && _weakObjectValue != NULL) {
+        return &_weakObjectValue;
+    }
+    return _pointer;
+}
+- (void *)weakPointer {
+    _usedWeakPointer = true;
+    return &_weakObjectValue;
 }
 - (void)convertValueWithTypeEncode:(const char *)typeEncode result:(void **)resultValue{
     if (_typeEncode == NULL) {
