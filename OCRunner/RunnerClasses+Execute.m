@@ -446,7 +446,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     if ([self.caller isKindOfClass:[ORValueExpression class]]) {
         ORValueExpression *value = (ORValueExpression *)self.caller;
         if (value.value_type == OCValueSuper) {
-            return invoke_sueper_values(instance, sel, argValues);
+            return invoke_sueper_values(instance, sel, scope.classNode, argValues);
         }
     }
     if (instance == nil) {
@@ -460,6 +460,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     if (map) {
         MFScopeChain *newScope = [MFScopeChain scopeChainWithNext:scope];
         newScope.instance = isClassMethod ? [MFValue valueWithClass:instance] : [MFValue valueWithObject:instance];
+        newScope.classNode = map.methodImp.classNode;
         [ORArgsStack push:argValues];
         return [map.methodImp execute:newScope];
     }
@@ -1289,6 +1290,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     }
     // 在添加方法，这样可以解决属性的懒加载不生效的问题
     for (ORMethodImplementation *method in self.methods) {
+        [method setClassNode:clazz];
         replace_method(clazz, method);
     }
     return nil;

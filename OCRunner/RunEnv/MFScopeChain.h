@@ -18,6 +18,7 @@ extern const void *mf_propKey(NSString *propName);
 + (instancetype)topScope;
 @property (strong, nonatomic) MFScopeChain *next;
 @property (strong, nonatomic) MFValue *instance;
+@property (strong, nonatomic) Class classNode;
 
 + (instancetype)scopeChainWithNext:(MFScopeChain *)next;
 - (nullable MFValue *)getValueWithIdentifier:(NSString *)identifier endScope:(nullable MFScopeChain *)endScope;

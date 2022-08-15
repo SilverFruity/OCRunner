@@ -1036,4 +1036,62 @@ class CRunnerTests: XCTestCase {
             (classValue as! OCExecute).execute(scope);
         }
     }
+
+    // https://github.com/SilverFruity/OCRunner/issues/24
+    func testMultiLevelSuperCall() {
+        let source =
+        """
+        @implementation FinalObject
+        - (int)test:(int)count {
+            return count + 1;
+        }
+        @end
+
+        @interface HotBaseController: FinalObject
+        @end
+        @implementation HotBaseController
+        - (int)test:(int)count {
+            if (count > 10) {
+                *0x11 = 1;
+            }
+            return [super test:count + 1];
+        }
+
+        @interface ViewController3 : HotBaseController
+        @end
+        @implementation ViewController3
+        - (int)test:(int)count {
+            return [super test:count + 1];
+        }
+        @end
+
+        int result = [[ViewController3 new] test:0];
+        """
+        let ast = ocparser.parseSource(source)
+        for classValue in ast.nodes {
+            (classValue as! OCExecute).execute(scope);
+        }
+        let result = scope.getValueWithIdentifier("result")?.intValue
+        XCTAssert(result == 3);
+    }
+
+    func testHookNativeMultiLevelSuperCall() {
+        let source =
+        """
+        @implementation NativeHotBaseController
+        - (int)test:(int)count {
+            if (count > 10) {
+                *0x11 = 1;
+            }
+            return [super test:count + 1];
+        }
+        int result = [[NativeViewController3 new] test:0];
+        """
+        let ast = ocparser.parseSource(source)
+        for classValue in ast.nodes {
+            (classValue as! OCExecute).execute(scope);
+        }
+        let result = scope.getValueWithIdentifier("result")?.intValue
+        XCTAssert(result == 3);
+    }
 }

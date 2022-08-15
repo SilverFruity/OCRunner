@@ -29,6 +29,7 @@ static MFScopeChain *instance = nil;
 	MFScopeChain *scope = [MFScopeChain new];
 	scope.next = next;
     scope.instance = next.instance;
+    scope.classNode = next.classNode;
 #if DEBUG
     MFValue *value = [MFValue valueWithObject:scope];
     value.modifier = DeclarationModifierWeak;

@@ -49,6 +49,7 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
         // 方法调用时不应该增加引用计数
         scope.instance = [MFValue valueWithUnownedObject:target];
     }
+    scope.classNode = methodImp.classNode;
     MFValue *value = nil;
     [ORArgsStack push:argValues];
     value = [methodImp execute:scope];
@@ -113,13 +114,14 @@ void setterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
 }
 
 
-MFValue *invoke_sueper_values(id instance, SEL sel, NSArray<MFValue *> *argValues){
+MFValue *invoke_sueper_values(id instance, SEL sel, Class classNode, NSArray<MFValue *> *argValues){
     BOOL isClassMethod = object_isClass(instance);
     Class superClass;
     if (isClassMethod) {
-        superClass = class_getSuperclass(instance);
+        superClass = class_getSuperclass(instance == classNode ? instance : classNode);
     }else{
-        superClass = class_getSuperclass([instance class]);
+        Class instanceClass = [instance class];
+        superClass = class_getSuperclass(instanceClass == classNode ? instanceClass : classNode);
     }
     struct objc_super *superPtr = &(struct objc_super){instance,superClass};
     NSMutableArray *args = [@[[MFValue valueWithPointer:(void *)superPtr],[MFValue valueWithSEL:sel]] mutableCopy];

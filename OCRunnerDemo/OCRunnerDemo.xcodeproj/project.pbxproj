@@ -33,6 +33,7 @@
 		EEBF3350248E84AA00DDE2E9 /* ORGCDTests.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3348248E84A900DDE2E9 /* ORGCDTests.m */; };
 		EEBF3351248E84AA00DDE2E9 /* ORTestReplaceClass.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF334A248E84A900DDE2E9 /* ORTestReplaceClass.m */; };
 		EEBF3353248E84D100DDE2E9 /* ORTestWithObjc.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3352248E84D100DDE2E9 /* ORTestWithObjc.m */; };
+		EECD490D28AA831B00253282 /* ORHookNatvieMultiSuperCall.m in Sources */ = {isa = PBXBuildFile; fileRef = EECD490C28AA831B00253282 /* ORHookNatvieMultiSuperCall.m */; };
 		EEF1527D24DE867400574FA7 /* ORCoreFunctionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = EEF1527C24DE867400574FA7 /* ORCoreFunctionTests.m */; };
 		EEF439342620030E0058B805 /* SwiftViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF439332620030E0058B805 /* SwiftViewController.swift */; };
 		FC281C0D85B4B7B6A9A7B598 /* Pods_OCRunnerDemoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A467A8D72C17536B47CC6E64 /* Pods_OCRunnerDemoTests.framework */; };
@@ -114,6 +115,8 @@
 		EEBF334A248E84A900DDE2E9 /* ORTestReplaceClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORTestReplaceClass.m; sourceTree = "<group>"; };
 		EEBF334B248E84A900DDE2E9 /* ORTestClassProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORTestClassProperty.h; sourceTree = "<group>"; };
 		EEBF3352248E84D100DDE2E9 /* ORTestWithObjc.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ORTestWithObjc.m; path = ../../OCRunnerTests/ORTestWithObjc.m; sourceTree = "<group>"; };
+		EECD490B28AA831B00253282 /* ORHookNatvieMultiSuperCall.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORHookNatvieMultiSuperCall.h; sourceTree = "<group>"; };
+		EECD490C28AA831B00253282 /* ORHookNatvieMultiSuperCall.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORHookNatvieMultiSuperCall.m; sourceTree = "<group>"; };
 		EEF1527C24DE867400574FA7 /* ORCoreFunctionTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ORCoreFunctionTests.m; path = ../../OCRunnerTests/ORCoreFunctionTests.m; sourceTree = "<group>"; };
 		EEF439322620030D0058B805 /* OCRunnerDemo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OCRunnerDemo-Bridging-Header.h"; sourceTree = "<group>"; };
 		EEF439332620030E0058B805 /* SwiftViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftViewController.swift; sourceTree = "<group>"; };
@@ -274,6 +277,8 @@
 				04A634C925E4A79300DB31A6 /* ORRecoverClass.m */,
 				17C05308274F338300EB0BB2 /* TestFakeModel.h */,
 				17C05309274F338300EB0BB2 /* TestFakeModel.m */,
+				EECD490B28AA831B00253282 /* ORHookNatvieMultiSuperCall.h */,
+				EECD490C28AA831B00253282 /* ORHookNatvieMultiSuperCall.m */,
 			);
 			name = TestClass;
 			path = ../../OCRunnerTests/TestClass;
@@ -596,6 +601,7 @@
 				EEBF334D248E84AA00DDE2E9 /* ORCallSuperNoArgTest.m in Sources */,
 				EEBF3351248E84AA00DDE2E9 /* ORTestReplaceClass.m in Sources */,
 				EEBF3353248E84D100DDE2E9 /* ORTestWithObjc.m in Sources */,
+				EECD490D28AA831B00253282 /* ORHookNatvieMultiSuperCall.m in Sources */,
 				EEBF334E248E84AA00DDE2E9 /* ORTestClassProperty.m in Sources */,
 				18C746632679EFB700317C75 /* ORParserForTest.m in Sources */,
 				04A634D125E4AB5A00DB31A6 /* ORRecoverClass.m in Sources */,
