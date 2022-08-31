@@ -143,6 +143,27 @@ void structDetect(StructDetectState state, NSMutableString *buffer, NSMutableArr
     state.chr++;
     structDetect(state, buffer, results);
 }
+
+void structFindMaxFieldSize(const char *typeEncode, int *max) {
+    if (!isStructWithTypeEncode(typeEncode)) {
+        NSUInteger size = 0;
+        NSGetSizeAndAlignment(typeEncode, &size, NULL);
+        *max = MAX(*max, (int)size);
+        return;
+    }
+    NSMutableArray *list = startStructDetect(typeEncode);
+    [list removeObjectAtIndex:0];
+    for (NSString *element in list) {
+        const char *cstr = element.UTF8String;
+        if (isStructWithTypeEncode(cstr)) {
+            structFindMaxFieldSize(cstr, max);
+        } else {
+            structFindMaxFieldSize(cstr, max);
+        }
+    }
+}
+
+
 NSMutableArray * startStructDetect(const char *typeEncode){
     NSMutableString *buffer = [NSMutableString string];
     NSMutableArray *results = [NSMutableArray array];

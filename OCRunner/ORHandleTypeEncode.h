@@ -83,6 +83,7 @@ NSString *startRemovePointerOfTypeEncode(const char *typeEncode);
 NSUInteger startDetectPointerCount(const char *typeEncode);
 NSString *startStructNameDetect(const char *typeEncode);
 NSString *startUnionNameDetect(const char *typeEncode);
+void structFindMaxFieldSize(const char *typeEncode, int *max);
 NSMutableArray * startStructDetect(const char *typeEncode);
 NSMutableArray * startUnionDetect(const char *typeEncode);
 NSMutableArray * startArrayDetect(const char *typeEncode);

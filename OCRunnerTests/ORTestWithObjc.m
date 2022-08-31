@@ -437,6 +437,61 @@ typedef struct MyStruct2 {
     XCTAssert([declare2.keyOffsets[@"d"] isEqualToNumber:@(16)]);
 }
 
+struct AStruct {
+    int a1;
+    char a2;
+};
+struct BStruct {
+    char b1;
+    struct AStruct b2;
+    double b3;
+};
+
+- (void)testStructMemoryAlignment2{
+    ORStructDeclare *declare = [[ORStructDeclare alloc] initWithTypeEncode:@encode(struct BStruct) keys:@[@"b1",@"b2",@"b3"]];
+    XCTAssert([declare.keyOffsets[@"b1"] isEqualToNumber:@(0)]);
+    XCTAssert([declare.keyOffsets[@"b2"] isEqualToNumber:@(offsetof(struct BStruct, b2))]);
+    XCTAssert(declare.structSize == sizeof(struct BStruct), @"BStruct %lu", declare.structSize);
+}
+
+struct CStruct {
+    short c1;
+    char c2;
+};
+struct DStruct {
+    char d1;
+    struct CStruct d2;
+    double d3;
+};
+- (void)testStructMemoryAlignment3{
+    ORStructDeclare *declare = [[ORStructDeclare alloc] initWithTypeEncode:@encode(struct DStruct) keys:@[@"d1",@"d2",@"d3"]];
+    XCTAssert([declare.keyOffsets[@"d1"] isEqualToNumber:@(0)]);
+    XCTAssert([declare.keyOffsets[@"d2"] isEqualToNumber:@(offsetof(struct DStruct, d2))]);
+    XCTAssert(declare.structSize == sizeof(struct DStruct), @"BStruct %lu", declare.structSize);
+}
+
+struct GStruct {
+    double g1;
+    int g2;
+};
+struct FStruct {
+    short f1;
+    char f2;
+    struct GStruct f3;
+};
+struct EStruct {
+    char e1;
+    struct FStruct e2;
+    double e3;
+};
+
+- (void)testStructMemoryAlignment4{
+    ORStructDeclare *declare = [[ORStructDeclare alloc] initWithTypeEncode:@encode(struct EStruct) keys:@[@"e1",@"e2",@"e3"]];
+    XCTAssert([declare.keyOffsets[@"e1"] isEqualToNumber:@(0)]);
+    XCTAssert([declare.keyOffsets[@"e2"] isEqualToNumber:@(offsetof(struct EStruct, e2))]);
+    XCTAssert(declare.structSize == sizeof(struct EStruct), @"EStruct %lu", declare.structSize);
+}
+
 - (void)testPerformanceExample {
     // This is an example of a performance test case.
     [self measureBlock:^{

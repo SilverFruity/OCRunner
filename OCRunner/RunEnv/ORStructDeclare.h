@@ -11,6 +11,11 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ORStructDeclare : NSObject
+{
+@private
+    NSUInteger size_;
+}
+
 @property (copy, nonatomic) NSString *name;
 @property (assign, nonatomic)const char *typeEncoding;
 @property (strong, nonatomic) NSArray<NSString *> *keys;
@@ -19,6 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (strong, nonatomic) NSDictionary<NSString *,NSString *> *keyTypeEncodes;
 + (instancetype)structDecalre:(const char *)encode keys:(NSArray *)keys;
 - (instancetype)initWithTypeEncode:(const char *)typeEncoding keys:(NSArray<NSString *> *)keys;
+- (NSInteger)structSize;
 @end
 
 @interface ORUnionDeclare : NSObject
