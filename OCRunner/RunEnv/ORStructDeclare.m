@@ -28,18 +28,17 @@
 - (void)initialWithFieldTypeEncodes:(NSArray *)fieldEncodes{
     NSMutableDictionary *keySizes = [NSMutableDictionary dictionary];
     NSMutableDictionary *keyTypes = [NSMutableDictionary dictionary];
-    NSMutableDictionary <NSString *, NSNumber *>*keyMaxElementSize = [NSMutableDictionary dictionary];
-    __block int globalMaxElementSize = 0;
+    NSMutableDictionary <NSString *, NSNumber *>*keyAlignments = [NSMutableDictionary dictionary];
+    __block NSUInteger structAlignment = 0;
     NSCAssert(self.keys.count == fieldEncodes.count, @"");
     [fieldEncodes enumerateObjectsUsingBlock:^(NSString *elementEncode, NSUInteger idx, BOOL * _Nonnull stop) {
         NSUInteger size;
-        NSGetSizeAndAlignment(elementEncode.UTF8String, &size, NULL);
+        NSUInteger align;
+        NSGetSizeAndAlignment(elementEncode.UTF8String, &size, &align);
         keySizes[self.keys[idx]] = @(size);
         keyTypes[self.keys[idx]] = elementEncode;
-        int elementMaxSize = 0;
-        structFindMaxFieldSize(elementEncode.UTF8String, &elementMaxSize);
-        keyMaxElementSize[self.keys[idx]] = @(elementMaxSize);
-        globalMaxElementSize = MAX(globalMaxElementSize, elementMaxSize);
+        keyAlignments[self.keys[idx]] = @(align);
+        structAlignment = MAX(structAlignment, align);
     }];
     self.keySizes = keySizes;
     self.keyTypeEncodes = keyTypes;
@@ -58,15 +57,15 @@
         NSUInteger lastOffset = keyOffsets[lastKey].unsignedIntValue;
         NSUInteger offset = lastOffset + lastSize;
         // 在参数对齐数和默认对齐数8取小
-        NSUInteger maxElementSize = keyMaxElementSize[curKey].unsignedIntegerValue;
+        NSUInteger maxElementSize = keyAlignments[curKey].unsignedIntegerValue;
         if (offset % maxElementSize != 0) {
             offset = ((offset + maxElementSize - 1) / maxElementSize) * maxElementSize;
         }
         keyOffsets[self.keys[i]] = @(offset);
         finalSize = offset + self.keySizes[curKey].unsignedIntValue;
     }
-    if (finalSize % globalMaxElementSize != 0) {
-        finalSize = ((finalSize + globalMaxElementSize - 1) / globalMaxElementSize) * globalMaxElementSize;
+    if (finalSize % structAlignment != 0) {
+        finalSize = ((finalSize + structAlignment - 1) / structAlignment) * structAlignment;
     }
     size_ = finalSize;
     self.keyOffsets = keyOffsets;
