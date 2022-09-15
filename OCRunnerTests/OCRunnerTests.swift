@@ -404,7 +404,7 @@ class CRunnerTests: XCTestCase {
                 }
                 if (a == 2){
                     a = 100;
-                    continute;
+                    continue;
                 }
                 if (a == 3){
                   return a;
@@ -416,6 +416,40 @@ class CRunnerTests: XCTestCase {
         int b = testForStatement(2);
         int c = testForStatement(3);
         int d = testForStatement(4);
+        """
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORNode]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 1)
+        XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 10)
+        XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 101)
+        XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 101)
+    }
+
+    func testForStatement1(){
+        let source =
+        """
+        int testForStatement(int x){
+            int a = 0;
+            for (a = 1; a < x; a++){
+                if (x == 2){
+                    a = 10;
+                    break;
+                }
+                if (a == 2){
+                    a = 100;
+                    continue;
+                }
+                if (a == 3){
+                  return a;
+                }
+            }
+            NSLog(@"%d",a);
+            return a;
+        }
+        int c = testForStatement(3);
         """
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]

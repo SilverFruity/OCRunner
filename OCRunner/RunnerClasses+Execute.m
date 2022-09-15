@@ -1105,7 +1105,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             result.resultType = MFStatementResultTypeNormal;
             return result;
         }else if (result.isContinue){
-            continue;
+
         }
         for (ORNode *exp in self.expressions) {
             [exp execute:(MFScopeChain *)current];
