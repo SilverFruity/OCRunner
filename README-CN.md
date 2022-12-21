@@ -16,7 +16,7 @@ git clone --recursive https://github.com/SilverFruity/OCRunner.git
 
 ### [OCRunner](https://github.com/SilverFruity/OCRunner)开发补丁的工作流
 
-![0](https://www.sayhelloworld.blog/2020/09/04/OCRunner/OCRunner_0.jpeg)
+![0](https://raw.githubusercontent.com/SilverFruity/silverfruity.github.io/9a371dcb9cece8deefa4fe05b155ae7cbd5834b5/source/_posts/OCRunner/OCRunner_0.jpeg)
 
 ### 初衷
 
@@ -237,7 +237,7 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 
 ### 如何确定补丁中是否包含源文件
 
-![1](https://www.sayhelloworld.blog/2020/09/04/OCRunner/OCRunner_2.jpeg)
+![1](https://raw.githubusercontent.com/SilverFruity/silverfruity.github.io/9a371dcb9cece8deefa4fe05b155ae7cbd5834b5/source/_posts/OCRunner/OCRunner_2.jpeg)
 
 查看Run Script打印的 **InputFiles** 中是否包含源文件.
 
@@ -248,7 +248,7 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 
 ### 加载时间
 
-![2](https://www.sayhelloworld.blog/2020/09/04/OCRunner/OCRunner_1.jpeg)
+![2](https://raw.githubusercontent.com/SilverFruity/silverfruity.github.io/9a371dcb9cece8deefa4fe05b155ae7cbd5834b5/source/_posts/OCRunner/OCRunner_1.jpeg)
 
 ### 执行速度和内存占用
 
