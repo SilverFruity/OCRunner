@@ -10,7 +10,7 @@
 
 ### The work flow of using [OCRunner](https://github.com/SilverFruity/OCRunner) to generate a patch 
 
-![image](https://www.sayhelloworld.blog/2020/09/04/OCRunner/OCRunner_EN_0.jpeg)
+![image](https://raw.githubusercontent.com/SilverFruity/silverfruity.github.io/9a371dcb9cece8deefa4fe05b155ae7cbd5834b5/source/_posts/OCRunner/OCRunner_EN_0.jpeg)
 
 ### Responsibilities of all parties
 
@@ -229,7 +229,7 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 
 ### How to determine if source files are included in a patch
 
-![image](https://www.sayhelloworld.blog/2020/09/04/OCRunner/OCRunner_2.jpeg)
+![image](https://raw.githubusercontent.com/SilverFruity/silverfruity.github.io/9a371dcb9cece8deefa4fe05b155ae7cbd5834b5/source/_posts/OCRunner/OCRunner_2.jpeg)
 
 
 
@@ -237,7 +237,7 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 
 ### Loading time
 
-![2](https://www.sayhelloworld.blog/2020/09/04/OCRunner/OCRunner_1.jpeg)
+![2](https://raw.githubusercontent.com/SilverFruity/silverfruity.github.io/9a371dcb9cece8deefa4fe05b155ae7cbd5834b5/source/_posts/OCRunner/OCRunner_1.jpeg)
 
 ### Execution speed and memory usage
 
