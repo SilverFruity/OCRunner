@@ -133,3 +133,8 @@ int fibonaccia(int n){
     return fibonaccia(n - 1) + fibonaccia(n - 2);
 }
 fibonaccia(20);
+
+void mainFunc() {
+    NSLog(@"call mainFunc");
+}
+mainFunc();
