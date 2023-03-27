@@ -132,6 +132,10 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     if (exprOrStatementClass == [ORValueExpression class]) {
         ORValueExpression *expr = (ORValueExpression *)exprOrStatement;
         switch (expr.value_type) {
+            case OCValueNSNumber:{
+                copy_undef_var(expr.value, chain, fromScope, destScope);
+                break;
+            }
             case OCValueDictionary:{
                 for (NSArray *kv in expr.value) {
                     ORNode *keyExp = kv.firstObject;

@@ -1128,4 +1128,20 @@ class CRunnerTests: XCTestCase {
         let result = scope.getValueWithIdentifier("result")?.intValue
         XCTAssert(result == 3);
     }
+    func testBlockCaptureNSNumberSubNodes() {
+        let source =
+        """
+        int x = 1, y = 2, z= 3;
+        id (^block)(void) = ^id{
+            return @(x * y * z + 1);
+        };
+        id result = block();
+        """
+        let ast = ocparser.parseSource(source)
+        for classValue in ast.nodes {
+            (classValue as! OCExecute).execute(scope);
+        }
+        let result = scope.getValueWithIdentifier("result")?.objectValue
+        XCTAssert(result as? NSNumber == NSNumber(value: 7), "\(result)");
+    }
 }
