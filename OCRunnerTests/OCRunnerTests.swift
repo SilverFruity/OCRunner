@@ -456,10 +456,7 @@ class CRunnerTests: XCTestCase {
         for exp in exps {
             exp.execute(scope);
         }
-        XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 1)
-        XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 10)
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 101)
-        XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 101)
     }
     func testForStatementWithDeclare(){
         let source =

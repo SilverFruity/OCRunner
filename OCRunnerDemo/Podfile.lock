@@ -1,10 +1,10 @@
 PODS:
   - Masonry (1.1.0)
-  - MJExtension (3.4.0)
-  - MJRefresh (3.7.2)
+  - MJExtension (3.4.1)
+  - MJRefresh (3.7.5)
   - oc2mangoLib (1.2.1):
     - ORPatchFile (= 1.2.2)
-  - OCRunner (1.2.7):
+  - OCRunner (1.2.11):
     - ORPatchFile (= 1.2.2)
   - ORPatchFile (1.2.2)
 
@@ -32,12 +32,12 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
-  MJExtension: 6c15c7b93398447252c0defdb8d69d02d218a41e
-  MJRefresh: 30997d30b347c8e9508a4db11e3a690da0c9b85a
+  MJExtension: 21c5f6f8c4d5d8844b7ae8fbae08fed0b501f961
+  MJRefresh: fdf5e979eb406a0341468932d1dfc8b7f9fce961
   oc2mangoLib: f24f75a921e2e8e5f3ae9f4bb95156d20224e868
-  OCRunner: 562318da2d0942da8e4f50b2ff8b656512afa678
+  OCRunner: 2edf4e7f0b7bc7a81854dbd415f8729b4a365402
   ORPatchFile: 64d0ffc7eeb96374c901dc2873903b99d36e9bbe
 
-PODFILE CHECKSUM: 59dfe70efa92c71e7183d9eb6bba4a70d62464f1
+PODFILE CHECKSUM: c7fea74886d207f0d11dbc427b0a17ca0c468412
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.12.0
