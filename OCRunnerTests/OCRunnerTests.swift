@@ -1144,4 +1144,22 @@ class CRunnerTests: XCTestCase {
         let result = scope.getValueWithIdentifier("result")?.objectValue
         XCTAssert(result as? NSNumber == NSNumber(value: 7), "\(result)");
     }
+    func testConditionNullCheck(){
+        let source =
+        """
+        id a = nil;
+        int b = 0;
+        if ([a description]) {
+            b = 1;
+        }else{
+            b = 2;
+        }
+        """
+        let ast = ocparser.parseSource(source)
+        for classValue in ast.nodes {
+            (classValue as! OCExecute).execute(scope);
+        }
+        let result = scope.getValueWithIdentifier("b")?.intValue
+        XCTAssert(result == 2, "\(result)");
+    }
 }
