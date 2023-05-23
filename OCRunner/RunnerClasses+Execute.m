@@ -108,7 +108,7 @@ static void replace_getter_method(Class clazz, ORPropertyDeclare *prop){
 static void replace_setter_method(Class clazz, ORPropertyDeclare *prop){
     NSString *name = prop.var.var.varname;
     NSString *str1 = [[name substringWithRange:NSMakeRange(0, 1)] uppercaseString];
-    NSString *str2 = name.length > 1 ? [name substringFromIndex:1] : nil;
+    NSString *str2 = name.length > 1 ? [name substringFromIndex:1] : @"";
     SEL setterSEL = NSSelectorFromString([NSString stringWithFormat:@"set%@%@:",str1,str2]);
     const char *prtTypeEncoding  = prop.var.typeEncode;
     const char * typeEncoding = mf_str_append("v@:", prtTypeEncoding);
