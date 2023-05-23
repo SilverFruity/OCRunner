@@ -1153,4 +1153,17 @@ int signatureBlockPtr(id object, int b){
     XCTAssert(fakeModel.sub.stringToInteger == model1.sub.stringToInteger);
     XCTAssert([model1.sub isKindOfClass:[SubModel1 class]], @"%@", model1.sub.class);
 }
+- (void)testSetterMethodWhenPropertyLengthOne{
+    NSString * source =
+    @"@interface Test : NSObject"
+    @"@property (nonatomic) CGFloat x;"
+    @"@end"
+    @""
+    @"@implementation Test"
+    @"@end"
+    @"";
+    AST *ast = [_parser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    XCTAssert([[NSClassFromString(@"Test") new] performSelector:@selector(setX:)]);
+}
 @end
