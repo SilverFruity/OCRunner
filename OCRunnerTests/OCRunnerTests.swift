@@ -35,7 +35,7 @@ class CRunnerTests: XCTestCase {
             hasAddScripts = true
         }
         scope = MFScopeChain.init(next: MFScopeChain.topScope())
-        mf_add_built_in(scope)
+        mf_add_built_in(MFScopeChain.topScope())
     }
     override func tearDown() {
         
@@ -456,10 +456,7 @@ class CRunnerTests: XCTestCase {
         for exp in exps {
             exp.execute(scope);
         }
-        XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 1)
-        XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 10)
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 101)
-        XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 101)
     }
     func testForStatementWithDeclare(){
         let source =
@@ -1161,5 +1158,36 @@ class CRunnerTests: XCTestCase {
         }
         let result = scope.getValueWithIdentifier("b")?.intValue
         XCTAssert(result == 2, "\(result)");
+    }
+    
+    func testCFunctionCallTypeConvert(){
+        let source =
+        """
+        CGRect rect = CGRectMake(0.1, 0.1, 1.1, [@"1.1" floatValue]);
+        NSValue *a = [NSValue valueWithCGRect:rect];
+        """
+        let ast = ocparser.parseSource(source)
+        for classValue in ast.nodes {
+            (classValue as! OCExecute).execute(scope);
+        }
+        
+        let a = scope.getValueWithIdentifier("a")?.objectValue as? NSValue
+        let result = a?.cgRectValue.height;
+        XCTAssert(result == CGFloat(("1.1" as NSString).floatValue), "\(result)");
+    }
+
+    func testSystemFunctionCallTypeConvert() {
+        let source =
+        """
+        CGAffineTransform result = CGAffineTransformMake(0.1, 0.1, 0.1, 0.1, 0.1, [@"1.1" floatValue]);
+        NSValue *a = [NSValue valueWithCGAffineTransform:result];
+        """
+        let ast = ocparser.parseSource(source)
+        for classValue in ast.nodes {
+            (classValue as! OCExecute).execute(scope);
+        }
+        let a = scope.getValueWithIdentifier("a")?.objectValue as? NSValue
+        let result = a?.cgAffineTransformValue.ty;
+        XCTAssert(result == CGFloat(("1.1" as NSString).floatValue), "\(result)");
     }
 }

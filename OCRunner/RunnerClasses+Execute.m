@@ -291,7 +291,17 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
 @end
 @implementation ORFuncDeclare(Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
-    NSMutableArray * parameters = [ORArgsStack  pop];
+    NSMutableArray <MFValue *>*parameters = [ORArgsStack pop];
+    // 类型转换
+    do {
+        NSArray <ORTypeVarPair *>*declArgs = self.funVar.pairs;
+        // ignore 'void xxx(void)'
+        if (declArgs.count == 1 && declArgs[0].type.type == TypeVoid && declArgs[0].var.ptCount == 0) break;
+        for (int i = 0; i < declArgs.count; i++) {
+            parameters[i].typeEncode = declArgs[i].typeEncode;
+        }
+    } while (0);
+
     [parameters enumerateObjectsUsingBlock:^(MFValue * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [scope setValue:obj withIndentifier:self.funVar.pairs[idx].var.varname];
     }];

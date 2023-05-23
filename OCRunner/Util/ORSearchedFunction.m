@@ -46,6 +46,20 @@
         NSLog(@"OCRunner Error: Unknow return type of C function '%@'", self.name);
         return [MFValue nullValue];
     }
+
+    // 根据声明的类型进行转换
+    do {
+        if (self.funVar == nil) break;
+        NSAssert([self.funVar isKindOfClass:[ORFuncVariable class]], @"funVar must be ORFuncVariable");
+        ORFuncVariable *funcDecl = self.funVar;
+        NSArray <ORTypeVarPair*> *declArgs = funcDecl.pairs;
+        // ignore 'void xxx(void)'
+        if (declArgs.count == 1 && declArgs[0].type.type == TypeVoid && declArgs[0].var.ptCount == 0) break;
+        for (int i = 0; i < declArgs.count; i++) {
+            args[i].typeEncode = declArgs[i].typeEncode;
+        }
+    } while (0);
+
     MFValue *returnValue = [MFValue defaultValueWithTypeEncoding:org_typeencode];
     void *funcptr = self.pointer != NULL ? self.pointer : [ORSystemFunctionPointerTable pointerForFunctionName:self.name];
     if (funcptr == NULL) {
