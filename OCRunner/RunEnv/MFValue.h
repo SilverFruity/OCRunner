@@ -136,7 +136,7 @@ break;\
 #define UnaryExecute(resultName,operator,value)\
 do{\
     if (value.isPointer) {\
-        resultName = operator (value.pointer);\
+        resultName = operator (*(void **)value.pointer);\
         break;\
     }\
     UnaryExecuteBaseType(resultName,operator,value)\
