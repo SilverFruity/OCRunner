@@ -64,7 +64,7 @@ void recover_method(BOOL isClassMethod, Class clazz, SEL sel){
     for (ORPropertyDeclare *prop in self.properties){
         NSString *name = prop.var.var.varname;
         NSString *str1 = [[name substringWithRange:NSMakeRange(0, 1)] uppercaseString];
-        NSString *str2 = name.length > 1 ? [name substringFromIndex:1] : nil;
+        NSString *str2 = name.length > 1 ? [name substringFromIndex:1] : @"";
         SEL getterSEL = NSSelectorFromString(name);
         SEL setterSEL = NSSelectorFromString([NSString stringWithFormat:@"set%@%@:",str1,str2]);
         recover_method(NO, class, getterSEL);
