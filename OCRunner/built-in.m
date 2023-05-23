@@ -20,7 +20,19 @@ static void add_gcd_build_in(MFScopeChain *scope){
     [ORSystemFunctionPointerTable reg:@"dispatch_get_main_queue" pointer:&dispatch_get_main_queue];
     [ORSystemFunctionPointerTable reg:@"dispatch_block_notify" pointer:&dispatch_block_notify];
     [ORSystemFunctionPointerTable reg:@"dispatch_block_testcancel" pointer:&dispatch_block_testcancel];
-    
+    [ORSystemFunctionPointerTable reg:@"CATransform3DIsIdentity" pointer:&CATransform3DIsIdentity];
+    [ORSystemFunctionPointerTable reg:@"CATransform3DEqualToTransform" pointer:&CATransform3DEqualToTransform];
+    [ORSystemFunctionPointerTable reg:@"CATransform3DMakeTranslation" pointer:&CATransform3DMakeTranslation];
+    [ORSystemFunctionPointerTable reg:@"CATransform3DMakeRotation" pointer:&CATransform3DMakeRotation];
+    [ORSystemFunctionPointerTable reg:@"CATransform3DTranslate" pointer:&CATransform3DTranslate];
+    [ORSystemFunctionPointerTable reg:@"CATransform3DRotate" pointer:&CATransform3DRotate];
+    [ORSystemFunctionPointerTable reg:@"CATransform3DConcat" pointer:&CATransform3DConcat];
+    [ORSystemFunctionPointerTable reg:@"CATransform3DInvert" pointer:&CATransform3DInvert];
+    [ORSystemFunctionPointerTable reg:@"CGAffineTransformMake" pointer:&CGAffineTransformMake];
+    [ORSystemFunctionPointerTable reg:@"CGPointEqualToPoint" pointer:&CGPointEqualToPoint];
+    [ORSystemFunctionPointerTable reg:@"CGSizeEqualToSize" pointer:&CGSizeEqualToSize];
+    [ORSystemFunctionPointerTable reg:@"dispatch_block_perform" pointer:&dispatch_block_perform];
+
     /* queue */
     [scope setValue:[MFValue valueWithLongLong:DISPATCH_QUEUE_PRIORITY_HIGH] withIndentifier:@"DISPATCH_QUEUE_PRIORITY_HIGH"];
     [scope setValue:[MFValue valueWithLongLong:DISPATCH_QUEUE_PRIORITY_DEFAULT] withIndentifier:@"DISPATCH_QUEUE_PRIORITY_DEFAULT"];
@@ -40,9 +52,7 @@ static void add_gcd_build_in(MFScopeChain *scope){
 }
 
 static void add_build_in_function(MFScopeChain *scope){
-    [scope setValue:[MFValue valueWithBlock:^ CGAffineTransform(CGFloat a, CGFloat b, CGFloat c, CGFloat d, CGFloat tx, CGFloat ty){
-        return CGAffineTransformMake(a, b, c, d, tx, ty);
-    }] withIndentifier:@"CGAffineTransformMake"];
+
     
 }
 static void add_build_in_var(MFScopeChain *scope){

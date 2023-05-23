@@ -1164,6 +1164,6 @@ int signatureBlockPtr(id object, int b){
     @"";
     AST *ast = [_parser parseSource:source];
     [ORInterpreter excuteNodes:ast.nodes];
-    XCTAssert([[NSClassFromString(@"Test") new] performSelector:@selector(setX:)]);
+    XCTAssert([[NSClassFromString(@"Test") new] respondsToSelector:@selector(setX:)]);
 }
 @end
