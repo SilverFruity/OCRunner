@@ -150,6 +150,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             break;
         
         case OCTypeCString:
+        {
             _isAlloced = YES;
             char *str = *(char **)pointer;
             if (str != NULL) {
@@ -158,9 +159,10 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             realBaseValue.pointerValue = str;
             _pointer = &realBaseValue.pointerValue;
             break;
+        }
         
         case OCTypeObject:{
-            [self setObjectPointer:pointer withModifier:_modifier];
+            [self setObjectPointer:(void **)pointer withModifier:_modifier];
             break;
         }
         
@@ -189,8 +191,10 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             _pointer = &realBaseValue.pointerValue;
             break;
         }
+
         case OCTypeUnion:
         case OCTypeStruct:
+        {
             _isAlloced = YES;
             NSUInteger size = self.memerySize;
             void *dst = malloc(size);
@@ -201,6 +205,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
             realBaseValue.pointerValue = dst;
             _pointer = realBaseValue.pointerValue;
             break;
+        }
         case OCTypePointer:
             realBaseValue.pointerValue = *(void **)pointer;
             _pointer = &realBaseValue.pointerValue;
@@ -214,14 +219,14 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 - (void)setPointerCount:(NSInteger)pointerCount{
     if (pointerCount > _pointerCount) {
         //取地址，增加一个 '^'
-        char *typeencode = alloca(strlen(self.typeEncode) + 2);
+        char *typeencode = (char *)alloca(strlen(self.typeEncode) + 2);
         memset(typeencode, 0, strlen(self.typeEncode) + 2);
         typeencode[0] = OCTypePointer;
         memcpy(typeencode + 1, self.typeEncode, strlen(self.typeEncode));
         self.typeEncode = typeencode;
     }else if (*_typeEncode == OCTypePointer){
         //取值, 减少一个 '^'
-        char *typeencode = alloca(strlen(self.typeEncode));
+        char *typeencode = (char *)alloca(strlen(self.typeEncode));
         memset(typeencode, 0, strlen(self.typeEncode));
         memcpy(typeencode, self.typeEncode + 1, strlen(self.typeEncode) - 1);
         self.typeEncode = typeencode;
@@ -241,7 +246,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 - (void)setModifier:(DeclarationModifier)modifier{
     if (_type == OCTypeObject) {
-        [self setObjectPointer:_pointer withModifier:modifier];
+        [self setObjectPointer:(void **)_pointer withModifier:modifier];
     }
     _modifier = modifier;
 }
@@ -267,7 +272,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     if (typeEncode == NULL) {
         typeEncode = OCTypeStringULongLong;
     }
-    _type = *typeEncode;
+    _type = (OCType)*typeEncode;
     //基础类型转换
     if (strlen(typeEncode) == 1) {
         //类型相同时，直接跳过
@@ -541,9 +546,9 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     NSUInteger offset = declare.keyOffsets[key].unsignedIntegerValue;
     MFValue *result = [MFValue defaultValueWithTypeEncoding:declare.keyTypeEncodes[key].UTF8String];
     if (copied) {
-        result.pointer = realBaseValue.pointerValue + offset;
+        result.pointer = (char *)realBaseValue.pointerValue + offset;
     }else{
-        [result setValuePointerWithNoCopy:realBaseValue.pointerValue + offset];
+        [result setValuePointerWithNoCopy:(char *)realBaseValue.pointerValue + offset];
     }
     return result;
 }
@@ -558,7 +563,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     NSString *structName = self.typeName;
     ORStructDeclare *declare = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:structName].declare;
     NSUInteger offset = declare.keyOffsets[key].unsignedIntegerValue;
-    void *pointer = realBaseValue.pointerValue;
+    char *pointer = (char *)realBaseValue.pointerValue;
     if (pointer != NULL) {
         pointer += offset;
     }

@@ -79,6 +79,10 @@ ExternOCTypeString(Unknown)
 static const char *OCTypeStringBlock = "@?";
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 NSString *startRemovePointerOfTypeEncode(const char *typeEncode);
 NSUInteger startDetectPointerCount(const char *typeEncode);
 NSString *startStructNameDetect(const char *typeEncode);
@@ -102,3 +106,7 @@ BOOL isFloatWithTypeEncode(const char *typeEncode);
 BOOL isObjectWithTypeEncode(const char *typeEncode);
 BOOL isPointerWithTypeEncode(const char *typeEncode);
 NSUInteger sizeOfTypeEncode(const char *typeEncode);
+
+#ifdef __cplusplus
+}
+#endif
