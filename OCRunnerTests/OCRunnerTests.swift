@@ -1190,4 +1190,27 @@ class CRunnerTests: XCTestCase {
         let result = a?.cgAffineTransformValue.ty;
         XCTAssert(result == CGFloat(("1.1" as NSString).floatValue), "\(result)");
     }
+
+    func testAnyVariableSelfAssign() {
+        let source =
+        """
+        double a = 22.23;
+        a = a;
+        int b = 10;
+        b = b;
+        id c = [NSObject new];
+        c = c;
+        """
+        let ast = ocparser.parseSource(source)
+        for classValue in ast.nodes {
+            (classValue as! OCExecute).execute(scope);
+        }
+        let a = scope.getValueWithIdentifier("a")?.doubleValue
+        XCTAssert(a == 22.23, "\(a)")
+        let b = scope.getValueWithIdentifier("b")?.intValue
+        XCTAssert(b == 10, "\(b)")
+        let c = scope.getValueWithIdentifier("c")?.objectValue
+        XCTAssert(c != nil)
+    }
+    
 }

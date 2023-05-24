@@ -330,7 +330,6 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 {
     @public
     MFRealBaseValue realBaseValue;
-    @protected
     __strong id _strongObjectValue;
     __weak id _weakObjectValue;
 }
@@ -402,8 +401,6 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type);
 @end
 
 @interface MFValue (ValueType)
-
-
 @property (assign, nonatomic, readonly) unsigned char uCharValue;
 @property (assign, nonatomic, readonly) unsigned short uShortValue;
 @property (assign, nonatomic, readonly) unsigned int uIntValue;

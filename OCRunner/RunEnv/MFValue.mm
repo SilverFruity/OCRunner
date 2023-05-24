@@ -35,16 +35,36 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return type & MFStatementResultTypeReturnMask;
 }
 @interface MFValue()
-@property (nonatomic,strong)id strongObjectValue;
-@property (nonatomic,weak)id weakObjectValue;
-@end
-
-@implementation MFValue
 {
+@public
     void *_pointer;
     BOOL _isAlloced;
     BOOL _usedWeakPointer;
 }
+@property (nonatomic,strong)id strongObjectValue;
+@property (nonatomic,weak)id weakObjectValue;
+@end
+
+struct MFValueDeallocScope {
+    __strong id _strongObject;
+    bool _isAllocated;
+    void **_pointer;
+    MFRealBaseValue _baseValue;
+    MFValueDeallocScope(MFValue *value) {
+        _strongObject = value->_strongObjectValue;
+        _isAllocated = value->_isAlloced;
+        _baseValue = value->realBaseValue;
+        _pointer = (void **)value->_pointer;
+    }
+    ~MFValueDeallocScope() {
+        if (_pointer != NULL && _isAllocated) {
+            free(_baseValue.pointerValue);
+        }
+        _strongObject = nil;
+    }
+};
+
+@implementation MFValue
 + (instancetype)defaultValueWithTypeEncoding:(const char *)typeEncode{
     return [MFValue valueWithTypeEncode:typeEncode pointer:NULL];
 }
@@ -77,7 +97,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
 }
 - (void)setPointer:(void *)pointer{
     NSCAssert(_typeEncode != NULL, @"TypeEncode must exist");
-    [self deallocPointer];
+    MFValueDeallocScope scope(self);
     _isAlloced = NO;
     void *replace = NULL;
     if (pointer == NULL) {
@@ -233,7 +253,7 @@ extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     }
 }
 - (void)setValuePointerWithNoCopy:(void *)pointer{
-    [self deallocPointer];
+    MFValueDeallocScope scope(self);
     realBaseValue.pointerValue = pointer;
     _pointer = pointer;
     _isAlloced = NO;
