@@ -16,10 +16,6 @@ target 'OCRunnerDemo' do
     pod 'MJExtension'
   end
 
-  target 'OCRunnerDemoUITests' do
-    # Pods for testing
-  end
-
 end
 
 
