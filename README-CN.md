@@ -295,7 +295,7 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 
 ## 目前的问题
 
-1. 指针与乘号识别冲突问题，衍生的问题：类型转换等等
+1. 指针与乘号识别冲突问题，衍生的问题：不支持类型转换 等等
 2. 不支持static、inline函数声明
 3. 不支持C数组声明:  type a[]和type a[2]，以及 value = { 0 , 0 , 0 , 0 } 这种表达式
 4. 不支持 ‘->’ 操作符号
