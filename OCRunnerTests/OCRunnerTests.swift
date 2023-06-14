@@ -470,7 +470,7 @@ class CRunnerTests: XCTestCase {
                 }
                 if (a == 2){
                     b = 100;
-                    continute;
+                    continue;
                 }
                 if (a == 3){
                   return b;
