@@ -91,9 +91,9 @@ struct MFValueDeallocScope {
         free(realBaseValue.pointerValue);
         realBaseValue.pointerValue = NULL;
     }
+    _strongObjectValue = nil;
     realBaseValue.pointerValue = NULL;
     _pointer = NULL;
-    _strongObjectValue = nil;
 }
 - (void)setPointer:(void *)pointer{
     NSCAssert(_typeEncode != NULL, @"TypeEncode must exist");
@@ -795,7 +795,7 @@ struct MFValueDeallocScope {
 + (instancetype)valueWithObject:(id)objValue{
     return [MFValue valueWithTypeEncode:OCTypeStringObject pointer:&objValue];
 }
-+ (instancetype)valueWithUnownedObject:(id)objValue{
++ (instancetype)valueWithUnRetainedObject:(id)objValue{
     MFValue *value = [MFValue valueWithTypeEncode:OCTypeStringPointer pointer:&objValue];
     value.typeEncode = OCTypeStringObject;
     return value;

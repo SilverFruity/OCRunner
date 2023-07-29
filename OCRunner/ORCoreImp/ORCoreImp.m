@@ -47,7 +47,7 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
         scope.instance = [MFValue valueWithClass:target];
     }else{
         // 方法调用时不应该增加引用计数
-        scope.instance = [MFValue valueWithUnownedObject:target];
+        scope.instance = [MFValue valueWithUnRetainedObject:target];
     }
     scope.classNode = methodImp.classNode;
     MFValue *value = nil;

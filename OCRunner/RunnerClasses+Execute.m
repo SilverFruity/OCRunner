@@ -473,8 +473,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:class classMethod:isClassMethod sel:sel];
     if (map) {
         MFScopeChain *newScope = [MFScopeChain scopeChainWithNext:scope];
-        newScope.instance = isClassMethod ? [MFValue valueWithClass:instance] : [MFValue valueWithObject:instance];
         newScope.classNode = map.methodImp.classNode;
+        newScope.instance = isClassMethod ? [MFValue valueWithClass:instance] : [MFValue valueWithUnRetainedObject:instance];
         [ORArgsStack push:argValues];
         return [map.methodImp execute:newScope];
     }
@@ -486,7 +486,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     NSUInteger argCount = [sig numberOfArguments];
     //解决多参数调用问题
     if (argValues.count + 2 > argCount && sig != nil) {
-        NSMutableArray *methodArgs = [@[[MFValue valueWithObject:instance],
+        NSMutableArray *methodArgs = [@[[MFValue valueWithUnRetainedObject:instance],
                                        [MFValue valueWithSEL:sel]] mutableCopy];
         [methodArgs addObjectsFromArray:argValues];
         MFValue *result = [MFValue defaultValueWithTypeEncoding:[sig methodReturnType]];
