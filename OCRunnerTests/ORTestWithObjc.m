@@ -17,6 +17,7 @@
 #import "ORTestClassIvar.h"
 #import "ORParserForTest.h"
 #import "TestFakeModel.h"
+#import "ORTestORGDealloc.h"
 #import <MJExtension/MJExtension.h>
 
 @interface SubModel1 : NSObject
@@ -862,27 +863,42 @@ int signatureBlockPtr(id object, int b){
     MFValue *flag = [scope recursiveGetValueWithIdentifier:@"flag"];
     XCTAssert(flag.intValue == 1);
 }
-- (void)testBlockUseWeakVarWhileIsNil{
+- (void)testBlockUseWeakVarWhileIsNil {
     MFScopeChain *scope = self.currentScope;
     NSString *source = @"\
-    id value1 = [NSObject new];\
-    id value2 = [NSObject new];\
+    bool assignOther = YES;\
+    id value1 = nil;\
+    id value2 = nil;\
+    id value3 = nil;\
+    @interface TestObject:NSObject \
+    @property(assign, nonatomoic)BOOL assignOther; \
+    @end\
     @implementation TestObject\
+    - (instancetype)initWithFlag:(bool)value {\
+        self = [super init];\
+        _assignOther = value;\
+        return self;\
+    }\
     - (void)runTest{\
+        bool assignOther = _assignOther;\
         __weak id object = [NSObject new];\
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (1 * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{\
-            value1 = object;\
+            if (!assignOther) value1 = object;\
         });\
         __weak id weakSelf = self;\
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (1 * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{\
-            value2 = weakSelf;\
+            if (!assignOther) value2 = weakSelf;\
+            else value3 = weakSelf;\
         });\
     }\
     - (void)dealloc{\
         NSLog(@\"TestObject dealloc\");\
+        [super dealloc];\
     }\
     @end\
     [[TestObject new] runTest];\
+    id object = [[TestObject alloc] initWithFlag:YES];\
+    [object runTest];\
     ";
     @autoreleasepool {
         AST *ast = [OCParser parseSource:source];
@@ -891,8 +907,10 @@ int signatureBlockPtr(id object, int b){
     [NSThread sleepForTimeInterval:1.5f];
     MFValue *value1 = [scope recursiveGetValueWithIdentifier:@"value1"];
     MFValue *value2 = [scope recursiveGetValueWithIdentifier:@"value2"];
+    MFValue *value3 = [scope recursiveGetValueWithIdentifier:@"value3"];
     XCTAssert(value1.objectValue == nil, @"%@",value1.objectValue);
     XCTAssert(value2.objectValue == nil, @"%@",value2.objectValue);
+    XCTAssert(value3.objectValue != nil, @"%@",value2.objectValue);
 }
 - (void)testInputStackBlock{
     NSString *source = @"\
@@ -1107,7 +1125,7 @@ int signatureBlockPtr(id object, int b){
     @"    return a + b;"
     @"}"
     @"@end"
-    @"int a = [[Fibonaccia new] run:25];";
+    @"int a = [[Fibonaccia new] run:20];";
     AST *ast = [_parser parseSource:source];
     [self measureBlock:^{
         for (id <OCExecute> exp in ast.nodes) {
@@ -1183,4 +1201,75 @@ int signatureBlockPtr(id object, int b){
     IMP result = class_getMethodImplementation(TestFakeSubModel.class, @selector(numberToString));
     XCTAssert(before == result);
 }
+
+void testCallORGDeallocHelper(int *counter) {
+    [[ORTestORGDealloc alloc] initWithCounter:counter];
+}
+
+- (void)testCallORGDealloc {
+    NSString *source = @"\
+    @implementation ORTestORGDealloc\
+    - (void)dealloc {\
+        *_counter = *_counter + 100;\
+        [self ORGdealloc];\
+    }\
+    @end\
+    ";
+    AST *ast = [_parser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    int counter = 0;
+    testCallORGDeallocHelper(&counter);
+    XCTAssert(counter == 110);
+}
+
+
+- (void)testCallSuperDealloc {
+    MFScopeChain *scope = self.currentScope;
+    NSString *source = @"\
+    __weak id a = nil;\
+    __weak id b = nil;\
+    __weak id c = nil;\
+    int count = 0;\
+    @implementation ORTestDeallocBase\
+    /* by default, at the end of dealloc, we will call [super dealloc] */ \
+    - (void)dealloc {\
+        count++;\
+    }\
+    @end\
+    @interface ORTestSuperDealloc1: ORTestDeallocBase\
+    @end\
+    @implementation ORTestSuperDealloc1\
+    - (void)dealloc { }\
+    @end\
+    \
+    @interface ORTestSuperDealloc2: ORTestDeallocBase\
+    @end\
+    @implementation ORTestSuperDealloc2\
+    - (void)dealloc { }\
+    @end\
+    @interface ORTestSuperDealloc3: ORTestDeallocBase\
+    @end\
+    @implementation ORTestSuperDealloc3\
+    - (void)dealloc {\
+        [self ORGdealloc];\
+    }\
+    @end\
+    a = [ORTestSuperDealloc1 new];\
+    b = [ORTestSuperDealloc2 new];\
+    c = [ORTestSuperDealloc3 new];\
+    ";
+    AST *ast = [_parser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
+    MFValue *b = [scope recursiveGetValueWithIdentifier:@"b"];
+    MFValue *c = [scope recursiveGetValueWithIdentifier:@"c"];
+    MFValue *count = [scope recursiveGetValueWithIdentifier:@"count"];
+    XCTAssert(a.objectValue == nil);
+    XCTAssert(b.objectValue == nil);
+    XCTAssert(c.objectValue == nil);
+    // disassemblly arm64 of [xx dealloc], you can found the 'super_msgSend' is added by compiler.
+    // so ORTestSuperDealloc3's [self ORGdealloc] will call [NSObject dealloc] directly. so the count is 2.
+    XCTAssert(count.intValue == 2, @"count.intValue: %d", count.intValue);
+}
+
 @end

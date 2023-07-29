@@ -16,6 +16,14 @@
 #import "util.h"
 #import "ORStructDeclare.h"
 #import "ORCoreFunctionCall.h"
+#import <syslog.h>
+
+#define FATAL_CHECK(condition, msg) \
+if (!(condition)) {\
+    syslog(LOG_ERR, msg);\
+    abort();\
+}\
+
 void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     MFScopeChain *scope = [MFScopeChain scopeChainWithNext:[MFScopeChain topScope]];
     ORMethodImplementation *methodImp = (__bridge ORMethodImplementation *)userdata;
@@ -49,18 +57,34 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
         // 方法调用时不应该增加引用计数
         scope.instance = [MFValue valueWithUnRetainedObject:target];
     }
-    scope.classNode = methodImp.classNode;
-    MFValue *value = nil;
+
+    OREntryContext *ctx = [OREntryContext contextWithClass:methodImp.classNode];
+    ctx.isDeallocScope = sel == NSSelectorFromString(@"dealloc");
+    scope.entryCtx = ctx;
+
+    MFValue *returnValue = nil;
     [ORArgsStack push:argValues];
-    value = [methodImp execute:scope];
-    if (sel == NSSelectorFromString(@"dealloc")) {
-        Method deallocMethod = class_getInstanceMethod(object_getClass(target), NSSelectorFromString(@"ORGdealloc"));
-        void (*originalDealloc)(__unsafe_unretained id, SEL) = (__typeof__(originalDealloc))method_getImplementation(deallocMethod);
-        originalDealloc(target, NSSelectorFromString(@"dealloc"));
-    }
-    if (value.type != TypeVoid && value.pointer != NULL){
+    returnValue = [methodImp execute:scope];
+    if (returnValue.type != TypeVoid && returnValue.pointer != NULL){
         // 类型转换
-        [value writePointer:ret typeEncode:[sig methodReturnType]];
+        [returnValue writePointer:ret typeEncode:[sig methodReturnType]];
+    }
+
+    if (ctx.isDeallocScope) {
+        Class instanceClass = scope.classNode;
+        if (ctx.deferCallOrigDealloc) {
+            Method deallocMethod = class_getInstanceMethod(instanceClass, NSSelectorFromString(@"ORGdealloc"));
+            void (*originalDealloc)(__unsafe_unretained id, SEL) = (__typeof__(originalDealloc))method_getImplementation(deallocMethod);
+            FATAL_CHECK(originalDealloc != NULL, "orig dealloc must exist, otherwise memory leaks");
+            originalDealloc(target, NSSelectorFromString(@"dealloc"));
+        // default is call [super dealloc]
+        } else {
+            Class superClass = class_getSuperclass(instanceClass);
+            Method superDeallocMethod = class_getInstanceMethod(superClass, NSSelectorFromString(@"dealloc"));
+            void (*superDealloc)(__unsafe_unretained id, SEL) = (__typeof__(superDealloc))method_getImplementation(superDeallocMethod);
+            FATAL_CHECK(superDealloc != NULL, "super dealloc must exist, otherwise memory leaks");
+            superDealloc(target, NSSelectorFromString(@"dealloc"));
+        }
     }
 }
 

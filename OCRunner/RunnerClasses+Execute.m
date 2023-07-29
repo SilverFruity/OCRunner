@@ -422,6 +422,23 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     if ([self.caller isKindOfClass:[ORMethodCall class]]) {
         [(ORMethodCall *)self.caller setIsAssignedValue:self.isAssignedValue];
     }
+
+    // we don't invoke [self ORGdealloc] and [super dealloc] immediately under script's dealloc method,
+    // we will invoke them when we when exit dealloc method scope.
+    if (scope.entryCtx.isDeallocScope && [self.caller isKindOfClass:[ORValueExpression class]] ) {
+        ORValueExpression *value = (ORValueExpression *)self.caller;
+        SEL sel = NSSelectorFromString(self.selectorName);
+        if (value.value_type == OCValueSuper && sel == NSSelectorFromString(@"dealloc")) {
+            // call [super dealloc]
+            scope.entryCtx.deferCallSuperDealloc = YES;
+            return [MFValue voidValue];
+        } else if (value.value_type == OCValueSelf && sel == NSSelectorFromString(@"ORGdealloc")) {
+            // call [self ORGdealloc]
+            scope.entryCtx.deferCallOrigDealloc = YES;
+            return [MFValue voidValue];
+        }
+    }
+
     MFValue *variable = [self.caller execute:scope];
     if (variable.type == OCTypeStruct || variable.type == OCTypeUnion) {
         if ([self.names.firstObject hasPrefix:@"set"]) {
@@ -473,8 +490,8 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:class classMethod:isClassMethod sel:sel];
     if (map) {
         MFScopeChain *newScope = [MFScopeChain scopeChainWithNext:scope];
-        newScope.classNode = map.methodImp.classNode;
         newScope.instance = isClassMethod ? [MFValue valueWithClass:instance] : [MFValue valueWithUnRetainedObject:instance];
+        newScope.entryCtx = [OREntryContext contextWithClass:map.methodImp.classNode];
         [ORArgsStack push:argValues];
         return [map.methodImp execute:newScope];
     }

@@ -14,6 +14,15 @@
 #import "util.h"
 #import "RunnerClasses+Execute.h"
 #import "ORTypeVarPair+TypeEncode.h"
+
+@implementation OREntryContext
++ (instancetype)contextWithClass:(Class)classNode {
+    OREntryContext *ctx = [OREntryContext new];
+    ctx->_classNode = classNode;
+    return ctx;
+}
+@end
+
 @interface MFScopeChain()
 @end
 static MFScopeChain *instance = nil;
@@ -29,13 +38,17 @@ static MFScopeChain *instance = nil;
 	MFScopeChain *scope = [MFScopeChain new];
 	scope.next = next;
     scope.instance = next.instance;
-    scope.classNode = next.classNode;
+    scope.entryCtx = next.entryCtx;
 #if DEBUG
     MFValue *value = [MFValue valueWithObject:scope];
     value.modifier = DeclarationModifierWeak;
     [scope setValue:value withIndentifier:@"$curScope"];
 #endif
 	return scope;
+}
+
+- (Class)classNode {
+    return _entryCtx.classNode;
 }
 
 - (instancetype)init{

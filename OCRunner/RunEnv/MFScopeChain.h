@@ -12,13 +12,25 @@
 #import "built-in.h"
 @class MFValue;
 NS_ASSUME_NONNULL_BEGIN
+
+@interface OREntryContext: NSObject
+@property (strong, nonatomic) Class classNode;
+@property (nonatomic, assign)bool isDeallocScope;
+@property (nonatomic, assign)bool deferCallOrigDealloc;
+@property (nonatomic, assign)bool deferCallSuperDealloc;
++ (instancetype)contextWithClass:(Class)classNode;
+@end
+
 extern const void *mf_propKey(NSString *propName);
 @interface MFScopeChain: NSObject
 @property (strong, nonatomic) NSMutableDictionary<NSString *,MFValue *> *vars;
 + (instancetype)topScope;
 @property (strong, nonatomic) MFScopeChain *next;
 @property (strong, nonatomic) MFValue *instance;
-@property (strong, nonatomic) Class classNode;
+// only in Method or Function's top scope.
+@property (strong, nonatomic) OREntryContext *entryCtx;
+
+- (Class)classNode;
 
 + (instancetype)scopeChainWithNext:(MFScopeChain *)next;
 - (nullable MFValue *)getValueWithIdentifier:(NSString *)identifier endScope:(nullable MFScopeChain *)endScope;
