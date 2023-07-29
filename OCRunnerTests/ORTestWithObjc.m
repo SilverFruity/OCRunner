@@ -1166,4 +1166,21 @@ int signatureBlockPtr(id object, int b){
     [ORInterpreter excuteNodes:ast.nodes];
     XCTAssert([[NSClassFromString(@"Test") new] respondsToSelector:@selector(setX:)]);
 }
+
+- (void)testHotfixAbandonPropertyReplace {
+    NSString * source =
+    @"@interface TestFakeSubModel : NSObject \
+    @property (nonatomic, strong) NSString *numberToString; \
+    // raw \
+    // @property (nonatomic, copy) NSString *numberToString; \
+    @end \
+    ";
+    IMP before = class_getMethodImplementation(TestFakeSubModel.class, @selector(numberToString));
+    AST *ast = [_parser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    objc_property_t prop3 = class_getProperty(TestFakeSubModel.class, "numberToString");
+    XCTAssert(strcmp(property_getAttributes(prop3), "T@\"NSString\",C,N,V_numberToString") == 0);
+    IMP result = class_getMethodImplementation(TestFakeSubModel.class, @selector(numberToString));
+    XCTAssert(before == result);
+}
 @end

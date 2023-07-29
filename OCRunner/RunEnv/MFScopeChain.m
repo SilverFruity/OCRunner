@@ -86,9 +86,9 @@ const void *mf_propKey(NSString *propName) {
             Class clazz = object_getClass(instance);
             NSString *propName = [self propNameByIvarName:identifier];
             if (propName != nil) {
-                MFPropertyMapTable *table = [MFPropertyMapTable shareInstance];
-                ORPropertyDeclare *propDef = [table getPropertyMapTableItemWith:clazz name:propName].property;
-                if (propDef) {
+                MFPropertyMapTableItem *propItem = [[MFPropertyMapTable shareInstance] getPropertyMapTableItemWith:clazz name:propName];
+                ORPropertyDeclare *propDef = propItem.property;
+                if (propItem.added && propDef) {
                     MFValue *result = [[MFValue alloc] initTypeEncode:propDef.var.typeEncode pointer:value.pointer];
                     MFPropertyModifier modifier = propDef.modifier;
                     if ((modifier & MFPropertyModifierMemMask) == MFPropertyModifierMemWeak) {
@@ -128,9 +128,9 @@ const void *mf_propKey(NSString *propName) {
             Class clazz = object_getClass(instance);
             NSString *propName = [self propNameByIvarName:identifier];
             if (propName != nil) {
-                MFPropertyMapTable *table = [MFPropertyMapTable shareInstance];
-                ORPropertyDeclare *propDef = [table getPropertyMapTableItemWith:clazz name:propName].property;
-                if (propDef) {
+                MFPropertyMapTableItem *propItem = [[MFPropertyMapTable shareInstance] getPropertyMapTableItemWith:clazz name:propName];
+                ORPropertyDeclare *propDef = propItem.property;     
+                if (propItem.added && propDef) {
                     MFValue *propValue = objc_getAssociatedObject(instance, mf_propKey(propName));
                     if (!propValue) {
                         return [MFValue defaultValueWithTypeEncoding:propDef.var.typeEncode];

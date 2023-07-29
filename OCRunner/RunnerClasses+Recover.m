@@ -63,6 +63,9 @@ void recover_method(BOOL isClassMethod, Class clazz, SEL sel){
     }
     for (ORPropertyDeclare *prop in self.properties){
         NSString *name = prop.var.var.varname;
+        if ([[MFPropertyMapTable shareInstance] getPropertyMapTableItemWith:class name:name].added == NO) {
+            continue;
+        }
         NSString *str1 = [[name substringWithRange:NSMakeRange(0, 1)] uppercaseString];
         NSString *str2 = name.length > 1 ? [name substringFromIndex:1] : @"";
         SEL getterSEL = NSSelectorFromString(name);

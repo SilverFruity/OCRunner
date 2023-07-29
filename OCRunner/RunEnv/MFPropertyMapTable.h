@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (strong, nonatomic) Class clazz;
 @property (strong, nonatomic) ORPropertyDeclare *property;
-
+@property (assign, nonatomic) bool added;
 - (instancetype)initWithClass:(Class)clazz  property:(ORPropertyDeclare *)property;
 
 @end

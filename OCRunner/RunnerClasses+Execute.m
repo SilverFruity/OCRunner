@@ -1179,9 +1179,16 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     NSString *propertyName = self.var.var.varname;
     MFValue *classValue = [scope recursiveGetValueWithIdentifier:@"Class"];
     Class class = *(Class *)classValue.pointer;
-    class_replaceProperty(class, [propertyName UTF8String], self.propertyAttributes, 3);
     MFPropertyMapTableItem *propItem = [[MFPropertyMapTableItem alloc] initWithClass:class property:self];
     [[MFPropertyMapTable shareInstance] addPropertyMapTableItem:propItem];
+    // only support add new property
+    if (class_getProperty(class, propertyName.UTF8String)) {
+        propItem.added = NO;
+        return nil;
+    }
+    // for recover: RunnerClasses+Recover.m
+    propItem.added = YES;
+    class_addProperty(class, propertyName.UTF8String, self.propertyAttributes, 3);
     replace_getter_method(class, self);
     replace_setter_method(class, self);
     return nil;
