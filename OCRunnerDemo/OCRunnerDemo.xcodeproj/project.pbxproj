@@ -23,6 +23,7 @@
 		EE48547F263ACB5D0080AE07 /* SwiftViewController1.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE48547D263ACB5D0080AE07 /* SwiftViewController1.swift */; };
 		EE485480263ACB5D0080AE07 /* SwiftViewController1.xib in Resources */ = {isa = PBXBuildFile; fileRef = EE48547E263ACB5D0080AE07 /* SwiftViewController1.xib */; };
 		EE66C0C224FEAC0F00C85B31 /* Scripts.bundle in Resources */ = {isa = PBXBuildFile; fileRef = EE66C0C124FEAC0F00C85B31 /* Scripts.bundle */; };
+		EE7F74B72A7A9A110000B24C /* ORTestORGDealloc.m in Sources */ = {isa = PBXBuildFile; fileRef = EE7F74B62A7A9A110000B24C /* ORTestORGDealloc.m */; };
 		EEBF333E248E848100DDE2E9 /* OCRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEBF333D248E848100DDE2E9 /* OCRunnerTests.swift */; };
 		EEBF334C248E84AA00DDE2E9 /* ORCallOCPropertyBlockTest.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3340248E84A900DDE2E9 /* ORCallOCPropertyBlockTest.m */; };
 		EEBF334D248E84AA00DDE2E9 /* ORCallSuperNoArgTest.m in Sources */ = {isa = PBXBuildFile; fileRef = EEBF3343248E84A900DDE2E9 /* ORCallSuperNoArgTest.m */; };
@@ -88,6 +89,8 @@
 		EE66C09E24FE95D600C85B31 /* ViewController1.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController1.m; sourceTree = "<group>"; };
 		EE66C0BD24FEA97000C85B31 /* Scripts.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Scripts.bundle; sourceTree = "<group>"; };
 		EE66C0C124FEAC0F00C85B31 /* Scripts.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = Scripts.bundle; path = OCRunnerDemo/Scripts.bundle; sourceTree = SOURCE_ROOT; };
+		EE7F74B52A7A9A110000B24C /* ORTestORGDealloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORTestORGDealloc.h; sourceTree = "<group>"; };
+		EE7F74B62A7A9A110000B24C /* ORTestORGDealloc.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORTestORGDealloc.m; sourceTree = "<group>"; };
 		EEBF3312248E61FC00DDE2E9 /* OCRunnerDemoTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OCRunnerDemoTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		EEBF333D248E848100DDE2E9 /* OCRunnerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = OCRunnerTests.swift; path = ../../OCRunnerTests/OCRunnerTests.swift; sourceTree = "<group>"; };
 		EEBF3340248E84A900DDE2E9 /* ORCallOCPropertyBlockTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ORCallOCPropertyBlockTest.m; sourceTree = "<group>"; };
@@ -240,6 +243,8 @@
 				EEBF3347248E84A900DDE2E9 /* ORTestClassIvar.m */,
 				EEBF334B248E84A900DDE2E9 /* ORTestClassProperty.h */,
 				EEBF3344248E84A900DDE2E9 /* ORTestClassProperty.m */,
+				EE7F74B52A7A9A110000B24C /* ORTestORGDealloc.h */,
+				EE7F74B62A7A9A110000B24C /* ORTestORGDealloc.m */,
 				EEBF3345248E84A900DDE2E9 /* ORTestReplaceClass.h */,
 				EEBF334A248E84A900DDE2E9 /* ORTestReplaceClass.m */,
 				04A634C825E4A79300DB31A6 /* ORRecoverClass.h */,
@@ -501,6 +506,7 @@
 				EEBF3353248E84D100DDE2E9 /* ORTestWithObjc.m in Sources */,
 				EECD490D28AA831B00253282 /* ORHookNatvieMultiSuperCall.m in Sources */,
 				EEBF334E248E84AA00DDE2E9 /* ORTestClassProperty.m in Sources */,
+				EE7F74B72A7A9A110000B24C /* ORTestORGDealloc.m in Sources */,
 				18C746632679EFB700317C75 /* ORParserForTest.m in Sources */,
 				04A634D125E4AB5A00DB31A6 /* ORRecoverClass.m in Sources */,
 				EEBF334F248E84AA00DDE2E9 /* ORTestClassIvar.m in Sources */,

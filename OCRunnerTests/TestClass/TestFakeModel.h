@@ -24,4 +24,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) TestFakeSubModel *sub;
 @end
 
+@interface TestFakeModel (TestProperty)
+@property (nonatomic, assign) int categoryProperty;
+@end
+
 NS_ASSUME_NONNULL_END

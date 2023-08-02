@@ -48,16 +48,6 @@
                ReferencedContainer = "container:OCRunnerDemo.xcodeproj">
             </BuildableReference>
          </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "EE480EB324794CDB003E4970"
-               BuildableName = "OCRunnerDemoUITests.xctest"
-               BlueprintName = "OCRunnerDemoUITests"
-               ReferencedContainer = "container:OCRunnerDemo.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

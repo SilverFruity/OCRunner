@@ -1185,7 +1185,7 @@ int signatureBlockPtr(id object, int b){
     XCTAssert([[NSClassFromString(@"Test") new] respondsToSelector:@selector(setX:)]);
 }
 
-- (void)testHotfixAbandonPropertyReplace {
+- (void)testHotfixPropertyWhenIvarExist {
     NSString * source =
     @"@interface TestFakeSubModel : NSObject \
     @property (nonatomic, strong) NSString *numberToString; \
@@ -1200,6 +1200,23 @@ int signatureBlockPtr(id object, int b){
     XCTAssert(strcmp(property_getAttributes(prop3), "T@\"NSString\",C,N,V_numberToString") == 0);
     IMP result = class_getMethodImplementation(TestFakeSubModel.class, @selector(numberToString));
     XCTAssert(before == result);
+}
+
+- (void)testHotfixPropertyWhenIvarNotExist {
+    NSString * source =
+    @"@interface TestFakeModel: NSObject\
+    @property(nonatomic, assign)int categoryProperty;\
+    @end\
+    @implementation TestFakeModel\
+    @end\
+    ";
+    TestFakeModel *model = [TestFakeModel new];
+    XCTAssert(![model respondsToSelector:@selector(categoryProperty)]);
+    XCTAssert(![model respondsToSelector:@selector(setCategoryProperty:)]);
+    AST *ast = [_parser parseSource:source];
+    [ORInterpreter excuteNodes:ast.nodes];
+    [model setCategoryProperty:1000];
+    XCTAssert(model.categoryProperty == 1000);
 }
 
 void testCallORGDeallocHelper(int *counter) {

@@ -1198,8 +1198,9 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
     Class class = *(Class *)classValue.pointer;
     MFPropertyMapTableItem *propItem = [[MFPropertyMapTableItem alloc] initWithClass:class property:self];
     [[MFPropertyMapTable shareInstance] addPropertyMapTableItem:propItem];
-    // only support add new property
-    if (class_getProperty(class, propertyName.UTF8String)) {
+    // only support add new property when ivar is NULL
+    if (class_getProperty(class, propertyName.UTF8String)
+        && class_getInstanceVariable(class, [@"_" stringByAppendingString:propertyName].UTF8String)) {
         propItem.added = NO;
         return nil;
     }
