@@ -34,18 +34,25 @@
 }
 + (NSString *)history{
     NSMutableArray *frames = [ORCallFrameStack threadStack].array;
-    NSMutableString *log = [@"OCRunner Frames:\n\n" mutableCopy];
-    for (int i = 0; i < frames.count; i++) {
+    NSMutableString *log = [@"*OCRunner Frames:*\n" mutableCopy];
+    // avoid unsigned int overflow
+    if (frames.count == 0) {
+        return [log stringByAppendingString:@"Empty\n"];
+    }
+    for (int i = (int)frames.count - 1; i >= 0; i--) {
         NSArray *frame = frames[i];
         if ([frame.firstObject isKindOfClass:[MFValue class]]) {
             MFValue *instance = frame.firstObject;
             ORMethodImplementation *imp = frame.lastObject;
-            [log appendFormat:@"%@ %@ %@\n", imp.declare.isClassMethod ? @"+" : @"-", instance.objectValue, imp.declare.selectorName];
+            BOOL isClassMethod = imp.declare.isClassMethod;
+            id objectValue = instance.objectValue;
+            const char *className = isClassMethod ? class_getName(objectValue) : object_getClassName(objectValue);
+            [log appendFormat:@"%@[%s %@]\n", isClassMethod ? @"+" : @"-", className, imp.declare.selectorName];
         }else{
             MFScopeChain *scope = frame.firstObject;
             ORFunctionImp *imp = frame.lastObject;
             if (imp.declare.funVar.varname == nil){
-                [log appendFormat:@"Block Call: Captured external variables '%@' \n",[scope.vars.allKeys componentsJoinedByString:@","]];
+                [log appendFormat:@"\nBlock Call: Captured external variables '%@' \n",[scope.vars.allKeys componentsJoinedByString:@","]];
                 // 比如dispatch_after中的block，此时只会孤零零的提醒你一个Block Call
                 // 异步调用时，此时通过语法树回溯，可以定位到 block 所在的类以及方法名
                 if (i == 0) {

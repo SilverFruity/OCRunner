@@ -8,6 +8,13 @@
 
 #import "ViewController.h"
 #import <Masonry/Masonry.h>
+
+typedef NS_ENUM(NSInteger, UIBarButtonItemStyle) {
+    UIBarButtonItemStylePlain,
+    UIBarButtonItemStyleBordered,
+    UIBarButtonItemStyleDone,
+};
+
 typedef NS_ENUM(NSInteger, WKNavigationActionPolicy) {
     WKNavigationActionPolicyCancel,
     WKNavigationActionPolicyAllow,

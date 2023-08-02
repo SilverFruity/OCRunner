@@ -2,6 +2,21 @@
 #import <UIKit/UIKit.h>
 #import <MJRefresh/MJRefresh.h>
 
+CGRect CGRectZero = CGRectMake(0, 0, 0, 0);
+
+typedef NS_ENUM(NSInteger, UITableViewStyle) {
+    UITableViewStylePlain,          // regular table view
+    UITableViewStyleGrouped,        // sections are grouped together
+    UITableViewStyleInsetGrouped   // grouped sections are inset with rounded corners
+};
+
+typedef NS_ENUM(NSInteger, UITableViewCellSelectionStyle) {
+    UITableViewCellSelectionStyleNone,
+    UITableViewCellSelectionStyleBlue,
+    UITableViewCellSelectionStyleGray,
+    UITableViewCellSelectionStyleDefault
+};
+
 @implementation OCRunnerDemo.SwiftViewController
 - (void)updateFrame:(NSObject *)arg arg1:(NSNumber *)arg1{
     [self ORGupdateFrame:arg arg1:arg1];

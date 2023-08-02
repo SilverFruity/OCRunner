@@ -319,9 +319,32 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
                 value = [MFValue valueWithClass:class];
             }else{
 #if DEBUG
-                if (self.value) NSLog(@"\n---------OCRunner Warning---------\n"
-                                      @"Can't find object or class: %@\n"
-                                      @"-----------------------------------", self.value);
+                if (self.value) {
+                    NSLog(@"\
+\n---------OCRunner Error---------\n\
+*Unknown variable or class: '%@'*\n\
+%@\n\
+you should add a (enum declare / global variable or others) in OCRunner scripts.\n\
+for example:\n\
+if it is a UIControlStateNormal, you should add a enum declare in Script\n\
+```\n\
+typedef NS_OPTIONS(NSUInteger, UIControlState) {\n\
+  UIControlStateNormal       = 0,\n\
+  UIControlStateHighlighted  = 1 << 0,\n\
+  UIControlStateDisabled     = 1 << 1\n\
+};\n\
+```\n\
+if it is a UIApplicationDidBecomeActiveNotification, then add a 'NSString *' global variable\n\
+```\n\
+NSString *UIApplicationDidBecomeActiveNotification = @\"UIApplicationDidBecomeActiveNotification\";\n\
+```\n\
+if it is a CGRectZero, then add a 'CGRect' global variable\n\
+```\n\
+CGRect CGRectZero = CGRectMake(0, 0, 0, 0);\n\
+```\n\
+-----------------------------------", self.value, [ORCallFrameStack history]);
+                    NSAssert(false, @"as mentioned above");
+                }
 #endif
                 value = [MFValue nullValue];
             }
