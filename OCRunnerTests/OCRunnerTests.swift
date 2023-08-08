@@ -1213,4 +1213,36 @@ class CRunnerTests: XCTestCase {
         XCTAssert(c != nil)
     }
     
+    func testAfterKVOGetSetPropertyIvar() {
+        let source =
+        """
+        typedef NS_OPTIONS(NSUInteger, NSKeyValueObservingOptions) {
+            NSKeyValueObservingOptionNew = 0x01,
+            NSKeyValueObservingOptionOld = 0x02,
+            NSKeyValueObservingOptionInitial = 0x04,
+            NSKeyValueObservingOptionPrior = 0x08
+        };
+        @interface Person : NSObject
+        @property (nonatomic, copy) NSString *name;
+        @end
+        @implementation Person
+        - (void)addObserver {
+            [self addObserver:self forKeyPath:@"name" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
+            _name = @"123";
+        }
+        - (void)name {
+            return _name;
+        }
+        @end
+        id value = [Person new];
+        [value addObserver];
+        id result = value.name;
+        """
+        let ast = ocparser.parseSource(source)
+        for classValue in ast.nodes {
+            (classValue as! OCExecute).execute(scope);
+        }
+        let result = scope.getValueWithIdentifier("result")?.objectValue as? String
+        XCTAssert(result == "123", result ?? "error")
+    }
 }

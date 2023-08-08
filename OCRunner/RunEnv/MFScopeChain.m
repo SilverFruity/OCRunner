@@ -96,7 +96,7 @@ const void *mf_propKey(NSString *propName) {
 	for (MFScopeChain *pos = self; pos; pos = pos.next) {
 		if ([identifier characterAtIndex:0] == '_' && pos.instance) {
             id instance = [(MFValue *)pos.instance objectValue];
-            Class clazz = object_getClass(instance);
+            Class clazz = [instance class];
             NSString *propName = [self propNameByIvarName:identifier];
             if (propName != nil) {
                 MFPropertyMapTableItem *propItem = [[MFPropertyMapTable shareInstance] getPropertyMapTableItemWith:clazz name:propName];
@@ -112,7 +112,7 @@ const void *mf_propKey(NSString *propName) {
                     return;
                 }
             }
-            Ivar ivar = class_getInstanceVariable(object_getClass(instance),identifier.UTF8String);
+            Ivar ivar = class_getInstanceVariable(clazz,identifier.UTF8String);
             if(ivar){
                 const char *ivarEncoding = ivar_getTypeEncoding(ivar);
                 if (*ivarEncoding == OCTypeObject) {
@@ -138,7 +138,7 @@ const void *mf_propKey(NSString *propName) {
     do {
         if ([identifier characterAtIndex:0] == '_' && pos.instance) {
             id instance = [(MFValue *)pos.instance objectValue];
-            Class clazz = object_getClass(instance);
+            Class clazz = [instance class];
             NSString *propName = [self propNameByIvarName:identifier];
             if (propName != nil) {
                 MFPropertyMapTableItem *propItem = [[MFPropertyMapTable shareInstance] getPropertyMapTableItemWith:clazz name:propName];
