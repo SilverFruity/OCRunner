@@ -117,7 +117,6 @@ class CRunnerTests: XCTestCase {
         let result = scope.getValueWithIdentifier("a")
         XCTAssert(result!.type == OCTypeObject)
         XCTAssert(result?.objectValue != nil) //__NSMallocBlock__
-        let scopeValue = scope.getValueWithIdentifier("a")
     }
     func testBlockExecute(){
         let source =
