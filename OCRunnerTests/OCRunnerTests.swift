@@ -102,7 +102,7 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scopeValue!.type == OCTypeCString)
         XCTAssert(String(utf8String: scopeValue!.cStringValue!) == "123")
         scopeValue = scope.getValueWithIdentifier("sel")
-        XCTAssert(scopeValue!.selValue == Selector("test"))
+        XCTAssert(scopeValue!.selValue == #selector(ORTestReplaceClass.test))
     }
     func testeDeclareBlock(){
         let source =
