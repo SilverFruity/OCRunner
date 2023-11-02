@@ -1088,6 +1088,7 @@ class CRunnerTests: XCTestCase {
             }
             return [super test:count + 1];
         }
+        @end
 
         @interface ViewController3 : HotBaseController
         @end
