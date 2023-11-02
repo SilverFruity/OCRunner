@@ -102,7 +102,7 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scopeValue!.type == OCTypeCString)
         XCTAssert(String(utf8String: scopeValue!.cStringValue!) == "123")
         scopeValue = scope.getValueWithIdentifier("sel")
-        XCTAssert(scopeValue!.selValue == Selector("test"))
+        XCTAssert(scopeValue!.selValue == #selector(ORTestReplaceClass.test))
     }
     func testeDeclareBlock(){
         let source =
@@ -117,9 +117,6 @@ class CRunnerTests: XCTestCase {
         let result = scope.getValueWithIdentifier("a")
         XCTAssert(result!.type == OCTypeObject)
         XCTAssert(result?.objectValue != nil) //__NSMallocBlock__
-        let scopeValue = scope.getValueWithIdentifier("a")
-        XCTAssert(scopeValue!.type == OCTypeObject)
-        XCTAssert(scopeValue?.objectValue != nil) //__NSMallocBlock__
     }
     func testBlockExecute(){
         let source =
@@ -137,8 +134,7 @@ class CRunnerTests: XCTestCase {
         }
         let scopeValue = scope.getValueWithIdentifier("b")
         XCTAssert(scopeValue!.type == OCTypeInt)
-        XCTAssert(scopeValue!.type == OCTypeInt)
-        XCTAssert(scopeValue!.shortValue == 2)
+        XCTAssert(scopeValue!.intValue == 2)
     }
     func testBlockCopyValue(){
         let source =
@@ -449,14 +445,20 @@ class CRunnerTests: XCTestCase {
             NSLog(@"%d",a);
             return a;
         }
+        int a = testForStatement(0);
+        int b = testForStatement(2);
         int c = testForStatement(3);
+        int d = testForStatement(4);
         """
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
             exp.execute(scope);
         }
+        XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 1)
+        XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 10)
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 101)
+        XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 101)
     }
     func testForStatementWithDeclare(){
         let source =
@@ -774,6 +776,14 @@ class CRunnerTests: XCTestCase {
         let source =
         """
         @implementation ORGCDTests
+        + (instancetype)sharedInstance{
+            static ORGCDTests *instance = nil;
+            static dispatch_once_t onceToken;
+            dispatch_once(&onceToken, ^{
+                instance = [ORGCDTests new];
+            });
+            return instance;
+        }
         - (void)testGCDWithCompletionBlock:(void (^)(NSString * _Nonnull))completion{
            dispatch_queue_t queue = dispatch_queue_create("com.plliang19.mango", DISPATCH_QUEUE_SERIAL);
            dispatch_async(queue, ^{
@@ -818,6 +828,11 @@ class CRunnerTests: XCTestCase {
         for classValue in classes {
             classValue.execute(scope);
         }
+        
+        let shared1 = ORGCDTests.sharedInstance()
+        let shared2 = ORGCDTests.sharedInstance()
+        XCTAssert(shared1 === shared2)
+        
         let test = ORGCDTests.init()
         XCTAssert(test.testDispatchSemaphore())
         XCTAssert(test.testDispatchSource() == 10)
@@ -854,21 +869,6 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 2)
         exps[3].execute(scope)
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 3)
-    }
-    func testDispatchOnce(){
-        source =
-        """
-        typedef NSInteger dispatch_once_t;
-        static dispatch_once_t onceToken;
-        dispatch_once(&onceToken, ^{
-            [NSObject new];
-        });
-        """
-        let ast = ocparser.parseSource(source)
-        let exps = ast.globalStatements as! [ORNode]
-        for exp in exps {
-            exp.execute(scope);
-        }
     }
     
     func testEnumDeclare(){
@@ -1087,6 +1087,7 @@ class CRunnerTests: XCTestCase {
             }
             return [super test:count + 1];
         }
+        @end
 
         @interface ViewController3 : HotBaseController
         @end

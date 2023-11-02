@@ -11,6 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ORGCDTests : NSObject
++ (instancetype)sharedInstance;
 - (void)testGCDWithCompletionBlock:(void(^)(NSString * data))completion;
 - (void)testGCDAfterWithCompletionBlock:(void(^)(NSString * data))completion;
 - (BOOL)testDispatchSemaphore;
