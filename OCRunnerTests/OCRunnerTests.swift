@@ -777,6 +777,14 @@ class CRunnerTests: XCTestCase {
         let source =
         """
         @implementation ORGCDTests
+        + (instancetype)sharedInstance{
+            static ORGCDTests *instance = nil;
+            static dispatch_once_t onceToken;
+            dispatch_once(&onceToken, ^{
+                instance = [ORGCDTests new];
+            });
+            return instance;
+        }
         - (void)testGCDWithCompletionBlock:(void (^)(NSString * _Nonnull))completion{
            dispatch_queue_t queue = dispatch_queue_create("com.plliang19.mango", DISPATCH_QUEUE_SERIAL);
            dispatch_async(queue, ^{
@@ -821,6 +829,11 @@ class CRunnerTests: XCTestCase {
         for classValue in classes {
             classValue.execute(scope);
         }
+        
+        let shared1 = ORGCDTests.sharedInstance()
+        let shared2 = ORGCDTests.sharedInstance()
+        XCTAssert(shared1 === shared2)
+        
         let test = ORGCDTests.init()
         XCTAssert(test.testDispatchSemaphore())
         XCTAssert(test.testDispatchSource() == 10)
@@ -857,21 +870,6 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 2)
         exps[3].execute(scope)
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 3)
-    }
-    func testDispatchOnce(){
-        source =
-        """
-        typedef NSInteger dispatch_once_t;
-        static dispatch_once_t onceToken;
-        dispatch_once(&onceToken, ^{
-            [NSObject new];
-        });
-        """
-        let ast = ocparser.parseSource(source)
-        let exps = ast.globalStatements as! [ORNode]
-        for exp in exps {
-            exp.execute(scope);
-        }
     }
     
     func testEnumDeclare(){
