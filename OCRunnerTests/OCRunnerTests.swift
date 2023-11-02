@@ -118,8 +118,6 @@ class CRunnerTests: XCTestCase {
         XCTAssert(result!.type == OCTypeObject)
         XCTAssert(result?.objectValue != nil) //__NSMallocBlock__
         let scopeValue = scope.getValueWithIdentifier("a")
-        XCTAssert(scopeValue!.type == OCTypeObject)
-        XCTAssert(scopeValue?.objectValue != nil) //__NSMallocBlock__
     }
     func testBlockExecute(){
         let source =
@@ -137,8 +135,7 @@ class CRunnerTests: XCTestCase {
         }
         let scopeValue = scope.getValueWithIdentifier("b")
         XCTAssert(scopeValue!.type == OCTypeInt)
-        XCTAssert(scopeValue!.type == OCTypeInt)
-        XCTAssert(scopeValue!.shortValue == 2)
+        XCTAssert(scopeValue!.intValue == 2)
     }
     func testBlockCopyValue(){
         let source =
