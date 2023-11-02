@@ -446,14 +446,20 @@ class CRunnerTests: XCTestCase {
             NSLog(@"%d",a);
             return a;
         }
+        int a = testForStatement(0);
+        int b = testForStatement(2);
         int c = testForStatement(3);
+        int d = testForStatement(4);
         """
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
             exp.execute(scope);
         }
+        XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 1)
+        XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 10)
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 101)
+        XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 101)
     }
     func testForStatementWithDeclare(){
         let source =
