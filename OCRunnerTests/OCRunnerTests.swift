@@ -366,6 +366,8 @@ class CRunnerTests: XCTestCase {
                     return 111;
                 case 2:
                     break;
+                case 3:
+                    a = 10;
                 default:
                     a = 222;
                     break;
@@ -376,6 +378,7 @@ class CRunnerTests: XCTestCase {
         int b = testSwitchStatement(1);
         int c = testSwitchStatement(2);
         int d = testSwitchStatement(3);
+        int e = testSwitchStatement(4);
         """
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
@@ -386,8 +389,36 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 111)
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 0)
         XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 222)
+        XCTAssert(scope.getValueWithIdentifier("e")!.intValue == 222)
     }
-    
+
+    func testSwitchStatement2(){
+        let source =
+        """
+        int testSwitchStatement(int x) {
+            switch(x) {
+                case 1: return 1;
+                case 2: return 2;
+                case 3: return 3;
+                default: return 4;
+            }
+        }
+        int a = testSwitchStatement(1);
+        int b = testSwitchStatement(2);
+        int c = testSwitchStatement(3);
+        int d = testSwitchStatement(4);
+        """
+        let ast = ocparser.parseSource(source)
+        let exps = ast.globalStatements as! [ORNode]
+        for exp in exps {
+            exp.execute(scope);
+        }
+        XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 1)
+        XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 2)
+        XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 3)
+        XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 4)
+    }
+
     func testForStatement(){
         let source =
         """

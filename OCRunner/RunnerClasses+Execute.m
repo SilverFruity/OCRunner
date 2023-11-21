@@ -1109,39 +1109,35 @@ CGRect CGRectZero = CGRectMake(0, 0, 0, 0);\n\
     return [self.scopeImp execute:current];
 }
 @end
+
 @implementation ORSwitchStatement (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFValue *value = [self.value execute:scope];
-    BOOL hasMatch = NO;
+    BOOL matched = NO;
     for (ORCaseStatement *statement in self.cases) {
-        if (statement.value) {
-            if (!hasMatch) {
-                MFValue *caseValue = [statement.value execute:scope];
-                LogicBinaryOperatorExecute(value, ==, caseValue);
-                hasMatch = logicResultValue;
-                if (!hasMatch) {
-                    continue;
-                }
-            }
-            MFValue *result = [statement execute:scope];
-            if (result.isBreak) {
-                result.resultType = MFStatementResultTypeNormal;
-                return result;
-            }else if (result.isNormal){
+        MFValue *result = nil;
+        if (statement.value && !matched) {
+            MFValue *caseValue = [statement.value execute:scope];
+            LogicBinaryOperatorExecute(value, ==, caseValue);
+            matched = logicResultValue;
+            if (!matched) {
                 continue;
-            }else{
-                return result;
             }
-        }else{
-            MFValue *result = [statement execute:scope];
-            if (result.isBreak) {
-                result.resultType = MFStatementResultTypeNormal;
-                return value;
-            }
+        }
+        result = [statement execute:scope];
+        if (result.isBreak) {
+            result.resultType = MFStatementResultTypeNormal;
+            return result;
+        } else if (result.isNormal) {
+            continue;
+        } else {
+            return result;
         }
     }
     return [MFValue normalEnd];
-}@end
+}
+@end
+
 @implementation ORForStatement (Execute)
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     MFScopeChain *current = [MFScopeChain scopeChainWithNext:scope];
