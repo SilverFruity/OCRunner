@@ -30,6 +30,7 @@
 #include <mach/mach.h>
 #include <mach/vm_map.h>
 #include <mach/vm_region.h>
+#include <mach-o/dyld_images.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,36 +62,24 @@ typedef struct nlist nlist_t;
 #define SEG_AUTH_CONST "__AUTH_CONST"
 #endif
 
-struct rebindings_entry {
-    struct FunctionSearch search;
-    struct rebindings_entry *next;
-    size_t link_list_len;
-};
 
-struct FunctionSearch makeFunctionSearch(const char *name, void *pointer) {
-    struct FunctionSearch search;
-    name = name ?: "";
-    search.name = strdup(name);
-    search.pointer = pointer;
-    return search;
+static inline int copySafely(const void *restrict const src, const int byteCount) {
+    vm_size_t bytesCopied = 0;
+    char buffer[byteCount];
+    kern_return_t result = vm_read_overwrite(mach_task_self(),
+                                             (vm_address_t)src,
+                                             (vm_size_t)byteCount,
+                                             (vm_address_t)buffer,
+                                             &bytesCopied);
+    if (result != KERN_SUCCESS) {
+        return 0;
+    }
+    return (int)bytesCopied;
 }
 
-static struct rebindings_entry *_rebindings_head = NULL;
-static bool _is_first_search = true;
-
-static int prepend_search(struct rebindings_entry **rebindings_head,
-                          struct FunctionSearch rebindings[],
-                          size_t nel) {
-    for (int i = 0; i < nel; i++) {
-        struct FunctionSearch search = rebindings[i];
-        struct rebindings_entry *new_entry = (struct rebindings_entry *)malloc(sizeof(struct rebindings_entry));
-        memcpy(&(new_entry->search), &search, sizeof(struct FunctionSearch));
-        new_entry->link_list_len = nel;
-        if (new_entry->search.name == NULL) continue;
-        new_entry->next = *rebindings_head;
-        *rebindings_head = new_entry;
-    }
-    return 0;
+// KSCrash: KSMemory.c/ ksmem_copySafely(
+static bool ksmem_readSafely(const void *restrict const src, const int byteCount) {
+    return copySafely(src, byteCount);
 }
 
 static bool cstringPrefix(const char *str, const char *pre) {
@@ -127,47 +116,71 @@ static void forEachLoadCommand(const struct mach_header *header, void (^callback
     }
 }
 
-static void forEachSection(const struct mach_header *header, void (^callback)(const section_t *sectInfo, bool *stop)) {
-    __block uint32_t segIndex = 0;
-    forEachLoadCommand(header, ^(const load_command_t *cmd, bool *stop) {
-        if (cmd->cmd == LC_SEGMENT_64) {
-            const segment_command_t *segCmd = (segment_command_t *)cmd;
-            const section_t *const sectionsStart = (section_t *)((char *)segCmd + sizeof(segment_command_t));
-            const section_t *const sectionsEnd = &sectionsStart[segCmd->nsects];
-            for (const section_t *sect = sectionsStart; !(*stop) && (sect < sectionsEnd); ++sect) {
-                callback(sect, stop);
-            }
-            ++segIndex;
-        }
-    });
+struct function_entry {
+    struct FunctionSearch *searchs;
+    struct function_entry *next;
+    size_t link_list_len;
+};
+
+struct FunctionSearch makeFunctionSearch(const char *name, void *pointer) {
+    struct FunctionSearch search = {0};
+    name = name ?: "";
+    search.name = strdup(name);
+    search.pointer = pointer;
+    return search;
 }
 
-//edit from dyld: bool MachOAnalyzer::inCodeSection
-static bool inCodeSection(const struct mach_header *header, intptr_t slide, intptr_t address) {
-    __block bool result = false;
-    forEachSection(header, ^(const section_t *sectInfo, bool *stop) {
-        if ((sectInfo->addr + slide <= address) && (address < (sectInfo->addr + sectInfo->size + slide))) {
-            result = ((sectInfo->flags & S_ATTR_PURE_INSTRUCTIONS) || (sectInfo->flags & S_ATTR_SOME_INSTRUCTIONS));
-            *stop = true;
-        }
-    });
-    return result;
+static struct function_entry *_rebindings_head = NULL;
+
+static int prepare_search(struct function_entry **rebindings_head,
+                          struct FunctionSearch rebindings[],
+                          size_t nel) {
+    struct function_entry *new_entry = (struct function_entry *)malloc(sizeof(struct function_entry));
+    if (!new_entry) {
+        return -1;
+    }
+    new_entry->searchs = malloc(sizeof(struct FunctionSearch) * nel);
+    memcpy(new_entry->searchs, rebindings, sizeof(struct FunctionSearch) * nel);
+    if (!new_entry->searchs) {
+        free(new_entry);
+        return -1;
+    }
+    new_entry->link_list_len = nel;
+    new_entry->next = *rebindings_head;
+    *rebindings_head = new_entry;
+    return 0;
 }
 
-static void search_symbols_for_image(struct rebindings_entry *rebindings,
+static bool address_has_execute_protect(vm_address_t address) {
+    vm_size_t region_size;
+    vm_region_basic_info_data_64_t info;
+    mach_msg_type_number_t info_count = VM_REGION_BASIC_INFO_COUNT_64;
+    mach_port_t object_name;
+    vm_address_t pageAddr = trunc_page(address);
+    kern_return_t kr = vm_region_64(mach_task_self(), &pageAddr, &region_size, VM_REGION_BASIC_INFO_COUNT_64,
+                      (vm_region_info_64_t)&info, &info_count, &object_name);
+    if (kr != KERN_SUCCESS) {
+        return false;
+    }
+    if (info.protection & (VM_PROT_EXECUTE | VM_PROT_READ)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+static void search_symbols_for_image(struct function_entry *rebindings,
                                      const struct mach_header *header,
                                      intptr_t slide) {
-    Dl_info info;
-    if (dladdr(header, &info) == 0) {
-        return;
-    }
-
     segment_command_t *cur_seg_cmd;
     segment_command_t *linkedit_segment = NULL;
     struct symtab_command *symtab_cmd = NULL;
 
     uintptr_t cur = (uintptr_t)header + sizeof(mach_header_t);
     for (uint i = 0; i < header->ncmds; i++, cur += cur_seg_cmd->cmdsize) {
+        if (linkedit_segment && symtab_cmd) {
+            break;
+        }
         cur_seg_cmd = (segment_command_t *)cur;
         if (cur_seg_cmd->cmd == LC_SEGMENT_ARCH_DEPENDENT) {
             if (strcmp(cur_seg_cmd->segname, SEG_LINKEDIT) == 0) {
@@ -187,84 +200,104 @@ static void search_symbols_for_image(struct rebindings_entry *rebindings,
     nlist_t *symtab = (nlist_t *)(linkedit_base + symtab_cmd->symoff);
     char *strtab = (char *)(linkedit_base + symtab_cmd->stroff);
     uint32_t cmdsize = symtab_cmd->nsyms;
-
-    void *free_list[rebindings->link_list_len];
-    size_t free_list_len = 0;
+    
     for (uint32_t i = 0; i < cmdsize; i++) {
         nlist_t *nlist = &symtab[i];
 
         if ((nlist->n_type & N_STAB) || (nlist->n_type & N_TYPE) != N_SECT) {
             continue;
         }
+        
+//        if (!ksmem_readSafely(nlist , sizeof(nlist_t))) {
+//            fprintf(stderr, "unreadable for nlist_t  %p\n ", nlist);
+//            continue;
+//        }
 
         const char *symbol_name = strtab + nlist->n_un.n_strx;
+
+//        if (!ksmem_readSafely(symbol_name, 2)) {
+//            fprintf(stderr, "unreadable for strtab %p\n ", symbol_name);
+//            continue;
+//        }
+
         bool symbol_name_longer_than_1 = symbol_name[0] && symbol_name[1];
-        // <redirect>
-        // $ ___Z C++
-        // +/- objc
-        // __swift swift
-        if (!symbol_name_longer_than_1
-            || symbol_name[0] == '<'
-            || symbol_name[0] == '-'
-            || symbol_name[0] == '+'
-            || symbol_name[1] == '$'
-            || cstringPrefix(symbol_name, "__Z")
-            || cstringPrefix(symbol_name, "___")
-            || cstringPrefix(symbol_name, "__swift")) {
-            continue;
-        }
 
         intptr_t functionAddress = (intptr_t)(nlist->n_value + slide);
-        if (!inCodeSection(header, slide, functionAddress)) {
-            continue;
-        }
-
-        struct rebindings_entry *cur = rebindings;
-        struct rebindings_entry *prev = NULL;
-        while (cur) {
-            if (symbol_name_longer_than_1 && strcmp(&symbol_name[1], cur->search.name) == 0) {
-                if (cur->search.pointer != NULL) {
-                    *(cur->search.pointer) = (void *)(functionAddress);
-                    if (prev) {
-                        prev->next = cur->next;
-                        free_list[free_list_len++] = cur;
-                    }
-                }
-            }
-            prev = cur;
-            cur = cur->next;
-        }
-    }
-
-    for (int i = 0; i < free_list_len; i++) {
-        struct rebindings_entry *cur = free_list[i];
-        free((void *)cur->search.name);
-        free(cur);
-    }
-
+        const char *name = rebindings->searchs[i].name;
+        const char *alias = rebindings->searchs[i].alias;
+		for (int i = 0; i < rebindings->link_list_len; i++) {
+			if (symbol_name_longer_than_1 && cstringPrefix(symbol_name, "_") 
+            && (strcmp(&symbol_name[1], name) == 0 || (alias && strcmp(&symbol_name[1], alias) == 0))) {
+				if (address_has_execute_protect(functionAddress)) {
+					*(rebindings->searchs[i].pointer) = (void *)(functionAddress);
+				} else {
+					fprintf(stderr, "SymbolSearch error for %s\n", rebindings->searchs[i].name);
+					break;
+				}
+			}
+		}
+	}
     return;
 }
 
-static void _rebind_symbols_for_image(const struct mach_header *header,
-                                      intptr_t slide) {
-    search_symbols_for_image(_rebindings_head, header, slide);
-}
-
 int search_symbols(struct FunctionSearch rebindings[], size_t rebindings_nel) {
-    int retval = prepend_search(&_rebindings_head, rebindings, rebindings_nel);
+#if DEBUG
+    struct timespec start_ts;
+    clock_gettime(CLOCK_REALTIME, &start_ts);
+    long milliseconds = start_ts.tv_sec * 1000 + start_ts.tv_nsec / 1000000;
+#endif
+        
+    int retval = prepare_search(&_rebindings_head, rebindings, rebindings_nel);
     if (retval < 0) {
         return retval;
     }
-    // If this was the first call, register callback for image additions (which is also invoked for
-    // existing images, otherwise, just run on existing images
-    if (!_is_first_search) {
-        _dyld_register_func_for_add_image(_rebind_symbols_for_image);
-        _is_first_search = false;
-    } else {
-        uint32_t c = _dyld_image_count();
-        for (uint32_t i = 0; i < c; i++) {
-            _rebind_symbols_for_image(_dyld_get_image_header(i), _dyld_get_image_vmaddr_slide(i));
+    
+    for (int i = 0; i < _rebindings_head->link_list_len; i++) {
+        if (strcmp("strlen", _rebindings_head->searchs[i].name) == 0) {
+            _rebindings_head->searchs[i].alias = "_platform_strlen";
         }
     }
+
+    kern_return_t kr;
+    struct task_dyld_info dyld_info;
+    mach_msg_type_number_t count = TASK_DYLD_INFO_COUNT;
+
+    kr = task_info(mach_task_self(), TASK_DYLD_INFO, (task_info_t)&dyld_info, &count);
+    if (kr != KERN_SUCCESS) {
+        fprintf(stderr, "task_info failed: %d\n", kr);
+        return -1;
+    }
+
+    struct dyld_all_image_infos *all_image_infos = (struct dyld_all_image_infos *)dyld_info.all_image_info_addr;
+    for (int i = 0; i < all_image_infos->infoArrayCount; i++) {
+        struct dyld_image_info info = all_image_infos->infoArray[i];
+        __block intptr_t slide = 0;
+        const struct mach_header* header = info.imageLoadAddress;
+        // dyld4: intptr_t MachOLoaded::getSlide()
+        forEachLoadCommand(header, ^(const load_command_t *cmd, bool *stop) {
+            if (cmd->cmd == LC_SEGMENT_64) {
+                const segment_command_t* seg = (segment_command_t *)cmd;
+                if (strcmp(seg->segname, "__TEXT") == 0 ) {
+                    slide = (uintptr_t)((uintptr_t)header - (uintptr_t)seg->vmaddr);
+                    *stop = true;
+                }
+            }
+        });
+        search_symbols_for_image(_rebindings_head, header, slide);
+    }
+
+    for (int i = 0; i < _rebindings_head->link_list_len; i++) {
+        free((void *)_rebindings_head->searchs[i].name);
+    }
+    free(_rebindings_head->searchs);
+    free(_rebindings_head);
+    _rebindings_head = NULL;
+
+#if DEBUG
+    struct timespec end_ts;
+    clock_gettime(CLOCK_REALTIME, &end_ts);
+    long end_milliseconds = end_ts.tv_sec * 1000 + end_ts.tv_nsec / 1000000;
+    printf("[OCRunner] search_symbols time cost %ld ms\n", end_milliseconds - milliseconds);
+#endif
     return retval;
 }

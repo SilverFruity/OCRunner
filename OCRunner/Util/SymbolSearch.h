@@ -38,6 +38,7 @@ extern "C" {
 #endif //__cplusplus
 
 struct FunctionSearch {
+  const char *alias;
   const char *name;
   void **pointer;
 };
