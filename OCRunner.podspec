@@ -11,11 +11,7 @@ s.author             = { "SilverFruity" => "15328044115@163.com" }
 s.ios.deployment_target = "9.0"
 s.source       = { :git => "https://github.com/SilverFruity/OCRunner.git", :tag => "#{s.version}" }
 s.source_files  = "OCRunner/**/*.{h,m,c,mm}"
-s.pod_target_xcconfig = {
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64'
-  }
-s.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
-s.vendored_libraries  = 'OCRunner/libffi/libffi.a'
+s.vendored_frameworks = 'OCRunner/libffi/libffi.xcframework'
 s.dependency "ORPatchFile", "1.2.3"
 end
 
