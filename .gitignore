@@ -6,7 +6,7 @@
 /OCRunnerDemo/OCRunnerDemo/binarypatch.ocrr
 ## User settings
 xcuserdata/
-
+.ccls-cache/
 ## compatibility with Xcode 8 and earlier (ignoring not required starting Xcode 9)
 *.xcscmblueprint
 *.xccheckout
