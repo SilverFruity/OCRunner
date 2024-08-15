@@ -139,7 +139,7 @@ void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *
             case OCValueDictionary:{
                 for (NSArray *kv in expr.value) {
                     ORNode *keyExp = kv.firstObject;
-                    ORNode *valueExp = kv.firstObject;
+                    ORNode *valueExp = kv.lastObject;
                     copy_undef_var(keyExp, chain, fromScope, destScope);
                     copy_undef_var(valueExp, chain, fromScope, destScope);
                 }

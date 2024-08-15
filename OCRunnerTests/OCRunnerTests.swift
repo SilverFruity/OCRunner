@@ -155,6 +155,27 @@ class CRunnerTests: XCTestCase {
         XCTAssert(scopeValue!.type == OCTypeInt)
         XCTAssert(scopeValue!.intValue == 3)
     }
+    func testBlockDictionaryCopyValue(){
+        let source =
+        """
+        @implementation ORCallOCPropertyBlockTest
+        - (NSDictionary *)testCapture {
+            NSString *outStr = @"value";
+            NSDictionary *(^block)(void) = ^NSDictionary *{
+                return @{@"key" : outStr};
+            };
+            return block();
+        }
+        @end
+        """
+        let ast = ocparser.parseSource(source)
+        let classes = ast.classCache.allValues as! [ORClass];
+        for classValue in classes {
+            classValue.execute(scope);
+        }
+        let dict = ORCallOCPropertyBlockTest.init().testCapture()
+        XCTAssert(dict["key"] as! String == "value")
+    }
     func testUnaryExpresssion() {
         let source =
         """
