@@ -373,7 +373,7 @@ CGRect CGRectZero = CGRectMake(0, 0, 0, 0);\n\
                 if (key && value){
                     dict[key] = value;
                 }else{
-                    NSLog(@"OCRunner Error: the key %@ or value %@ of NSDictionary can't be nil", key?:@"", value?:@"");
+                    NSLog(@"OCRunner Error: the key '%@' or value '%@' of NSDictionary can't be nil", key?:@"null", value?:@"null");
                 }
             }
             return [MFValue valueWithObject:[dict copy]];

@@ -62,7 +62,7 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     ctx.isDeallocScope = sel == NSSelectorFromString(@"dealloc");
     scope.entryCtx = ctx;
 
-    MFValue *returnValue = nil;
+    __autoreleasing MFValue *returnValue = nil;
     [ORArgsStack push:argValues];
     returnValue = [methodImp execute:scope];
     if (returnValue.type != TypeVoid && returnValue.pointer != NULL){
@@ -97,7 +97,7 @@ void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
         MFValue *argValue = [[MFValue alloc] initTypeEncode:[sig getArgumentTypeAtIndex:i] pointer:args[i]];
         [argValues addObject:argValue];
     }
-    MFValue *value = nil;
+    __autoreleasing MFValue *value = nil;
     [ORArgsStack push:argValues];
     value = [mangoBlock.func execute:mangoBlock.outScope];
     if (value.type != TypeVoid && value.pointer != NULL){
