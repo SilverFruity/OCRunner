@@ -606,6 +606,35 @@ CGRect CGRectZero = CGRectMake(0, 0, 0, 0);\n\
             function.pointer = blockValue->realBaseValue.pointerValue;
             [ORArgsStack push:args];
             return [function execute:scope];
+        } else {
+#if DEBUG
+            NSLog(@"\
+\n---------OCRunner Error---------\n\
+*Unknown C function: '%@'*\n\
+%@\n\
+You need to add the missing C function in OCRunner scripts.\n\
+For example:\n\
+If it is 'UIEdgeInsetsMake', then add the following function:\n\
+```\n\
+UIEdgeInsets UIEdgeInsetsMake(CGFloat top, CGFloat left, CGFloat bottom, CGFloat right) {\n\
+    UIEdgeInsets insets;\n\
+    insets.top = top;\n\
+    insets.left = left;\n\
+    insets.bottom = bottom;\n\
+    insets.right = right;\n\
+    return insets;\n\
+}\n\
+```\n\
+If it is 'UIInterfaceOrientationIsLandscape', then add this function:\n\
+```\n\
+BOOL UIInterfaceOrientationIsLandscape(UIInterfaceOrientation orientation) {\n\
+    return ((orientation) == UIInterfaceOrientationLandscapeLeft || (orientation) == UIInterfaceOrientationLandscapeRight);\n\
+}\n\
+```\n\
+-----------------------------------", self.caller.value, [ORCallFrameStack history]);
+            NSAssert(false, @"As mentioned above");
+#endif
+
         }
     }
     return [MFValue valueWithObject:nil];
