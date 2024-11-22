@@ -441,6 +441,52 @@ CGRect CGRectZero = CGRectMake(0, 0, 0, 0);\n\
 @end
 
 @implementation ORMethodCall(Execute)
+#if DEBUG
+// 尝试寻找属性被重写的 getter/setter 方法或从 methodList 查找方法
+- (NSString *)unrecognizedSelectorTip:(id)instance
+{
+    NSString *currentName = self.selectorName;
+    // 如果是 setter 方法，去掉之前逻辑添加的 set 前缀
+    if (self.isAssignedValue && [currentName hasPrefix:@"set"] && [currentName hasSuffix:@":"]) {
+        currentName = [currentName substringWithRange:NSMakeRange(3, currentName.length - 4)];
+        currentName = [[currentName substringToIndex:1].lowercaseString stringByAppendingString:[currentName substringFromIndex:1]];
+    }
+    NSMutableString *tip = [NSMutableString stringWithFormat:@"OCRunner Error: %@ Unrecognized selector '%@'", instance, currentName];
+    if (object_isClass(instance)) {
+        return tip;
+    }
+    Class class = [instance class];
+
+    // 1、先尝试通过 propertyList 查找属性的 getter/setter 方法，如
+    // @property(nonatomic, assign, getter=customGetterTest, setter=customSetterTest:) BOOL test;
+    objc_property_t property = class_getProperty(class, currentName.UTF8String);
+    if (property) {
+        char *attributeValue = property_copyAttributeValue(property, self.isAssignedValue ? "S" : "G");
+        if (attributeValue) {
+            NSString *foundName = [NSString stringWithUTF8String:attributeValue];
+            free(attributeValue);
+            if (foundName.length && [instance respondsToSelector:NSSelectorFromString(foundName)]) {
+                [tip appendFormat:@"，but found %@ method '%@', please check if you need to call this method", self.isAssignedValue ? @"setter" : @"getter", foundName];
+                return tip;
+            }
+        }
+    }
+
+    // 2、未找到则尝试手动拼接 getter/setter 方法名并从 methodList 查找，如
+    // @interface UIView(UIViewRendering)
+    // @property(nonatomic,getter=isHidden) BOOL hidden;
+    // @end
+    currentName = [NSString stringWithFormat:@"%@%@%@", self.isAssignedValue ? @"set" : @"is", [[currentName substringToIndex:1] uppercaseString], [currentName substringFromIndex:1]];
+    Method method = class_getInstanceMethod(class, NSSelectorFromString(currentName));
+    if (method && [instance respondsToSelector:NSSelectorFromString(currentName)]) {
+        [tip appendFormat:@"，but found %@ method '%@', please check if you need to call this method", self.isAssignedValue ? @"setter" : @"getter", currentName];
+        return tip;
+    }
+
+    return tip;
+}
+#endif
+
 - (nullable MFValue *)execute:(MFScopeChain *)scope {
     if ([self.caller isKindOfClass:[ORMethodCall class]]) {
         [(ORMethodCall *)self.caller setIsAssignedValue:self.isAssignedValue];
@@ -520,7 +566,12 @@ CGRect CGRectZero = CGRectMake(0, 0, 0, 0);\n\
     }
     NSMethodSignature *sig = [instance methodSignatureForSelector:sel];
     if (sig == nil) {
-        NSLog(@"OCRunner Error: %@ Unrecognized Selector %@", instance, self.selectorName);
+#if DEBUG
+        NSLog(@"%@", [self unrecognizedSelectorTip:instance]);
+        NSAssert(false, @"As mentioned above");
+#else
+        NSLog(@"OCRunner Error: %@ Unrecognized selector '%@'", instance, self.selectorName);
+#endif
         return [MFValue nullValue];
     }
     NSUInteger argCount = [sig numberOfArguments];

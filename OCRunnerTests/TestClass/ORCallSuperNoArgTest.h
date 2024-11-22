@@ -15,6 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)testCallSuperNoArgTestSupser;
 
+@property(nonatomic, assign, getter=customGetterTest, setter=customSetterTest:) BOOL test;
+
 @end
 
 @interface MFCallSuperNoArgTest : MFCallSuperNoArgTestSupserTest

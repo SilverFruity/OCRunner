@@ -1085,7 +1085,29 @@ class CRunnerTests: XCTestCase {
     func testUnknownSelector(){
         let source =
         """
+        MFCallSuperNoArgTestSupserTest *father1 = [MFCallSuperNoArgTestSupserTest new];
+        NSLog(@"father1 customGetterTest: %d",father1.customGetterTest);
+        [father1 customSetterTest:YES];
+        NSLog(@"father1 customGetterTest: %d",father1.customGetterTest);
+
+        MFCallSuperNoArgTestSupserTest *father2 = [MFCallSuperNoArgTestSupserTest new];
+        NSLog(@"father2 test: %d",father2.test);
+        father2.test = YES;
+        NSLog(@"father2 test: %d",father2.test);
+
+        MFCallSuperNoArgTest *son1 = [MFCallSuperNoArgTest new];
+        NSLog(@"son1 customGetterTest: %d",son1.customGetterTest);
+        [son1 customSetterTest:YES];
+        NSLog(@"son1 customGetterTest: %d",son1.customGetterTest);
+
+        MFCallSuperNoArgTest *son2 = [MFCallSuperNoArgTest new];
+        NSLog(@"son2 test: %d",son2.test);
+        son2.test = YES;
+        NSLog(@"son2 test: %d",son2.test);
+
         [UIColor red];
+
+        NSLog(@"UIView.hidden: %d",[UIView new].hidden);
         """
         let ast = ocparser.parseSource(source)
         for classValue in ast.nodes {
