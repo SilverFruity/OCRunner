@@ -187,8 +187,8 @@ Element2Struct *Element2StructMake(){
     "TestUnion2 value;"
     "value.a = 2;";
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.nodes) {
-        [exp execute:scope];
+    for (ORNode * exp in ast.nodes) {
+        evalORNode(exp, scope);
     }
     MFValue *value = [scope getValueWithIdentifier:@"value"];
     XCTAssert([value unionFieldForKey:@"b"].intValue == 2);
@@ -317,8 +317,8 @@ Element2Struct *Element2StructMake(){
     "rect.size.width = 100;"
     "rect.size.height = 100;";
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.globalStatements) {
-        [exp execute:scope];
+    for (ORNode * exp in ast.globalStatements) {
+        evalORNode(exp, scope);
     }
     MFValue *rectValue = [scope recursiveGetValueWithIdentifier:@"rect"];
     CGRect rect = *(CGRect *) rectValue.pointer;
@@ -345,8 +345,8 @@ Element2Struct *Element2StructMake(){
     "size.width = 100;"
     "size.height = 100;";
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.globalStatements) {
-        [exp execute:scope];
+    for (ORNode * exp in ast.globalStatements) {
+        evalORNode(exp, scope);
     }
     MFValue *rectValue = [scope recursiveGetValueWithIdentifier:@"frame"];
     CGRect rect = *(CGRect *) rectValue.pointer;
@@ -362,8 +362,8 @@ Element2Struct *Element2StructMake(){
     "CGRect frame = view.frame;"
     "CGFloat a = frame.size.height;";
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.globalStatements) {
-        [exp execute:scope];
+    for (ORNode * exp in ast.globalStatements) {
+        evalORNode(exp, scope);
     }
     MFValue *frameValue = [scope recursiveGetValueWithIdentifier:@"frame"];
     CGRect rect = *(CGRect *) frameValue.pointer;
@@ -514,8 +514,8 @@ struct EStruct {
     @"int *b = &a;"
     @"int **c = &b;";
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.globalStatements) {
-        [exp execute:scope];
+    for (ORNode * exp in ast.globalStatements) {
+        evalORNode(exp, scope);
     }
     MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
     XCTAssert(strcmp(a.typeEncode, "i") == 0);
@@ -536,8 +536,8 @@ struct EStruct {
     @"int **c = &b;"
     @"int d = **c;";
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.globalStatements) {
-        [exp execute:scope];
+    for (ORNode * exp in ast.globalStatements) {
+        evalORNode(exp, scope);
     }
     MFValue *d = [scope recursiveGetValueWithIdentifier:@"d"];
     XCTAssert(strcmp(d.typeEncode, "i") == 0);
@@ -584,8 +584,8 @@ struct EStruct {
     NSString * source =
     @"id object = @protocol(NSObject);";
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.globalStatements) {
-        [exp execute:scope];
+    for (ORNode * exp in ast.globalStatements) {
+        evalORNode(exp, scope);
     }
     MFValue *d = [scope recursiveGetValueWithIdentifier:@"object"];
     Protocol *protocol = d.objectValue;
@@ -601,8 +601,8 @@ struct EStruct {
     @"}"
     @"int a = fibonaccia(20);";
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.globalStatements) {
-        [exp execute:scope];
+    for (ORNode * exp in ast.globalStatements) {
+        evalORNode(exp, scope);
     }
     MFValue *c = [scope recursiveGetValueWithIdentifier:@"a"];
     XCTAssert(c.intValue == fibonaccia(20));
@@ -619,8 +619,8 @@ struct EStruct {
     @"@end"
     @"int a = [[Fibonaccia new] run:20];";
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.nodes) {
-        [exp execute:scope];
+    for (ORNode * exp in ast.nodes) {
+        evalORNode(exp, scope);
     }
     MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
     XCTAssert(a.intValue == fibonaccia(20));
@@ -634,8 +634,8 @@ struct EStruct {
     @"id value = [ORTestReplaceClass new];"
     @"int a = imp(value, @selector(testOriginalMethod));";
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.nodes) {
-        [exp execute:scope];
+    for (ORNode * exp in ast.nodes) {
+        evalORNode(exp, scope);
     }
     MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
     XCTAssert(a.intValue == 2);
@@ -653,8 +653,8 @@ struct EStruct {
     "double h = 0.25 - 1;"
     ;
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.nodes) {
-        [exp execute:scope];
+    for (ORNode * exp in ast.nodes) {
+        evalORNode(exp, scope);
     }
     MFValue *a = [scope recursiveGetValueWithIdentifier:@"a"];
     MFValue *b = [scope recursiveGetValueWithIdentifier:@"b"];
@@ -722,8 +722,8 @@ struct EStruct {
     "@end";
     
     AST *ast = [_parser parseSource:source];
-    for (id <OCExecute> exp in ast.nodes) {
-        [exp execute:scope];
+    for (ORNode * exp in ast.nodes) {
+        evalORNode(exp, scope);
     }
     NSMutableString *propertyStrong = [NSMutableString string];
     @autoreleasepool {
@@ -1104,11 +1104,11 @@ int signatureBlockPtr(id object, int b){
     @"        return 1;"
     @"    return fibonaccia(n - 1) + fibonaccia(n - 2);"
     @"}"
-    @"int a = fibonaccia(20);";
+    @"int a = fibonaccia(25);";
     AST *ast = [_parser parseSource:source];
     [self measureBlock:^{
-        for (id <OCExecute> exp in ast.globalStatements) {
-            [exp execute:scope];
+        for (ORNode * exp in ast.globalStatements) {
+            evalORNode(exp, scope);
         }
         NSLog(@"%d",[scope getValueWithIdentifier:@"a"].uIntValue);
     }];
@@ -1128,8 +1128,8 @@ int signatureBlockPtr(id object, int b){
     @"int a = [[Fibonaccia new] run:20];";
     AST *ast = [_parser parseSource:source];
     [self measureBlock:^{
-        for (id <OCExecute> exp in ast.nodes) {
-            [exp execute:scope];
+        for (ORNode * exp in ast.nodes) {
+            evalORNode(exp, scope);
         }
         NSLog(@"%d",[scope getValueWithIdentifier:@"a"].uIntValue);
     }];

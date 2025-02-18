@@ -11,12 +11,13 @@
 NS_ASSUME_NONNULL_BEGIN
 @class ORTypeVarPair;
 @class ORFuncVariable;
-@interface ORSearchedFunction : NSObject <OCExecute>
+@interface ORSearchedFunction : NSObject
 @property (nonatomic,strong)ORTypeVarPair *funPair;
 @property (nonatomic,strong,readonly)ORFuncVariable *funVar;
 @property (nonatomic,copy)NSString *name;
 @property (nonatomic,assign)void *pointer;
 + (instancetype)functionWithName:(NSString *)name;
+- (nullable MFValue *)execute:(nonnull MFScopeChain *)scope;
 + (NSDictionary <NSString *, ORSearchedFunction *>*)functionTableForNames:(NSArray *)names;
 @end
 

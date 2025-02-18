@@ -64,7 +64,7 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
 
     __autoreleasing MFValue *returnValue = nil;
     [ORArgsStack push:argValues];
-    returnValue = [methodImp execute:scope];
+    returnValue = evalORNode(methodImp, scope);
     if (returnValue.type != TypeVoid && returnValue.pointer != NULL){
         // 类型转换
         [returnValue writePointer:ret typeEncode:[sig methodReturnType]];
@@ -99,7 +99,7 @@ void blockInter(ffi_cif *cfi,void *ret,void **args, void*userdata){
     }
     __autoreleasing MFValue *value = nil;
     [ORArgsStack push:argValues];
-    value = [mangoBlock.func execute:mangoBlock.outScope];
+    value = evalORNode(mangoBlock.func, mangoBlock.outScope);
     if (value.type != TypeVoid && value.pointer != NULL){
         // 类型转换
         [value writePointer:ret typeEncode:[sig methodReturnType]];

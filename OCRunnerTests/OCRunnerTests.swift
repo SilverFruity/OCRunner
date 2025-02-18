@@ -60,11 +60,11 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         var scopeValue = scope.getValueWithIdentifier("a")
         XCTAssert(scopeValue!.type == OCTypeChar)
-        XCTAssert(scopeValue!.charValue == -1)
+        XCTAssert(scopeValue!.charValue == -1, "\(scopeValue!.charValue)");
         scopeValue = scope.getValueWithIdentifier("b")
         XCTAssert(scopeValue!.type == OCTypeShort)
         XCTAssert(scopeValue!.shortValue == -1)
@@ -113,7 +113,7 @@ class CRunnerTests: XCTestCase {
         """
         let ast = ocparser.parseSource(source)
         let exp = ast.globalStatements.firstObject as! ORDeclareExpression;
-        exp.execute(scope)
+        evalORNode(exp, scope)
         let result = scope.getValueWithIdentifier("a")
         XCTAssert(result!.type == OCTypeObject)
         XCTAssert(result?.objectValue != nil) //__NSMallocBlock__
@@ -130,7 +130,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         let scopeValue = scope.getValueWithIdentifier("b")
         XCTAssert(scopeValue!.type == OCTypeInt)
@@ -148,7 +148,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         let scopeValue = scope.getValueWithIdentifier("b")
         XCTAssert(scopeValue!.type == OCTypeInt)
@@ -171,7 +171,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
-            classValue.execute(scope);
+            evalORNode(classValue, scope)
         }
         let dict = ORCallOCPropertyBlockTest.init().testCapture()
         XCTAssert(dict["key"] as! String == "value")
@@ -195,7 +195,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 2)
         XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 3)
@@ -234,7 +234,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 3)
         XCTAssert(scope.getValueWithIdentifier("d")!.intValue == 1)
@@ -267,7 +267,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 1)
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 3)
@@ -295,7 +295,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 0)
         XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 1)
@@ -332,7 +332,7 @@ class CRunnerTests: XCTestCase {
         let scope = MFScopeChain.topScope()
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 1)
         XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 3)
@@ -367,7 +367,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 2)
         XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 3)
@@ -404,7 +404,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 3)
         XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 111)
@@ -432,7 +432,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 1)
         XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 2)
@@ -468,7 +468,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 1)
         XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 10)
@@ -505,7 +505,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 1)
         XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 10)
@@ -540,7 +540,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 0)
         XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 10)
@@ -568,7 +568,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 6)
     }
@@ -618,11 +618,11 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
-            classValue.execute(scope);
+            evalORNode(classValue, scope)
         }
         let test = ORTestReplaceClass.init()
         XCTAssert(test.test() == 1)
@@ -647,7 +647,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         if let object = scope.getValueWithIdentifier("b")?.objectValue as? String{
             XCTAssert(object == "sss",object)
@@ -668,7 +668,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
-            classValue.execute(scope);
+            evalORNode(classValue, scope)
         }
         let test = ORTestReplaceClass.init()
         XCTAssert(test.test() == 10)
@@ -710,7 +710,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
-            classValue.execute(scope);
+            evalORNode(classValue, scope)
         }
         let test = ORTestClassProperty.init()
         XCTAssert(test.testObjectPropertyTest() == "Mango")
@@ -743,7 +743,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
-            classValue.execute(scope);
+            evalORNode(classValue, scope)
         }
         let test = ORTestClassIvar.init()
         XCTAssert(test.testObjectIvar() == "test")
@@ -764,7 +764,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
-            classValue.execute(scope);
+            evalORNode(classValue, scope)
         }
         let test = ORCallOCPropertyBlockTest.init()
         XCTAssert(test.testCallOCReturnBlock() == "ab")
@@ -783,7 +783,7 @@ class CRunnerTests: XCTestCase {
 
         let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
-            classValue.execute(scope);
+            evalORNode(classValue, scope)
         }
         
         let test = MFCallSuperNoArgTest.init()
@@ -801,7 +801,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
-            classValue.execute(scope);
+            evalORNode(classValue, scope)
         }
         let test = MFCallSuperNoArgTest.init()
         XCTAssert(test.testCallSuperNoArgTestSupser())
@@ -819,7 +819,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
-            classValue.execute(scope);
+            evalORNode(classValue, scope)
         }
         let test = MiniBMW.init()
         XCTAssert(test.run() == 2)
@@ -878,7 +878,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let classes = ast.classCache.allValues as! [ORClass];
         for classValue in classes {
-            classValue.execute(scope);
+            evalORNode(classValue, scope)
         }
         
         let shared1 = ORGCDTests.sharedInstance()
@@ -914,12 +914,12 @@ class CRunnerTests: XCTestCase {
         """
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
-        exps[0].execute(scope);
-        exps[1].execute(scope);
+evalORNode(exps[0], scope);
+evalORNode(exps[1], scope);
         XCTAssert(scope.getValueWithIdentifier("a")!.intValue == 1)
-        exps[2].execute(scope)
+evalORNode(exps[2], scope)
         XCTAssert(scope.getValueWithIdentifier("b")!.intValue == 2)
-        exps[3].execute(scope)
+evalORNode(exps[3], scope)
         XCTAssert(scope.getValueWithIdentifier("c")!.intValue == 3)
     }
     
@@ -955,7 +955,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         XCTAssert(scope.getValueWithIdentifier("UIControlEventTouchDown")!.uLongLongValue == 1 <<  0)
         XCTAssert(scope.getValueWithIdentifier("UIControlEventTouchDownRepeat")!.uLongLongValue == 1 <<  1)
@@ -995,7 +995,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         XCTAssert(scope.getValueWithIdentifier("a")!.doubleValue == 0.1)
     }
@@ -1020,7 +1020,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         let rect = ORTypeSymbolTable.shareInstance().symbolItem(forTypeName: "CGRect")
         XCTAssert(NSString.init(utf8String: rect.typeEncode) == "{CGRect={CGPoint=dd}{CGSize=dd}}")
@@ -1034,7 +1034,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         let item1 = ORTypeSymbolTable.shareInstance().symbolItem(forTypeName: "IntegerType")
         let item2 = ORTypeSymbolTable.shareInstance().symbolItem(forTypeName: "dispatch_once_t")
@@ -1054,7 +1054,7 @@ class CRunnerTests: XCTestCase {
         let ast = ocparser.parseSource(source)
         let exps = ast.globalStatements as! [ORNode]
         for exp in exps {
-            exp.execute(scope);
+            evalORNode(exp, scope)
         }
         XCTAssert(scope.getValueWithIdentifier("a")?.objectValue == nil)
         XCTAssert(scope.getValueWithIdentifier("b")?.objectValue == nil)
@@ -1077,7 +1077,7 @@ class CRunnerTests: XCTestCase {
         """
         let ast = ocparser.parseSource(source)
         for classValue in ast.nodes {
-            (classValue as! OCExecute).execute(scope);
+            evalORNode(classValue as! ORNode, scope);
         }
         let value = scope.getValueWithIdentifier("value")?.objectValue as? String ?? "failed"
         XCTAssert(value == "test", value)
@@ -1106,12 +1106,13 @@ class CRunnerTests: XCTestCase {
         NSLog(@"son2 test: %d",son2.test);
 
         [UIColor red];
-
-        NSLog(@"UIView.hidden: %d",[UIView new].hidden);
+        UIView *x = [UIView new];
+        x.hidden = YES;
+        NSLog(@"UIView.hidden: %d", x.hidden);
         """
         let ast = ocparser.parseSource(source)
         for classValue in ast.nodes {
-            (classValue as! OCExecute).execute(scope);
+            evalORNode(classValue as! ORNode, scope);
         }
     }
     
@@ -1138,7 +1139,7 @@ class CRunnerTests: XCTestCase {
         """
         let ast = ocparser.parseSource(source)
         for classValue in ast.nodes {
-            (classValue as! OCExecute).execute(scope);
+            evalORNode(classValue as! ORNode, scope);
         }
     }
 
@@ -1175,7 +1176,7 @@ class CRunnerTests: XCTestCase {
         """
         let ast = ocparser.parseSource(source)
         for classValue in ast.nodes {
-            (classValue as! OCExecute).execute(scope);
+            evalORNode(classValue as! ORNode, scope);
         }
         let result = scope.getValueWithIdentifier("result")?.intValue
         XCTAssert(result == 3);
@@ -1195,7 +1196,7 @@ class CRunnerTests: XCTestCase {
         """
         let ast = ocparser.parseSource(source)
         for classValue in ast.nodes {
-            (classValue as! OCExecute).execute(scope);
+            evalORNode(classValue as! ORNode, scope);
         }
         let result = scope.getValueWithIdentifier("result")?.intValue
         XCTAssert(result == 3);
@@ -1211,7 +1212,7 @@ class CRunnerTests: XCTestCase {
         """
         let ast = ocparser.parseSource(source)
         for classValue in ast.nodes {
-            (classValue as! OCExecute).execute(scope);
+            evalORNode(classValue as! ORNode, scope);
         }
         let result = scope.getValueWithIdentifier("result")?.objectValue
         XCTAssert(result as? NSNumber == NSNumber(value: 7), "\(result)");
@@ -1229,7 +1230,7 @@ class CRunnerTests: XCTestCase {
         """
         let ast = ocparser.parseSource(source)
         for classValue in ast.nodes {
-            (classValue as! OCExecute).execute(scope);
+            evalORNode(classValue as! ORNode, scope);
         }
         let result = scope.getValueWithIdentifier("b")?.intValue
         XCTAssert(result == 2, "\(result)");
@@ -1243,7 +1244,7 @@ class CRunnerTests: XCTestCase {
         """
         let ast = ocparser.parseSource(source)
         for classValue in ast.nodes {
-            (classValue as! OCExecute).execute(scope);
+            evalORNode(classValue as! ORNode, scope);
         }
         
         let a = scope.getValueWithIdentifier("a")?.objectValue as? NSValue
@@ -1259,7 +1260,7 @@ class CRunnerTests: XCTestCase {
         """
         let ast = ocparser.parseSource(source)
         for classValue in ast.nodes {
-            (classValue as! OCExecute).execute(scope);
+            evalORNode(classValue as! ORNode, scope);
         }
         let a = scope.getValueWithIdentifier("a")?.objectValue as? NSValue
         let result = a?.cgAffineTransformValue.ty;
@@ -1278,7 +1279,7 @@ class CRunnerTests: XCTestCase {
         """
         let ast = ocparser.parseSource(source)
         for classValue in ast.nodes {
-            (classValue as! OCExecute).execute(scope);
+            evalORNode(classValue as! ORNode, scope);
         }
         let a = scope.getValueWithIdentifier("a")?.doubleValue
         XCTAssert(a == 22.23, "\(a)")
@@ -1315,7 +1316,7 @@ class CRunnerTests: XCTestCase {
         """
         let ast = ocparser.parseSource(source)
         for classValue in ast.nodes {
-            (classValue as! OCExecute).execute(scope);
+            evalORNode(classValue as! ORNode, scope);
         }
         let result = scope.getValueWithIdentifier("result")?.objectValue as? String
         XCTAssert(result == "123", result ?? "error")

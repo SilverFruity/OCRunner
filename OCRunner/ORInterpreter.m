@@ -67,14 +67,14 @@
     
     //注册Protcol 注册Class 全局函数声明等
     for (ORNode *node in nodes) {
-        [node execute:scope];
+        evalORNode(node, scope);
     }
 }
 + (NSArray *)linkFunctions:(NSArray *)nodes scope:(MFScopeChain *)scope{
     NSMutableArray <ORTypeVarPair *>*funcVars = [NSMutableArray array];
     NSMutableArray *normalStatements = [NSMutableArray array];
     NSMutableArray *names = [NSMutableArray array];
-    for (id <OCExecute> expression in nodes) {
+    for (ORNode *expression in nodes) {
         if ([expression isKindOfClass:[ORDeclareExpression class]]) {
             ORTypeVarPair *pair = [(ORDeclareExpression *)expression pair];
             NSString *name = pair.var.varname;
