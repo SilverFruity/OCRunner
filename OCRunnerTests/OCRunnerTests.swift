@@ -356,7 +356,7 @@ class CRunnerTests: XCTestCase {
                     a = 11;
                     continue;
                 }
-            }while(a < x)
+            }while(a < x);
             return a;
         }
         int a = testDoWhileStatement(2);
