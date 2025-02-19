@@ -373,6 +373,23 @@ Element2Struct *Element2StructMake(){
     XCTAssert(aValue.type == OCTypeDouble);
     XCTAssert(aValue.doubleValue == 4);
 }
+- (void)testStructGetValueNoDefine{
+    //    NSString *source = @"\
+    //    struct NSDirectionalEdgeInsets {\
+    //        CGFloat top, leading, bottom, trailing;\
+    //    };\
+    //    CGFloat top = UIApplication.sharedApplication.keyWindow.directionalLayoutMargins.top;\
+    //    ";
+    NSString *source = @"CGFloat top = UIApplication.sharedApplication.keyWindow.directionalLayoutMargins.top;";
+    MFScopeChain *scope = self.currentScope;
+    AST *ast = [_parser parseSource:source];
+    for (id <OCExecute> exp in ast.globalStatements) {
+        [exp execute:scope];
+    }
+    if (@available(iOS 11.0, *)) {
+        XCTAssert(UIApplication.sharedApplication.keyWindow.directionalLayoutMargins.top == [scope getValueWithIdentifier:@"top"].doubleValue);
+    }
+}
 - (void)testDetectStructMemeryLayoutCode{
     NSString *result = detectStructMemeryLayoutEncodeCode("{CGRect={CGPoint=ff{CGPoint=dd}}{CGSize=dd}}");
     XCTAssert([result isEqualToString:@"ffdddd"]);
