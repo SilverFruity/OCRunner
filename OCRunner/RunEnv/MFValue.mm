@@ -563,6 +563,24 @@ struct MFValueDeallocScope {
     NSCAssert(self.type == OCTypeStruct, @"must be struct");
     NSString *structName = self.typeName;
     ORStructDeclare *declare = [[ORTypeSymbolTable shareInstance] symbolItemForTypeName:structName].declare;
+#if DEBUG
+    if (!declare) {
+        NSLog(@"\
+\n---------OCRunner Error---------\n\
+Unknown struct: '%@'\n\
+Tried to access the field '%@' of the struct '%@', but the struct '%@' was not defined in advance\n\
+You need to add the missing struct in OCRunner scripts.\n\
+For example:\n\
+If it is 'NSDirectionalEdgeInsets', then add the following struct:\n\
+```\n\
+typedef struct {\n\
+    CGFloat top, leading, bottom, trailing;\n\
+} NSDirectionalEdgeInsets;\n\
+```\n\
+-----------------------------------", structName, key, structName, structName);
+        NSAssert(false, @"As mentioned above");
+    }
+#endif
     NSUInteger offset = declare.keyOffsets[key].unsignedIntegerValue;
     MFValue *result = [MFValue defaultValueWithTypeEncoding:declare.keyTypeEncodes[key].UTF8String];
     if (copied) {
