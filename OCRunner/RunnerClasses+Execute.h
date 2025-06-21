@@ -17,7 +17,7 @@
 NS_ASSUME_NONNULL_BEGIN
 @class MFScopeChain;
 
-MFValue *evalORNode(ORNode *node, MFScopeChain * scope);
+FOUNDATION_EXPORT MFValue *evalORNode(ORNode *node, MFScopeChain * scope);
 
 @interface ORMethodCall (Execute)
 #if DEBUG

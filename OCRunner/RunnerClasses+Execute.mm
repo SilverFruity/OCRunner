@@ -21,6 +21,7 @@
 #import "ORCoreImp.h"
 #import "ORSearchedFunction.h"
 #import "ORffiResultCache.h"
+#import "ORThreadContext.h"
 
 static MFValue * invoke_MFBlockValue(MFValue *blockValue, NSArray *args){
     id block = blockValue.objectValue;
@@ -91,7 +92,7 @@ static void replace_method(Class clazz, ORMethodImplementation *methodImp){
     or_ffi_result *result = register_method(&methodIMP, declare.parameterTypes, declare.returnType, (__bridge_retained void *)methodImp);
     [[ORffiResultCache shared] saveffiResult:result WithKey:[NSValue valueWithPointer:(__bridge void *)methodImp]];
     SEL sel = NSSelectorFromString(methodImp.declare.selectorName);
-    or_method_replace(methodImp.declare.isClassMethod, clazz, sel, result->function_imp, typeEncoding);
+    or_method_replace(methodImp.declare.isClassMethod, clazz, sel, (IMP)result->function_imp, typeEncoding);
     free((void *)typeEncoding);
 }
 
@@ -101,7 +102,7 @@ static void replace_getter_method(Class clazz, ORPropertyDeclare *prop){
     const char * typeEncoding = mf_str_append(retTypeEncoding, "@:");
     or_ffi_result *result = register_method(&getterImp, @[], prop.var, (__bridge  void *)prop);
     [[ORffiResultCache shared] saveffiResult:result WithKey:[NSValue valueWithPointer:(__bridge void *)prop]];
-    or_method_replace(NO, clazz, getterSEL, result->function_imp, typeEncoding);
+    or_method_replace(NO, clazz, getterSEL, (IMP)result->function_imp, typeEncoding);
     free((void *)typeEncoding);
 }
 
@@ -113,18 +114,20 @@ static void replace_setter_method(Class clazz, ORPropertyDeclare *prop){
     const char *prtTypeEncoding  = prop.var.typeEncode;
     const char * typeEncoding = mf_str_append("v@:", prtTypeEncoding);
     or_ffi_result *result = register_method(&setterImp, @[prop.var], [ORTypeVarPair typePairWithTypeKind:TypeVoid],(__bridge_retained  void *)prop);
-    or_method_replace(NO, clazz, setterSEL, result->function_imp, typeEncoding);
+    or_method_replace(NO, clazz, setterSEL, (IMP)result->function_imp, typeEncoding);
     free((void *)typeEncoding);
 }
 
-void copy_undef_var(id exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *fromScope, MFScopeChain *destScope);
+static void copy_undef_var(ORNode * exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *fromScope, MFScopeChain *destScope);
+
 void copy_undef_vars(NSArray *exprOrStatements, MFVarDeclareChain *chain, MFScopeChain *fromScope, MFScopeChain *destScope){
-    for (id exprOrStatement in exprOrStatements) {
+    for (ORNode * exprOrStatement in exprOrStatements) {
         copy_undef_var(exprOrStatement, chain, fromScope, destScope);
     }
 }
+
 /// Block执行时的外部变量捕获
-void copy_undef_var(ORNode *exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *fromScope, MFScopeChain *destScope){
+static void copy_undef_var(ORNode *exprOrStatement, MFVarDeclareChain *chain, MFScopeChain *fromScope, MFScopeChain *destScope){
     if (!exprOrStatement) {
         return;
     }
@@ -306,9 +309,9 @@ MFValue * evalORValueExpression (ORValueExpression  *node, MFScopeChain * scope)
         case OCValueVariable:{
             MFValue *value = [scope recursiveGetValueWithIdentifier:node.value];
             if (value != nil) return value;
-            Class class = NSClassFromString(node.value);
-            if (class) {
-                value = [MFValue valueWithClass:class];
+            Class clazz = NSClassFromString(node.value);
+            if (clazz) {
+                value = [MFValue valueWithClass:clazz];
             }else{
 #if DEBUG
                 if (node.value) {
@@ -496,8 +499,8 @@ MFValue * evalORMethodCall(ORMethodCall *node, MFScopeChain * scope) {
     
     //如果在方法缓存表的中已经找到相关方法，直接调用，省去一次中间类型转换问题。优化性能，在方法递归时，调用耗时减少33%，0.15s -> 0.10s
     BOOL isClassMethod = object_isClass(instance);
-    Class class = isClassMethod ? objc_getMetaClass(class_getName(instance)) : [instance class];
-    MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:class classMethod:isClassMethod sel:sel];
+    Class clazz = isClassMethod ? objc_getMetaClass(class_getName(instance)) : [instance class];
+    MFMethodMapTableItem *map = [[MFMethodMapTable shareInstance] getMethodMapTableItemWith:clazz classMethod:isClassMethod sel:sel];
     if (map) {
         MFScopeChain *newScope = [MFScopeChain scopeChainWithNext:scope];
         newScope.instance = isClassMethod ? [MFValue valueWithClass:instance] : [MFValue valueWithUnRetainedObject:instance];
@@ -520,7 +523,7 @@ MFValue * evalORMethodCall(ORMethodCall *node, MFScopeChain * scope) {
                                        [MFValue valueWithSEL:sel]] mutableCopy];
         [methodArgs addObjectsFromArray:argValues];
         MFValue *result = [MFValue defaultValueWithTypeEncoding:[sig methodReturnType]];
-        void *msg_send = &objc_msgSend;
+        void *msg_send = (void *)&objc_msgSend;
         invoke_functionPointer(msg_send, methodArgs, result, argCount);
         return result;
     }else{
@@ -567,11 +570,11 @@ MFValue * evalORMethodCall(ORMethodCall *node, MFScopeChain * scope) {
         currentName = [[currentName substringToIndex:1].lowercaseString stringByAppendingString:[currentName substringFromIndex:1]];
     }
     NSMutableString *tip = [NSMutableString stringWithFormat:@"%@ Unrecognized selector '%@'", instance, currentName];
-    Class class = [instance class];
+    Class clazz = [instance class];
 
     // 1、先尝试通过 class_copyPropertyList 查找属性的 getter/setter 方法，如
     // @property(nonatomic, assign, getter=customGetterTest, setter=customSetterTest:) BOOL test;
-    objc_property_t property = class_getProperty(class, currentName.UTF8String);
+    objc_property_t property = class_getProperty(clazz, currentName.UTF8String);
     if (property) {
         NSString *foundName = [NSString stringWithUTF8String:property_copyAttributeValue(property, self.isAssignedValue ? "S" : "G")];
         if (foundName.length && [instance respondsToSelector:NSSelectorFromString(foundName)]) {
@@ -585,7 +588,7 @@ MFValue * evalORMethodCall(ORMethodCall *node, MFScopeChain * scope) {
     // @property(nonatomic,getter=isHidden) BOOL hidden;
     //
     currentName = [NSString stringWithFormat:@"%@%@%@", self.isAssignedValue ? @"set" : @"is", [[currentName substringToIndex:1] uppercaseString], [currentName substringFromIndex:1]];
-    Class methodClass = class.mutableCopy;
+    Class methodClass = clazz.mutableCopy;
 //    class_getInstanceMethod(<#Class  ___unsafe_unretained cls#>, <#SEL  _Nonnull name#>)
     while (methodClass && methodClass != NSObject.class) {
         unsigned int methodCount;
@@ -1272,20 +1275,20 @@ MFValue * evalORContinueStatement (ORContinueStatement  *node, MFScopeChain * sc
 MFValue * evalORPropertyDeclare(ORPropertyDeclare *node, MFScopeChain * scope) {
     NSString *propertyName = node.var.var.varname;
     MFValue *classValue = [scope recursiveGetValueWithIdentifier:@"Class"];
-    Class class = *(Class *)classValue.pointer;
-    MFPropertyMapTableItem *propItem = [[MFPropertyMapTableItem alloc] initWithClass:class property:node];
+    Class clazz = *(Class *)classValue.pointer;
+    MFPropertyMapTableItem *propItem = [[MFPropertyMapTableItem alloc] initWithClass:clazz property:node];
     [[MFPropertyMapTable shareInstance] addPropertyMapTableItem:propItem];
     // only support add new property when ivar is NULL
-    if (class_getProperty(class, propertyName.UTF8String)
-        && class_getInstanceVariable(class, [@"_" stringByAppendingString:propertyName].UTF8String)) {
+    if (class_getProperty(clazz, propertyName.UTF8String)
+        && class_getInstanceVariable(clazz, [@"_" stringByAppendingString:propertyName].UTF8String)) {
         propItem.added = NO;
         return nil;
     }
     // for recover: RunnerClasses+Recover.m
     propItem.added = YES;
-    class_addProperty(class, propertyName.UTF8String, node.propertyAttributes, 3);
-    replace_getter_method(class, node);
-    replace_setter_method(class, node);
+    class_addProperty(clazz, propertyName.UTF8String, node.propertyAttributes, 3);
+    replace_getter_method(clazz, node);
+    replace_setter_method(clazz, node);
     return nil;
 }
 
@@ -1293,11 +1296,11 @@ MFValue * evalORPropertyDeclare(ORPropertyDeclare *node, MFScopeChain * scope) {
 @implementation ORPropertyDeclare(Execute)
 - (const objc_property_attribute_t *)propertyAttributes{
     NSValue *value = objc_getAssociatedObject(self, mf_propKey(@"propertyAttributes"));
-    objc_property_attribute_t *attributes = [value pointerValue];
+    objc_property_attribute_t *attributes = (objc_property_attribute_t *)[value pointerValue];
     if (attributes != NULL) {
         return attributes;
     }
-    attributes = malloc(sizeof(objc_property_attribute_t) * 3);
+    attributes = (objc_property_attribute_t *)malloc(sizeof(objc_property_attribute_t) * 3);
     attributes[0] = self.typeAttribute;
     attributes[1] = self.memeryAttribute;
     attributes[2] = self.atomicAttribute;
@@ -1306,7 +1309,7 @@ MFValue * evalORPropertyDeclare(ORPropertyDeclare *node, MFScopeChain * scope) {
 }
 - (void)dealloc{
     NSValue *value = objc_getAssociatedObject(self, mf_propKey(@"propertyAttributes"));
-    objc_property_attribute_t *attributes = [value pointerValue];
+    objc_property_attribute_t *attributes = (objc_property_attribute_t *)[value pointerValue];
     if (attributes != NULL) {
         free((void *)attributes->value);
         free(attributes);
@@ -1557,14 +1560,6 @@ MFValue * evalORUnionExpressoin (ORUnionExpressoin  *node, MFScopeChain * scope)
 MFValue *evalORNode(ORNode *node, MFScopeChain * scope) {
     if (node == NULL) return MFValue.nullValue;
     switch (node.nodeType) {
-//        case AstEnumEmptyNode: return evalOREmptyNode((OREmptyNode *)node, scope);
-//        case AstEnumPatchFile: return evalORPatchFile((ORPatchFile *)node, scope);
-//        case AstEnumStringCursorNode: return evalORStringCursorNode((ORStringCursorNode *)node, scope);
-//        case AstEnumStringBufferNode: return evalORStringBufferNode((ORStringBufferNode *)node, scope);
-//        case AstEnumListNode: return evalORListNode((ORListNode *)node, scope);
-//        case AstEnumTypeSpecial: return evalORTypeSpecial((ORTypeSpecial *)node, scope);
-//        case AstEnumVariable: return evalORVariable((ORVariable *)node, scope);
-//        case AstEnumTypeVarPair: return evalORTypeVarPair((ORTypeVarPair *)node, scope);
         case AstEnumFuncVariable: return evalORFuncVariable((ORFuncVariable *)node, scope);
         case AstEnumFuncDeclare: return evalORFuncDeclare((ORFuncDeclare *)node, scope);
         case AstEnumScopeImp: return evalORScopeImp((ORScopeImp *)node, scope);

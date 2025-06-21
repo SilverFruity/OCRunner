@@ -117,16 +117,15 @@
 }
 @end
 
+thread_local void *thread_ctx = nullptr;
+
 @implementation ORThreadContext
 + (instancetype)threadContext{
-    //每一个线程拥有一个独立的上下文
-    NSMutableDictionary *threadInfo = [[NSThread currentThread] threadDictionary];
-    ORThreadContext *ctx = threadInfo[@"ORThreadContext"];
-    if (!ctx) {
-        ctx = [[ORThreadContext alloc] init];
-        threadInfo[@"ORThreadContext"] = ctx;
+    thread_local void *thread_ctx = nullptr;
+    if (!thread_ctx) {
+        thread_ctx = (__bridge_retained void *)[[ORThreadContext alloc] init];
     }
-    return ctx;
+    return (__bridge ORThreadContext *)thread_ctx;
 }
 - (instancetype)init
 {

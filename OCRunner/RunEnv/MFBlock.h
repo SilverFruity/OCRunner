@@ -76,7 +76,8 @@ struct ORFixedBlockDescriptor {
     void (*orignalDispose)(const void *);
 };
 
-const char *NSBlockGetSignature(id block);
+FOUNDATION_EXPORT const char *NSBlockGetSignature(id block);
+
 BOOL NSBlockHasSignature(id block);
 void NSBlockSetSignature(id block, const char *typeencode);
 void *simulateNSBlock(const char* typeEncoding, void *imp, void *userdata);

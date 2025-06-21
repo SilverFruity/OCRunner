@@ -31,7 +31,7 @@ cal_result.box.uLongValue = (operator *(unsigned long *)value.pointer); break;\
 case OCTypeULongLong:\
 cal_result.box.uLongLongValue = (operator *(unsigned long long *)value.pointer); break;\
 case OCTypeBOOL:\
-cal_result.box.boolValue = (operator *(BOOL *)value.pointer); break;\
+cal_result.box.boolValue = (BOOL)(operator *(char *)value.pointer); break;\
 case OCTypeChar:\
 cal_result.box.charValue = (operator *(char *)value.pointer); break;\
 case OCTypeShort:\
@@ -72,7 +72,7 @@ cal_result.box.uLongValue = ((*(unsigned long *)value.pointer) operator); break;
 case OCTypeULongLong:\
 cal_result.box.uLongLongValue = ((*(unsigned long long *)value.pointer) operator); break;\
 case OCTypeBOOL:\
-cal_result.box.boolValue = ((*(BOOL *)value.pointer) operator); break;\
+cal_result.box.boolValue = (BOOL)((*(char *)value.pointer) operator); break;\
 case OCTypeChar:\
 cal_result.box.charValue = ((*(char *)value.pointer) operator); break;\
 case OCTypeShort:\

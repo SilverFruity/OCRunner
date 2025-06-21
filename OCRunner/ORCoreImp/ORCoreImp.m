@@ -17,6 +17,7 @@
 #import "ORStructDeclare.h"
 #import "ORCoreFunctionCall.h"
 #import <syslog.h>
+#import "ORThreadContext.h"
 
 #define FATAL_CHECK(condition, msg) \
 if (!(condition)) {\

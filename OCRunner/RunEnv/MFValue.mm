@@ -31,9 +31,10 @@ switch (*target->_typeEncode) {\
     default: result = 0;\
 }
 
-extern BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
+BOOL MFStatementResultTypeIsReturn(MFStatementResultType type){
     return type & MFStatementResultTypeReturnMask;
 }
+
 @interface MFValue()
 {
 @public

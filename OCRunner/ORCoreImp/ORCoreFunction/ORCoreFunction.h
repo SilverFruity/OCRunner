@@ -70,34 +70,35 @@ typedef struct {
 #endif
     void *function_imp;
 }or_ffi_result;
-void or_ffi_result_free(or_ffi_result *result);
+
+FOUNDATION_EXPORT void or_ffi_result_free(or_ffi_result *result);
 
 @class NSArray;
 @class MFValue;
 @class ORTypeVarPair;
 
-void core_invoke_function_pointer(ffi_cif *cif, void *funcptr, void **args, void *ret);
+FOUNDATION_EXPORT void core_invoke_function_pointer(ffi_cif *cif, void *funcptr, void **args, void *ret);
 __attribute__((overloadable))
-void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue, NSUInteger needArgs);
-void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue);
+FOUNDATION_EXPORT void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue, NSUInteger needArgs);
+FOUNDATION_EXPORT void invoke_functionPointer(void *funptr, NSArray<MFValue *> *argValues, MFValue *returnValue);
 
 
 
 
-or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
+FOUNDATION_EXPORT or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
                         NSArray <ORTypeVarPair *>*args,
                         ORTypeVarPair *ret)  __attribute__((overloadable));
 
-or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
+FOUNDATION_EXPORT or_ffi_result *register_function(void (*fun)(ffi_cif *,void *,void **, void*),
                         NSArray <ORTypeVarPair *>*args,
                         ORTypeVarPair *ret,
                         void *userdata);
 
-or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
+FOUNDATION_EXPORT or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
                       NSArray <ORTypeVarPair *>*args,
                       ORTypeVarPair *ret) __attribute__((overloadable));
 
-or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
+FOUNDATION_EXPORT or_ffi_result *register_method(void (*fun)(ffi_cif *,void *,void **, void*),
                       NSArray <ORTypeVarPair *>*args,
                       ORTypeVarPair *ret,
                       void *userdata);

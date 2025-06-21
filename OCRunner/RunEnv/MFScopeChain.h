@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "ORThreadContext.h"
 #import "ORGlobalFunctionTable.h"
 #import "built-in.h"
 @class MFValue;
@@ -21,7 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)contextWithClass:(Class)classNode;
 @end
 
-extern const void *mf_propKey(NSString *propName);
+FOUNDATION_EXPORT const void *mf_propKey(NSString *propName);
+
 @interface MFScopeChain: NSObject
 @property (strong, nonatomic) NSMutableDictionary<NSString *,MFValue *> *vars;
 + (instancetype)topScope;
