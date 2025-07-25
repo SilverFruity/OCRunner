@@ -17,6 +17,10 @@
 #import "MFStaticVarTable.h"
 #import "ORffiResultCache.h"
 
+#ifdef OCRUNNER_OBJC_SOURCE
+#import <oc2mangoLib/oc2mangoLib.h>
+#endif
+
 @interface ORInterpreter()
 @property (nonatomic, copy)NSArray *currentNodes;
 @end
@@ -31,6 +35,13 @@
     });
     return _instance;
 }
+
+#ifdef OCRUNNER_OBJC_SOURCE
++ (void)executeSourceCode:(NSString *)sourceCode {
+    AST *ast = [[Parser shared] parseSource:sourceCode];
+    [self excuteNodes: ast.nodes];
+}
+#else
 + (void)excuteBinaryPatchFile:(NSString *)path{
     //加载补丁文件
     ORPatchFile *file = [ORPatchFile loadBinaryPatch:path];
@@ -52,6 +63,7 @@
     }
     [self excuteNodes:file.nodes];
 }
+#endif
 
 + (void)excuteNodes:(NSArray <ORNode *>*)nodes{
     

@@ -11,8 +11,12 @@
 NS_ASSUME_NONNULL_BEGIN
 @interface ORInterpreter : NSObject
 + (instancetype)shared;
+#ifdef OCRUNNER_OBJC_SOURCE
++ (void)executeSourceCode:(NSString *)sourceCode;
+#else
 + (void)excuteBinaryPatchFile:(NSString *)path;
 + (void)excuteJsonPatchFile:(NSString *)path;
+#endif
 + (void)excuteNodes:(NSArray *)nodes;
 + (void)recover;
 + (void)recoverWithClearEnvironment:(BOOL)clear;
