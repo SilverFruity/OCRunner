@@ -9,6 +9,7 @@
 #import "AppDelegate.h"
 
 //#import <ObjcScript/OCRunner.h>
+//#import <ObjcScript/TcpServer.h>
 
 #import <OCRunner.h>
 
@@ -40,6 +41,9 @@
 
 // only for #import <ObjcScript/OCRunner.h>
 #ifdef OCRUNNER_OBJC_SOURCE
+
+    ObjcScriptRunExeServer();
+
     NSString *file0Path = [[NSBundle mainBundle] pathForResource:@"ViewController1" ofType:nil];
     NSString *file1Path = [[NSBundle mainBundle] pathForResource:@"HotViewcontroller" ofType:nil];
 

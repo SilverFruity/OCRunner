@@ -16,7 +16,7 @@ s.user_target_xcconfig = {
 }
 s.ios.deployment_target = "9.0"
 s.source       = { :git => "https://github.com/SilverFruity/OCRunner.git", :tag => "#{s.version}" }
-s.source_files  = "OCRunner/*.{h,m,c,mm}", "OCRunner/ORCoreImp/**/*.{h,m,c,mm}", "OCRunner/RunEnv/**/*.{h,m,c,mm}", "OCRunner/Util/**/*.{h,m,c,mm}", "OCRunner/libffi/**/*.{h,m,c,mm}"
+s.source_files  = "OCRunner/*.{h,m,c,mm}", "OCRunner/ORCoreImp/**/*.{h,m,c,mm}", "OCRunner/RunEnv/**/*.{h,m,c,mm}", "OCRunner/Util/**/*.{h,m,c,mm}", "OCRunner/libffi/**/*.{h,m,c,mm}", "OCRunner/Server/**/*.{h,m,c,mm}"
 s.ios.vendored_frameworks = 'OCRunner/libffi/libffi.xcframework'
 s.dependency "oc2mangoLib", "1.2.3"
 end
