@@ -310,8 +310,28 @@ Take the classic Fibonacci sequence function as an example, find the test result
 etc.
 
 
-### Thanks for
+## Thanks for
 * [Mango](https://github.com/YPLiang19/Mango)
 * [libffi](https://github.com/libffi/libffi)
 * Procedure Call Standard for the ARM 64-bit Architecture. 
 * [@jokerwking](https://github.com/jokerwking)
+
+## For ObjcScript
+
+We designed a TCP client/server system to enable real-time interaction and execution of Objective-C source code between the macOS Terminal and an iPhone.
+
+**Features:**
+
+1. In interactive mode, supports single-line execution and uses keyboard up/down arrow keys to navigate command history.
+2. If the Objective-C script server on the iPhone disconnects, the macOS client will automatically attempt to reconnect indefinitely, eliminating the need for manual reconnection.
+3. Supports preloading environment source code via the --preload-folder option to load all necessary environment code at startup.
+4. Upon each connection, the client automatically sends and loads content from the preload-folder, monitoring-file, and monitoring-folder directories, avoiding redundant manual initialization.
+
+**It supports three interaction modes:**
+
+1. **Interactive Mode**:
+    Enter source code directly in the terminal for step-by-step execution on the server (ideal for debugging and testing), as shown below:
+    ![InteractiveMode](./OCRunner/Server/InteractiveMode.gif)
+2. **File Monitoring Mode:**  Monitor a single file; whenever the file is modified, its content is automatically sent and executed on the iPhone
+2. F**older Monitoring Mode**: Monitor an entire directory; whenever any file within the folder changes, the updated content is automatically sent and executed on the iPhone, as shown below:
+![InteractiveMode](./OCRunner/Server/FolderMode.gif)

@@ -331,3 +331,28 @@ CGRect CGRectMake(CGFloat x, CGFloat y, CGFloat width, CGFloat height)
 * 更多的单元测试覆盖（尽管目前显示是84%）
 * PatchGenerator阶段进行优化：未被调用的函数声明、结构体、枚举等，不会在补丁中，减少包大小以及加载时间等
 * 尝试Swift热更新（新建库吧，哈哈）
+
+
+
+## For ObjcScript
+
+我们设计了一个 Tcp Client/Server 用于通过 Macos Terminal 与 iPhone 实时交互并执行 Objc Source Code。
+
+**特性：**
+
+1. 在 interactive mode 下，支持单句执行以及键盘的上下快捷键查找历史记录
+
+2. 当 iphone 的 ObjcScript Server 掉线时，Macos 的 client 会无限重连 Server，避免重复的手动连接
+3. 支持 environment source code 通过 --preload-folder 方式加载所有环境代码
+4. 每次连接时，都会向 Server 发送并加载 preload-folder、monitoring--file、monitoring-folder 中的内容，避免无意义的手动初始化
+
+**三种交互模式:**
+
+1. 命令行直接交互：控制台直接输入源码然单步执行（极其适合调试与测试），在 Server 执行，如下:
+   ![InteractiveMode](./OCRunner/Server/InteractiveMode.gif)
+   
+2. 单文件监听执行：监听单个文件的内容，并在修改时，让其在 iphone 执行
+
+3. 文件夹监听执行：监听整个文件夹的内容，任意文件夹修改时，让其在 iphone 执行，如下:
+
+      ![InteractiveMode](./OCRunner/Server/FolderMode.gif)
