@@ -26,7 +26,7 @@
 2. Then use script to connect server
 
    ```shell
-   python3 ObjcScriptClient.py --host 30.211.98.210 
+   python3 ObjcScriptClient.py --host 30.211.98.210 --preload-folder xxx/Scripts.bundle
    ```
 
    

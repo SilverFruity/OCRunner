@@ -45,6 +45,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.view.backgroundColor = [UIColor grayColor];
     WKWebView *webView = [WKWebView new];
     webView.navigationDelegate = self;
     [self.view addSubview:webView];

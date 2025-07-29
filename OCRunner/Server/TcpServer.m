@@ -372,7 +372,7 @@ void* server_main_loop(void* arg) {
         get_current_time(time_str, sizeof(time_str));
         char welcome_msg[512];
         int welcome_len = snprintf(welcome_msg, sizeof(welcome_msg),
-                                  "Welcome to TCP Server! Connected at %s.\n"
+                                  "Welcome to ObjcScript Server! Connected at %s.\n"
                                   "Max message size: 1MB. Commands: 'quit' or 'exit' to disconnect.\n",
                                   time_str);
         send_message(client_socket, welcome_msg, welcome_len);

@@ -9,6 +9,8 @@ import struct
 import os
 import signal
 import argparse
+import glob
+import hashlib
 
 try:
     # 尝试导入 readline 支持方向键历史
@@ -34,17 +36,81 @@ class Colors:
     RESET = '\033[0m'
 
 class FileMonitorHandler(FileSystemEventHandler):
-    def __init__(self, client):
+    def __init__(self, client, monitoring_file):
         self.client = client
+        self.monitoring_file = monitoring_file  # 直接传入监控文件路径
+        self.last_sha256 = None
         
+    def calculate_file_sha256(self, file_path):
+        """计算文件的SHA256值"""
+        try:
+            hash_sha256 = hashlib.sha256()
+            with open(file_path, "rb") as f:
+                for chunk in iter(lambda: f.read(4096), b""):
+                    hash_sha256.update(chunk)
+            return hash_sha256.hexdigest()
+        except Exception as e:
+            print(f"{Colors.RED}[CLIENT] Error calculating SHA256 for {file_path}: {e}{Colors.RESET}")
+            return None
+    
     def on_modified(self, event):
-        if not event.is_directory and self.client.monitoring_file:
-            if os.path.abspath(event.src_path) == os.path.abspath(self.client.monitoring_file):
-                print(f"{Colors.CYAN}[CLIENT] File {event.src_path} modified, sending content...{Colors.RESET}")
-                self.client.send_file_content()
+        if not event.is_directory:
+            # 只有当修改的文件是我们监控的文件时才触发
+            if os.path.abspath(event.src_path) == os.path.abspath(self.monitoring_file):
+                # 计算当前文件的SHA256
+                current_sha256 = self.calculate_file_sha256(event.src_path)
+                if current_sha256 is None:
+                    return
+                
+                # 如果是第一次或者SHA256值不同，则触发发送
+                if self.last_sha256 is None or self.last_sha256 != current_sha256:
+                    self.last_sha256 = current_sha256
+                    print(f"{Colors.CYAN}[CLIENT] File {event.src_path} content changed, sending content...{Colors.RESET}")
+                    self.client.send_file_content()
+                else:
+                    print(f"{Colors.YELLOW}[CLIENT] File {event.src_path} modified but content unchanged{Colors.RESET}")
+
+class FolderMonitorHandler(FileSystemEventHandler):
+    def __init__(self, client, monitoring_folder):
+        self.client = client
+        self.monitoring_folder = monitoring_folder  # 直接传入监控文件夹路径
+        self.file_sha256_cache = {}  # 缓存每个文件的SHA256值
+        
+    def calculate_file_sha256(self, file_path):
+        """计算文件的SHA256值"""
+        try:
+            hash_sha256 = hashlib.sha256()
+            with open(file_path, "rb") as f:
+                for chunk in iter(lambda: f.read(4096), b""):
+                    hash_sha256.update(chunk)
+            return hash_sha256.hexdigest()
+        except Exception as e:
+            print(f"{Colors.RED}[CLIENT] Error calculating SHA256 for {file_path}: {e}{Colors.RESET}")
+            return None
+    
+    def on_modified(self, event):
+        if not event.is_directory:
+            file_path = event.src_path
+            # 检查文件是否在监控文件夹内
+            if os.path.commonpath([self.monitoring_folder, file_path]) == os.path.normpath(self.monitoring_folder):
+                # 计算当前文件的SHA256
+                current_sha256 = self.calculate_file_sha256(file_path)
+                if current_sha256 is None:
+                    return
+                
+                # 获取之前的SHA256值
+                previous_sha256 = self.file_sha256_cache.get(file_path)
+                
+                # 如果是第一次或者SHA256值不同，则触发发送
+                if previous_sha256 is None or previous_sha256 != current_sha256:
+                    self.file_sha256_cache[file_path] = current_sha256
+                    print(f"{Colors.CYAN}[CLIENT] File {os.path.basename(file_path)} content changed, sending content...{Colors.RESET}")
+                    self.client.send_single_file_content(file_path)
+                else:
+                    print(f"{Colors.YELLOW}[CLIENT] File {os.path.basename(file_path)} modified but content unchanged{Colors.RESET}")
 
 class TCPClient:
-    def __init__(self, host='localhost', port=8888):
+    def __init__(self, host='localhost', port=8888, preload_folder=None):
         self.host = host
         self.port = port
         self.socket = None
@@ -52,12 +118,14 @@ class TCPClient:
         self.running = False
         self.max_message_size = 1024 * 1024  # 1MB
         self.monitoring_file = None
+        self.monitoring_folder = None
         self.observer = None
         self.file_handler = None
-        self.mode = 'interactive'  # 'interactive' or 'file_monitor'
+        self.mode = 'interactive'  # 'interactive', 'file_monitor', or 'folder_monitor'
         self.reconnect_delay = 5  # 重连间隔秒数
         self.should_reconnect = True
         self.exit_requested = False
+        self.preload_folder = preload_folder
         
         # 如果有 readline，启用历史记录
         if READLINE_AVAILABLE:
@@ -79,14 +147,23 @@ class TCPClient:
                 print(f"{Colors.CYAN}[CLIENT] Connected to server {self.host}:{self.port}{Colors.RESET}")
                 print(f"{Colors.CYAN}[CLIENT] Maximum message size: {self.max_message_size} bytes{Colors.RESET}")
                 
+                # 如果指定了 preload_folder，发送预加载内容
+                if self.preload_folder:
+                    self.send_preload_content()
+                
                 # 启动接收消息的线程
                 receive_thread = threading.Thread(target=self.receive_messages)
                 receive_thread.daemon = True
                 receive_thread.start()
                 
-                # 如果是文件监控模式，发送初始文件内容
-                if self.mode == 'file_monitor' and self.monitoring_file:
-                    self.send_file_content()
+                # 如果是文件监控模式或文件夹监控模式，发送初始文件内容
+                if self.mode in ['file_monitor', 'folder_monitor']:
+                    if self.mode == 'file_monitor' and self.monitoring_file:
+                        print(f"{Colors.CYAN}[CLIENT] Triggering initial file send on connection...{Colors.RESET}")
+                        self.send_file_content()
+                    elif self.mode == 'folder_monitor' and self.monitoring_folder:
+                        print(f"{Colors.CYAN}[CLIENT] Triggering initial folder files send on connection...{Colors.RESET}")
+                        self.send_all_folder_files()
                 
                 return True
                 
@@ -99,6 +176,52 @@ class TCPClient:
                     break
                     
         return False
+    
+    def send_preload_content(self):
+        """发送预加载文件夹中的所有文件内容"""
+        if not self.preload_folder or not os.path.exists(self.preload_folder):
+            return
+            
+        try:
+            print(f"{Colors.CYAN}[CLIENT] Loading content from preload folder: {self.preload_folder}{Colors.RESET}")
+            
+            # 获取文件夹下所有文件
+            files = glob.glob(os.path.join(self.preload_folder, "*"))
+            files = [f for f in files if os.path.isfile(f)]
+            
+            if not files:
+                print(f"{Colors.YELLOW}[CLIENT] No files found in preload folder{Colors.RESET}")
+                return
+            
+            # 读取所有文件内容并拼接
+            all_content = []
+            total_size = 0
+            
+            for file_path in sorted(files):  # 按文件名排序
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        if content:
+                            file_info = f"// {os.path.basename(file_path)}\n{content}\n"
+                            all_content.append(file_info)
+                            total_size += len(file_info.encode('utf-8'))
+                            print(f"{Colors.CYAN}[CLIENT] Loaded file: {os.path.basename(file_path)} ({len(content)} chars){Colors.RESET}")
+                except Exception as e:
+                    print(f"{Colors.RED}[CLIENT] Error reading file {file_path}: {e}{Colors.RESET}")
+            
+            if all_content:
+                combined_content = "\n".join(all_content)
+                message = f"// [PRELOAD]\n{combined_content}"
+                
+                if self.send_message(message):
+                    print(f"{Colors.BLUE}[CLIENT] Preload content sent successfully ({total_size} bytes){Colors.RESET}")
+                else:
+                    print(f"{Colors.BRIGHT_RED}[CLIENT] Failed to send preload content{Colors.RESET}")
+            else:
+                print(f"{Colors.YELLOW}[CLIENT] No content to send from preload folder{Colors.RESET}")
+                
+        except Exception as e:
+            print(f"{Colors.RED}[CLIENT] Error processing preload folder: {e}{Colors.RESET}")
     
     def send_message_with_length(self, message):
         """发送带长度前缀的消息"""
@@ -159,10 +282,14 @@ class TCPClient:
                     try:
                         message = message_bytes.decode('utf-8')
                         message_length = len(message_bytes)
+                        
+                        # 检查是否包含错误信息
                         if '-Error-' in message:
-                            print(f"{Colors.RED}[SERVER RESPONSE]:\n{message.strip()}{Colors.RESET}")
+                            print(f"{Colors.RED}[SERVER RESPONSE] ({message_length} bytes) - ERROR DETECTED:{Colors.RESET}")
+                            print(f"{Colors.RED}{message.strip()}{Colors.RESET}")
                         else:
-                            print(f"{Colors.BLUE}[SERVER RESPONSE]: {message.strip()}{Colors.RESET}")
+                            print(f"{Colors.BLUE}[SERVER RESPONSE] ({message_length} bytes):{Colors.RESET}")
+                            print(f"{Colors.WHITE}{message.strip()}{Colors.RESET}")
                     except UnicodeDecodeError:
                         message_length = len(message_bytes)
                         print(f"{Colors.BLUE}[SERVER RESPONSE] ({message_length} bytes - binary data):{Colors.RESET}")
@@ -245,13 +372,12 @@ class TCPClient:
     
     def reconnect_worker(self):
         """重连工作线程"""
-        if self.connect() and self.mode == 'file_monitor' and self.monitoring_file:
-            # 重连成功后重新发送文件内容
-            time.sleep(1)  # 等待连接稳定
-            self.send_file_content()
+        if self.connect() and self.mode in ['file_monitor', 'folder_monitor']:
+            # 重连成功后重新发送文件内容（已经在connect中处理）
+            pass
     
     def start_file_monitoring(self, file_path):
-        """开始文件监控模式"""
+        """开始单文件监控模式"""
         if not os.path.exists(file_path):
             print(f"{Colors.RED}[CLIENT] File {file_path} does not exist{Colors.RESET}")
             return False
@@ -260,7 +386,7 @@ class TCPClient:
         self.mode = 'file_monitor'
         
         # 设置文件监控
-        self.file_handler = FileMonitorHandler(self)
+        self.file_handler = FileMonitorHandler(self, file_path)  # 传入文件路径
         self.observer = Observer()
         self.observer.schedule(self.file_handler, os.path.dirname(os.path.abspath(file_path)), recursive=False)
         self.observer.start()
@@ -271,8 +397,29 @@ class TCPClient:
         
         return True
     
+    def start_folder_monitoring(self, folder_path):
+        """开始文件夹监控模式"""
+        if not os.path.exists(folder_path):
+            print(f"{Colors.RED}[CLIENT] Folder {folder_path} does not exist{Colors.RESET}")
+            return False
+            
+        self.monitoring_folder = folder_path
+        self.mode = 'folder_monitor'
+        
+        # 设置文件夹监控
+        self.file_handler = FolderMonitorHandler(self, folder_path)  # 传入文件夹路径
+        self.observer = Observer()
+        self.observer.schedule(self.file_handler, folder_path, recursive=True)
+        self.observer.start()
+        
+        print(f"{Colors.CYAN}[CLIENT] Started monitoring folder: {folder_path}{Colors.RESET}")
+        print(f"{Colors.CYAN}[CLIENT] File changes in folder will be automatically sent to server{Colors.RESET}")
+        print(f"{Colors.CYAN}[CLIENT] Type 'stop' to stop monitoring and disconnect{Colors.RESET}")
+        
+        return True
+    
     def send_file_content(self):
-        """发送文件内容到服务器"""
+        """发送单文件内容到服务器（用于 file_monitor 模式）"""
         if not self.monitoring_file or not os.path.exists(self.monitoring_file) or not self.connected:
             return
             
@@ -288,6 +435,46 @@ class TCPClient:
                     print(f"{Colors.BRIGHT_RED}[CLIENT] Failed to send file content{Colors.RESET}")
         except Exception as e:
             print(f"{Colors.RED}[CLIENT] Error reading file: {e}{Colors.RESET}")
+    
+    def send_single_file_content(self, file_path):
+        """发送单个文件内容到服务器（用于 folder_monitor 模式）"""
+        if not os.path.exists(file_path) or not self.connected:
+            return
+            
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+                
+            if content:
+                message = f"[FILE] {os.path.basename(file_path)}: {content}"
+                if self.send_message(message):
+                    print(f"{Colors.BLUE}[CLIENT] File {os.path.basename(file_path)} sent successfully ({len(content)} chars){Colors.RESET}")
+                else:
+                    print(f"{Colors.BRIGHT_RED}[CLIENT] Failed to send file {os.path.basename(file_path)}{Colors.RESET}")
+        except Exception as e:
+            print(f"{Colors.RED}[CLIENT] Error reading file {file_path}: {e}{Colors.RESET}")
+    
+    def send_all_folder_files(self):
+        """发送文件夹中所有文件的内容（用于 folder_monitor 模式初始化）"""
+        if not self.monitoring_folder or not os.path.exists(self.monitoring_folder) or not self.connected:
+            return
+            
+        try:
+            # 获取文件夹下所有文件
+            files = glob.glob(os.path.join(self.monitoring_folder, "**/*"), recursive=True)
+            files = [f for f in files if os.path.isfile(f)]
+            
+            if not files:
+                print(f"{Colors.YELLOW}[CLIENT] No files found in folder{Colors.RESET}")
+                return
+            
+            print(f"{Colors.CYAN}[CLIENT] Sending initial content of {len(files)} files...{Colors.RESET}")
+            
+            for file_path in sorted(files):  # 按文件名排序
+                self.send_single_file_content(file_path)
+                
+        except Exception as e:
+            print(f"{Colors.RED}[CLIENT] Error processing folder: {e}{Colors.RESET}")
     
     def interactive_mode(self):
         """交互模式 - 使用标准 input 支持 readline"""
@@ -358,7 +545,17 @@ class TCPClient:
             self.disconnect()
     
     def file_monitor_mode(self, file_path):
-        """文件监控模式"""
+        """单文件监控模式"""
+        # 先设置监控文件
+        self.monitoring_file = file_path
+        self.mode = 'file_monitor'
+        
+        # 然后连接到服务器
+        if not self.connect():
+            print(f"{Colors.RED}[CLIENT] Failed to connect to server{Colors.RESET}")
+            return
+            
+        # 启动文件监控
         if not self.start_file_monitoring(file_path):
             return
             
@@ -383,6 +580,43 @@ class TCPClient:
             self.should_reconnect = False
         finally:
             self.disconnect()
+    
+    def folder_monitor_mode(self, folder_path):
+        """文件夹监控模式"""
+        # 先设置监控文件夹
+        self.monitoring_folder = folder_path
+        self.mode = 'folder_monitor'
+        
+        # 然后连接到服务器
+        if not self.connect():
+            print(f"{Colors.RED}[CLIENT] Failed to connect to server{Colors.RESET}")
+            return
+            
+        # 启动文件夹监控
+        if not self.start_folder_monitoring(folder_path):
+            return
+            
+        try:
+            while self.running:
+                if self.connected:
+                    try:
+                        command = input()
+                        if command.lower() == 'stop':
+                            print(f"{Colors.CYAN}[CLIENT] Stopping folder monitoring...{Colors.RESET}")
+                            self.should_reconnect = False
+                            break
+                    except (EOFError, KeyboardInterrupt):
+                        self.should_reconnect = False
+                        break
+                else:
+                    # 未连接时等待重连
+                    time.sleep(1)
+                        
+        except KeyboardInterrupt:
+            print(f"\n{Colors.CYAN}[CLIENT] Interrupted by user{Colors.RESET}")
+            self.should_reconnect = False
+        finally:
+            self.disconnect()
 
 def parse_arguments():
     """解析命令行参数"""
@@ -391,24 +625,29 @@ def parse_arguments():
                        help='Server host address (default: localhost)')
     parser.add_argument('--port', type=int, default=8888, 
                        help='Server port (default: 8888)')
+    parser.add_argument('--preload-folder', type=str, 
+                       help='Folder path to preload content from (optional)')
     
     args = parser.parse_args()
-    return args.host, args.port
+    return args.host, args.port, args.preload_folder
 
 def get_client_mode():
     """获取客户端模式"""
     print(f"\n{Colors.CYAN}[CLIENT] Select mode:{Colors.RESET}")
     print(f"{Colors.CYAN}[CLIENT] 1. Interactive mode (type messages manually){Colors.RESET}")
-    print(f"{Colors.CYAN}[CLIENT] 2. File monitoring mode (monitor file changes){Colors.RESET}")
+    print(f"{Colors.CYAN}[CLIENT] 2. Single file monitoring mode (monitor one file changes){Colors.RESET}")
+    print(f"{Colors.CYAN}[CLIENT] 3. Folder monitoring mode (monitor all files in folder){Colors.RESET}")
     
     while True:
-        choice = input(f"{Colors.CYAN}[CLIENT] Enter choice (1 or 2, default: 1): {Colors.RESET}").strip()
+        choice = input(f"{Colors.CYAN}[CLIENT] Enter choice (1, 2 or 3, default: 1): {Colors.RESET}").strip()
         if not choice or choice == '1':
             return 'interactive'
         elif choice == '2':
             return 'file_monitor'
+        elif choice == '3':
+            return 'folder_monitor'
         else:
-            print(f"{Colors.RED}[CLIENT] Please enter 1 or 2{Colors.RESET}")
+            print(f"{Colors.RED}[CLIENT] Please enter 1, 2 or 3{Colors.RESET}")
 
 def get_file_path():
     """获取要监控的文件路径"""
@@ -422,34 +661,53 @@ def get_file_path():
         else:
             print(f"{Colors.RED}[CLIENT] Please enter a valid file path{Colors.RESET}")
 
+def get_folder_path():
+    """获取要监控的文件夹路径"""
+    while True:
+        folder_path = input(f"{Colors.CYAN}[CLIENT] Enter folder path to monitor: {Colors.RESET}").strip()
+        if folder_path:
+            if os.path.exists(folder_path):
+                return folder_path
+            else:
+                print(f"{Colors.RED}[CLIENT] Folder {folder_path} does not exist{Colors.RESET}")
+        else:
+            print(f"{Colors.RED}[CLIENT] Please enter a valid folder path{Colors.RESET}")
+
 def main():
     # 解析命令行参数
-    host, port = parse_arguments()
+    host, port, preload_folder = parse_arguments()
     
     print(f"{Colors.CYAN}[CLIENT] Using server: {host}:{port}{Colors.RESET}")
+    if preload_folder:
+        print(f"{Colors.CYAN}[CLIENT] Preload folder: {preload_folder}{Colors.RESET}")
     
     # 获取客户端模式
     mode = get_client_mode()
     
     # 根据模式获取相应参数
     if mode == 'file_monitor':
-        # 先获取文件路径
+        # 获取文件路径
         file_path = get_file_path()
         # 创建客户端实例
-        client = TCPClient(host, port)
+        client = TCPClient(host, port, preload_folder)
         client.running = True
         client.mode = mode
         
-        # 连接到服务器
-        if not client.connect():
-            print(f"{Colors.RED}[CLIENT] Failed to connect to server{Colors.RESET}")
-            return
-            
-        # 启动文件监控模式
+        # 启动文件监控模式（会先设置监控文件再连接）
         client.file_monitor_mode(file_path)
+    elif mode == 'folder_monitor':
+        # 获取文件夹路径
+        folder_path = get_folder_path()
+        # 创建客户端实例
+        client = TCPClient(host, port, preload_folder)
+        client.running = True
+        client.mode = mode
+        
+        # 启动文件夹监控模式（会先设置监控文件夹再连接）
+        client.folder_monitor_mode(folder_path)
     else:  # interactive mode
         # 创建客户端实例
-        client = TCPClient(host, port)
+        client = TCPClient(host, port, preload_folder)
         client.running = True
         client.mode = mode
         
