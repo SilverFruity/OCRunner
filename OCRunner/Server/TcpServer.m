@@ -19,6 +19,7 @@
 #import <unistd.h>
 #import "TcpServer.h"
 #import "ORInterpreter.h"
+#import <oc2mangoLib/Parser.h>
 
 // GEN by Qwen3-Coder
 
@@ -424,33 +425,21 @@ void* server_main_loop(void* arg) {
             size_t display_length = strlen(display_message);
             
             if (display_length > 0) {
+                NSString *time_stamp = [NSString stringWithUTF8String:time_str];
                 NSString *content = [NSString stringWithUTF8String:display_message];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [ORInterpreter executeSourceCode:content];
+                    if ([Parser shared].error) {
+                        NSString *errorInfo = [NSString stringWithFormat:@"\n----Error----: \n  PATH: %@\n  INFO:%@",[Parser shared].source.filePath, [Parser shared].error];
+                        send_message(client_socket, errorInfo.UTF8String, errorInfo.length);
+                    } else {
+                        // 发送换行符
+                        const char *msg = "ObjcScript Successfully";
+                        send_message(client_socket, msg, strlen(msg));
+                    }
                 });
             }
- 
-            // 回显消息给客户端
-            char response_prefix[256];
-            int prefix_len = snprintf(response_prefix, sizeof(response_prefix),
-                                     "[ECHO %s] Received %zu bytes: ", time_str, display_length);
-            
-            // 发送响应前缀
-            if (send_message(client_socket, response_prefix, prefix_len) <= 0) {
-                break;
-            }
-            
-            // 发送处理后的消息
-            if (send_message(client_socket, display_message, display_length) <= 0) {
-                break;
-            }
-            
-            // 发送换行符
-            const char* newline = "\n";
-            if (send_message(client_socket, newline, 1) <= 0) {
-                break;
-            }
-            
+
             // 特殊命令处理
             if (message_length >= 4 &&
                 (strncmp(message, "quit", 4) == 0 || strncmp(message, "exit", 4) == 0)) {

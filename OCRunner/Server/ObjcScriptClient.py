@@ -1,16 +1,38 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+# Gen by Qwen3-Coder
 import socket
 import threading
 import sys
 import time
 import struct
 import os
+import signal
 import argparse
+
+try:
+    # 尝试导入 readline 支持方向键历史
+    import readline
+    READLINE_AVAILABLE = True
+except ImportError:
+    READLINE_AVAILABLE = False
+
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-# Gen by Qwen3-Coder
+
+# ANSI 颜色代码
+class Colors:
+    RED = '\033[91m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    MAGENTA = '\033[95m'
+    CYAN = '\033[96m'
+    WHITE = '\033[97m'
+    BRIGHT_GREEN = '\033[1;92m'
+    BRIGHT_RED = '\033[1;91m'
+    RESET = '\033[0m'
+
 class FileMonitorHandler(FileSystemEventHandler):
     def __init__(self, client):
         self.client = client
@@ -18,7 +40,7 @@ class FileMonitorHandler(FileSystemEventHandler):
     def on_modified(self, event):
         if not event.is_directory and self.client.monitoring_file:
             if os.path.abspath(event.src_path) == os.path.abspath(self.client.monitoring_file):
-                print(f"[CLIENT] File {event.src_path} modified, sending content...")
+                print(f"{Colors.CYAN}[CLIENT] File {event.src_path} modified, sending content...{Colors.RESET}")
                 self.client.send_file_content()
 
 class TCPClient:
@@ -35,12 +57,17 @@ class TCPClient:
         self.mode = 'interactive'  # 'interactive' or 'file_monitor'
         self.reconnect_delay = 5  # 重连间隔秒数
         self.should_reconnect = True
+        self.exit_requested = False
         
+        # 如果有 readline，启用历史记录
+        if READLINE_AVAILABLE:
+            readline.parse_and_bind("mode emacs")  # 启用 emacs 模式以支持方向键
+            
     def connect(self):
         """连接到服务器"""
         while self.should_reconnect and self.running:
             try:
-                print(f"[CLIENT] Attempting to connect to {self.host}:{self.port}...")
+                print(f"{Colors.CYAN}[CLIENT] Attempting to connect to {self.host}:{self.port}...{Colors.RESET}")
                 self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 # 设置连接超时
                 self.socket.settimeout(10)
@@ -49,8 +76,8 @@ class TCPClient:
                 self.socket.connect((self.host, self.port))
                 self.connected = True
                 
-                print(f"[CLIENT] Connected to server {self.host}:{self.port}")
-                print(f"[CLIENT] Maximum message size: {self.max_message_size} bytes")
+                print(f"{Colors.CYAN}[CLIENT] Connected to server {self.host}:{self.port}{Colors.RESET}")
+                print(f"{Colors.CYAN}[CLIENT] Maximum message size: {self.max_message_size} bytes{Colors.RESET}")
                 
                 # 启动接收消息的线程
                 receive_thread = threading.Thread(target=self.receive_messages)
@@ -64,9 +91,9 @@ class TCPClient:
                 return True
                 
             except Exception as e:
-                print(f"[CLIENT] Connection failed: {e}")
+                print(f"{Colors.RED}[CLIENT] Connection failed: {e}{Colors.RESET}")
                 if self.should_reconnect and self.running:
-                    print(f"[CLIENT] Retrying in {self.reconnect_delay} seconds...")
+                    print(f"{Colors.YELLOW}[CLIENT] Retrying in {self.reconnect_delay} seconds...{Colors.RESET}")
                     time.sleep(self.reconnect_delay)
                 else:
                     break
@@ -128,29 +155,32 @@ class TCPClient:
             try:
                 message_bytes = self.receive_message_with_length()
                 if message_bytes is not None:
-                    # 尝试解码为 UTF-8
+                    # 打印服务器返回的完整内容
                     try:
                         message = message_bytes.decode('utf-8')
-                        if len(message) <= 200:
-                            print(f"{message.strip()}")
+                        message_length = len(message_bytes)
+                        if '-Error-' in message:
+                            print(f"{Colors.RED}[SERVER RESPONSE]:\n{message.strip()}{Colors.RESET}")
                         else:
-                            print(f"{message[:200]}... (truncated, {len(message)} chars total)")
+                            print(f"{Colors.BLUE}[SERVER RESPONSE]: {message.strip()}{Colors.RESET}")
                     except UnicodeDecodeError:
-                        print(f"[CLIENT] Received {len(message_bytes)} bytes of binary data")
+                        message_length = len(message_bytes)
+                        print(f"{Colors.BLUE}[SERVER RESPONSE] ({message_length} bytes - binary data):{Colors.RESET}")
+                        print(f"{Colors.WHITE}{message_bytes}{Colors.RESET}")
                 else:
                     # 服务器关闭连接
-                    print("[CLIENT] Server disconnected")
+                    print(f"{Colors.RED}[CLIENT] Server disconnected{Colors.RESET}")
                     self.connected = False
                     break
             except ValueError as e:
-                print(f"[CLIENT] Protocol error: {e}")
+                print(f"{Colors.RED}[CLIENT] Protocol error: {e}{Colors.RESET}")
                 self.connected = False
                 break
             except socket.timeout:
                 continue  # 继续循环
             except Exception as e:
                 if self.running:
-                    print(f"[CLIENT] Error receiving message: {e}")
+                    print(f"{Colors.RED}[CLIENT] Error receiving message: {e}{Colors.RESET}")
                 self.connected = False
                 break
         
@@ -161,20 +191,21 @@ class TCPClient:
     def send_message(self, message):
         """发送消息到服务器"""
         if not self.connected:
-            print("[CLIENT] Not connected to server")
+            print(f"{Colors.RED}[CLIENT] Not connected to server{Colors.RESET}")
             return False
             
         try:
             self.send_message_with_length(message)
+            print(f"{Colors.BLUE}[CLIENT] Message sent successfully ({len(message)} chars){Colors.RESET}")
             return True
         except Exception as e:
-            print(f"[CLIENT] Error sending message: {e}")
+            print(f"{Colors.BRIGHT_RED}[CLIENT] Error sending message: {e}{Colors.RESET}")
             self.connected = False
             return False
     
     def disconnect(self):
         """断开连接"""
-        print("[CLIENT] Disconnecting...")
+        print(f"{Colors.CYAN}[CLIENT] Disconnecting...{Colors.RESET}")
         self.should_reconnect = False
         self.running = False
         self.connected = False
@@ -190,7 +221,7 @@ class TCPClient:
                 self.socket.close()
             except:
                 pass
-        print("[CLIENT] Disconnected from server")
+        print(f"{Colors.CYAN}[CLIENT] Disconnected from server{Colors.RESET}")
     
     def handle_disconnect(self):
         """处理断开连接并尝试重连"""
@@ -205,7 +236,7 @@ class TCPClient:
                 pass
             self.socket = None
             
-        print("[CLIENT] Connection lost. Attempting to reconnect...")
+        print(f"{Colors.YELLOW}[CLIENT] Connection lost. Attempting to reconnect...{Colors.RESET}")
         
         # 在新线程中重连，避免阻塞接收线程
         reconnect_thread = threading.Thread(target=self.reconnect_worker)
@@ -222,7 +253,7 @@ class TCPClient:
     def start_file_monitoring(self, file_path):
         """开始文件监控模式"""
         if not os.path.exists(file_path):
-            print(f"[CLIENT] File {file_path} does not exist")
+            print(f"{Colors.RED}[CLIENT] File {file_path} does not exist{Colors.RESET}")
             return False
             
         self.monitoring_file = file_path
@@ -234,9 +265,9 @@ class TCPClient:
         self.observer.schedule(self.file_handler, os.path.dirname(os.path.abspath(file_path)), recursive=False)
         self.observer.start()
         
-        print(f"[CLIENT] Started monitoring file: {file_path}")
-        print("[CLIENT] File changes will be automatically sent to server")
-        print("[CLIENT] Type 'stop' to stop monitoring and disconnect")
+        print(f"{Colors.CYAN}[CLIENT] Started monitoring file: {file_path}{Colors.RESET}")
+        print(f"{Colors.CYAN}[CLIENT] File changes will be automatically sent to server{Colors.RESET}")
+        print(f"{Colors.CYAN}[CLIENT] Type 'stop' to stop monitoring and disconnect{Colors.RESET}")
         
         return True
     
@@ -252,60 +283,77 @@ class TCPClient:
             if content:
                 message = f"[FILE] {os.path.basename(self.monitoring_file)}: {content}"
                 if self.send_message(message):
-                    print(f"[CLIENT] File content sent ({len(content)} chars)")
+                    print(f"{Colors.BLUE}[CLIENT] File content sent successfully ({len(content)} chars){Colors.RESET}")
                 else:
-                    print("[CLIENT] Failed to send file content")
+                    print(f"{Colors.BRIGHT_RED}[CLIENT] Failed to send file content{Colors.RESET}")
         except Exception as e:
-            print(f"[CLIENT] Error reading file: {e}")
+            print(f"{Colors.RED}[CLIENT] Error reading file: {e}{Colors.RESET}")
     
     def interactive_mode(self):
-        """交互模式"""
-        print("[CLIENT] Enter messages (type 'quit' or 'exit' to disconnect)")
-        print("[CLIENT] Special commands:")
-        print("  - 'quit' or 'exit': Disconnect")
-        print("  - 'help': Show this help")
+        """交互模式 - 使用标准 input 支持 readline"""
+        print(f"{Colors.CYAN}[CLIENT] Enter messages (type 'quit' or 'exit' to disconnect){Colors.RESET}")
+        print(f"{Colors.CYAN}[CLIENT] Special commands:{Colors.RESET}")
+        print(f"{Colors.CYAN}  - 'quit' or 'exit': Disconnect{Colors.RESET}")
+        print(f"{Colors.CYAN}  - 'help': Show this help{Colors.RESET}")
+        if READLINE_AVAILABLE:
+            print(f"{Colors.CYAN}  - Use Up/Down arrow keys to navigate history{Colors.RESET}")
+        print(f"{Colors.CYAN}[CLIENT] Use Ctrl+C to exit program{Colors.RESET}")
         
         try:
-            while self.running:
+            while self.running and not self.exit_requested:
                 if self.connected:
                     try:
-                        message = input()
+                        # 使用标准 input，支持 readline 历史
+                        message = input("")
+                        
                         if not message.strip():
                             continue
                             
                         # 处理特殊命令
                         if message.lower() in ['quit', 'exit']:
                             self.should_reconnect = False
-                            self.send_message(message)
+                            if self.send_message(message):
+                                print(f"{Colors.BLUE}[CLIENT] Quit command sent successfully{Colors.RESET}")
                             time.sleep(0.1)  # 等待服务器响应
                             break
                         elif message.lower() == 'help':
-                            print("Special commands:")
-                            print("  - 'quit' or 'exit': Disconnect")
-                            print("  - 'help': Show this help")
+                            print(f"{Colors.CYAN}Special commands:{Colors.RESET}")
+                            print(f"{Colors.CYAN}  - 'quit' or 'exit': Disconnect{Colors.RESET}")
+                            print(f"{Colors.CYAN}  - 'help': Show this help{Colors.RESET}")
+                            if READLINE_AVAILABLE:
+                                print(f"{Colors.CYAN}  - Use Up/Down arrow keys to navigate history{Colors.RESET}")
+                            print(f"{Colors.CYAN}  - Use Ctrl+C to exit program{Colors.RESET}")
                         else:
                             self.send_message(message)
                     except EOFError:
                         # Ctrl+D
                         self.should_reconnect = False
-                        self.send_message('quit')
                         break
+                    except KeyboardInterrupt:
+                        print(f"\n{Colors.CYAN}[CLIENT] Ctrl+C received, exiting...{Colors.RESET}")
+                        self.exit_requested = True
+                        self.should_reconnect = False
+                        break
+                    except Exception as e:
+                        if self.running:
+                            print(f"{Colors.RED}[CLIENT] Error in interactive mode: {e}{Colors.RESET}")
                 else:
                     # 未连接时的命令处理
                     try:
-                        command = input("[CLIENT] Disconnected. Commands: 'reconnect', 'quit': ")
+                        command = input(f"{Colors.RED}[CLIENT] Disconnected. Commands: 'reconnect', 'quit': {Colors.RESET}")
                         if command.lower() in ['quit', 'exit']:
                             self.should_reconnect = False
                             break
                         elif command.lower() == 'reconnect':
                             if self.connect():
-                                print("[CLIENT] Reconnected successfully")
-                    except EOFError:
+                                print(f"{Colors.BLUE}[CLIENT] Reconnected successfully{Colors.RESET}")
+                    except (EOFError, KeyboardInterrupt):
                         self.should_reconnect = False
                         break
                         
         except KeyboardInterrupt:
-            print("\n[CLIENT] Interrupted by user")
+            print(f"\n{Colors.CYAN}[CLIENT] Interrupted by user{Colors.RESET}")
+            self.should_reconnect = False
         finally:
             self.disconnect()
     
@@ -320,10 +368,10 @@ class TCPClient:
                     try:
                         command = input()
                         if command.lower() == 'stop':
-                            print("[CLIENT] Stopping file monitoring...")
+                            print(f"{Colors.CYAN}[CLIENT] Stopping file monitoring...{Colors.RESET}")
                             self.should_reconnect = False
                             break
-                    except EOFError:
+                    except (EOFError, KeyboardInterrupt):
                         self.should_reconnect = False
                         break
                 else:
@@ -331,59 +379,55 @@ class TCPClient:
                     time.sleep(1)
                         
         except KeyboardInterrupt:
-            print("\n[CLIENT] Interrupted by user")
+            print(f"\n{Colors.CYAN}[CLIENT] Interrupted by user{Colors.RESET}")
+            self.should_reconnect = False
         finally:
             self.disconnect()
 
-def get_server_info():
-    """交互式获取服务器信息"""
-    print("[CLIENT] TCP Client Configuration")
-    print("[CLIENT] ======================")
+def parse_arguments():
+    """解析命令行参数"""
+    parser = argparse.ArgumentParser(description='TCP Client')
+    parser.add_argument('--host', type=str, default='localhost', 
+                       help='Server host address (default: localhost)')
+    parser.add_argument('--port', type=int, default=8888, 
+                       help='Server port (default: 8888)')
     
-    # 获取服务器 IP
-    while True:
-        host_input = input("[CLIENT] Enter server IP (default: localhost): ").strip()
-        if not host_input:
-            host = 'localhost'
-            break
-        else:
-            host = host_input
-            break
-    
-    # 端口使用默认值 8888
-    port = 8888
-    print(f"[CLIENT] Using default port: {port}")
-    
-    return host, port
+    args = parser.parse_args()
+    return args.host, args.port
 
 def get_client_mode():
     """获取客户端模式"""
-    print("\n[CLIENT] Select mode:")
-    print("[CLIENT] 1. Interactive mode (type messages manually)")
-    print("[CLIENT] 2. File monitoring mode (monitor file changes)")
+    print(f"\n{Colors.CYAN}[CLIENT] Select mode:{Colors.RESET}")
+    print(f"{Colors.CYAN}[CLIENT] 1. Interactive mode (type messages manually){Colors.RESET}")
+    print(f"{Colors.CYAN}[CLIENT] 2. File monitoring mode (monitor file changes){Colors.RESET}")
     
     while True:
-        choice = input("[CLIENT] Enter choice (1 or 2, default: 1): ").strip()
+        choice = input(f"{Colors.CYAN}[CLIENT] Enter choice (1 or 2, default: 1): {Colors.RESET}").strip()
         if not choice or choice == '1':
             return 'interactive'
         elif choice == '2':
             return 'file_monitor'
         else:
-            print("[CLIENT] Please enter 1 or 2")
+            print(f"{Colors.RED}[CLIENT] Please enter 1 or 2{Colors.RESET}")
 
 def get_file_path():
     """获取要监控的文件路径"""
     while True:
-        file_path = input("[CLIENT] Enter file path to monitor: ").strip()
+        file_path = input(f"{Colors.CYAN}[CLIENT] Enter file path to monitor: {Colors.RESET}").strip()
         if file_path:
             if os.path.exists(file_path):
                 return file_path
             else:
-                print(f"[CLIENT] File {file_path} does not exist")
+                print(f"{Colors.RED}[CLIENT] File {file_path} does not exist{Colors.RESET}")
         else:
-            print("[CLIENT] Please enter a valid file path")
+            print(f"{Colors.RED}[CLIENT] Please enter a valid file path{Colors.RESET}")
 
 def main():
+    # 解析命令行参数
+    host, port = parse_arguments()
+    
+    print(f"{Colors.CYAN}[CLIENT] Using server: {host}:{port}{Colors.RESET}")
+    
     # 获取客户端模式
     mode = get_client_mode()
     
@@ -391,8 +435,6 @@ def main():
     if mode == 'file_monitor':
         # 先获取文件路径
         file_path = get_file_path()
-        # 再获取服务器信息
-        host, port = get_server_info()
         # 创建客户端实例
         client = TCPClient(host, port)
         client.running = True
@@ -400,14 +442,12 @@ def main():
         
         # 连接到服务器
         if not client.connect():
-            print("[CLIENT] Failed to connect to server")
+            print(f"{Colors.RED}[CLIENT] Failed to connect to server{Colors.RESET}")
             return
             
         # 启动文件监控模式
         client.file_monitor_mode(file_path)
     else:  # interactive mode
-        # 直接获取服务器信息
-        host, port = get_server_info()
         # 创建客户端实例
         client = TCPClient(host, port)
         client.running = True
@@ -415,7 +455,7 @@ def main():
         
         # 连接到服务器
         if not client.connect():
-            print("[CLIENT] Failed to connect to server")
+            print(f"{Colors.RED}[CLIENT] Failed to connect to server{Colors.RESET}")
             return
             
         # 启动交互模式
@@ -425,6 +465,13 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n[CLIENT] Program interrupted by user")
+        print(f"\n{Colors.CYAN}[CLIENT] Program interrupted by user{Colors.RESET}")
     except Exception as e:
-        print(f"[CLIENT] Unexpected error: {e}")
+        print(f"{Colors.RED}[CLIENT] Unexpected error: {e}{Colors.RESET}")
+    finally:
+        # 确保清理资源
+        if 'client' in locals():
+            try:
+                client.disconnect()
+            except:
+                pass
