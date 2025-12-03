@@ -10,6 +10,9 @@
 #import <Masonry/Masonry.h>
 #import <MFBlock.h>
 #import <WebKit/WebKit.h>
+#if __has_include(<Aspects/Aspects.h>)
+#import <Aspects/Aspects.h>
+#endif
 
 @interface ShareInstance: NSObject
 @property (nonatomic,copy)NSDictionary *cache;
@@ -55,7 +58,33 @@
         make.bottom.equalTo(self.view.mas_safeAreaLayoutGuideBottom);
     }];
     [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"https://www.baidu.com"]]];
+
+#if __has_include(<Aspects/Aspects.h>)
+    UIButton *aspectButton = ({
+        UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(50, 300, 150, 50)];
+        [button setTitle:@"Test Aspect" forState:UIControlStateNormal];
+        [button addTarget:self action:@selector(buttonAction:) forControlEvents:UIControlEventTouchUpInside];
+        button.backgroundColor = UIColor.blackColor;
+        button;
+    });
+    [self.view addSubview:aspectButton];
+
+    [self aspect_hookSelector:@selector(buttonAction:)
+                  withOptions:AspectPositionBefore
+                   usingBlock:^(id<AspectInfo> aspectInfo, UIButton *sender) {
+                       NSLog(@"buttonAction aspects, sender: %@", sender);
+                   }
+                        error:nil];
+#endif
 }
+
+#if __has_include(<Aspects/Aspects.h>)
+- (void)buttonAction:(UIButton *)sender
+{
+    NSLog(@"buttonAction origin, sender: %@", sender);
+}
+#endif
+
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler{
     decisionHandler(WKNavigationActionPolicyAllow);
 }
