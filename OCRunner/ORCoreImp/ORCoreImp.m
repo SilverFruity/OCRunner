@@ -30,27 +30,53 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     __unsafe_unretained id target = *(__unsafe_unretained id *)args[0];
     SEL sel = *(SEL *)args[1];
     BOOL classMethod = object_isClass(target);
-    NSArray<ORTypeVarPair *> *paramTypes = methodImp.declare.parameterTypes;
-    FATAL_CHECK(cfi->nargs == 2 + paramTypes.count, @"ffi_cif nargs mismatch with parameterTypes");
-    NSMutableArray<MFValue *> *argValues = [NSMutableArray arrayWithCapacity:paramTypes.count];
-    for (NSUInteger i = 0; i < paramTypes.count; i++) {
-        MFValue *argValue = [[MFValue alloc] initTypeEncode:paramTypes[i].typeEncode pointer:args[i + 2]];
-        //针对系统传入的block，检查一次签名，如果没有，将在结构体中添加签名信息.
-        if (argValue.isObject && argValue.isBlockValue && argValue.objectValue != nil) {
-            struct MFSimulateBlock *bb = (void *)argValue->realBaseValue.pointerValue;
-            // 针对传入的block，如果为全局block或栈block，使用copy转换为堆block
-            if (bb->isa == &_NSConcreteGlobalBlock || bb->isa == &_NSConcreteStackBlock){
-                id copied = (__bridge id)Block_copy(argValue->realBaseValue.pointerValue);
-                argValue.pointer = &copied;
-            }
-            if (NSBlockHasSignature(argValue.objectValue) == NO) {
-                ORTypeVarPair *blockdecl = paramTypes[i];
-                if ([blockdecl.var isKindOfClass:[ORFuncVariable class]]) {
-                    NSBlockSetSignature(argValue.objectValue, blockdecl.blockSignature);
+    NSMethodSignature *sig = [target methodSignatureForSelector:sel];
+    // 默认用 runtime 获取方法签名
+    // 如无 sig 则使用 AST 中的方法签名（多为与 Aspects 等 Swizzle 库冲突时）
+    BOOL useRuntimeSig = sig != nil;
+    NSMutableArray<MFValue *> *argValues = [NSMutableArray array];
+    if (useRuntimeSig) {
+        for (NSUInteger i = 2; i < sig.numberOfArguments; i++) {
+            MFValue *argValue = [[MFValue alloc] initTypeEncode:[sig getArgumentTypeAtIndex:i] pointer:args[i]];
+            //针对系统传入的block，检查一次签名，如果没有，将在结构体中添加签名信息.
+            if (argValue.isObject && argValue.isBlockValue && argValue.objectValue != nil) {
+                struct MFSimulateBlock *bb = (void *)argValue->realBaseValue.pointerValue;
+                // 针对传入的block，如果为全局block或栈block，使用copy转换为堆block
+                if (bb->isa == &_NSConcreteGlobalBlock || bb->isa == &_NSConcreteStackBlock){
+                    id copied = (__bridge id)Block_copy(argValue->realBaseValue.pointerValue);
+                    argValue.pointer = &copied;
+                }
+                if (NSBlockHasSignature(argValue.objectValue) == NO) {
+                    ORTypeVarPair *blockdecl = methodImp.declare.parameterTypes[i - 2];
+                    if ([blockdecl.var isKindOfClass:[ORFuncVariable class]]) {
+                        NSBlockSetSignature(argValue.objectValue, blockdecl.blockSignature);
+                    }
                 }
             }
+            [argValues addObject:argValue];
         }
-        [argValues addObject:argValue];
+    } else {
+        NSLog(@"Method signature for %@ not found in runtime, use AST signature instead.", NSStringFromSelector(sel));
+        NSArray<ORTypeVarPair *> *paramTypes = methodImp.declare.parameterTypes;
+        for (NSUInteger i = 0; i < paramTypes.count; i++) {
+            MFValue *argValue = [[MFValue alloc] initTypeEncode:paramTypes[i].typeEncode pointer:args[i + 2]];
+            //针对系统传入的block，检查一次签名，如果没有，将在结构体中添加签名信息.
+            if (argValue.isObject && argValue.isBlockValue && argValue.objectValue != nil) {
+                struct MFSimulateBlock *bb = (void *)argValue->realBaseValue.pointerValue;
+                // 针对传入的block，如果为全局block或栈block，使用copy转换为堆block
+                if (bb->isa == &_NSConcreteGlobalBlock || bb->isa == &_NSConcreteStackBlock){
+                    id copied = (__bridge id)Block_copy(argValue->realBaseValue.pointerValue);
+                    argValue.pointer = &copied;
+                }
+                if (NSBlockHasSignature(argValue.objectValue) == NO) {
+                    ORTypeVarPair *blockdecl = paramTypes[i];
+                    if ([blockdecl.var isKindOfClass:[ORFuncVariable class]]) {
+                        NSBlockSetSignature(argValue.objectValue, blockdecl.blockSignature);
+                    }
+                }
+            }
+            [argValues addObject:argValue];
+        }
     }
     if (classMethod) {
         scope.instance = [MFValue valueWithClass:target];
@@ -68,7 +94,7 @@ void methodIMP(ffi_cif *cfi,void *ret,void **args, void*userdata){
     returnValue = [methodImp execute:scope];
     if (returnValue.type != TypeVoid && returnValue.pointer != NULL){
         // 类型转换
-        [returnValue writePointer:ret typeEncode:methodImp.declare.returnType.typeEncode];
+        [returnValue writePointer:ret typeEncode:useRuntimeSig ? [sig methodReturnType] : methodImp.declare.returnType.typeEncode];
     }
 
     if (ctx.isDeallocScope) {
@@ -113,19 +139,22 @@ void getterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
     SEL sel = *(SEL *)args[1];
     ORPropertyDeclare *propDef = (__bridge ORPropertyDeclare *)userdata;
     NSString *propName = propDef.var.var.varname;
+    NSMethodSignature *sig = [target methodSignatureForSelector:sel];
     __autoreleasing MFValue *propValue = objc_getAssociatedObject(target, mf_propKey(propName));
     if (!propValue) {
         propValue = [MFValue defaultValueWithTypeEncoding:propDef.var.typeEncode];
     }
     if (propValue.type != TypeVoid && propValue.pointer != NULL){
-        [propValue writePointer:ret typeEncode:propDef.var.typeEncode];
+        [propValue writePointer:ret typeEncode:sig ? sig.methodReturnType : propDef.var.typeEncode];
     }
 }
 
 void setterImp(ffi_cif *cfi,void *ret,void **args, void*userdata){
     id target = *(__strong id *)args[0];
     ORPropertyDeclare *propDef = (__bridge ORPropertyDeclare *)userdata;
-    const char *argTypeEncode = propDef.var.typeEncode;
+    SEL sel = *(SEL *)args[1];
+    NSMethodSignature *sig = [target methodSignatureForSelector:sel];
+    const char *argTypeEncode = sig ? [sig getArgumentTypeAtIndex:2] : propDef.var.typeEncode;
     MFValue *value = [MFValue valueWithTypeEncode:argTypeEncode pointer:args[2]];
     NSString *propName = propDef.var.var.varname;
     MFPropertyModifier modifier = propDef.modifier;

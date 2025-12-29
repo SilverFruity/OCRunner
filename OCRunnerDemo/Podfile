@@ -8,7 +8,6 @@ target 'OCRunnerDemo' do
   pod 'MJRefresh'
   pod 'MJExtension'
   pod 'Masonry'
-  # pod 'Aspects'
 
   pod 'ORPatchFile', :path => '../oc2mango'
   pod 'oc2mangoLib', :path => '../oc2mango'
@@ -20,6 +19,7 @@ target 'OCRunnerDemo' do
     inherit! :search_paths
     pod 'oc2mangoLib', :path => '../oc2mango'
     pod 'MJExtension'
+    pod 'Aspects'
   end
 
 end

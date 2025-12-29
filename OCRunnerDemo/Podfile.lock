@@ -1,4 +1,5 @@
 PODS:
+  - Aspects (1.4.1)
   - Masonry (1.1.0)
   - MJExtension (3.4.0)
   - MJRefresh (3.7.2)
@@ -9,6 +10,7 @@ PODS:
   - ORPatchFile (1.2.3)
 
 DEPENDENCIES:
+  - Aspects
   - Masonry
   - MJExtension
   - MJRefresh
@@ -18,6 +20,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
+    - Aspects
     - Masonry
     - MJExtension
     - MJRefresh
@@ -31,6 +34,7 @@ EXTERNAL SOURCES:
     :path: "../oc2mango"
 
 SPEC CHECKSUMS:
+  Aspects: 7595ba96a6727a58ebcbfc954497fc5d2fdde546
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   MJExtension: 6c15c7b93398447252c0defdb8d69d02d218a41e
   MJRefresh: 30997d30b347c8e9508a4db11e3a690da0c9b85a
@@ -38,6 +42,6 @@ SPEC CHECKSUMS:
   OCRunner: ed65d5b720eecacbb079d389d66a5dd93e86bc54
   ORPatchFile: 46bf49eb4f3065b04ec938f119252f07ca7dd605
 
-PODFILE CHECKSUM: dd3c66b344755d7ded96fcf63029ff3eea031446
+PODFILE CHECKSUM: b6db5d33d71a3e4234bdf8757b52534b18fd77b7
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

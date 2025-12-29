@@ -132,12 +132,6 @@ void cfunctionCallBlock(void (^block)(NSString *)){
     [self.navigationController pushViewController:vc animated:YES];
 }
 
-- (void)buttonAction:(UIButton *)sender
-{
-    NSLog(@"buttonAction hotfix, sender: %@", sender);
-    [self ORGbuttonAction:sender];
-}
-
 @end
 
 int fibonaccia(int n){
