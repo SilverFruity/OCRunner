@@ -39,6 +39,7 @@
 		EEF1527D24DE867400574FA7 /* ORCoreFunctionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = EEF1527C24DE867400574FA7 /* ORCoreFunctionTests.m */; };
 		EEF439342620030E0058B805 /* SwiftViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF439332620030E0058B805 /* SwiftViewController.swift */; };
 		FC281C0D85B4B7B6A9A7B598 /* Pods_OCRunnerDemoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A467A8D72C17536B47CC6E64 /* Pods_OCRunnerDemoTests.framework */; };
+		FDFB596C2F02699200E4CCE7 /* ORTestAspect.m in Sources */ = {isa = PBXBuildFile; fileRef = FDFB596B2F02699200E4CCE7 /* ORTestAspect.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -116,6 +117,8 @@
 		EEF1527C24DE867400574FA7 /* ORCoreFunctionTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ORCoreFunctionTests.m; path = ../../OCRunnerTests/ORCoreFunctionTests.m; sourceTree = "<group>"; };
 		EEF439322620030D0058B805 /* OCRunnerDemo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "OCRunnerDemo-Bridging-Header.h"; sourceTree = "<group>"; };
 		EEF439332620030E0058B805 /* SwiftViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftViewController.swift; sourceTree = "<group>"; };
+		FDFB596A2F02699200E4CCE7 /* ORTestAspect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ORTestAspect.h; sourceTree = "<group>"; };
+		FDFB596B2F02699200E4CCE7 /* ORTestAspect.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ORTestAspect.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -242,10 +245,14 @@
 				EEBF3340248E84A900DDE2E9 /* ORCallOCPropertyBlockTest.m */,
 				EEBF3349248E84A900DDE2E9 /* ORCallSuperNoArgTest.h */,
 				EEBF3343248E84A900DDE2E9 /* ORCallSuperNoArgTest.m */,
-				0480FEE62580A77F00D6D914 /* ORWeakPropertyAndIvar.h */,
-				0480FEE72580A77F00D6D914 /* ORWeakPropertyAndIvar.m */,
 				EEBF3341248E84A900DDE2E9 /* ORGCDTests.h */,
 				EEBF3348248E84A900DDE2E9 /* ORGCDTests.m */,
+				EECD490B28AA831B00253282 /* ORHookNatvieMultiSuperCall.h */,
+				EECD490C28AA831B00253282 /* ORHookNatvieMultiSuperCall.m */,
+				04A634C825E4A79300DB31A6 /* ORRecoverClass.h */,
+				04A634C925E4A79300DB31A6 /* ORRecoverClass.m */,
+				FDFB596A2F02699200E4CCE7 /* ORTestAspect.h */,
+				FDFB596B2F02699200E4CCE7 /* ORTestAspect.m */,
 				EEBF3342248E84A900DDE2E9 /* ORTestClassIvar.h */,
 				EEBF3347248E84A900DDE2E9 /* ORTestClassIvar.m */,
 				EEBF334B248E84A900DDE2E9 /* ORTestClassProperty.h */,
@@ -254,12 +261,10 @@
 				EE7F74B62A7A9A110000B24C /* ORTestORGDealloc.m */,
 				EEBF3345248E84A900DDE2E9 /* ORTestReplaceClass.h */,
 				EEBF334A248E84A900DDE2E9 /* ORTestReplaceClass.m */,
-				04A634C825E4A79300DB31A6 /* ORRecoverClass.h */,
-				04A634C925E4A79300DB31A6 /* ORRecoverClass.m */,
+				0480FEE62580A77F00D6D914 /* ORWeakPropertyAndIvar.h */,
+				0480FEE72580A77F00D6D914 /* ORWeakPropertyAndIvar.m */,
 				17C05308274F338300EB0BB2 /* TestFakeModel.h */,
 				17C05309274F338300EB0BB2 /* TestFakeModel.m */,
-				EECD490B28AA831B00253282 /* ORHookNatvieMultiSuperCall.h */,
-				EECD490C28AA831B00253282 /* ORHookNatvieMultiSuperCall.m */,
 			);
 			name = TestClass;
 			path = ../../OCRunnerTests/TestClass;
@@ -520,6 +525,7 @@
 				18C746632679EFB700317C75 /* ORParserForTest.m in Sources */,
 				04A634D125E4AB5A00DB31A6 /* ORRecoverClass.m in Sources */,
 				EEBF334F248E84AA00DDE2E9 /* ORTestClassIvar.m in Sources */,
+				FDFB596C2F02699200E4CCE7 /* ORTestAspect.m in Sources */,
 				EEBF334C248E84AA00DDE2E9 /* ORCallOCPropertyBlockTest.m in Sources */,
 				17C0530A274F338300EB0BB2 /* TestFakeModel.m in Sources */,
 				EEBF333E248E848100DDE2E9 /* OCRunnerTests.swift in Sources */,

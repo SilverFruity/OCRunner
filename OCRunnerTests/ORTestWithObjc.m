@@ -18,7 +18,9 @@
 #import "ORParserForTest.h"
 #import "TestFakeModel.h"
 #import "ORTestORGDealloc.h"
+#import "ORTestAspect.h"
 #import <MJExtension/MJExtension.h>
+#import <Aspects/Aspects.h>
 
 @interface SubModel1 : NSObject
 @property (nonatomic, assign) CGFloat numberToFloat;
@@ -1188,6 +1190,36 @@ int signatureBlockPtr(id object, int b){
     XCTAssert(fakeModel.sub.stringToInteger == model1.sub.stringToInteger);
     XCTAssert([model1.sub isKindOfClass:[SubModel1 class]], @"%@", model1.sub.class);
 }
+
+- (void)testAspectsAndHotfix
+{
+    // ORInterpreter 直接执行补丁代码后，再通过 Aspects hook 同一 selector，触发 swizzle + msgForward 链路
+    NSString *source = @"\
+        @implementation ORTestAspect\
+        - (void)foo:(id)arg\
+        {\
+            NSLog(@\"foo Hotfix: %@\", arg);\
+            self.argFromHotfix = arg;\
+            [self ORGfoo:arg];\
+        }\
+        @end\
+    ";
+    [ORInterpreter excuteNodes:[_parser parseSource:source].nodes];
+    
+    ORTestAspect *obj = ORTestAspect.new;
+    [obj aspect_hookSelector:@selector(foo:) withOptions:AspectPositionBefore usingBlock:^(id<AspectInfo> info, id arg) {
+        NSLog(@"foo Aspect: %@", arg);
+        ((ORTestAspect *)info.instance).argFromAspect = arg;
+    } error:nil];
+    
+    [obj foo:@123];
+    
+    XCTAssertNotNil(obj.argFromAspect);
+    XCTAssertEqualObjects(obj.argFromAspect, @123);
+    XCTAssertEqualObjects(obj.argFromOrigin, obj.argFromAspect);
+    XCTAssertEqualObjects(obj.argFromOrigin, obj.argFromHotfix);
+}
+
 - (void)testSetterMethodWhenPropertyLengthOne{
     NSString * source =
     @"@interface Test : NSObject"

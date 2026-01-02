@@ -19,6 +19,7 @@ target 'OCRunnerDemo' do
     inherit! :search_paths
     pod 'oc2mangoLib', :path => '../oc2mango'
     pod 'MJExtension'
+    pod 'Aspects'
   end
 
 end
