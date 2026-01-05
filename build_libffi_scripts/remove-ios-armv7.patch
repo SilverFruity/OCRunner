@@ -1,0 +1,33 @@
+--- generate-darwin-source-and-headers.py.orig
++++ generate-darwin-source-and-headers.py
+@@ -52,13 +52,6 @@ class ios_simulator_arm64_platform(arm64_platform):
+     version_min = '-miphoneos-version-min=7.0'
+ 
+ 
+-class ios_device_armv7_platform(armv7_platform):
+-    target = 'armv7-apple-ios'
+-    directory = 'darwin_ios'
+-    sdk = 'iphoneos'
+-    version_min = '-miphoneos-version-min=7.0'
+-
+-
+ class ios_device_arm64_platform(arm64_platform):
+     target = 'arm64-apple-ios'
+     directory = 'darwin_ios'
+@@ -227,7 +220,6 @@ def generate_source_and_headers(
+     if generate_ios:
+         copy_src_platform_files(ios_simulator_x86_64_platform)
+         copy_src_platform_files(ios_simulator_arm64_platform)
+-        copy_src_platform_files(ios_device_armv7_platform)
+         copy_src_platform_files(ios_device_arm64_platform)
+     if generate_osx:
+         copy_src_platform_files(desktop_x86_64_platform)
+@@ -247,7 +239,6 @@ def generate_source_and_headers(
+     if generate_ios:
+         build_target(ios_simulator_x86_64_platform, platform_headers)
+         build_target(ios_simulator_arm64_platform, platform_headers)
+-        build_target(ios_device_armv7_platform, platform_headers)
+         build_target(ios_device_arm64_platform, platform_headers)
+     if generate_osx:
+         build_target(desktop_x86_64_platform, platform_headers)
+

@@ -5,7 +5,7 @@ PODS:
   - MJRefresh (3.7.2)
   - oc2mangoLib (1.2.3):
     - ORPatchFile (= 1.2.3)
-  - OCRunner (1.3.3):
+  - OCRunner (1.3.4):
     - ORPatchFile (= 1.2.3)
   - ORPatchFile (1.2.3)
 
@@ -39,9 +39,9 @@ SPEC CHECKSUMS:
   MJExtension: 6c15c7b93398447252c0defdb8d69d02d218a41e
   MJRefresh: 30997d30b347c8e9508a4db11e3a690da0c9b85a
   oc2mangoLib: d6fe3b516f314f748b98ac3c539fc128704fba38
-  OCRunner: ed65d5b720eecacbb079d389d66a5dd93e86bc54
+  OCRunner: 2e22177745914493c1015a293795a115fa662580
   ORPatchFile: 46bf49eb4f3065b04ec938f119252f07ca7dd605
 
-PODFILE CHECKSUM: b6db5d33d71a3e4234bdf8757b52534b18fd77b7
+PODFILE CHECKSUM: 882433457a5f80d3641afe3de6722d0221061075
 
 COCOAPODS: 1.16.2

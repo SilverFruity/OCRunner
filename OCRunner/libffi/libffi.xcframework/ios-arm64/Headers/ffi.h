@@ -1,7 +1,5 @@
-#ifdef __x86_64__
-
 /* -----------------------------------------------------------------*-C-*-
-   libffi 3.4.6
+   libffi 3.5.2
      - Copyright (c) 2011, 2014, 2019, 2021, 2022, 2024, 2025 Anthony Green
      - Copyright (c) 1996-2003, 2007, 2008 Red Hat, Inc.
 
@@ -52,8 +50,8 @@ extern "C" {
 #endif
 
 /* Specify which architecture libffi is configured for. */
-#ifndef X86_64
-#define X86_64
+#ifndef AARCH64
+#define AARCH64
 #endif
 
 /* ---- System configuration information --------------------------------- */
@@ -63,7 +61,7 @@ extern "C" {
 #define FFI_TYPE_INT        1
 #define FFI_TYPE_FLOAT      2
 #define FFI_TYPE_DOUBLE     3
-#if 1
+#if 0
 #define FFI_TYPE_LONGDOUBLE 4
 #else
 #define FFI_TYPE_LONGDOUBLE FFI_TYPE_DOUBLE
@@ -83,7 +81,7 @@ extern "C" {
 /* This should always refer to the last type code (for sanity checks).  */
 #define FFI_TYPE_LAST       FFI_TYPE_COMPLEX
 
-#include "ffitarget.h"
+#include <ffitarget.h>
 
 #ifndef LIBFFI_ASM
 
@@ -318,8 +316,8 @@ size_t ffi_java_raw_size (ffi_cif *cif) __attribute__((deprecated));
 
 /* ---- Version API ------------------------------------------------------ */
 
-#define FFI_VERSION_STRING "3.5.1"
-#define FFI_VERSION_NUMBER 30501
+#define FFI_VERSION_STRING "3.5.2"
+#define FFI_VERSION_NUMBER 30502
 
 #ifndef LIBFFI_ASM
 /* Return a version string. */
@@ -342,7 +340,7 @@ FFI_API size_t ffi_get_closure_size (void);
 __declspec(align(8))
 #endif
 typedef struct {
-#if 0
+#if 1
   void *trampoline_table;
   void *trampoline_table_entry;
 #else
@@ -395,7 +393,7 @@ ffi_prep_closure_loc (ffi_closure*,
 # pragma pack 8
 #endif
 typedef struct {
-#if 0
+#if 1
   void *trampoline_table;
   void *trampoline_table_entry;
 #else
@@ -420,7 +418,7 @@ typedef struct {
 } ffi_raw_closure;
 
 typedef struct {
-#if 0
+#if 1
   void *trampoline_table;
   void *trampoline_table_entry;
 #else
@@ -534,8 +532,5 @@ ffi_status ffi_get_struct_offsets (ffi_abi abi, ffi_type *struct_type,
 #ifdef __cplusplus
 }
 #endif
-
-#endif
-
 
 #endif

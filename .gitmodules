@@ -1,3 +1,6 @@
 [submodule "oc2mango"]
 	path = oc2mango
 	url = https://github.com/SilverFruity/oc2mango.git
+[submodule "libffi"]
+	path = libffi
+	url = https://github.com/libffi/libffi.git

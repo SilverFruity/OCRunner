@@ -1,5 +1,3 @@
-#ifdef __arm64__
-
 /* Copyright (c) 2009, 2010, 2011, 2012 ARM Ltd.
 
 Permission is hereby granted, free of charge, to any person obtaining
@@ -95,8 +93,5 @@ typedef enum ffi_abi
 /* No complex type on Windows */
 #define FFI_TARGET_HAS_COMPLEX_TYPE
 #endif
-
-#endif
-
 
 #endif
