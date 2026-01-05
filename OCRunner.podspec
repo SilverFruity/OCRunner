@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name         = "OCRunner"
-s.version      = "1.3.3"
+s.version      = "1.3.4"
 s.summary      = "OCRunner"
 s.description  = <<-DESC
 Execute Objective-C code Dynamically. iOS hotfix SDK.
