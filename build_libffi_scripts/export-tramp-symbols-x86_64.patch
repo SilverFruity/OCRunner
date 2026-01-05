@@ -1,0 +1,55 @@
+--- a/libffi/src/tramp.c
++++ b/libffi/src/tramp.c
+@@ -689,6 +689,29 @@
+ 
+ #else /* !FFI_EXEC_STATIC_TRAMP */
+ 
++#ifdef __APPLE__
++#include <TargetConditionals.h>
++#if TARGET_OS_SIMULATOR && defined(__x86_64__)
++/* 在 iOS Simulator x86_64 上，确保符号被导出 */
++#define FFI_TRAMP_EXPORT __attribute__((visibility("default")))
++#else
++#define FFI_TRAMP_EXPORT
++#endif
++#else
++#define FFI_TRAMP_EXPORT
++#endif
++
+ #include <stddef.h>
+ 
+-int
++FFI_TRAMP_EXPORT int
+ ffi_tramp_is_supported(void)
+ {
+   return 0;
+ }
+ 
+-void *
++FFI_TRAMP_EXPORT void *
+ ffi_tramp_alloc (int flags)
+ {
+   return NULL;
+ }
+ 
+-void
++FFI_TRAMP_EXPORT void
+ ffi_tramp_set_parms (void *arg, void *target, void *data)
+ {
+ }
+ 
+-void *
++FFI_TRAMP_EXPORT void *
+ ffi_tramp_get_addr (void *arg)
+ {
+   return NULL;
+ }
+ 
+-void
++FFI_TRAMP_EXPORT void
+ ffi_tramp_free (void *arg)
+ {
+ }
+ 
+ #endif /* FFI_EXEC_STATIC_TRAMP */
+

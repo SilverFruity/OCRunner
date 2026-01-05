@@ -4,7 +4,10 @@
 # 支持 iOS 设备 (arm64) 和 iOS Simulator (x86_64, arm64)
 #
 # 使用方法:
-#   ./build_libffi_xcframework.sh
+#   ./build_libffi_xcframework.sh [选项]
+#
+# 选项:
+#   --enable-exec-static-tramp    启用 FFI_EXEC_STATIC_TRAMP 宏（默认：禁用）
 #
 # 依赖:
 #   - Xcode Command Line Tools
@@ -15,6 +18,9 @@
 #   OCRunner/libffi/libffi.xcframework
 
 set -e  # 遇到错误立即退出
+
+# 默认配置
+ENABLE_EXEC_STATIC_TRAMP=0
 
 # 颜色输出
 RED='\033[0;31m'
@@ -52,6 +58,31 @@ print_error() {
 
 print_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+# 解析命令行参数
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --enable-exec-static-tramp)
+                ENABLE_EXEC_STATIC_TRAMP=1
+                shift
+                ;;
+            --help|-h)
+                echo "使用方法: $0 [选项]"
+                echo ""
+                echo "选项:"
+                echo "  --enable-exec-static-tramp    启用 FFI_EXEC_STATIC_TRAMP 宏（默认：禁用）"
+                echo "  --help, -h                    显示此帮助信息"
+                exit 0
+                ;;
+            *)
+                print_error "未知选项: $1"
+                echo "使用 --help 查看帮助信息"
+                exit 1
+                ;;
+        esac
+    done
 }
 
 # 检查依赖
@@ -102,6 +133,19 @@ prepare_build_env() {
         fi
     elif [ -f "${PYTHON_FILE}" ]; then
         print_warning "Patch 脚本不存在，尝试直接运行 generate-darwin-source-and-headers.py（可能包含 armv7 构建）"
+    fi
+    
+    # 应用 patch 导出 tramp.c 符号（针对 iOS Simulator x86_64）
+    TRAMP_PATCH_SCRIPT="${SCRIPT_DIR}/apply-export-tramp-symbols-patch.py"
+    TRAMP_FILE="${LIBFFI_DIR}/src/tramp.c"
+    
+    if [ -f "${TRAMP_PATCH_SCRIPT}" ] && [ -f "${TRAMP_FILE}" ]; then
+        print_info "应用 patch 导出 tramp.c 符号（iOS Simulator x86_64）..."
+        ${PYTHON_CMD} "${TRAMP_PATCH_SCRIPT}"
+        if [ $? -ne 0 ]; then
+            print_error "应用 tramp.c patch 失败"
+            exit 1
+        fi
     fi
     
     # 生成 iOS 源文件和头文件
@@ -155,13 +199,25 @@ build_arch() {
     export LDFLAGS
     export SDKROOT
     
-    ../configure \
-        --host=${TARGET} \
-        --enable-static \
-        --disable-shared \
-        --disable-multi-os-directory \
-        --disable-docs \
+    # 构建 configure 参数
+    CONFIGURE_ARGS=(
+        --host=${TARGET}
+        --enable-static
+        --disable-shared
+        --disable-multi-os-directory
+        --disable-docs
         --prefix=$(pwd)/install
+    )
+    
+    # 根据选项决定是否启用 exec-static-tramp
+    if [ ${ENABLE_EXEC_STATIC_TRAMP} -eq 1 ]; then
+        CONFIGURE_ARGS+=(--enable-exec-static-tramp)
+        print_info "启用 FFI_EXEC_STATIC_TRAMP 宏"
+    else
+        CONFIGURE_ARGS+=(--disable-exec-static-tramp)
+    fi
+    
+    ../configure "${CONFIGURE_ARGS[@]}"
     
     # 编译
     print_info "编译 ${SDK} ${ARCH}..."
@@ -253,6 +309,30 @@ create_universal_lib() {
     }
 }
 
+# 创建 module.modulemap 文件
+create_module_map() {
+    local HEADERS_DIR=$1
+    
+    if [ ! -d "${HEADERS_DIR}" ]; then
+        print_warning "Headers 目录不存在: ${HEADERS_DIR}，跳过创建 module.modulemap"
+        return 1
+    fi
+    
+    print_info "创建 module.modulemap: ${HEADERS_DIR}/module.modulemap"
+    
+    # 创建 module.modulemap 文件
+    # 使用 umbrella header 方式，ffi.h 是 libffi 的主头文件
+    cat > "${HEADERS_DIR}/module.modulemap" <<EOF
+module libffi {
+    umbrella header "ffi.h"
+    export *
+    module * { export * }
+}
+EOF
+    
+    print_info "module.modulemap 创建完成"
+}
+
 # 创建 xcframework
 create_xcframework() {
     print_info "创建 xcframework..."
@@ -301,6 +381,9 @@ create_xcframework() {
         print_warning "未能复制头文件，请检查构建结果"
     fi
     
+    # 创建 module.modulemap
+    create_module_map "${IOS_DEVICE_DIR}/Headers"
+    
     # iOS Simulator 版本（合并 x86_64 和 arm64）
     IOS_SIMULATOR_DIR="${XCFRAMEWORK_PATH}/ios-arm64_x86_64-simulator"
     mkdir -p "${IOS_SIMULATOR_DIR}/Headers"
@@ -344,6 +427,9 @@ create_xcframework() {
     if [ ${HEADERS_COPIED} -eq 0 ]; then
         print_warning "未能复制头文件，请检查构建结果"
     fi
+    
+    # 创建 module.modulemap
+    create_module_map "${IOS_SIMULATOR_DIR}/Headers"
     
     # 创建 Info.plist
     cat > "${XCFRAMEWORK_PATH}/Info.plist" <<EOF
@@ -408,6 +494,12 @@ main() {
     print_info "开始构建 libffi.xcframework"
     print_info "工作目录: ${LIBFFI_DIR}"
     
+    if [ ${ENABLE_EXEC_STATIC_TRAMP} -eq 1 ]; then
+        print_info "配置: FFI_EXEC_STATIC_TRAMP 已启用"
+    else
+        print_info "配置: FFI_EXEC_STATIC_TRAMP 已禁用（默认）"
+    fi
+    
     # 检查依赖
     check_dependencies
     
@@ -425,6 +517,9 @@ main() {
     print_info "构建完成！"
     print_info "xcframework 位置: ${XCFRAMEWORK_PATH}"
 }
+
+# 解析命令行参数
+parse_args "$@"
 
 # 运行主函数
 main
